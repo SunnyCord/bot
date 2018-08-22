@@ -5,7 +5,7 @@
 
 ### Changelog *(as of 22/08/18)*
 ****
-> `v1.0.0U220818 (Not on GitHub yet!)`
+> `v1.0.0U220818` [( 3062d9 )](https://github.com/NiceAesth/Sunny/commit/3062d92d4a0da7ae913024c9551662f75ed7acfa)
 > - First commit of the rewrite!
 > - Audio is now being handled by a lavalink server
 > - Shortened and improved commands
