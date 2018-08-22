@@ -25,8 +25,8 @@
 
 <br>
 
-****
 ### Versioning
+****
 > #### Versioning is done in the next way:
 > `vX.Y.ZSDDMMYY`*, where:
 > - `X` **marks a major change to the bot**
