@@ -12,7 +12,7 @@ def get_config():
 
 def get_prefix(bot, message):
     """A callable Prefix for our bot. This could be edited to allow per server prefixes."""
-    prefixes = ['s.', '?', 'sunny ']
+    prefixes = get_config().PREFIXES
     if message.guild:
         guildPref = mongoIO.getSetting(message.guild.id, 'prefix')
     if guildPref is not None:
