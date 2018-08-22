@@ -1,4 +1,4 @@
-> # ☀️Sunny☀️
+> # ☀️Sunny☀️ ![Python](https://img.shields.io/badge/Python-3.6%2B-brightgreen.svg)
 > #### Sunny is a Discord bot which is meant to replace [overused-emoji](https://github.com/NiceAesth/overused-emoji-bot). There are many reasons as to why I decided to abandon the old code and redo it, but th biggest ones were my displeasure with it, lavalink, the Discord.py rewrite and many others. The unstable version that is currently written of this bot is more stable than the stable versions of the old bot already. Hope second time's the charm and won't rewrite it again! 😊
 
 <br>
