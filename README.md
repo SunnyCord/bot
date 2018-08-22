@@ -19,8 +19,8 @@
 
 <br>
 
-> `v0.0.0-200818`
-> - initial commit [ d4e3d27 ](https://github.com/NiceAesth/Sunny/commit/d4e3d27936e1f466b9e6b42b95ab32a83a6c0b75)
+> `v0.0.0-200818` [( d4e3d27 )](https://github.com/NiceAesth/Sunny/commit/d4e3d27936e1f466b9e6b42b95ab32a83a6c0b75)
+> - initial commit
 ****
 
 <br>
