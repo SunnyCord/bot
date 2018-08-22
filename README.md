@@ -6,7 +6,12 @@
 ### Changelog *(as of 22/08/18)*
 ****
 
-> `v1.0.1U220818` [( d4e3d27 )](https://github.com/NiceAesth/Sunny/commit/9852d6c9824316cc16d30577e5f886548e4c3633)
+> `v1.0.2U220818` [( 9a5b23 )](https://github.com/NiceAesth/Sunny/commit/9a5b234ff137ea4a0b80e9cc29b9cfe6360ed82d)
+> - Made the bot use a separate prefix for the developer version.
+
+<br>
+
+> `v1.0.1U220818` [( 9852d6 )](https://github.com/NiceAesth/Sunny/commit/9852d6c9824316cc16d30577e5f886548e4c3633)
 > - Made the bot use a separate database for the developer version.
 
 <br>
