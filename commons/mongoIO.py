@@ -2,8 +2,14 @@ from pymongo import MongoClient
 import discord
 import config as cfg
 
+def get_config():
+    if cfg.DEBUG==True:
+        return cfg.debugConf
+    else:
+        return cfg.conf
+
 client = MongoClient(cfg.mongoDB.URI)
-db = client['sunny']
+db = client[get_config().MONGODB]
 
 def getSetting(id, setting: str):
 	a = db.settings.find({'id':id})
