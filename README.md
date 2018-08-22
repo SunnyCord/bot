@@ -5,6 +5,12 @@
 
 ### Changelog *(as of 22/08/18)*
 ****
+
+> `v1.0.1U220818` [( d4e3d27 )](https://github.com/NiceAesth/Sunny/commit/9852d6c9824316cc16d30577e5f886548e4c3633)
+> - Made the bot use a separate database for the developer version.
+
+<br>
+
 > `v1.0.0U220818` [( 3062d9 )](https://github.com/NiceAesth/Sunny/commit/3062d92d4a0da7ae913024c9551662f75ed7acfa)
 > - First commit of the rewrite!
 > - Audio is now being handled by a lavalink server
