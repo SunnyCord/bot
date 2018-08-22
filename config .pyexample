@@ -1,0 +1,15 @@
+DEBUG=False
+
+class debugConf:
+    TOKEN = ''
+    COLOR = 0x045bce
+
+class conf:
+    TOKEN = ''
+    COLOR = 0xd74613
+
+class lavalink:
+    PASSWORD = ''
+
+class mongoDB:
+    URI = ''
