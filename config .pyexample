@@ -1,0 +1,19 @@
+DEBUG=False
+
+class debugConf:
+    TOKEN = ''
+    COLOR = 0x045bce
+	MONGODB = 'sunny-dev'
+	PREFIXES = ['s.dev', 'sunnydev ', '?dev']
+
+class conf:
+    TOKEN = ''
+    COLOR = 0xd74613
+	MONGODB = 'sunny'
+	PREFIXES = ['s.', 'sunny ', '?']
+    
+class lavalink:
+    PASSWORD = ''
+
+class mongoDB:
+    URI = ''

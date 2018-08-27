@@ -1,0 +1,7 @@
+discord.py==1.0.0a1510+g8ccb98d
+dnspython==1.15.0
+GitPython==2.1.11
+pymongo==3.7.1
+lavalink==2.1.9
+aiohttp>=3.3.0,<3.4.0
+websockets>=6.0,<7.0
