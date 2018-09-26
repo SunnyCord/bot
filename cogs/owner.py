@@ -1,6 +1,6 @@
 from discord.ext import commands
 import io, os
-from shutil import copy2
+import subprocess
 import textwrap
 import traceback
 from contextlib import redirect_stdout
@@ -23,18 +23,19 @@ class OwnerCog:
     async def git_update(self, ctx):
         """Downloads the latest version
         of the bot from GitHub then runs it"""
-        await ctx.send("Updating, please wait...")
-        cwp = os.getcwd()
-        cwd = cwp.split(os.sep)[-1]
-        if cwd == "github":
-            Repo.clone_from("git://github.com/NiceAesth/Sunny.git", cwp)
-            os.system('python run.py')
+        pipe = subprocess.Popen("git ls-remote", shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        repo = Repo(path=os.getcwd())
+        (out, error) = pipe.communicate()
+        out = out.decode("utf-8")
+        remote = out[:40]
+        local = str(repo.head.object)
+        if remote != local:
+            await ctx.send("Updating, please wait.")
+            exec(compile(open('run.py', "rb").read(), 'run.py', 'exec'))
+            await self.bot.logout()
         else:
-            Repo.clone_from("git://github.com/NiceAesth/Sunny.git", "github")
-            copy2('config.py', f'{cwp}/github')
-            copy2('application.yml', f'{cwp}/github')
-            os.system('python github/run.py')
-        await self.bot.logout()
+            await ctx.send("Bot already up to date.")
+
 
 
 
