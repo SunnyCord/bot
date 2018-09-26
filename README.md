@@ -43,7 +43,7 @@
 > - `X` **marks a major change to the bot**
 > - `Y` **marks that minor changes or features were made**
 > - `Z` **marks bugfixes**
-> - `S` **marks the state of the version e.g. *U*nstable / *S*table / *E*xperimental
+> - `S` **marks the state of the version e.g. *U*nstable / *S*table / *E*xperimental**
 > - `DDMMYY` **marks the day, month and year of the change**
 
 <br>
