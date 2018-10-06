@@ -21,7 +21,7 @@ def get_prefix(bot, message):
         return ' '
     return commands.when_mentioned_or(*prefixes)(bot, message)
 
-load_extensions = ['cogs.owner', 'cogs.admin', 'cogs.music', 'cogs.images', 'cogs.errorhandler', 'cogs.fun', 'cogs.settings'] 
+load_extensions = ['cogs.owner', 'cogs.admin', 'cogs.music', 'cogs.images', 'cogs.errorhandler', 'cogs.fun', 'cogs.settings', 'cogs.information'] 
 bot = commands.AutoShardedBot(command_prefix=get_prefix, description='Sunny Bot', pm_help=True)
 
 if __name__ == '__main__':

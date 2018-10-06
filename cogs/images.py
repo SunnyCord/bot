@@ -19,6 +19,7 @@ class Image:
                 await ctx.send(res['file'])
 
     @commands.cooldown(1, 5, commands.BucketType.user)
+    @checks.is_blacklisted()
     @commands.command()
     async def dog(self, ctx):
         """Who doesn't love a good dog pic?"""
@@ -28,6 +29,7 @@ class Image:
                 await ctx.send(res['message'])      
 
     @commands.cooldown(1, 5, commands.BucketType.user)
+    @checks.is_blacklisted()
     @commands.command()
     async def avatar(self, ctx, user : discord.Member = None):
         """Gets a user's avatar. Returns invoker's avatar if no user is specified."""
