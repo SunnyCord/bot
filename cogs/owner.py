@@ -5,6 +5,7 @@ import textwrap
 import traceback
 from contextlib import redirect_stdout
 from git import Repo
+from datetime import datetime
 
 class OwnerCog:
 
@@ -18,27 +19,26 @@ class OwnerCog:
             return '\n'.join(content.split('\n')[1:-1])
         return content.strip('` \n')
 
-    @commands.command(name='update', hidden=True)
+    @commands.command(name='pull', hidden=True)
     @commands.is_owner()
     async def git_update(self, ctx):
-        """Downloads the latest version
-        of the bot from GitHub then runs it"""
-        pipe = subprocess.Popen("git ls-remote", shell=True, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        """Pulls the bot from GitHub."""
+        now = datetime.now()
+        message = ""
         repo = Repo(path=os.getcwd())
-        (out, error) = pipe.communicate()
-        out = out.decode("utf-8")
-        remote = out[:40]
-        local = str(repo.head.object)
-        if remote != local:
-            await ctx.send("Updating, please wait.")
-            exec(compile(open('run.py', "rb").read(), 'run.py', 'exec'))
-            await self.bot.logout()
-        else:
-            await ctx.send("Bot already up to date.")
+        o = repo.remotes.origin
+        for fetch_info in o.pull():
+            message = message + f"\n Updated '{fetch_info.ref}' To '{fetch_info.commit}''"
+        later = datetime.now()
+        difference = (later - now).total_seconds()
+        await ctx.send(f"Operation completed succesfully in {difference}s. Output: ```prolog\n{message}\n```")
 
-
-
-
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def shutdown(self, ctx):
+        """Shuts the bot down."""
+        await ctx.send("Goodbye!")
+        await self.bot.logout()
 
     @commands.command(name='load', hidden=True)
     @commands.is_owner()
