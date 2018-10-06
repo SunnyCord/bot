@@ -6,9 +6,17 @@
 ### Changelog *(as of 06/10/18)*
 ****
 
+
+> `v1.2.0U06102018` [( b3e41f )](https://github.com/NiceAesth/Sunny/commit/b3e41f27a720c818263b47d3f82137dc85e076ee)
+> - Added user/server information cog
+
+<br>
+
 > `v1.1.1U06102018` [( d42399 )](https://github.com/NiceAesth/Sunny/commit/d423993c4cca02a2bc5dcb14f61919047ae9ae60)
 > - Simplified the updating command. 
 > - Added shutdown command.
+
+<br>
 
 > `v1.1.0U260918` [( b90a4d )](https://github.com/NiceAesth/Sunny/commit/b90a4d95ddb69367e86e4a0a91666d5e50ba10b9)
 > - Extremely useful update for me. Fixed updating. Added update.py and changed owner cog to use it. Added backup folder to .gitignore
