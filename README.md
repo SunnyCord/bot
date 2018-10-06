@@ -3,8 +3,15 @@
 
 <br>
 
-### Changelog *(as of 22/08/18)*
+### Changelog *(as of 06/10/18)*
 ****
+
+> `v1.1.1U06102018` [( 9a5b23 )](https://github.com/NiceAesth/Sunny/commit/d423993c4cca02a2bc5dcb14f61919047ae9ae60)
+> - Simplified the updating command. 
+> - Added shutdown command.
+
+> `v1.1.0U260918` [( 9a5b23 )](https://github.com/NiceAesth/Sunny/commit/b90a4d95ddb69367e86e4a0a91666d5e50ba10b9)
+> - Extremely useful update for me. Fixed updating. Added update.py and changed owner cog to use it. Added backup folder to .gitignore
 
 > `v1.0.2U220818` [( 9a5b23 )](https://github.com/NiceAesth/Sunny/commit/9a5b234ff137ea4a0b80e9cc29b9cfe6360ed82d)
 > - Made the bot use a separate prefix for the developer version.
@@ -27,11 +34,6 @@
 > - Added support for server-wide prefixes
 > - Added cog loader/unloader/reloader
 > - Fixed avatar command
-
-<br>
-
-> `v0.0.0-200818` [( d4e3d27 )](https://github.com/NiceAesth/Sunny/commit/d4e3d27936e1f466b9e6b42b95ab32a83a6c0b75)
-> - initial commit
 ****
 
 <br>
