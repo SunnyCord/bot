@@ -50,7 +50,7 @@ class Information:
         embed.add_field(name='Text Channels', value=str(channel_count))
         embed.add_field(name='Region', value=ctx.guild.region)
         embed.add_field(name='Verification Level', value=str(ctx.guild.verification_level))
-        embed.add_field(name='Highest role', value=ctx.guild.roles[0])
+        embed.add_field(name='Highest role', value=ctx.guild.roles[-1])
         embed.add_field(name='Number of roles', value=str(role_count))
         embed.add_field(name='Number of emotes', value=str(emoji_count))
         embed.add_field(name='Created At', value=ctx.guild.created_at.__format__('%A, %d. %B %Y @ %H:%M:%S'))
