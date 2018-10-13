@@ -208,8 +208,8 @@ class Music:
     async def volume(self, ctx, volume: int=None):
         """Turn that music up! (Max 150)"""
         player = self.bot.lavalink.players.get(ctx.guild.id)
-		if(volume>150):
-			volume = 150
+        if(volume>150):
+            volume = 150
         if not volume:
             return await ctx.send(f'🔈 | {player.volume}%')
 
