@@ -3,8 +3,17 @@
 
 <br>
 
-### Changelog *(as of 06/10/18)*
+### Changelog *(as of 23/10/18)*
 ****
+
+> `v1.3.0E23102018` [( 97ef66 )](https://github.com/NiceAesth/Sunny/commit/97ef668cc8c189d73e5b0473ac74d0e941911542)
+> - Added osu! commands
+> - Added PP calculation
+> - Updated config example
+> - Updated requirements
+> - Updated mongoDB to have osu! username
+
+<br>
 
 
 > `v1.2.0U06102018` [( b3e41f )](https://github.com/NiceAesth/Sunny/commit/b3e41f27a720c818263b47d3f82137dc85e076ee)
@@ -28,21 +37,6 @@
 
 > `v1.0.1U220818` [( 9852d6 )](https://github.com/NiceAesth/Sunny/commit/9852d6c9824316cc16d30577e5f886548e4c3633)
 > - Made the bot use a separate database for the developer version.
-
-<br>
-
-> `v1.0.0U220818` [( 3062d9 )](https://github.com/NiceAesth/Sunny/commit/3062d92d4a0da7ae913024c9551662f75ed7acfa)
-> - First commit of the rewrite!
-> - Audio is now being handled by a lavalink server
-> - Shortened and improved commands
-> - Removed verification functionality
-> - Removed admin call command
-> - Removed the need for a poll channel
-> - Added a feature for the bot to update itself from git
-> - Added support for server-wide prefixes
-> - Added cog loader/unloader/reloader
-> - Fixed avatar command
-****
 
 <br>
 
