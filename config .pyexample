@@ -1,5 +1,5 @@
 DEBUG=False
-
+OSU_API = ''
 class debugConf:
     TOKEN = ''
     COLOR = 0x045bce

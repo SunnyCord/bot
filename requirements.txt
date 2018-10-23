@@ -1,4 +1,4 @@
-discord.py==1.0.0a1510+g8ccb98d
+discord.py==1.0.0a1590+g860d6a9
 dnspython==1.15.0
 GitPython==2.1.11
 pymongo==3.7.1
