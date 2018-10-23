@@ -41,4 +41,11 @@ async def on_ready():
     await bot.change_presence(activity=discord.Streaming(name='#shameless_self_promotion', type=1, url='https://www.twitch.tv/niceaesthetic'))
     print(f'Successfully logged in and booted...!')
 
+@bot.event
+async def on_guild_join(guild):
+    mongoIO.addServer(guild)
+    for member in guild.members:
+        if not member.bot and not mongoIO.userExists(member):
+            mongoIO.addUser(member)
+
 bot.run(get_config().TOKEN, bot=True, reconnect=True)
