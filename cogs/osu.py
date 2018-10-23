@@ -166,6 +166,7 @@ class osu:
                     count50 = int(recentp[0]["count50"])
                     count100 = int(recentp[0]["count100"])
                     count300 = int(recentp[0]["count300"])
+                    perfect = int(recentp[0]["perfect"])
                     uid = int(recentp[0]["user_id"])
                     rank = recentp[0]["rank"]
                     date = datetime.strptime(recentp[0]["date"], "%Y-%m-%d %H:%M:%S")
@@ -212,18 +213,31 @@ class osu:
                     if mode == 3:
                         mode_icon = "https://i.imgur.com/0uZM1PZ.png"
                         mode_name = "Mania"
+                    if_fc = ""
                     if mode == 0:
                         ppcalc = calc_pp(f"https://osu.ppy.sh/b/{beatmap_id}", accuracy, mods, bestcombo, count0)
                         pp = ppcalc.splitlines()[1]
                         sr = ppcalc.splitlines()[0]
+                        if perfect == 0:
+                            accuracy_fc = round(float((50*count50+100*count100+300*count300)/(300*(count50+count100+count300))*100), 2)
+                            ppcalc = calc_pp(f"https://osu.ppy.sh/b/{beatmap_id}", accuracy, mods, int(maxcombo), 0)
+                            if_fc = f"({ppcalc.splitlines()[1]}PP for {accuracy_fc}% FC)"
                     else:
                         pp = "Only STD PP supported 😦"
-                    desc = f"🠺 {rankemoji} 🠺 **{pp} PP** 🠺 {accuracy}%\n🠺 {score} 🠺 x{bestcombo}/{maxcombo} 🠺 [{count300}/{count100}/{count50}/{count0}]"
+                    if status == 4:
+                        status = "Loved"
+                    if status == 3:
+                        status = "Qualified"
+                    if status == 2:
+                        status = "Approved"
+                    if status == 1:
+                        status = "Ranked"
+                    desc = f"🠺 {rankemoji} 🠺 **{pp}PP {if_fc}** 🠺 {accuracy}%\n🠺 {score} 🠺 x{bestcombo}/{maxcombo} 🠺 [{count300}/{count100}/{count50}/{count0}]"
                     embed = discord.Embed(title=discord.Embed.Empty, color=get_config().COLOR, description = desc, timestamp=date)
-                    embed.set_author(name=f"{title} [{diff}] +{mods} [{sr}★]", url=f"https://osu.ppy.sh/b/{beatmap_id}", icon_url=f"https://a.ppy.sh/{uid}")
+                    embed.set_author(name=f"{title} [{diff}] ({creator}) +{mods} [{sr}★]", url=f"https://osu.ppy.sh/b/{beatmap_id}", icon_url=f"https://a.ppy.sh/{uid}")
                     embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{beatmapset_id}.jpg")
-                    embed.set_footer(text=f"osu! {mode_name} Play", icon_url=mode_icon)
-                    await ctx.send(embed=embed)
+                    embed.set_footer(text=f"{status} | osu! {mode_name} Play", icon_url=mode_icon)
+                    await ctx.send(f"**Most Recent osu! {mode_name} Play for {user}:**",embed=embed)
                             
             else:
                 await ctx.send("User has not been found or has no recent plays!")  
