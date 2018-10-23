@@ -18,6 +18,24 @@ def getSetting(id, setting: str):
 		b=x[setting]
 	return b
 
+def getOsu(member):
+	a = db.users.find({'id':member.id})
+	b = None
+	for x in a:
+		b=x["osu"]
+	return b
+
+def setOsu(member, username):
+	db.users.update_one(
+		{"id": member.id},
+		{
+			"$set": {
+				"osu": username 
+			},
+			"$currentDate": {"lastModified": True}
+		}
+	)
+
 def addUser(member: discord.Member, blacklist: bool = False):
 	exists = db.users.find( {  "id":{"$eq":member.id}  }  ).count()
 	if not exists:
@@ -25,7 +43,8 @@ def addUser(member: discord.Member, blacklist: bool = False):
 			{
 				"blacklisted": blacklist,
 				"id": member.id,
-				"name": member.name
+				"name": member.name,
+				"osu": None
 			}
 		)
 

@@ -40,7 +40,7 @@ class Settings:
     
     @commands.is_owner()
     @commands.command(hidden=True)
-    async def rebuild(self, ctx, *, args = None):
+    async def rebuild(self, ctx, *, args = "normal"):
         """Rebuilds the database. (Owner-only)"""
         start_time = time.time()
         mongoIO.wipe()
@@ -55,7 +55,7 @@ class Settings:
                     if args == "debug":
                         print (f'Adding member {member.name}')
                     mongoIO.addUser(member)
-        print(f'Done rebuilding. {time.time() - start_time}s')
+        await ctx.send(f'Done rebuilding. {time.time() - start_time}s')
 
     @commands.is_owner()
     @commands.command(hidden=True)
