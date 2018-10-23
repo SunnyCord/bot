@@ -6,6 +6,7 @@ from commons import checks
 import config as cfg
 from commons.calc import calc_pp
 from commons.mongoIO import getOsu, setOsu
+import re
 def get_config():
     if cfg.DEBUG==True:
         return cfg.debugConf
@@ -76,6 +77,8 @@ class osu:
         """Shows osu! stats for a user. Modes can be specified."""
         if not user:
             user = getOsu(ctx.message.author)
+        if user.startswith("<@") and user.endswith(">"):
+            user = getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
         if not user:
             await ctx.send("Please set your profile!")
         else:
@@ -151,6 +154,8 @@ class osu:
                 user = ''.join(input)
                 if not user:
                     user = getOsu(ctx.message.author)
+        if user.startswith("<@") and user.endswith(">"):
+            user = getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
         if not user:
             await ctx.send("Please set your profile!")
         else:
