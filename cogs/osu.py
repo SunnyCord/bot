@@ -154,7 +154,7 @@ class osu:
                 user = ''.join(input)
                 if not user:
                     user = getOsu(ctx.message.author)
-        if user.startswith("<@") and user.endswith(">"):
+        if user is not None and user.startswith("<@") and user.endswith(">"):
             user = getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
         if not user:
             await ctx.send("Please set your profile!")
@@ -179,7 +179,6 @@ class osu:
                         async with cs2.get(f'https://osu.ppy.sh/api/get_beatmaps?k={cfg.OSU_API}&b={beatmap_id}&limit=1') as r2:
                             beatmap = await r2.json()
                     beatmapset_id = int(beatmap[0]["beatmapset_id"])
-                    artist = beatmap[0]["artist"]
                     title = beatmap[0]["title"]
                     creator = beatmap[0]["creator"]
                     sr = round(float(beatmap[0]["difficultyrating"]), 2)
