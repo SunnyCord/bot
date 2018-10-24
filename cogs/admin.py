@@ -25,7 +25,7 @@ class Admin:
     @checks.can_ban()
     @checks.is_blacklisted()
     @commands.command()
-    async def ban(self, ctx, user : discord.Member, *, args):
+    async def ban(self, ctx, user : discord.Member):
         """Bans a user from the server."""
         if ctx.author == user:
             await ctx.send("You cannot ban yourself.")
