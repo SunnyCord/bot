@@ -224,7 +224,7 @@ class osu:
                         sr = ppcalc.splitlines()[0]
                         if perfect == 0:
                             accuracy_fc = round(float((50*count50+100*count100+300*count300)/(300*(count50+count100+count300))*100), 2)
-                            ppcalc = calc_pp(f"https://osu.ppy.sh/b/{beatmap_id}", accuracy, mods, int(maxcombo), 0)
+                            ppcalc = calc_pp(f"https://osu.ppy.sh/b/{beatmap_id}", accuracy_fc, mods, int(maxcombo), 0)
                             if_fc = f"({ppcalc.splitlines()[1]}PP for {accuracy_fc}% FC)"
                     else:
                         pp = "Only STD PP supported 😦"
