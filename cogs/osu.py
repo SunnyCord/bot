@@ -77,7 +77,7 @@ class osu:
         """Shows osu! stats for a user. Modes can be specified."""
         if not user:
             user = getOsu(ctx.message.author)
-        if user.startswith("<@") and user.endswith(">"):
+        if user and user.startswith("<@") and user.endswith(">"):
             user = getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
         if not user:
             await ctx.send("Please set your profile!")
@@ -136,11 +136,15 @@ class osu:
     @commands.command()
     async def recent(self, ctx, *, input = None):
         """Shows recent osu! plays for a user. Modes can be specified."""
+        bancho = True
         if input is None:
             user = getOsu(ctx.message.author)
             mode = 0
         else:
             input = input.split(" ")
+            if "-ripple" in input:
+                bancho = False
+                input.pop(input.index('-ripple'))
             if '-m' not in input:
                 user = ''.join(input)
                 mode = 0
@@ -159,8 +163,12 @@ class osu:
         if not user:
             await ctx.send("Please set your profile!")
         else:
+            if bancho is True:
+                api_url = f"https://osu.ppy.sh/api/get_user_recent?k={cfg.OSU_API}&u={user}&m={mode}"
+            else:
+                api_url = f"https://ripple.moe/api/get_user_recent?u={user}&m={mode}"
             async with aiohttp.ClientSession() as cs1:
-                async with cs1.get(f'https://osu.ppy.sh/api/get_user_recent?k={cfg.OSU_API}&u={user}&m={mode}') as r1:
+                async with cs1.get(api_url) as r1:
                     recentp = await r1.json()
             if recentp != []:
                     modnum = int(recentp[0]["enabled_mods"])
@@ -174,9 +182,9 @@ class osu:
                     perfect = int(recentp[0]["perfect"])
                     uid = int(recentp[0]["user_id"])
                     rank = recentp[0]["rank"]
-                    date = datetime.strptime(recentp[0]["date"], "%Y-%m-%d %H:%M:%S")
+                    date = datetime.strptime(recentp[0]["date"], "%Y-%m-%d %H:%M:%S")  
                     async with aiohttp.ClientSession() as cs2:
-                        async with cs2.get(f'https://osu.ppy.sh/api/get_beatmaps?k={cfg.OSU_API}&b={beatmap_id}&limit=1') as r2:
+                        async with cs2.get(f"https://osu.ppy.sh/api/get_beatmaps?k={cfg.OSU_API}&b={beatmap_id}&limit=1") as r2:
                             beatmap = await r2.json()
                     beatmapset_id = int(beatmap[0]["beatmapset_id"])
                     title = beatmap[0]["title"]
@@ -218,7 +226,7 @@ class osu:
                         mode_icon = "https://i.imgur.com/0uZM1PZ.png"
                         mode_name = "Mania"
                     if_fc = ""
-                    if mode == 0:
+                    if mode == 0 and bancho is True:
                         ppcalc = calc_pp(f"https://osu.ppy.sh/b/{beatmap_id}", accuracy, mods, bestcombo, count0)
                         pp = ppcalc.splitlines()[1]
                         sr = ppcalc.splitlines()[0]
@@ -226,7 +234,9 @@ class osu:
                             accuracy_fc = round(float((50*count50+100*count100+300*count300)/(300*(count50+count100+count300))*100), 2)
                             ppcalc = calc_pp(f"https://osu.ppy.sh/b/{beatmap_id}", accuracy_fc, mods, int(maxcombo), 0)
                             if_fc = f"({ppcalc.splitlines()[1]}PP for {accuracy_fc}% FC)"
-                    else:
+                    if bancho is False:
+                        pp = round(float(recentp[0]["pp"]), 2)
+                    elif mode != 0:
                         pp = "Only STD PP supported 😦"
                     if status == 4:
                         status = "Loved"
