@@ -46,7 +46,7 @@ class Admin:
         else:
             rolem = discord.utils.get(ctx.message.guild.roles, name='Muted')
             if rolem is None:
-                embed=discord.Embed(title="Muted role", url="http://echo-bot.wikia.com/wiki/Setting_up_the_muted_role", description="The mute command requires a role named Muted.", color=0xff0000)
+                embed=discord.Embed(title="Muted role", url="http://echo-bot.wikia.com/wiki/Setting_up_the_muted_role", description="The mute command requires a role named 'Muted'.", color=0xff0000)
                 embed.set_author(name=self.bot.user.name, icon_url=self.bot.user.avatar_url)
                 embed.set_footer(text="Without this role, the command will not work.")
                 await ctx.send(embed=embed)
@@ -58,11 +58,14 @@ class Admin:
                 await user.add_roles(rolem)
                 await sleep(time)
                 if rolem in user.roles:
-                    embed = discord.Embed(title=f'User {user.name} has been automatically unmuted.', color=0x00ff00)
-                    embed.add_field(name="Welcome back!", value=":open_mouth:")
-                    embed.set_thumbnail(url=user.avatar_url)
-                    await ctx.send(embed=embed)
-                    await user.remove_roles(rolem)
+                    try:
+                        await user.remove_roles(rolem)
+                        embed = discord.Embed(title=f'User {user.name} has been automatically unmuted.', color=0x00ff00)
+                        embed.add_field(name="Welcome back!", value=":open_mouth:")
+                        embed.set_thumbnail(url=user.avatar_url)
+                        await ctx.send(embed=embed)
+                    except Exception:
+                        pass
             else:
                 await ctx.send(f'User {user.mention} is already muted.')
 
