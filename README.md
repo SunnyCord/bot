@@ -3,40 +3,33 @@
 
 <br>
 
-### Changelog *(as of 23/10/18)*
+### Changelog *(as of 30/12/18)*
 ****
 
-> `v1.3.0E23102018` [( 97ef66 )](https://github.com/NiceAesth/Sunny/commit/97ef668cc8c189d73e5b0473ac74d0e941911542)
+> `v1.3.1S301218` [( 0c0292 )](https://github.com/NiceAesth/Sunny/commit/0c0292982722324f0d8ad8baac41d467499a6d9e)
+> - Stability improvements
+> - Bugfixes
+<br>
+
+> `v1.3.0E231018` [( 97ef66 )](https://github.com/NiceAesth/Sunny/commit/97ef668cc8c189d73e5b0473ac74d0e941911542)
 > - Added osu! commands
 > - Added PP calculation
 > - Updated config example
 > - Updated requirements
 > - Updated mongoDB to have osu! username
-
 <br>
 
-
-> `v1.2.0U06102018` [( b3e41f )](https://github.com/NiceAesth/Sunny/commit/b3e41f27a720c818263b47d3f82137dc85e076ee)
+> `v1.2.0U061018` [( b3e41f )](https://github.com/NiceAesth/Sunny/commit/b3e41f27a720c818263b47d3f82137dc85e076ee)
 > - Added user/server information cog
-
 <br>
 
-> `v1.1.1U06102018` [( d42399 )](https://github.com/NiceAesth/Sunny/commit/d423993c4cca02a2bc5dcb14f61919047ae9ae60)
+> `v1.1.1U061018` [( d42399 )](https://github.com/NiceAesth/Sunny/commit/d423993c4cca02a2bc5dcb14f61919047ae9ae60)
 > - Simplified the updating command. 
 > - Added shutdown command.
-
 <br>
 
 > `v1.1.0U260918` [( b90a4d )](https://github.com/NiceAesth/Sunny/commit/b90a4d95ddb69367e86e4a0a91666d5e50ba10b9)
 > - Extremely useful update for me. Fixed updating. Added update.py and changed owner cog to use it. Added backup folder to .gitignore
-
-> `v1.0.2U220818` [( 9a5b23 )](https://github.com/NiceAesth/Sunny/commit/9a5b234ff137ea4a0b80e9cc29b9cfe6360ed82d)
-> - Made the bot use a separate prefix for the developer version.
-
-<br>
-
-> `v1.0.1U220818` [( 9852d6 )](https://github.com/NiceAesth/Sunny/commit/9852d6c9824316cc16d30577e5f886548e4c3633)
-> - Made the bot use a separate database for the developer version.
 
 <br>
 
@@ -47,7 +40,7 @@
 > - `X` **marks a major change to the bot**
 > - `Y` **marks that minor changes or features were made**
 > - `Z` **marks bugfixes**
-> - `S` **marks the state of the version e.g. *U*nstable / *S*table / *E*xperimental**
+> - `S` **marks the state of the version e.g. *E*xperimental / *U*nstable / *S*table**
 > - `DDMMYY` **marks the day, month and year of the change**
 
 <br>
