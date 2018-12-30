@@ -25,7 +25,7 @@ def get_prefix(bot, message):
 
 load_extensions = ['cogs.owner', 'cogs.admin', 'cogs.music', 'cogs.images', 'cogs.errorhandler', 'cogs.fun', 'cogs.settings', 'cogs.information', 'cogs.osu'] 
 bot = commands.AutoShardedBot(command_prefix=get_prefix, description='Sunny Bot', pm_help=True, activity=discord.Streaming(name='#shameless_self_promotion', type=1, url='https://www.twitch.tv/niceaesthetic'))
-print("""                                                      
+print(r"""                                                      
   .--.--.                                                  
  /  /    '.                                                
 |  :  /`. /          ,--,      ,---,      ,---,            
