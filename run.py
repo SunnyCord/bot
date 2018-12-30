@@ -22,7 +22,7 @@ def get_prefix(bot, message):
     return commands.when_mentioned_or(*prefixes)(bot, message)
 
 load_extensions = ['cogs.owner', 'cogs.admin', 'cogs.music', 'cogs.images', 'cogs.errorhandler', 'cogs.fun', 'cogs.settings', 'cogs.information', 'cogs.osu'] 
-bot = commands.AutoShardedBot(command_prefix=get_prefix, description='Sunny Bot', pm_help=True)
+bot = commands.AutoShardedBot(command_prefix=get_prefix, description='Sunny Bot', pm_help=True, activity=discord.Streaming(name='#shameless_self_promotion', type=1, url='https://www.twitch.tv/niceaesthetic'))
 
 if __name__ == '__main__':
     for extension in load_extensions:
@@ -35,17 +35,11 @@ if __name__ == '__main__':
 
 @bot.event
 async def on_ready():
-
     print(f'\n\nLogged in as: {bot.user.name} - {bot.user.id}\nVersion: {discord.__version__}\n')
-
-    await bot.change_presence(activity=discord.Streaming(name='#shameless_self_promotion', type=1, url='https://www.twitch.tv/niceaesthetic'))
     print(f'Successfully logged in and booted...!')
 
 @bot.event
 async def on_guild_join(guild):
     mongoIO.addServer(guild)
-    for member in guild.members:
-        if not member.bot and not mongoIO.userExists(member):
-            mongoIO.addUser(member)
 
 bot.run(get_config().TOKEN, bot=True, reconnect=True)
