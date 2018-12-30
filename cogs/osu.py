@@ -57,7 +57,6 @@ class osu:
         self.bot = bot
     
     @commands.cooldown(1, 5, commands.BucketType.user)
-    @checks.is_blacklisted()
     @commands.command()
     async def osuset(self, ctx, username):
         """Sets the osu! profile for the message author."""
@@ -71,7 +70,6 @@ class osu:
                     await ctx.send("User has not been found!")
 
     @commands.cooldown(1, 1, commands.BucketType.user)
-    @checks.is_blacklisted()
     @commands.command(aliases=["mania", "taiko", "ctb"])
     async def osu(self, ctx, user = None):
         """Shows osu! stats for a user. Modes can be specified."""
@@ -120,7 +118,7 @@ class osu:
                             level = int(float(res[0]["level"]))
                             level_progress = round((float(res[0]["level"])%1*100), 2)
                             username = res[0]["username"]
-                            desc=f"**🠺Rank:** #{pp_rank} ({country}#{pp_country_rank})\n**🠺PP:** {pp_raw}\n**🠺Accuracy:** {accuracy}%\n**🠺Level:** {level} ({level_progress}%)\n**🠺Playtime:** {secondsToText(total_seconds_played)}\n**🠺Playcount:** {playcount}\n**🠺PP/hour:** {int(pp_raw/total_seconds_played*3600)}\n**🠺Ranks/day:** {int(pp_rank/total_seconds_played*86400)}"
+                            desc=f"**>Rank:** #{pp_rank} ({country}#{pp_country_rank})\n**>PP:** {pp_raw}\n**>Accuracy:** {accuracy}%\n**>Level:** {level} ({level_progress}%)\n**>Playtime:** {secondsToText(total_seconds_played)}\n**>Playcount:** {playcount}\n**>PP/hour:** {int(pp_raw/total_seconds_played*3600)}\n**>Ranks/day:** {int(pp_rank/total_seconds_played*86400)}"
                             embed=discord.Embed(title=discord.Embed.Empty, color=get_config().COLOR, description=desc, timestamp=datetime.utcnow())
                             embed.set_author(name=f"osu! {mode_name} stats for {username}", url=f"https://osu.ppy.sh/users/{id}", icon_url=mode_icon)
                             embed.set_thumbnail(url=f"https://a.ppy.sh/{id}")
@@ -132,8 +130,7 @@ class osu:
                         await ctx.send("User has not been found or has not played enough!")  
 
     @commands.cooldown(1, 1, commands.BucketType.user)
-    @checks.is_blacklisted()
-    @commands.command()
+    @commands.command(aliases=["rs","r"])
     async def recent(self, ctx, *, input = None):
         """Shows recent osu! plays for a user. Modes can be specified."""
         bancho = True
@@ -226,7 +223,7 @@ class osu:
                         mode_icon = "https://i.imgur.com/0uZM1PZ.png"
                         mode_name = "Mania"
                     if_fc = ""
-                    if mode == 0 and bancho is True:
+                    if mode == 0:
                         ppcalc = calc_pp(f"https://osu.ppy.sh/b/{beatmap_id}", accuracy, mods, bestcombo, count0)
                         pp = ppcalc.splitlines()[1]
                         sr = ppcalc.splitlines()[0]
@@ -234,8 +231,6 @@ class osu:
                             accuracy_fc = round(float((50*count50+100*count100+300*count300)/(300*(count50+count100+count300))*100), 2)
                             ppcalc = calc_pp(f"https://osu.ppy.sh/b/{beatmap_id}", accuracy_fc, mods, int(maxcombo), 0)
                             if_fc = f"({ppcalc.splitlines()[1]}PP for {accuracy_fc}% FC)"
-                    if bancho is False:
-                        pp = round(float(recentp[0]["pp"]), 2)
                     elif mode != 0:
                         pp = "Only STD PP supported 😦"
                     if status == 4:
@@ -246,7 +241,7 @@ class osu:
                         status = "Approved"
                     if status == 1:
                         status = "Ranked"
-                    desc = f"🠺 {rankemoji} 🠺 **{pp}PP {if_fc}** 🠺 {accuracy}%\n🠺 {score} 🠺 x{bestcombo}/{maxcombo} 🠺 [{count300}/{count100}/{count50}/{count0}]"
+                    desc = f"> {rankemoji} > **{pp}PP {if_fc}** > {accuracy}%\n> {score} > x{bestcombo}/{maxcombo} > [{count300}/{count100}/{count50}/{count0}]"
                     embed = discord.Embed(title=discord.Embed.Empty, color=get_config().COLOR, description = desc, timestamp=date)
                     embed.set_author(name=f"{title} [{diff}] ({creator}) +{mods} [{sr}★]", url=f"https://osu.ppy.sh/b/{beatmap_id}", icon_url=f"https://a.ppy.sh/{uid}")
                     embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{beatmapset_id}.jpg")

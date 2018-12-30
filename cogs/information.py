@@ -14,7 +14,6 @@ class Information:
         self.bot = bot
     
     @commands.command()
-    @checks.is_blacklisted()
     async def userinfo(self, ctx, user: discord.Member = None):
         if user is None:
             user = ctx.message.author
@@ -27,18 +26,18 @@ class Information:
         embed.add_field(name='User ID', value=user.id, inline=True)
         embed.add_field(name='Nick', value=user.nick, inline=True)
         embed.add_field(name='Status', value=user.status, inline=True)
+        embed.add_field(name='On Mobile', value=user.is_on_mobile(), inline=True)
         embed.add_field(name='In Voice', value=voice_state, inline=True)
         embed.add_field(name='Game', value=game, inline=True)
         embed.add_field(name='Highest Role', value=user.top_role.name, inline=True)
-        embed.add_field(name='Account Created', value=user.created_at.__format__('%A, %d. %B %Y @ %H:%M:%S'), inline=True)
-        embed.add_field(name='Join Date', value=user.joined_at.__format__('%A, %d. %B %Y @ %H:%M:%S'), inline=True)
+        embed.add_field(name='Account Created', value=user.created_at.__format__('%A, %d. %B %Y @ %H:%M:%S'))
+        embed.add_field(name='Join Date', value=user.joined_at.__format__('%A, %d. %B %Y @ %H:%M:%S'))
         embed.set_thumbnail(url=user.avatar_url)
         embed.set_author(name=user.name, icon_url=user.avatar_url)
         embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
         await ctx.send(embed=embed)
 
     @commands.command()
-    @checks.is_blacklisted()
     async def serverinfo(self, ctx):
         role_count = len(ctx.guild.roles)
         emoji_count = len(ctx.guild.emojis)

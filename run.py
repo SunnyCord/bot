@@ -13,6 +13,8 @@ def get_config():
 def get_prefix(bot, message):
     """A callable Prefix for our bot. This could be edited to allow per server prefixes."""
     prefixes = get_config().PREFIXES
+    if mongoIO.isBlacklisted(message.author):
+        return ' '
     if message.guild:
         guildPref = mongoIO.getSetting(message.guild.id, 'prefix')
     if guildPref is not None:
@@ -23,6 +25,22 @@ def get_prefix(bot, message):
 
 load_extensions = ['cogs.owner', 'cogs.admin', 'cogs.music', 'cogs.images', 'cogs.errorhandler', 'cogs.fun', 'cogs.settings', 'cogs.information', 'cogs.osu'] 
 bot = commands.AutoShardedBot(command_prefix=get_prefix, description='Sunny Bot', pm_help=True, activity=discord.Streaming(name='#shameless_self_promotion', type=1, url='https://www.twitch.tv/niceaesthetic'))
+print("""                                                      
+  .--.--.                                                  
+ /  /    '.                                                
+|  :  /`. /          ,--,      ,---,      ,---,            
+;  |  |--`         ,'_ /|  ,-+-. /  | ,-+-. /  |           
+|  :  ;_      .--. |  | : ,--.'|'   |,--.'|'   |     .--,  
+ \  \    `. ,'_ /| :  . ||   |  ,"' |   |  ,"' |   /_ ./|  
+  `----.   \|  ' | |  . .|   | /  | |   | /  | |, ' , ' :  
+  __ \  \  ||  | ' |  | ||   | |  | |   | |  | /___/ \: |  
+ /  /`--'  /:  | : ;  ; ||   | |  |/|   | |  |/ .  \  ' |  
+'--'.     / '  :  `--'   \   | |--' |   | |--'   \  ;   :  
+  `--'---'  :  ,      .-./   |/     |   |/        \  \  ;  
+             `--`----'   '---'      '---'          :  \  \ 
+                                                    \  ' ; 
+                                                     `--`  
+""")
 
 if __name__ == '__main__':
     for extension in load_extensions:
