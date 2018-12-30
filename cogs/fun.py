@@ -20,7 +20,6 @@ class Fun:
         self.bot = bot
 
     @commands.cooldown(1, 5, commands.BucketType.user)
-    @checks.is_blacklisted()
     @commands.command()
     async def poll(self, ctx, *, args):
         """Creates a poll. Takes the polltext as an argument."""

@@ -9,7 +9,6 @@ class Admin:
         self.bot = bot
 
     @checks.can_kick()
-    @checks.is_blacklisted()
     @commands.command()
     async def kick(self, ctx, user : discord.Member):
         """Kicks a user from the server."""
@@ -23,7 +22,6 @@ class Admin:
             await ctx.send(embed=embed)
 
     @checks.can_ban()
-    @checks.is_blacklisted()
     @commands.command()
     async def ban(self, ctx, user : discord.Member):
         """Bans a user from the server."""
@@ -37,7 +35,6 @@ class Admin:
             await ctx.send(embed=embed)
 
     @checks.can_mute()
-    @checks.is_blacklisted()
     @commands.command()
     async def mute(self, ctx, user : discord.Member, time: int):
         """Prevents a user from speaking for a specified amount of time."""
@@ -70,7 +67,6 @@ class Admin:
                 await ctx.send(f'User {user.mention} is already muted.')
 
     @checks.can_mute()
-    @checks.is_blacklisted()
     @commands.command()
     async def unmute(self, ctx, user: discord.Member):
         """Unmutes a user."""
@@ -83,7 +79,6 @@ class Admin:
             await user.remove_roles(rolem)
 
     @checks.can_managemsg()
-    @checks.is_blacklisted()
     @commands.command()
     async def prune(self, ctx, count: int):
         """Deletes a specified amount of messages. (Max 100)"""
@@ -92,7 +87,6 @@ class Admin:
         await ctx.message.channel.purge(limit=count, bulk=True)
 
     @checks.can_managemsg()
-    @checks.is_blacklisted()
     @commands.command()
     async def clean(self, ctx):
         """Cleans the chat of the bot's messages."""
