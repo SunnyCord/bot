@@ -89,7 +89,7 @@ class Music:
             await player.play()
 
     @checks.is_blacklisted()
-    @commands.cooldown(1, 30, commands.BucketType.user)
+    @commands.cooldown(1, 5, commands.BucketType.guild)
     @commands.command()
     async def seek(self, ctx, time):
         """Goes further in a song by a specified amount of seconds."""
