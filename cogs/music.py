@@ -124,8 +124,12 @@ class Music:
         if not player.is_playing:
             return await ctx.send('Not playing.')
 
-        await ctx.send('⏭ | Skipped.')
-        await player.skip()
+        if not ctx.author.voice or not ctx.author.voice.channel or player.connected_channel.id != ctx.author.voice.channel.id:
+                return await ctx.send('Join my voice channel!')
+
+        else:
+            await ctx.send('⏭ | Skipped.')
+            await player.skip()
 
     @checks.is_blacklisted()
     @commands.command()
