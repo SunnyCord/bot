@@ -3,8 +3,16 @@
 
 <br>
 
-### Changelog *(as of 30/12/18)*
+### Changelog *(as of 11/02/19)*
 ****
+
+> `v1.3.2S110219` [( 505c5b )](https://github.com/NiceAesth/Sunny/commit/505c5ba11de11ed3673aad1416bc7a2f073cc0b4)
+> - Moved std PP calculations to pyttanko
+> - Implement speed rebalance and other PP changes
+> - Added ctb PP and SR calculations using catch-the-pp
+> - Removed old PP calculator
+> - Added pyttanko and aiofiles to requirements
+<br>
 
 > `v1.3.1S301218` [( 0c0292 )](https://github.com/NiceAesth/Sunny/commit/0c0292982722324f0d8ad8baac41d467499a6d9e)
 > - Stability improvements
@@ -28,10 +36,6 @@
 > - Added shutdown command.
 <br>
 
-> `v1.1.0U260918` [( b90a4d )](https://github.com/NiceAesth/Sunny/commit/b90a4d95ddb69367e86e4a0a91666d5e50ba10b9)
-> - Extremely useful update for me. Fixed updating. Added update.py and changed owner cog to use it. Added backup folder to .gitignore
-
-<br>
 
 ### Versioning
 ****
