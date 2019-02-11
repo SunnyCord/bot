@@ -1,4 +1,9 @@
 import pyttanko as pyt
+from commons.catchthepp.osu_parser.beatmap import Beatmap
+from commons.catchthepp.osu.ctb.difficulty import Difficulty
+from commons.catchthepp.ppCalc import calculate_pp
+
+
 
 def stdCalc(bmap, count0: int, count50: int, count100: int, count300: int, combo: int, mods: int, perfect: int, max_combo: int):
     p = pyt.parser()
@@ -11,8 +16,17 @@ def stdCalc(bmap, count0: int, count50: int, count100: int, count300: int, combo
     return round(sr.total, 2), round(pp, 2), round(pp_fc, 2)
 
 def taikoCalc(bmap, mods: int):
-    p = pyt.parser()
-    beatmap = p.map(bmap)
-    sr = pyt.diff_calc().calc(beatmap, mods)
-    pp, _, _, _, _ = pyt.ppv2(sr.aim, sr.speed, bmap=beatmap)
-    return round(sr.total, 2), round(pp, 2)
+    #p = pyt.parser()
+    #beatmap = p.map(bmap)
+    #sr = pyt.diff_calc().calc(beatmap, mods)
+    #pp, _, _, _, _ = pyt.ppv2(sr.aim, sr.speed, bmap=beatmap)
+    #return round(sr.total, 2), round(pp, 2)
+    return "N/A", "Not implemented."
+
+def ctbCalc(bmap, accuracy: float, count0: int, mods: int, max_combo: int):
+    beatmap = Beatmap(bmap)
+    difficulty = Difficulty(beatmap, mods)
+    return round(difficulty.star_rating, 2), round(calculate_pp(difficulty, accuracy, max_combo, count0), 2), beatmap.max_combo
+
+def maniaCalc():
+    return "N/A", "Not implemented."
