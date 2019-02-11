@@ -28,6 +28,7 @@ def getMods(number):
     if number == 0:	mod_list.append('NM')
     if number & 1<<0:   mod_list.append('NF')
     if number & 1<<1:   mod_list.append('EZ')
+    if number & 1<<2:   mod_list.append('TD')
     if number & 1<<3:   mod_list.append('HD')
     if number & 1<<4:   mod_list.append('HR')
     if number & 1<<14:  mod_list.append('PF')
