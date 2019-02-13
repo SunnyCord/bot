@@ -14,6 +14,7 @@ class conf:
     
 class lavalink:
     PASSWORD = ''
+    PORT = 80
 
 class mongoDB:
     URI = ''
