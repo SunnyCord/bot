@@ -317,7 +317,7 @@ class osu:
             if_fc=""
             if mode == 0:
                 accuracy = acc.stdCalc(count0, count50, count100, count300)
-                sr, pp, pp_fc = await self.bot.loop.run_in_executor(None, ppc.stdCalc, bmap, count0, count50, count100, count300, bestcombo, modnum, perfect, maxcombo)
+                sr, __, pp_fc = await self.bot.loop.run_in_executor(None, ppc.stdCalc, bmap, count0, count50, count100, count300, bestcombo, modnum, perfect, maxcombo)
                 if perfect == 0:
                     accuracy_fc = acc.stdCalc(0, count50, count100, count300+count0)
                     if_fc = f" ({pp_fc}PP for {accuracy_fc}% FC)"
@@ -325,17 +325,17 @@ class osu:
                 mode_name = "Standard"
             if mode == 1:
                 accuracy = acc.taikoCalc(count0, count100, count300)
-                sr, pp = await self.bot.loop.run_in_executor(None, ppc.taikoCalc, bmap, modnum)
+                sr, __ = await self.bot.loop.run_in_executor(None, ppc.taikoCalc, bmap, modnum)
                 mode_icon = "https://i.imgur.com/G6bzM0X.png"
                 mode_name = "Taiko"
             if mode == 2:
                 accuracy = acc.ctbCalc(count0, countkatu, count50, count100, count300)
-                sr, pp, maxcombo = await self.bot.loop.run_in_executor(None, ppc.ctbCalc, bmap, accuracy/100, count0, modnum, bestcombo)
+                sr, __, maxcombo = await self.bot.loop.run_in_executor(None, ppc.ctbCalc, bmap, accuracy/100, count0, modnum, bestcombo)
                 mode_icon = "https://i.imgur.com/EsanYkH.png"
                 mode_name = "Catch the Beat"
             if mode == 3:
                 accuracy = acc.maniaCalc(count0, count50, count100, countkatu, count300, countgeki)
-                sr, pp = await self.bot.loop.run_in_executor(None, ppc.maniaCalc)
+                sr, __ = await self.bot.loop.run_in_executor(None, ppc.maniaCalc)
                 mode_icon = "https://i.imgur.com/0uZM1PZ.png"
                 mode_name = "Mania"
             if spec:
