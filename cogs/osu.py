@@ -341,7 +341,8 @@ class osu:
             if spec:
                 index = limit-1
             desc = desc + f"\n{index+1}. [**{beatmap_title}**](https://osu.ppy.sh/b/{beatmap_id}) + **{mods}** [{sr}★]" + '\n' + f"> {rankemoji} > **{pp}pp**{if_fc} > {accuracy}%\n> {bestcombo}x/{maxcombo}x > [{count300}/{count100}/{count50}/{count0}]\n> {date}\n"
-        embed = discord.Embed(title=f"Top {limit} osu! {mode_name} for {user}", color=get_config().COLOR, description=desc)
+        embed = discord.Embed(title=discord.Embed.Empty, color=get_config().COLOR, description=desc)
+        embed.set_author(name=f"Top {limit} osu! {mode_name} for {user}", url=f"https://osu.ppy.sh/users/{uid}", icon_url=mode_icon)
         embed.set_thumbnail(url=f"https://a.ppy.sh/{uid}")
         await ctx.send(embed=embed)
             
