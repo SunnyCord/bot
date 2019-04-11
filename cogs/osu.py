@@ -241,6 +241,7 @@ class osu:
     async def osutop(self, ctx, *, user=None):
         limit = 5
         spec = False
+        recentFirst = False
         if user:
             user = user.split(" ")
             if '-p' in user:
@@ -251,6 +252,9 @@ class osu:
                 except IndexError:
                     limit = 5
                 user.pop(user.index('-p'))
+            if '-r' in user:
+                recentFirst = True
+                user.remove('-r')
             user = ''.join(user)
         if not user:
             user = getOsu(ctx.message.author)
@@ -286,6 +290,8 @@ class osu:
         uid = tops[0]["user_id"]
         if spec:
             tops = tops[limit-1:]
+        elif recentFirst:
+            tops.sort(key=lambda x: datetime.strptime(x["date"], "%Y-%m-%d %H:%M:%S"))
         desc = ""
         for index, play in enumerate(tops):
             rank = play["rank"]
