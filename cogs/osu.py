@@ -285,17 +285,23 @@ class osu(commands.Cog, name='osu!'):
         if mode == 3:
             mode_icon = "https://i.imgur.com/0uZM1PZ.png"
             mode_name = "Mania"
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(f"https://osu.ppy.sh/api/get_user_best?k={cfg.OSU_API}&m={mode}&limit={limit}&u={user}&type=string") as r:
-                tops = await r.json()
+        if not recentFirst:
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(f"https://osu.ppy.sh/api/get_user_best?k={cfg.OSU_API}&m={mode}&limit={limit}&u={user}&type=string") as r:
+                    tops = await r.json()
+        else:
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(f"https://osu.ppy.sh/api/get_user_best?k={cfg.OSU_API}&m={mode}&limit=100&u={user}&type=string") as r:
+                    tops = await r.json()
         if tops == []:
             return await ctx.send("User has not been found or has no plays!")  
-        redisIO.setValue(ctx.message.channel.id, tops[-1]["beatmap_id"])
+        #redisIO.setValue(ctx.message.channel.id, tops[-1]["beatmap_id"])
         uid = tops[0]["user_id"]
         if spec:
             tops = tops[limit-1:]
         elif recentFirst:
-            tops.sort(key=lambda x: datetime.strptime(x["date"], "%Y-%m-%d %H:%M:%S"))
+            tops.sort(key=lambda x: datetime.strptime(x["date"], "%Y-%m-%d %H:%M:%S"), reverse=True)
+            tops = tops[:5]
         desc = ""
         for index, play in enumerate(tops):
             rank = play["rank"]
