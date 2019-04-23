@@ -24,7 +24,7 @@ def get_prefix(bot, message):
         prefixes.append(guildPref)
     return commands.when_mentioned_or(*prefixes)(bot, message)
 
-load_extensions = ['cogs.owner', 'cogs.admin',  'cogs.images', 'cogs.errorhandler', 'cogs.fun', 'cogs.settings', 'cogs.information', 'cogs.osu', 'cogs.help'] 
+load_extensions = ['cogs.owner', 'cogs.admin',  'cogs.images', 'cogs.errorhandler', 'cogs.fun', 'cogs.settings', 'cogs.information', 'cogs.osu', 'cogs.help', 'cogs.music'] 
 bot = commands.AutoShardedBot(command_prefix=get_prefix, description='Sunny Bot', activity=discord.Streaming(name='#shameless_self_promotion', type=1, url='https://www.twitch.tv/niceaesthetic'))
 bot.remove_command('help')
 
