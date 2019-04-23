@@ -365,7 +365,7 @@ class osu(commands.Cog, name='osu!'):
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.command(aliases=['c'])
     async def compare(self, ctx, user = None):
-        beatmap_id = redisIO.getValue(ctx.message.channel.id)
+        beatmap_id = redisIO.getValue(ctx.message.channel.id).decode('utf-8')
         if beatmap_id is None:
             return await ctx.send("No beatmap found.")
         if user is None:
