@@ -295,7 +295,7 @@ class osu(commands.Cog, name='osu!'):
                     tops = await r.json()
         if tops == []:
             return await ctx.send("User has not been found or has no plays!")  
-        #redisIO.setValue(ctx.message.channel.id, tops[-1]["beatmap_id"])
+        redisIO.setValue(ctx.message.channel.id, tops[-1]["beatmap_id"])
         uid = tops[0]["user_id"]
         if spec:
             tops = tops[limit-1:]
@@ -366,6 +366,8 @@ class osu(commands.Cog, name='osu!'):
     @commands.command(aliases=['c'])
     async def compare(self, ctx, user = None):
         beatmap_id = redisIO.getValue(ctx.message.channel.id)
+        if beatmap_id is None:
+            return await ctx.send("No beatmap found.")
         if user is None:
             user = getOsu(ctx.message.author)
             mode = 0
