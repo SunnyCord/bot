@@ -13,8 +13,8 @@ def get_config():
     else:
         return cfg.conf
 
-class Settings:
-
+class Settings(commands.Cog):
+    """Commands user for changing server-based settings."""
     def __init__(self,bot):
         self.bot = bot
 

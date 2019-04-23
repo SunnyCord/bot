@@ -1,4 +1,4 @@
-import discord, aiohttp, re, aiofiles
+import discord, aiohttp, re, aiofiles, redis
 from io import StringIO
 from discord.ext import commands
 from datetime import datetime
@@ -7,6 +7,7 @@ from commons import accuracycalculator as acc
 from commons import ppwrapper as ppc
 import config as cfg
 from commons.mongoIO import getOsu, setOsu
+import commons.redisIO as redisIO
 
 def get_config():
     if cfg.DEBUG==True:
@@ -54,7 +55,8 @@ def getMods(number):
     if number & 1<<28:  mod_list.append('2 KEY')
     return ''.join(mod_list)
 	
-class osu:
+class osu(commands.Cog, name='osu!'):
+    """osu! related commands."""
     def __init__(self,bot):
         self.bot = bot
         self.ranks = {
@@ -109,7 +111,7 @@ class osu:
             mode_icon = "https://i.imgur.com/0uZM1PZ.png"
             mode_name = "Mania"
         async with aiohttp.ClientSession() as cs:
-            async with cs.get(f'https://osu.ppy.sh/api/get_user?k={cfg.OSU_API}&u={user}&m={mode}') as r:
+            async with cs.get(f'https://osu.ppy.sh/api/get_user?k={cfg.OSU_API}&u={user}&m={mode}&type=string') as r:
                 res = await r.json()
                 if res != []:
                     if (res[0]["playcount"] is not None) and (res[0]["accuracy"] is not None):
@@ -162,7 +164,7 @@ class osu:
         if not user:
             return await ctx.send("Please set your profile!")
         async with aiohttp.ClientSession() as cs1:
-            async with cs1.get(f"https://osu.ppy.sh/api/get_user_recent?k={cfg.OSU_API}&u={user}&m={mode}") as r:
+            async with cs1.get(f"https://osu.ppy.sh/api/get_user_recent?k={cfg.OSU_API}&u={user}&m={mode}&type=string") as r:
                 recentp = await r.json()
         if recentp != []:
             if_fc = ""
@@ -181,6 +183,7 @@ class osu:
             rank = recentp[0]["rank"]
             rankemoji = self.ranks[rank]
             date = datetime.strptime(recentp[0]["date"], "%Y-%m-%d %H:%M:%S")  
+            redisIO.setValue(ctx.message.channel.id, beatmap_id)
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(f'https://osu.ppy.sh/osu/{beatmap_id}') as r:
                     if r.status == 200:
@@ -283,10 +286,11 @@ class osu:
             mode_icon = "https://i.imgur.com/0uZM1PZ.png"
             mode_name = "Mania"
         async with aiohttp.ClientSession() as cs:
-            async with cs.get(f"https://osu.ppy.sh/api/get_user_best?k={cfg.OSU_API}&m={mode}&limit={limit}&u={user}") as r:
+            async with cs.get(f"https://osu.ppy.sh/api/get_user_best?k={cfg.OSU_API}&m={mode}&limit={limit}&u={user}&type=string") as r:
                 tops = await r.json()
         if tops == []:
             return await ctx.send("User has not been found or has no plays!")  
+        redisIO.setValue(ctx.message.channel.id, tops[-1]["beatmap_id"])
         uid = tops[0]["user_id"]
         if spec:
             tops = tops[limit-1:]
@@ -352,8 +356,78 @@ class osu:
         embed.set_thumbnail(url=f"https://a.ppy.sh/{uid}")
         await ctx.send(embed=embed)
             
-
-
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    @commands.command(aliases=['c'])
+    async def compare(self, ctx, user = None):
+        beatmap_id = redisIO.getValue(ctx.message.channel.id)
+        if user is None:
+            user = getOsu(ctx.message.author)
+            mode = 0
+        if user is not None and user.startswith("<@") and user.endswith(">"):
+            user = getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
+        if not user:
+            return await ctx.send("Please set your profile!")
+        user.replace(" ", "_")
+        desc = ""
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(f'https://osu.ppy.sh/api/get_scores?k={cfg.OSU_API}&b={beatmap_id}&u={user}&type=string&limit=5') as r:
+                tops = await r.json()
+        async with aiohttp.ClientSession() as cs2:
+                async with cs2.get(f"https://osu.ppy.sh/api/get_beatmaps?k={cfg.OSU_API}&b={beatmap_id}&limit=1") as r2:
+                    beatmap = await r2.json()
+                    beatmap = beatmap[0]
+        for index, play in enumerate(tops):
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(f'https://osu.ppy.sh/osu/{beatmap_id}') as r:
+                    if r.status == 200:
+                        bmap = StringIO(await r.text())
+            rank = play["rank"]
+            rankemoji = self.ranks[rank]
+            pp = float(play["pp"])
+            perfect = int(play["perfect"])
+            count50 = int(play["count50"])
+            count100 = int(play["count100"])
+            count300 = int(play["count300"])
+            count0 = int(play["countmiss"])
+            countgeki = int(play["countgeki"])
+            countkatu = int(play["countkatu"])
+            modnum = int(play["enabled_mods"])
+            mods = getMods(modnum)
+            bestcombo = int(play["maxcombo"])
+            date = datetime.strptime(play["date"], "%Y-%m-%d %H:%M:%S") 
+            if_fc=""
+            maxcombo = int(beatmap["max_combo"]) if beatmap["max_combo"] else None
+            beatmapset_id = beatmap['beatmapset_id']
+            diff = beatmap["version"]
+            beatmap_title = f"{beatmap['artist']} - {beatmap['title']} ({beatmap['creator']}) [{diff}]"
+            if mode == 0:
+                accuracy = acc.stdCalc(count0, count50, count100, count300)
+                sr, __, pp_fc = await self.bot.loop.run_in_executor(None, ppc.stdCalc, bmap, count0, count50, count100, count300, bestcombo, modnum, perfect, maxcombo)
+                if perfect == 0:
+                    accuracy_fc = acc.stdCalc(0, count50, count100, count300+count0)
+                    if_fc = f" ({pp_fc}PP for {accuracy_fc}% FC)"
+                mode_icon = "https://i.imgur.com/lT2nqls.png"
+                mode_name = "Standard"
+            if mode == 1:
+                accuracy = acc.taikoCalc(count0, count100, count300)
+                sr, __ = await self.bot.loop.run_in_executor(None, ppc.taikoCalc, bmap, modnum)
+                mode_icon = "https://i.imgur.com/G6bzM0X.png"
+                mode_name = "Taiko"
+            if mode == 2:
+                accuracy = acc.ctbCalc(count0, countkatu, count50, count100, count300)
+                sr, __, maxcombo = await self.bot.loop.run_in_executor(None, ppc.ctbCalc, bmap, accuracy/100, count0, modnum, bestcombo)
+                mode_icon = "https://i.imgur.com/EsanYkH.png"
+                mode_name = "Catch the Beat"
+            if mode == 3:
+                accuracy = acc.maniaCalc(count0, count50, count100, countkatu, count300, countgeki)
+                sr, __ = await self.bot.loop.run_in_executor(None, ppc.maniaCalc)
+                mode_icon = "https://i.imgur.com/0uZM1PZ.png"
+                mode_name = "Mania"
+            desc = desc + f"\n{index+1}. ``{mods}`` [{sr}★]" + '\n' + f"> {rankemoji} > **{pp}pp**{if_fc} > {accuracy}%\n> {bestcombo}x/{maxcombo}x > [{count300}/{count100}/{count50}/{count0}]\n> {date}\n"
+        embed = discord.Embed(title=discord.Embed.Empty, color=get_config().COLOR, description=desc)
+        embed.set_author(name=f"Top osu! {mode_name} for {user} on {beatmap_title}", url=f"https://osu.ppy.sh/b/{beatmap_id}", icon_url=mode_icon)
+        embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{beatmapset_id}.jpg")
+        await ctx.send(embed=embed)
 
 def setup(bot):
     bot.add_cog(osu(bot))

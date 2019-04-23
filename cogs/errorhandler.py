@@ -3,10 +3,12 @@ import sys
 from discord.ext import commands
 import discord
 
-class CommandErrorHandler:
+class CommandErrorHandler(commands.Cog, name="Error Handler"):
+    """Handles any errors that may occur."""
     def __init__(self, bot):
         self.bot = bot
 
+    @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         if hasattr(ctx.command, 'on_error'):
             return
@@ -28,7 +30,7 @@ class CommandErrorHandler:
             return await ctx.send(f'You do not have the required permission for ``{ctx.command}``.')
 
         exc = f'{type(error).__name__}: {error}'
-        embed = discord.Embed(title="Oh no! An error has occured", color=0xff0000)
+        embed = discord.Embed(title="Oh no! An error has occured", color=discord.Color.red())
         embed.add_field(name="Error:", value=exc)
         embed.set_thumbnail(url="https://i.imgur.com/szL6ReL.png")
         await ctx.send(embed=embed)

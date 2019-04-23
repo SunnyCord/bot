@@ -14,8 +14,8 @@ def get_config():
     else:
         return cfg.conf
 
-class Fun:
-
+class Fun(commands.Cog):
+    """Miscellaneous commands."""
     def __init__(self,bot):
         self.bot = bot
 

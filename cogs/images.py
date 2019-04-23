@@ -3,8 +3,8 @@ from discord.ext import commands
 import aiohttp
 from commons import checks
 
-class Image:
-
+class Image(commands.Cog):
+    """Various image-related commands."""
     def __init__(self,bot):
         self.bot = bot
 

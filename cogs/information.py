@@ -9,7 +9,9 @@ def get_config():
     else:
         return cfg.conf
 
-class Information:
+class Information(commands.Cog):
+    """Retrieve information about various items."""
+
     def __init__(self, bot):
         self.bot = bot
     
