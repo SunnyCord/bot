@@ -295,13 +295,13 @@ class osu(commands.Cog, name='osu!'):
                     tops = await r.json()
         if tops == []:
             return await ctx.send("User has not been found or has no plays!")  
-        redisIO.setValue(ctx.message.channel.id, tops[-1]["beatmap_id"])
         uid = tops[0]["user_id"]
         if spec:
             tops = tops[limit-1:]
         elif recentFirst:
             tops.sort(key=lambda x: datetime.strptime(x["date"], "%Y-%m-%d %H:%M:%S"), reverse=True)
             tops = tops[:5]
+        redisIO.setValue(ctx.message.channel.id, tops[-1]["beatmap_id"])
         desc = ""
         for index, play in enumerate(tops):
             rank = play["rank"]
