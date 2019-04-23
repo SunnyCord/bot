@@ -301,7 +301,7 @@ class osu(commands.Cog, name='osu!'):
         elif recentFirst:
             tops.sort(key=lambda x: datetime.strptime(x["date"], "%Y-%m-%d %H:%M:%S"), reverse=True)
             tops = tops[:5]
-        redisIO.setValue(ctx.message.channel.id, tops[-1]["beatmap_id"])
+        redisIO.setValue(ctx.message.channel.id, tops[0]["beatmap_id"])
         desc = ""
         for index, play in enumerate(tops):
             rank = play["rank"]
