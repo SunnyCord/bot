@@ -384,6 +384,8 @@ class osu(commands.Cog, name='osu!'):
                 async with cs2.get(f"https://osu.ppy.sh/api/get_beatmaps?k={cfg.OSU_API}&b={beatmap_id}&limit=1") as r2:
                     beatmap = await r2.json()
                     beatmap = beatmap[0]
+        if tops == []:
+            return await ctx.send('User has no play on the beatmap!')
         for index, play in enumerate(tops):
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(f'https://osu.ppy.sh/osu/{beatmap_id}') as r:
@@ -401,6 +403,7 @@ class osu(commands.Cog, name='osu!'):
             countkatu = int(play["countkatu"])
             modnum = int(play["enabled_mods"])
             mods = getMods(modnum)
+            mode = int(beatmap['mode'])
             bestcombo = int(play["maxcombo"])
             date = datetime.strptime(play["date"], "%Y-%m-%d %H:%M:%S") 
             if_fc=""
