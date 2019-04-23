@@ -15,16 +15,19 @@ def get_prefix(bot, message):
     prefixes = get_config().PREFIXES
     if mongoIO.isBlacklisted(message.author):
         return ' '
+    if not message.guild:
+        return ' '
+    guildPref = None
     if message.guild:
         guildPref = mongoIO.getSetting(message.guild.id, 'prefix')
     if guildPref is not None:
         prefixes.append(guildPref)
-    if not message.guild:
-        return ' '
     return commands.when_mentioned_or(*prefixes)(bot, message)
 
-load_extensions = ['cogs.owner', 'cogs.admin', 'cogs.music', 'cogs.images', 'cogs.errorhandler', 'cogs.fun', 'cogs.settings', 'cogs.information', 'cogs.osu'] 
-bot = commands.AutoShardedBot(command_prefix=get_prefix, description='Sunny Bot', pm_help=True, activity=discord.Streaming(name='#shameless_self_promotion', type=1, url='https://www.twitch.tv/niceaesthetic'))
+load_extensions = ['cogs.owner', 'cogs.admin',  'cogs.images', 'cogs.errorhandler', 'cogs.fun', 'cogs.settings', 'cogs.information', 'cogs.osu', 'cogs.help'] 
+bot = commands.AutoShardedBot(command_prefix=get_prefix, description='Sunny Bot', activity=discord.Streaming(name='#shameless_self_promotion', type=1, url='https://www.twitch.tv/niceaesthetic'))
+bot.remove_command('help')
+
 print(r"""                                                      
   .--.--.                                                  
  /  /    '.                                                

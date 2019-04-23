@@ -7,19 +7,21 @@ from contextlib import redirect_stdout
 from git import Repo
 from datetime import datetime
 
-class OwnerCog:
 
+
+class OwnerCog(commands.Cog, command_attrs=dict(hidden=True), name="Owner"):
+    """Commands meant for the owner only."""
     def __init__(self, bot):
         self.bot = bot
         self._last_result = None
-    
+
     def cleanup_code(self, content):
         """Automatically removes code blocks from the code."""
         if content.startswith('```') and content.endswith('```'):
             return '\n'.join(content.split('\n')[1:-1])
         return content.strip('` \n')
 
-    @commands.command(name='pull', hidden=True)
+    @commands.command(name='pull')
     @commands.is_owner()
     async def git_update(self, ctx):
         """Pulls the bot from GitHub."""
@@ -33,16 +35,16 @@ class OwnerCog:
         difference = (later - now).total_seconds()
         await ctx.send(f"Operation completed succesfully in {difference}s. Output: ```prolog\n{message}\n```")
 
-    @commands.command(hidden=True)
+    @commands.command()
     @commands.is_owner()
     async def shutdown(self, ctx):
         """Shuts the bot down."""
         await ctx.send("Goodbye!")
         await self.bot.logout()
 
-    @commands.command(name='load', hidden=True)
+    @commands.command(name='load')
     @commands.is_owner()
-    async def cog_load(self, ctx, *, cog: str):
+    async def cogload(self, ctx, *, cog: str):
         """Command which Loads a Module.
         Remember to use dot path. e.g: cogs.owner"""
 
@@ -53,9 +55,9 @@ class OwnerCog:
         else:
             await ctx.send('**`SUCCESS`**')
 
-    @commands.command(name='unload', hidden=True)
+    @commands.command(name='unload')
     @commands.is_owner()
-    async def cog_unload(self, ctx, *, cog: str):
+    async def cogunload(self, ctx, *, cog: str):
         """Command which Unloads a Module.
         Remember to use dot path. e.g: cogs.owner"""
 
@@ -66,9 +68,9 @@ class OwnerCog:
         else:
             await ctx.send('**`SUCCESS`**')
 
-    @commands.command(name='reload', hidden=True)
+    @commands.command(name='reload')
     @commands.is_owner()
-    async def cog_reload(self, ctx, *, cog: str):
+    async def cogreload(self, ctx, *, cog: str):
         """Command which Reloads a Module.
         Remember to use dot path. e.g: cogs.owner"""
 
@@ -80,7 +82,7 @@ class OwnerCog:
         else:
             await ctx.send('**`SUCCESS`**')
     
-    @commands.command(hidden=True, name='eval')
+    @commands.command(name='eval')
     @commands.is_owner()
     async def _eval(self, ctx, *, body: str):
         """Evaluates a code"""

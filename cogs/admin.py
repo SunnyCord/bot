@@ -3,8 +3,8 @@ from discord.ext import commands
 from commons import checks
 from asyncio import sleep
 
-class Admin:
-
+class Admin(commands.Cog):
+    """Commands for managing Discord servers."""
     def __init__(self,bot):
         self.bot = bot
 
