@@ -3,7 +3,6 @@ from io import StringIO
 from discord.ext import commands
 from datetime import datetime
 from commons import checks
-from commons import accuracycalculator as acc
 from commons import ppwrapper as ppc
 import config as cfg
 from commons.mongoIO import getOsu, setOsu
@@ -25,35 +24,6 @@ def secondsToText(secs):
     ("{0} minute{1} ".format(minutes, "s" if minutes!=1 else "") if minutes else "") + \
     ("{0} second{1} ".format(seconds, "s" if seconds!=1 else "") if seconds else "")
     return result
-
-def getMods(number):
-    mod_list= []
-    if number == 0:	mod_list.append('NM')
-    if number & 1<<0:   mod_list.append('NF')
-    if number & 1<<1:   mod_list.append('EZ')
-    if number & 1<<2:   mod_list.append('TD')
-    if number & 1<<3:   mod_list.append('HD')
-    if number & 1<<4:   mod_list.append('HR')
-    if number & 1<<14:  mod_list.append('PF')
-    elif number & 1<<5:   mod_list.append('SD')
-    if number & 1<<9:   mod_list.append('NC')
-    elif number & 1<<6: mod_list.append('DT')
-    if number & 1<<7:   mod_list.append('RX')
-    if number & 1<<8:   mod_list.append('HT')
-    if number & 1<<10:  mod_list.append('FL')
-    if number & 1<<12:  mod_list.append('SO')
-    if number & 1<<15:  mod_list.append('4 KEY')
-    if number & 1<<16:  mod_list.append('5 KEY')
-    if number & 1<<17:  mod_list.append('6 KEY')
-    if number & 1<<18:  mod_list.append('7 KEY')
-    if number & 1<<19:  mod_list.append('8 KEY')
-    if number & 1<<20:  mod_list.append('FI')
-    if number & 1<<24:  mod_list.append('9 KEY')
-    if number & 1<<25:  mod_list.append('10 KEY')
-    if number & 1<<26:  mod_list.append('1 KEY')
-    if number & 1<<27:  mod_list.append('3 KEY')
-    if number & 1<<28:  mod_list.append('2 KEY')
-    return ''.join(mod_list)
 	
 class osu(commands.Cog, name='osu!'):
     """osu! related commands."""
@@ -70,6 +40,7 @@ class osu(commands.Cog, name='osu!'):
             "X": "<:X_:504305739209244672>",
             "XH": "<:XH:504305771417305112>"
         }
+        self.nomstat = ["Unranked", "Ranked", "Approved", "Qualified", "Loved"]
     
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command()
@@ -163,79 +134,32 @@ class osu(commands.Cog, name='osu!'):
             user = getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
         if not user:
             return await ctx.send("Please set your profile!")
-        async with aiohttp.ClientSession() as cs1:
-            async with cs1.get(f"https://osu.ppy.sh/api/get_user_recent?k={cfg.OSU_API}&u={user}&m={mode}&type=string") as r:
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(f"https://osu.ppy.sh/api/get_user_recent?k={cfg.OSU_API}&u={user}&m={mode}&type=string") as r:
                 recentp = await r.json()
         if recentp != []:
             if_fc = ""
-            modnum = int(recentp[0]["enabled_mods"])
-            score = int(recentp[0]["score"])
-            beatmap_id = int(recentp[0]["beatmap_id"])
-            bestcombo = int(recentp[0]["maxcombo"])
-            count0 = int(recentp[0]["countmiss"])
-            count50 = int(recentp[0]["count50"])
-            count100 = int(recentp[0]["count100"])
-            count300 = int(recentp[0]["count300"])
-            countgeki = int(recentp[0]["countgeki"])
-            countkatu = int(recentp[0]["countkatu"])
-            perfect = int(recentp[0]["perfect"])
-            uid = int(recentp[0]["user_id"])
-            rank = recentp[0]["rank"]
-            rankemoji = self.ranks[rank]
             date = datetime.strptime(recentp[0]["date"], "%Y-%m-%d %H:%M:%S")  
-            redisIO.setValue(ctx.message.channel.id, beatmap_id)
+            redisIO.setValue(ctx.message.channel.id, recentp[0]["beatmap_id"])
             async with aiohttp.ClientSession() as cs:
-                async with cs.get(f'https://osu.ppy.sh/osu/{beatmap_id}') as r:
-                    if r.status == 200:
+                async with cs.get(f'https://osu.ppy.sh/osu/{recentp[0]["beatmap_id"]}') as r:
                         bmap = StringIO(await r.text())
             async with aiohttp.ClientSession() as cs:
-                async with cs.get(f"https://osu.ppy.sh/api/get_beatmaps?k={cfg.OSU_API}&b={beatmap_id}&limit=1") as r:
+                async with cs.get(f"https://osu.ppy.sh/api/get_beatmaps?k={cfg.OSU_API}&b={recentp[0]['beatmap_id']}&limit=1") as r:
                     beatmap = await r.json()
             beatmapset_id = int(beatmap[0]["beatmapset_id"])
-            title = beatmap[0]["title"]
-            creator = beatmap[0]["creator"]
-            #sr = round(float(beatmap[0]["difficultyrating"]), 2)
-            diff = beatmap[0]["version"]
             status = int(beatmap[0]["approved"])
-            maxcombo = int(beatmap[0]["max_combo"]) if beatmap[0]["max_combo"] else None
-            mods = getMods(modnum)
-            if mode == 0:
-                accuracy = acc.stdCalc(count0, count50, count100, count300)
-                sr, pp, pp_fc = await self.bot.loop.run_in_executor(None, ppc.stdCalc, bmap, count0, count50, count100, count300, bestcombo, modnum, perfect, maxcombo)
-                if perfect == 0:
-                    accuracy_fc = acc.stdCalc(0, count50, count100, count300+count0)
-                    if_fc = f" ({pp_fc}PP for {accuracy_fc}% FC)"
-                mode_icon = "https://i.imgur.com/lT2nqls.png"
-                mode_name = "Standard"
-            if mode == 1:
-                accuracy = acc.taikoCalc(count0, count100, count300)
-                sr, pp = ppc.taikoCalc(bmap, modnum)
-                mode_icon = "https://i.imgur.com/G6bzM0X.png"
-                mode_name = "Taiko"
-            if mode == 2:
-                accuracy = acc.ctbCalc(count0, countkatu, count50, count100, count300)
-                sr, pp, maxcombo = await self.bot.loop.run_in_executor(None, ppc.ctbCalc, bmap, accuracy/100, count0, modnum, bestcombo)
-                mode_icon = "https://i.imgur.com/EsanYkH.png"
-                mode_name = "Catch the Beat"
-            if mode == 3:
-                accuracy = acc.maniaCalc(count0, count50, count100, countkatu, count300, countgeki)
-                sr, pp = ppc.maniaCalc()
-                mode_icon = "https://i.imgur.com/0uZM1PZ.png"
-                mode_name = "Mania"
-            if status == 4:
-                status = "Loved"
-            if status == 3:
-                status = "Qualified"
-            if status == 2:
-                status = "Approved"
-            if status == 1:
-                status = "Ranked"
-            desc = f"> {rankemoji} > **{pp}PP{if_fc}** > {accuracy}%\n> {score} > x{bestcombo}/{maxcombo} > [{count300}/{count100}/{count50}/{count0}]"
+            beatmapDict, playDict = ppc.calculatePlay(bmap, mode, int(recentp[0]["countmiss"]), int(recentp[0]["count50"]), int(recentp[0]["count100"]), int(recentp[0]["count300"]), int(recentp[0]["countgeki"]), int(recentp[0]["countkatu"]), int(recentp[0]["maxcombo"]), int(recentp[0]["enabled_mods"]), int(recentp[0]["perfect"]))
+            status = self.nomstat[status]
+            completion = f'\n> **Completion:** {playDict["completion"]}%' if recentp[0]["rank"] == 'F' and mode == 0 else ''
+            if_fc = '' if int(recentp[0]["perfect"]) == 1 else f" ({playDict['pp_fc']} for {playDict['accuracy_fc']}% FC)"
+            rankemoji = self.ranks[recentp[0]["rank"]]
+            desc = f"> {rankemoji} > **{playDict['pp']}PP{if_fc}** > {playDict['accuracy']}%\n> {recentp[0]['score']} > x{recentp[0]['maxcombo']}/{beatmapDict['maxcombo']} > [{recentp[0]['count300']}/{recentp[0]['count100']}/{recentp[0]['count50']}/{recentp[0]['countmiss']}]{completion}"
             embed = discord.Embed(title=discord.Embed.Empty, color=get_config().COLOR, description = desc, timestamp=date)
-            embed.set_author(name=f"{title} [{diff}] ({creator}) +{mods} [{sr}★]", url=f"https://osu.ppy.sh/b/{beatmap_id}", icon_url=f"https://a.ppy.sh/{uid}")
+            embed.set_author(name=f"{beatmapDict['title']} [{beatmapDict['version']}] ({beatmapDict['creator']}) +{playDict['modString']} [{playDict['rating']}★]", url=f"https://osu.ppy.sh/b/{recentp[0]['beatmap_id']}", icon_url=f"https://a.ppy.sh/{recentp[0]['user_id']}")
             embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{beatmapset_id}.jpg")
-            embed.set_footer(text=f"{status} | osu! {mode_name} Play", icon_url=mode_icon)
-            await ctx.send(f"**Most Recent osu! {mode_name} Play for {user}:**",embed=embed)   
+            embed.set_footer(text=f"{status} | osu! {playDict['mode_name']} Play", icon_url=playDict['mode_icon'])
+            await ctx.send(f"**Most Recent osu! {playDict['mode_name']} Play for {user}:**",embed=embed)   
         else:
             await ctx.send("User has not been found or has no recent plays!")  
     
