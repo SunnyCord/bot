@@ -4,6 +4,7 @@ from discord.ext import commands
 from datetime import datetime
 from commons import checks
 from commons import ppwrapper as ppc
+from commons import accuracycalculator as acc
 import config as cfg
 from commons.mongoIO import getOsu, setOsu
 import commons.redisIO as redisIO
