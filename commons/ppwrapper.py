@@ -40,7 +40,7 @@ def ctbCalc(bmap, accuracy: float, count0: int, mods: int, max_combo: int):
 def maniaCalc():
     return "N/A", "Not implemented."
 
-def calculatePlay(bmap, mode: int = 0, count0: int = 0, count50: int = 0, count100: int = 0, count300: int= 0, countgeki: int = 0, countkatu: int = 0, combo: int = 0, mods: int = 0, perfect: int = 0):
+def calculatePlay(bmap, mode: int = 0, count0: int = 0, count50: int = 0, count100: int = 0, count300: int= 0, countgeki: int = 0, countkatu: int = 0, combo: int = 0, mods: int = 0, perfect: int = 0, calcPP: int = 1):
 
     if mode == 0 :
         #Standard
@@ -52,7 +52,9 @@ def calculatePlay(bmap, mode: int = 0, count0: int = 0, count50: int = 0, count1
         objcount = beatmap.ncircles + beatmap.nsliders + beatmap.nspinners
         totalhits = count50 + count100 + count0
         sr = pyt.diff_calc().calc(beatmap, mods)
-        pp, _, _, _, _ = pyt.ppv2(sr.aim, sr.speed, bmap=beatmap, mods=mods, n300=count300, n100=count100, n50=count50, nmiss=count0, combo=combo)
+        pp = 0
+        if calcPP == 1:
+            pp, _, _, _, _ = pyt.ppv2(sr.aim, sr.speed, bmap=beatmap, mods=mods, n300=count300, n100=count100, n50=count50, nmiss=count0, combo=combo)
         pp_fc = 0
         if perfect == 0:
             pp_fc, _, _, _, _ = pyt.ppv2(sr.aim, sr.speed, bmap=beatmap, mods=mods, n300=objcount - totalhits, n100=count100, n50=count50, nmiss=0, combo=beatmap.max_combo())
@@ -117,6 +119,9 @@ def calculatePlay(bmap, mode: int = 0, count0: int = 0, count50: int = 0, count1
         p = pyt.parser()
         beatmapMetadata = p.map(bmap)
         difficulty = Difficulty(beatmap, mods)
+        pp = 0
+        if calcPP == 1:
+            pp = round(calculate_pp(difficulty, accuracy, combo, count0), 2)
         beatmapDict = {
             "title": beatmapMetadata.title,
             "artist": beatmapMetadata.artist,
@@ -128,7 +133,7 @@ def calculatePlay(bmap, mode: int = 0, count0: int = 0, count50: int = 0, count1
         }
         playDict = {
             "totalhits": 0,
-            "pp": round(calculate_pp(difficulty, accuracy, combo, count0), 2),
+            "pp":  pp,
             "pp_fc": 0,
             "accuracy": accuracy,
             "accuracy_fc": 0,

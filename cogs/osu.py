@@ -319,12 +319,12 @@ class osu(commands.Cog, name='osu!'):
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.command(aliases=['c'])
     async def compare(self, ctx, user = None):
-        beatmap_id = redisIO.getValue(ctx.message.channel.id).decode('utf-8')
+        beatmap_id = redisIO.getValue(ctx.message.channel.id)
+        mode = 0
         if beatmap_id is None:
             return await ctx.send("No beatmap found.")
         if user is None:
             user = getOsu(ctx.message.author)
-            mode = 0
         if user is not None and user.startswith("<@") and user.endswith(">"):
             user = getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
         if not user:
@@ -345,53 +345,23 @@ class osu(commands.Cog, name='osu!'):
                 async with cs.get(f'https://osu.ppy.sh/osu/{beatmap_id}') as r:
                     if r.status == 200:
                         bmap = StringIO(await r.text())
+            uid = play["user_id"]
             rank = play["rank"]
             rankemoji = self.ranks[rank]
-            pp = float(play["pp"])
-            perfect = int(play["perfect"])
-            count50 = int(play["count50"])
-            count100 = int(play["count100"])
-            count300 = int(play["count300"])
-            count0 = int(play["countmiss"])
-            countgeki = int(play["countgeki"])
-            countkatu = int(play["countkatu"])
-            modnum = int(play["enabled_mods"])
-            mods = getMods(modnum)
-            mode = int(beatmap['mode'])
-            bestcombo = int(play["maxcombo"])
             date = datetime.strptime(play["date"], "%Y-%m-%d %H:%M:%S") 
             if_fc=""
-            maxcombo = int(beatmap["max_combo"]) if beatmap["max_combo"] else None
             beatmapset_id = beatmap['beatmapset_id']
-            diff = beatmap["version"]
-            beatmap_title = f"{beatmap['artist']} - {beatmap['title']} ({beatmap['creator']}) [{diff}]"
-            if mode == 0:
-                accuracy = acc.stdCalc(count0, count50, count100, count300)
-                sr, __, pp_fc = await self.bot.loop.run_in_executor(None, ppc.stdCalc, bmap, count0, count50, count100, count300, bestcombo, modnum, perfect, maxcombo)
-                if perfect == 0:
-                    accuracy_fc = acc.stdCalc(0, count50, count100, count300+count0)
-                    if_fc = f" ({pp_fc}PP for {accuracy_fc}% FC)"
-                mode_icon = "https://i.imgur.com/lT2nqls.png"
-                mode_name = "Standard"
-            if mode == 1:
-                accuracy = acc.taikoCalc(count0, count100, count300)
-                sr, __ = await self.bot.loop.run_in_executor(None, ppc.taikoCalc, bmap, modnum)
-                mode_icon = "https://i.imgur.com/G6bzM0X.png"
-                mode_name = "Taiko"
-            if mode == 2:
-                accuracy = acc.ctbCalc(count0, countkatu, count50, count100, count300)
-                sr, __, maxcombo = await self.bot.loop.run_in_executor(None, ppc.ctbCalc, bmap, accuracy/100, count0, modnum, bestcombo)
-                mode_icon = "https://i.imgur.com/EsanYkH.png"
-                mode_name = "Catch the Beat"
-            if mode == 3:
-                accuracy = acc.maniaCalc(count0, count50, count100, countkatu, count300, countgeki)
-                sr, __ = await self.bot.loop.run_in_executor(None, ppc.maniaCalc)
-                mode_icon = "https://i.imgur.com/0uZM1PZ.png"
-                mode_name = "Mania"
-            desc = desc + f"\n{index+1}. ``{mods}`` [{sr}★]" + '\n' + f"> {rankemoji} > **{pp}pp**{if_fc} > {accuracy}%\n> {bestcombo}x/{maxcombo}x > [{count300}/{count100}/{count50}/{count0}]\n> {date}\n"
+            status = int(beatmap["approved"])
+            status = self.nomstat[status]
+            #(bmap, mode: int = 0, count0: int = 0, count50: int = 0, count100: int = 0, count300: int= 0, countgeki: int = 0, countkatu: int = 0, combo: int = 0, mods: int = 0, perfect: int = 0):
+            beatmapDict, playDict = ppc.calculatePlay(bmap, mode, int(play["countmiss"]), int(play["count50"]), int(play["count100"]), int(play["count300"]), int(play["countgeki"]), int(play["countkatu"]), int(play["maxcombo"]), int(play["enabled_mods"]), int(play["perfect"]), 0)
+            beatmap_title = f"{beatmapDict['artist']} - {beatmapDict['title']} ({beatmapDict['creator']}) [{beatmapDict['version']}]"
+            if_fc = '' if int(play[0]["perfect"]) == 1 else f" ({playDict['pp_fc']} for {playDict['accuracy_fc']}% FC)"
+            desc = desc + f"\n{index+1}. ``{playDict['modString']}`` [{playDict['rating']}★]" + '\n' + f"> {rankemoji} > **{round(float(play['pp']), 2)}pp**{if_fc} > {playDict['accuracy']}%\n> {play['score']} > x{play['maxcombo']}/{beatmapDict['maxcombo']} > [{play['count300']}/{play['count100']}/{play['count50']}/{play['countmiss']}]\n> {date}\n"
         embed = discord.Embed(title=discord.Embed.Empty, color=get_config().COLOR, description=desc)
-        embed.set_author(name=f"Top osu! {mode_name} for {user} on {beatmap_title}", url=f"https://osu.ppy.sh/b/{beatmap_id}", icon_url=mode_icon)
+        embed.set_author(name=f"Top osu! {playDict['mode_name']} for {user} on {beatmap_title}", url=f"https://osu.ppy.sh/b/{beatmap_id}", icon_url=f"https://a.ppy.sh/{uid}")
         embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{beatmapset_id}.jpg")
+        embed.set_footer(icon_url=playDict['mode_icon'], text=status)
         await ctx.send(embed=embed)
 
 def setup(bot):
