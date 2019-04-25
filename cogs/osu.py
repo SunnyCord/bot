@@ -356,7 +356,7 @@ class osu(commands.Cog, name='osu!'):
             #(bmap, mode: int = 0, count0: int = 0, count50: int = 0, count100: int = 0, count300: int= 0, countgeki: int = 0, countkatu: int = 0, combo: int = 0, mods: int = 0, perfect: int = 0):
             beatmapDict, playDict = ppc.calculatePlay(bmap, mode, int(play["countmiss"]), int(play["count50"]), int(play["count100"]), int(play["count300"]), int(play["countgeki"]), int(play["countkatu"]), int(play["maxcombo"]), int(play["enabled_mods"]), int(play["perfect"]), 0)
             beatmap_title = f"{beatmapDict['artist']} - {beatmapDict['title']} ({beatmapDict['creator']}) [{beatmapDict['version']}]"
-            if_fc = '' if int(play[0]["perfect"]) == 1 else f" ({playDict['pp_fc']} for {playDict['accuracy_fc']}% FC)"
+            if_fc = '' if int(play["perfect"]) == 1 else f" ({playDict['pp_fc']} for {playDict['accuracy_fc']}% FC)"
             desc = desc + f"\n{index+1}. ``{playDict['modString']}`` [{playDict['rating']}★]" + '\n' + f"> {rankemoji} > **{round(float(play['pp']), 2)}pp**{if_fc} > {playDict['accuracy']}%\n> {play['score']} > x{play['maxcombo']}/{beatmapDict['maxcombo']} > [{play['count300']}/{play['count100']}/{play['count50']}/{play['countmiss']}]\n> {date}\n"
         embed = discord.Embed(title=discord.Embed.Empty, color=get_config().COLOR, description=desc)
         embed.set_author(name=f"Top osu! {playDict['mode_name']} for {user} on {beatmap_title}", url=f"https://osu.ppy.sh/b/{beatmap_id}", icon_url=f"https://a.ppy.sh/{uid}")
