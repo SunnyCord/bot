@@ -50,7 +50,7 @@ def calculatePlay(bmap, mode: int = 0, count0: int = 0, count50: int = 0, count1
         p = pyt.parser()
         beatmap = p.map(bmap)
         objcount = beatmap.ncircles + beatmap.nsliders + beatmap.nspinners
-        totalhits = count50 + count100 + count300
+        totalhits = count50 + count100 + count0
         sr = pyt.diff_calc().calc(beatmap, mods)
         pp, _, _, _, _ = pyt.ppv2(sr.aim, sr.speed, bmap=beatmap, mods=mods, n300=count300, n100=count100, n50=count50, nmiss=count0, combo=combo)
         pp_fc = 0
