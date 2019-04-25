@@ -76,7 +76,7 @@ def calculatePlay(bmap, mode: int = 0, count0: int = 0, count50: int = 0, count1
             "accuracy_fc": 0 if perfect ==1 else accuracy_fc,
             "modString": modString if modString != "nomod" else "NM",
             "rating": round(sr.total, 2),
-            "completion": round( (totalhits*100)/objcount, 2),
+            "completion": round( ((totalhits+count300)*100)/objcount, 2),
             "mode_icon": "https://i.imgur.com/lT2nqls.png",
             "mode_name": "Standard"
         }
