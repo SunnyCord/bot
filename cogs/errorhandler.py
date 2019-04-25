@@ -31,7 +31,7 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):
 
         exc = f'{type(error).__name__}: {error}'
         embed = discord.Embed(title="Oh no! An error has occured", color=discord.Color.red())
-        embed.add_field(name="Error:", value=exc)
+        embed.add_field(name="Error:", value=f"{exc}\nIf you can, please open an issue: https://github.com/NiceAesth/Sunny/issues")
         embed.set_thumbnail(url="https://i.imgur.com/szL6ReL.png")
         await ctx.send(embed=embed)
         print(f'Ignoring exception in command {ctx.command}:', file=sys.stderr)

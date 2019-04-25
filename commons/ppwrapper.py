@@ -54,7 +54,6 @@ def calculatePlay(bmap, mode: int = 0, count0: int = 0, count50: int = 0, count1
         sr = pyt.diff_calc().calc(beatmap, mods)
         pp, _, _, _, _ = pyt.ppv2(sr.aim, sr.speed, bmap=beatmap, mods=mods, n300=count300, n100=count100, n50=count50, nmiss=count0, combo=combo)
         pp_fc = 0
-
         if perfect == 0:
             pp_fc, _, _, _, _ = pyt.ppv2(sr.aim, sr.speed, bmap=beatmap, mods=mods, n300=objcount - totalhits, n100=count100, n50=count50, nmiss=0, combo=beatmap.max_combo())
             accuracy_fc = acc.stdCalc(0, count50, count100, objcount - totalhits)
@@ -74,7 +73,7 @@ def calculatePlay(bmap, mode: int = 0, count0: int = 0, count50: int = 0, count1
             "pp": round(pp, 2),
             "pp_fc": round(pp_fc, 2),
             "accuracy": accuracy,
-            "accuracy_fc": accuracy_fc,
+            "accuracy_fc": 0 if perfect ==1 else accuracy_fc,
             "modString": modString if modString != "nomod" else "NM",
             "rating": round(sr.total, 2),
             "completion": round( (totalhits*100)/objcount, 2),
@@ -102,7 +101,7 @@ def calculatePlay(bmap, mode: int = 0, count0: int = 0, count50: int = 0, count1
             "pp": "Not implemented.",
             "pp_fc": 0,
             "accuracy": acc.taikoCalc(count0, count100, count300),
-            "accuracy_fc": acc.taikoCalc(0, count100, count300+count0),
+            "accuracy_fc": 0 if perfect == 1 else acc.taikoCalc(0, count100, count300+count0),
             "modString": modString if modString != "nomod" else "NM",
             "rating": "N/A",
             "completion": 100,
