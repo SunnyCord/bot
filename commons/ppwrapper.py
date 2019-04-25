@@ -59,8 +59,8 @@ def calculatePlay(bmap, mode: int = 0, count0: int = 0, count50: int = 0, count1
             accuracy_fc = acc.stdCalc(0, count50, count100, objcount - totalhits)
 
         beatmapDict = {
-            "title": beatmap.title_unicode,
-            "artist": beatmap.artist_unicode,
+            "title": beatmap.title,
+            "artist": beatmap.artist,
             "creator": beatmap.creator,
             "version": beatmap.version,
             "objcount": objcount,
@@ -87,8 +87,8 @@ def calculatePlay(bmap, mode: int = 0, count0: int = 0, count50: int = 0, count1
         p = pyt.parser()
         beatmap = p.map(bmap)
         beatmapDict = {
-            "title": beatmap.title_unicode,
-            "artist": beatmap.artist_unicode,
+            "title": beatmap.title,
+            "artist": beatmap.artist,
             "creator": beatmap.creator,
             "version": beatmap.version,
             "objcount": 0,
@@ -118,8 +118,8 @@ def calculatePlay(bmap, mode: int = 0, count0: int = 0, count50: int = 0, count1
         beatmapMetadata = p.map(bmap)
         difficulty = Difficulty(beatmap, mods)
         beatmapDict = {
-            "title": beatmapMetadata.title_unicode,
-            "artist": beatmapMetadata.artist_unicode,
+            "title": beatmapMetadata.title,
+            "artist": beatmapMetadata.artist,
             "creator": beatmapMetadata.creator,
             "version": beatmapMetadata.version,
             "objcount": len(beatmap.hitobjects),
@@ -145,8 +145,8 @@ def calculatePlay(bmap, mode: int = 0, count0: int = 0, count50: int = 0, count1
         p = pyt.parser()
         beatmap = p.map(bmap)
         beatmapDict = {
-            "title": beatmap.title_unicode,
-            "artist": beatmap.artist_unicode,
+            "title": beatmap.title,
+            "artist": beatmap.artist,
             "creator": beatmap.creator,
             "version": beatmap.version,
             "objcount": 0,
