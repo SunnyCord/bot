@@ -4,6 +4,9 @@
 <br>
 
 ### Changelog *(as of 11/02/19)*
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/e7be7cb6e87945fabf7a8caa6694a76d)](https://app.codacy.com/app/NiceAesth/Sunny?utm_source=github.com&utm_medium=referral&utm_content=NiceAesth/Sunny&utm_campaign=Badge_Grade_Dashboard)
+
 ****
 
 > `v1.3.2S110219` [( 505c5b )](https://github.com/NiceAesth/Sunny/commit/505c5ba11de11ed3673aad1416bc7a2f073cc0b4)
