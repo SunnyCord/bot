@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
 import aiohttp
-from commons import checks
 
 class Image(commands.Cog):
     """Various image-related commands."""
