@@ -70,7 +70,7 @@ class osu(commands.Cog, name='osu!'):
             "XH": "<:XH:504305771417305112>"
         }
         self.nomstat = ["Unranked", "Ranked", "Approved", "Qualified", "Loved"]
-    
+
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command()
     async def osuset(self, ctx, username):
@@ -271,7 +271,7 @@ class osu(commands.Cog, name='osu!'):
             modnum = int(play["enabled_mods"])
             mods = getMods(modnum)
             bestcombo = int(play["maxcombo"])
-            date = datetime.strptime(play["date"], "%Y-%m-%d %H:%M:%S") 
+            date = datetime.strptime(play["date"], "%Y-%m-%d %H:%M:%S")
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(f'https://osu.ppy.sh/osu/{beatmap_id}') as r:
                     if r.status == 200:
