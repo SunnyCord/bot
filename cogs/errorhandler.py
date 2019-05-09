@@ -25,7 +25,7 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):
                 return await ctx.author.send(f'``{ctx.command}`` can not be used in Private Messages.')
             except:
                 pass
-        
+
         elif isinstance(error, commands.CheckFailure):
             return await ctx.send(f'You do not have the required permission for ``{ctx.command}``.')
 

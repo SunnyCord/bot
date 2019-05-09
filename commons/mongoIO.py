@@ -1,4 +1,4 @@
-from pymongo import MongoClient 
+from pymongo import MongoClient
 import discord
 import config as cfg
 
@@ -65,7 +65,7 @@ def setOsu(member, username):
 			{"id": member.id},
 			{
 				"$set": {
-					"osu": username 
+					"osu": username
 				},
 				"$currentDate": {"lastModified": True}
 			}
@@ -98,7 +98,7 @@ def blacklistUser(member: discord.Member):
 				"$currentDate": {"lastModified": True}
 			}
 		)
-	
+
 def unblacklistUser(member: discord.Member):
 	if not userExists(member):
 		addUser(member, False)
@@ -111,7 +111,7 @@ def unblacklistUser(member: discord.Member):
 				},
 				"$currentDate": {"lastModified": True}
 			}
-		)	
+		)
 
 def isBlacklisted(member: discord.Member):
 	a = db.users.find({'id': member.id})

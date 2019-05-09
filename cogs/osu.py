@@ -1,4 +1,4 @@
-import discord, aiohttp, re, aiofiles, redis
+import discord, aiohttp, re, aiofiles
 from io import StringIO
 from discord.ext import commands
 from datetime import datetime
@@ -136,28 +136,28 @@ class osu(commands.Cog, name='osu!'):
                         embed.set_footer(text=f"#{pp_country_rank}", icon_url=f"https://osu.ppy.sh/images/flags/{country}.png")
                         await ctx.send(embed=embed)
                 else:
-                    await ctx.send("User has not been found or has not played enough!")  
+                    await ctx.send("User has not been found or has not played enough!")
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.command(aliases=["rs","r"])
-    async def recent(self, ctx, *, input = None):
+    async def recent(self, ctx, *, optional = None):
         """Shows recent osu! plays for a user. Modes can be specified."""
-        if input is None:
+        if optional is None:
             user = getOsu(ctx.message.author)
             mode = 0
         else:
-            input = input.split(" ")
-            if '-m' not in input:
-                user = ''.join(input)
+            optional = optional.split(" ")
+            if '-m' not in optional:
+                user = ''.join(optional)
                 mode = 0
             else:
                 try:
-                    mode = int(input[input.index('-m') + 1])
-                    input.pop(input.index('-m') + 1)
+                    mode = int(optional[optional.index('-m') + 1])
+                    optional.pop(optional.index('-m') + 1)
                 except IndexError:
                     mode = 0
-                input.pop(input.index('-m'))
-                user = ''.join(input)
+                optional.pop(optional.index('-m'))
+                user = ''.join(optional)
                 if not user:
                     user = getOsu(ctx.message.author)
         if user is not None and user.startswith("<@") and user.endswith(">"):
@@ -169,7 +169,7 @@ class osu(commands.Cog, name='osu!'):
                 recentp = await r.json()
         if recentp != []:
             if_fc = ""
-            date = datetime.strptime(recentp[0]["date"], "%Y-%m-%d %H:%M:%S")  
+            date = datetime.strptime(recentp[0]["date"], "%Y-%m-%d %H:%M:%S")
             redisIO.setValue(ctx.message.channel.id, recentp[0]["beatmap_id"])
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(f'https://osu.ppy.sh/osu/{recentp[0]["beatmap_id"]}') as r:
@@ -189,9 +189,9 @@ class osu(commands.Cog, name='osu!'):
             embed.set_author(name=f"{beatmapDict['title']} [{beatmapDict['version']}] ({beatmapDict['creator']}) +{playDict['modString']} [{playDict['rating']}★]", url=f"https://osu.ppy.sh/b/{recentp[0]['beatmap_id']}", icon_url=f"https://a.ppy.sh/{recentp[0]['user_id']}")
             embed.set_thumbnail(url=f"https://b.ppy.sh/thumb/{beatmapset_id}.jpg")
             embed.set_footer(text=f"{status} | osu! {playDict['mode_name']} Play", icon_url=playDict['mode_icon'])
-            await ctx.send(f"**Most Recent osu! {playDict['mode_name']} Play for {user}:**",embed=embed)   
+            await ctx.send(f"**Most Recent osu! {playDict['mode_name']} Play for {user}:**",embed=embed)
         else:
-            await ctx.send("User has not been found or has no recent plays!")  
+            await ctx.send("User has not been found or has no recent plays!")
     
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.command(aliases=["ot", "tt", "ct", "mt", "taikotop", "ctbtop", "maniatop"])
@@ -315,7 +315,7 @@ class osu(commands.Cog, name='osu!'):
         embed.set_author(name=f"Top {limit} osu! {mode_name} for {user}", url=f"https://osu.ppy.sh/users/{uid}", icon_url=mode_icon)
         embed.set_thumbnail(url=f"https://a.ppy.sh/{uid}")
         await ctx.send(embed=embed)
-            
+
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.command(aliases=['c'])
     async def compare(self, ctx, user = None):

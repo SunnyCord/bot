@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from commons import mongoIO
 from commons import checks
-import config as cfg 
+import config as cfg
 from datetime import datetime
 import time
 disableKeywords = ['none','disable','off','disabled']
@@ -37,7 +37,7 @@ class Settings(commands.Cog):
         embed.set_thumbnail(url="https://i.imgur.com/ubhUTNH.gif")
         embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
         await ctx.send(embed=embed)
-    
+
     @commands.is_owner()
     @commands.command(hidden=True)
     async def rebuild(self, ctx, *, args = "normal"):
@@ -70,7 +70,7 @@ class Settings(commands.Cog):
 
     @commands.is_owner()
     @commands.command(hidden=True)
-    async def unblacklist(self, ctx, user: discord.Member):   
+    async def unblacklist(self, ctx, user: discord.Member):
         """Unblacklists a user from the bot. (Owner-only)"""
         mongoIO.unblacklistUser(user)
         await ctx.send("User unblacklisted.")

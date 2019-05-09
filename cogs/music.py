@@ -269,7 +269,7 @@ class Music(commands.Cog):
 
         if not ctx.author.voice or not ctx.author.voice.channel or player.connected_channel.id != ctx.author.voice.channel.id:
                 return await ctx.send('Join my voice channel!')
-                
+
         if not player.queue:
             return await ctx.send('Nothing queued.')
 

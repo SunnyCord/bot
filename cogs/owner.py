@@ -1,6 +1,5 @@
 from discord.ext import commands
 import io, os
-import subprocess
 import textwrap
 import traceback
 from contextlib import redirect_stdout

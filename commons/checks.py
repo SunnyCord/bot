@@ -1,6 +1,5 @@
 from discord.ext import commands
-import discord.utils
-import os 
+import os
 from commons.mongoIO import isBlacklisted
 
 #

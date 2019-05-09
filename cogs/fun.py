@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands
 import random, time
 import config as cfg
-from commons import checks
 
 def random_line(fname):
     lines = open(fname).read().splitlines()
