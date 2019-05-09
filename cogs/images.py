@@ -60,6 +60,17 @@ class Image(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.command(aliases=['pika'])
+    async def pikachu(self, ctx):
+        """Not the best pokemon, but one of the cutest."""
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get('https://some-random-api.ml/pikachuimg') as r:
+                res = await r.json()
+                imgUrl = res['link']
+        embed = discord.Embed(title='Pika!', color=get_config().COLOR).set_image(url=imgUrl)
+        await ctx.send(embed=embed)
+
+    @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command(aliases=['birb'])
     async def bird(self, ctx):
         """A birb is sure to cheer you right up!"""
