@@ -17,14 +17,10 @@
 >
 > -   Added pyttanko and aiofiles to requirements
 >
->
->
 > `v1.3.1S301218` [( 0c0292 )](https://github.com/NiceAesth/Sunny/commit/0c0292982722324f0d8ad8baac41d467499a6d9e)
 > -   Stability improvements
 >
 > -   Bugfixes
->
->
 >
 > `v1.3.0E231018` [( 97ef66 )](https://github.com/NiceAesth/Sunny/commit/97ef668cc8c189d73e5b0473ac74d0e941911542)
 > -   Added osu! commands
@@ -34,21 +30,15 @@
 > -   Updated config example
 >
 > -   Updated requirements
->
 > -   Updated mongoDB to have osu! username
->
->
 >
 > `v1.2.0U061018` [( b3e41f )](https://github.com/NiceAesth/Sunny/commit/b3e41f27a720c818263b47d3f82137dc85e076ee)
 > -   Added user/server information cog
->
->
 >
 > `v1.1.1U061018` [( d42399 )](https://github.com/NiceAesth/Sunny/commit/d423993c4cca02a2bc5dcb14f61919047ae9ae60)
 > -   Simplified the updating command. 
 >
 > -   Added shutdown command.
-<br>
 
 ### Versioning
 ****
