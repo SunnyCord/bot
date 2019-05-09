@@ -117,7 +117,7 @@ class OwnerCog(commands.Cog, command_attrs=dict(hidden=True), name="Owner"):
             value = stdout.getvalue()
             try:
                 await ctx.message.add_reaction('\u2705')
-            except:
+            except Exception as e:
                 pass
 
             if ret is None:

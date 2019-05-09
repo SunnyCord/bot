@@ -23,7 +23,7 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):
         elif isinstance(error, commands.NoPrivateMessage):
             try:
                 return await ctx.author.send(f'``{ctx.command}`` can not be used in Private Messages.')
-            except:
+            except Exception as e:
                 pass
 
         elif isinstance(error, commands.CheckFailure):
