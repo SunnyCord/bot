@@ -1,4 +1,4 @@
-> # ☀️Sunny☀️ ![Python](https://img.shields.io/badge/Python-3.6%2B-brightgreen.svg) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/e7be7cb6e87945fabf7a8caa6694a76d)](https://app.codacy.com/app/NiceAesth/Sunny?utm_source=github.com&utm_medium=referral&utm_content=NiceAesth/Sunny&utm_campaign=Badge_Grade_Dashboard)
+> # ☀️Sunny☀️ ![Python](https://img.shields.io/badge/Python-3.6%2B-brightgreen.svg) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/5e417c4aec7b40efb8b82ae362e7ac77)](https://www.codacy.com/app/NiceAesth/Sunny?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=NiceAesth/Sunny&amp;utm_campaign=Badge_Grade)
 > ## Sunny is a Discord bot which is meant to replace [overused-emoji](https://github.com/NiceAesth/overused-emoji-bot). There are many reasons as to why I decided to abandon the old code and redo it, but the biggest one is the fact dpy was rewritten. The bot is quite unstable currently, but it is already better than the old one. I will not provide support to anyone attempting to use this code. Hope second time's the charm and won't rewrite it again! 😊
 
 <br>
