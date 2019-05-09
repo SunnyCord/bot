@@ -191,7 +191,7 @@ class osu(commands.Cog, name='osu!'):
             await ctx.send(f"**Most Recent osu! {playDict['mode_name']} Play for {user}:**",embed=embed)
         else:
             await ctx.send("User has not been found or has no recent plays!")
-    
+
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.command(aliases=["ot", "tt", "ct", "mt", "taikotop", "ctbtop", "maniatop"])
     async def osutop(self, ctx, *, user=None):
@@ -247,7 +247,7 @@ class osu(commands.Cog, name='osu!'):
                 async with cs.get(f"https://osu.ppy.sh/api/get_user_best?k={cfg.OSU_API}&m={mode}&limit=100&u={user}&type=string") as r:
                     tops = await r.json()
         if tops == []:
-            return await ctx.send("User has not been found or has no plays!")  
+            return await ctx.send("User has not been found or has no plays!")
         uid = tops[0]["user_id"]
         if spec:
             tops = tops[limit-1:]
@@ -347,7 +347,7 @@ class osu(commands.Cog, name='osu!'):
             uid = play["user_id"]
             rank = play["rank"]
             rankemoji = self.ranks[rank]
-            date = datetime.strptime(play["date"], "%Y-%m-%d %H:%M:%S") 
+            date = datetime.strptime(play["date"], "%Y-%m-%d %H:%M:%S")
             if_fc=""
             beatmapset_id = beatmap['beatmapset_id']
             status = int(beatmap["approved"])

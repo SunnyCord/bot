@@ -6,19 +6,17 @@ from contextlib import redirect_stdout
 from git import Repo
 from datetime import datetime
 
-
+def cleanup_code(content):
+    """Automatically removes code blocks from the code."""
+    if content.startswith('```') and content.endswith('```'):
+        return '\n'.join(content.split('\n')[1:-1])
+    return content.strip('` \n')
 
 class OwnerCog(commands.Cog, command_attrs=dict(hidden=True), name="Owner"):
     """Commands meant for the owner only."""
     def __init__(self, bot):
         self.bot = bot
         self._last_result = None
-
-    def cleanup_code(self, content):
-        """Automatically removes code blocks from the code."""
-        if content.startswith('```') and content.endswith('```'):
-            return '\n'.join(content.split('\n')[1:-1])
-        return content.strip('` \n')
 
     @commands.command(name='pull')
     @commands.is_owner()
@@ -80,7 +78,7 @@ class OwnerCog(commands.Cog, command_attrs=dict(hidden=True), name="Owner"):
             await ctx.send(f'**`ERROR:`** {type(e).__name__} - {e}')
         else:
             await ctx.send('**`SUCCESS`**')
-    
+
     @commands.command(name='eval')
     @commands.is_owner()
     async def _eval(self, ctx, *, body: str):
@@ -98,7 +96,7 @@ class OwnerCog(commands.Cog, command_attrs=dict(hidden=True), name="Owner"):
 
         env.update(globals())
 
-        body = self.cleanup_code(body)
+        body = cleanup_code(body)
         stdout = io.StringIO()
 
         to_compile = f'async def func():\n{textwrap.indent(body, "  ")}'

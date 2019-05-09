@@ -13,7 +13,7 @@ class Information(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-    
+
     @commands.command()
     async def userinfo(self, ctx, user: discord.Member = None):
         if user is None:

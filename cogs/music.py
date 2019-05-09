@@ -19,7 +19,7 @@ class Music(commands.Cog):
         if not hasattr(bot, 'lavalink'):
             lavalink.Client(bot=bot, password=cfg.lavalink.PASSWORD, loop=self.bot.loop, log_level=logging.INFO, ws_port=cfg.lavalink.PORT)
             self.bot.lavalink.register_hook(self.track_hook)
-            
+
     async def track_hook(self, event):
         if isinstance(event, lavalink.Events.TrackStartEvent):
             c = event.player.fetch('channel')
