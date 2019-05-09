@@ -1,7 +1,6 @@
 import discord
 import config as cfg
 from discord.ext import commands
-from commons import checks
 
 def get_config():
     if cfg.DEBUG==True:

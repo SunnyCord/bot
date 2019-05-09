@@ -1,8 +1,7 @@
-import discord, aiohttp, re, aiofiles
+import discord, aiohttp, re
 from io import StringIO
 from discord.ext import commands
 from datetime import datetime
-from commons import checks
 from commons import ppwrapper as ppc
 from commons import accuracycalculator as acc
 import config as cfg
@@ -116,7 +115,7 @@ class osu(commands.Cog, name='osu!'):
                 res = await r.json()
                 if res != []:
                     if (res[0]["playcount"] is not None) and (res[0]["accuracy"] is not None):
-                        id = res[0]["user_id"]
+                        uid = res[0]["user_id"]
                         pp_rank = int(res[0]["pp_rank"])
                         pp_country_rank = int(res[0]["pp_country_rank"])
                         pp_raw = float(res[0]["pp_raw"])
@@ -131,8 +130,8 @@ class osu(commands.Cog, name='osu!'):
                         username = res[0]["username"]
                         desc=f"**>Rank:** #{pp_rank}\n**>PP:** {pp_raw}\n**>Accuracy:** {accuracy}%\n**>Level:** {level} ({level_progress}%)\n**>Playtime:** {secondsToText(total_seconds_played)}\n**>Playcount:** {playcount}\n**>PP/hour:** {int(pp_raw/total_seconds_played*3600)}\n**>Ranks/day:** {int(pp_rank/total_seconds_played*86400)}"
                         embed=discord.Embed(title=discord.Embed.Empty, color=get_config().COLOR, description=desc, timestamp=datetime.utcnow())
-                        embed.set_author(name=f"osu! {mode_name} stats for {username}", url=f"https://osu.ppy.sh/users/{id}", icon_url=mode_icon)
-                        embed.set_thumbnail(url=f"https://a.ppy.sh/{id}")
+                        embed.set_author(name=f"osu! {mode_name} stats for {username}", url=f"https://osu.ppy.sh/users/{uid}", icon_url=mode_icon)
+                        embed.set_thumbnail(url=f"https://a.ppy.sh/{uid}")
                         embed.set_footer(text=f"#{pp_country_rank}", icon_url=f"https://osu.ppy.sh/images/flags/{country}.png")
                         await ctx.send(embed=embed)
                 else:

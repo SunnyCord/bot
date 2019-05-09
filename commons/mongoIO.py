@@ -43,8 +43,8 @@ def serverExists(server: discord.Guild):
 	else:
 		return False
 
-def getSetting(id, setting: str):
-	a = db.settings.find({'id':id})
+def getSetting(uid, setting: str):
+	a = db.settings.find({'id':uid})
 	b = None
 	for x in a:
 		b=x[setting]
