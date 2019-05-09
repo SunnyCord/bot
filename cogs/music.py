@@ -20,7 +20,7 @@ class Music(commands.Cog):
             self.bot.lavalink.register_hook(self._track_hook)
 
     def cog_unload(self):
-        for guild_id, player in self.bot.lavalink.players:
+        for _, player in self.bot.lavalink.players:
             self.bot.loop.create_task(player.disconnect())
             player.cleanup()
         self.bot.lavalink.players.clear()
