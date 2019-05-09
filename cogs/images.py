@@ -24,7 +24,7 @@ class Image(commands.Cog):
         async with aiohttp.ClientSession() as cs:
             async with cs.get('https://dog.ceo/api/breeds/image/random') as r:
                 res = await r.json()
-                await ctx.send(res['message'])      
+                await ctx.send(res['message'])
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command()

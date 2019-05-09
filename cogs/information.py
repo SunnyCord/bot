@@ -43,7 +43,7 @@ class Information(commands.Cog):
     async def serverinfo(self, ctx):
         role_count = len(ctx.guild.roles)
         emoji_count = len(ctx.guild.emojis)
-        channel_count = len([x for x in ctx.guild.channels if type(x) == discord.channel.TextChannel])
+        channel_count = len([x for x in ctx.guild.channels if isinstance(x, discord.channel.TextChannel)])
         embed = discord.Embed(color=get_config().COLOR, timestamp=ctx.message.created_at)
         embed.add_field(name='Name (ID)', value=f"{ctx.guild.name} ({ctx.guild.id})")
         embed.add_field(name='Owner', value=ctx.guild.owner, inline=False)
@@ -59,7 +59,7 @@ class Information(commands.Cog):
         embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
         embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
         await ctx.send(embed=embed)
-    
+
 
 def setup(bot):
     bot.add_cog(Information(bot))

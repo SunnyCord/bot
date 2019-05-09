@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-import config as cfg 
+import config as cfg
 
 #https://gist.github.com/StudioMFTechnologies/ad41bfd32b2379ccffe90b0e34128b8b
 

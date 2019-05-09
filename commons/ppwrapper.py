@@ -85,7 +85,7 @@ def calculatePlay(bmap, mode: int = 0, count0: int = 0, count50: int = 0, count1
 
     elif mode == 1:
         #Taiko
-        
+
         p = pyt.parser()
         beatmap = p.map(bmap)
         beatmapDict = {
@@ -142,7 +142,7 @@ def calculatePlay(bmap, mode: int = 0, count0: int = 0, count50: int = 0, count1
             "completion": 100,
             "mode_icon": "https://i.imgur.com/EsanYkH.png",
             "mode_name": "Catch the Beat"
-        } 
+        }
 
     elif mode == 3:
         #Mania
