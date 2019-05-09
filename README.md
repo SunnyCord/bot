@@ -37,7 +37,6 @@
 >
 > `v1.1.1U061018` [( d42399 )](https://github.com/NiceAesth/Sunny/commit/d423993c4cca02a2bc5dcb14f61919047ae9ae60)
 > -   Simplified the updating command. 
->
 > -   Added shutdown command.
 
 ### Versioning
