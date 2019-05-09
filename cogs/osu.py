@@ -24,7 +24,7 @@ def secondsToText(secs):
     ("{0} minute{1} ".format(minutes, "s" if minutes!=1 else "") if minutes else "") + \
     ("{0} second{1} ".format(seconds, "s" if seconds!=1 else "") if seconds else "")
     return result
-	
+
 def getMods(number): # TODO - REMOVE THIS AFTER REWORK
     mod_list= []
     if number == 0:	mod_list.append('NM')

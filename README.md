@@ -8,27 +8,19 @@
 
 > `v1.3.2S110219` [( 505c5b )](https://github.com/NiceAesth/Sunny/commit/505c5ba11de11ed3673aad1416bc7a2f073cc0b4)
 > -   Moved std PP calculations to pyttanko
->
 > -   Implement speed rebalance and other PP changes
->
 > -   Added ctb PP and SR calculations using catch-the-pp
->
 > -   Removed old PP calculator
->
 > -   Added pyttanko and aiofiles to requirements
 >
 > `v1.3.1S301218` [( 0c0292 )](https://github.com/NiceAesth/Sunny/commit/0c0292982722324f0d8ad8baac41d467499a6d9e)
 > -   Stability improvements
->
 > -   Bugfixes
 >
 > `v1.3.0E231018` [( 97ef66 )](https://github.com/NiceAesth/Sunny/commit/97ef668cc8c189d73e5b0473ac74d0e941911542)
 > -   Added osu! commands
->
 > -   Added PP calculation
->
 > -   Updated config example
->
 > -   Updated requirements
 > -   Updated mongoDB to have osu! username
 >
