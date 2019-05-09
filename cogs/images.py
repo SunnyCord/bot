@@ -126,7 +126,7 @@ class Image(commands.Cog):
             async with cs.get('https://some-random-api.ml/animu/pat') as r:
                 res = await r.json()
                 imgUrl = res['link']
-        embed = discord.Embed(title=f'{ctx.message.author.name} pats {f"themselves. 😔" if user is None else "{user.name} <:angery:545969728527663114>"}', color=get_config().COLOR).set_image(url=imgUrl)
+        embed = discord.Embed(title=f'{ctx.message.author.name} pats {f"themselves. 😔" if user is None else f"{user.name} <:angery:545969728527663114>"}', color=get_config().COLOR).set_image(url=imgUrl)
         await ctx.send(embed=embed)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -137,7 +137,7 @@ class Image(commands.Cog):
             async with cs.get('https://some-random-api.ml/animu/hug') as r:
                 res = await r.json()
                 imgUrl = res['link']
-        embed = discord.Embed(title=f'{ctx.message.author.name} hugs {f"themselves. 😔" if user is None else "{user.name} <:angery:545969728527663114>"}', color=get_config().COLOR).set_image(url=imgUrl)
+        embed = discord.Embed(title=f'{ctx.message.author.name} hugs {f"themselves. 😔" if user is None else f"{user.name} <:angery:545969728527663114>"}', color=get_config().COLOR).set_image(url=imgUrl)
         await ctx.send(embed=embed)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
