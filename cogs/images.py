@@ -155,7 +155,7 @@ class Image(commands.Cog):
     @commands.command()
     async def avatar(self, ctx, user : discord.Member = None):
         """Gets a user's avatar. Returns invoker's avatar if no user is specified."""
-        embed = discord.Embed(title=f"{ctx.message.author.name if user is None else user.avatar_url}'s avatar.", color=get_config().COLOR).set_image(url=ctx.message.author.avatar_url if user is None else user.avatar_url)
+        embed = discord.Embed(title=f"{ctx.message.author.name if user is None else user.name}'s avatar.", color=get_config().COLOR).set_image(url=ctx.message.author.avatar_url if user is None else user.avatar_url)
         await ctx.send(embed=embed)
 
 def setup(bot):
