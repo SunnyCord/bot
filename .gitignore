@@ -110,3 +110,5 @@ application\.yml
 logs/
 
 Pipfile
+
+lavalink/
