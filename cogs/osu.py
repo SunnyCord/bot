@@ -204,5 +204,61 @@ class osu(commands.Cog, name='osu!'):
 
         await ctx.send(embed=result)
 
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    @commands.command(aliases=["c"])
+    async def compare(self, ctx, *, args=None):
+        """Shows your best scores on the last linked map."""
+
+        user, server, mode, limit = None, 'bancho', 0, 5
+        mode_icon = "https://i.imgur.com/lT2nqls.png"
+        mode_name = "Standard" #will need to see about adding last mode to redis
+
+        beatmap_id = redisIO.getValue(ctx.message.channel.id)
+        if beatmap_id is None:
+            return await ctx.send("No beatmap found.")
+
+        if args is not None:
+            parsedArgs = osuhelpers.parseArgs(args=args)
+            user, qtype, server = parsedArgs['user'], parsedArgs['qtype'], parsedArgs['server']
+
+        if not user:
+            qtype = "id"
+            user = getOsu(ctx.message.author)
+
+        if user and user.startswith("<@") and user.endswith(">"):
+            qtype = "id"
+            user = getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
+
+        if not user:
+            return await ctx.send("Please set your profile!")
+
+        try:
+            profile = await self.osuAPI.getuser(usr = user, mode = mode, qtype = qtype, server = server)
+            tops = await self.osuAPI.getusrscores(usr = user, mode = mode, qtype = qtype, limit = limit, server = server, b = beatmap_id)
+
+        except ValueError:
+            return await ctx.send("User has not been found or has no plays!")
+
+        beatmap = await self.osuAPI.getbmap(server=server, mode=mode, b=beatmap_id, mods=tops[0]["enabled_mods"])
+
+        for index, _ in enumerate(tops):
+            
+            bmapfile = await self.osuAPI.getbmaposu(server='bancho', mode=mode, b=beatmap_id)
+            _, playDict = await self.bot.loop.run_in_executor(None, ppc.calculatePlay, bmapfile, mode, tops[0])
+            tops[index]['pp_fc'] = playDict['pp_fc']
+            tops[index]['accuracy'] = playDict['accuracy']
+            tops[index]['modString'] = playDict['modString']
+
+            tops[index]['if_fc'] = '' 
+            if tops[index]["perfect"] == 0 and mode == 0:
+                tops[index]['if_fc'] = f" ({playDict['pp_fc']} for {playDict['accuracy_fc']}% FC)"
+
+        beatmap_title = f"{beatmap[0]['artist']} - {beatmap[0]['title']} ({beatmap[0]['creator']}) [{beatmap[0]['version']}]"
+
+        result = OsuListEmbed(list = tops, profile = profile, beatmap = beatmap[0], title = f"Top osu! {mode_name} for {profile['username']}  on {beatmap_title}", url = profile['profile_url'],\
+        authorico = mode_icon, thumbnail = f"https://b.ppy.sh/thumb/{beatmap[0]['beatmapset_id']}.jpg", color = self.bot.configs.COLOR, style = 1, footertext=f'Plays from {server}')
+
+        await ctx.send(embed=result)
+
 def setup(bot):
     bot.add_cog(osu(bot))

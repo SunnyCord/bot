@@ -18,7 +18,8 @@ class APIService:
                 'getbmaposu': lambda b: f'https://osu.ppy.sh/osu/{b}',
                 'getavatar': lambda usr: f'https://a.ppy.sh/{usr}',
                 'getprofileurl': lambda usr: f'https://osu.ppy.sh/users/{usr}',
-                'getbmapurl': lambda mode, s, b: f'https://osu.ppy.sh/beatmapsets/{s}#{self.__bmapURLModes[mode]}/{b}'
+                'getbmapurl': lambda mode, s, b: f'https://osu.ppy.sh/beatmapsets/{s}#{self.__bmapURLModes[mode]}/{b}',
+                'getusrscores': lambda usr, mode, b, qtype, limit: f'https://osu.ppy.sh/api/get_scores?k={self.__token}&u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}&b={b}'
             },
             {
                 'getuser': lambda usr, mode, qtype: f'https://ripple.moe/api/get_user?u={usr}&m={mode}&type={qtype}',
@@ -28,7 +29,8 @@ class APIService:
                 'getbmaposu': lambda b: f'https://ripple.moe/osu/{b}',
                 'getavatar': lambda usr: f'https://a.ripple.moe/{usr}',
                 'getprofileurl': lambda usr: f'https://ripple.moe/u/{usr}',
-                'getbmapurl': lambda mode, s, b: f'https://ripple.moe/b/{b}?mode={mode}'
+                'getbmapurl': lambda mode, s, b: f'https://ripple.moe/b/{b}?mode={mode}',
+                'getusrscores': lambda usr, mode, b, qtype, limit: f'https://ripple.moe/api/get_scores?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}&b={b}'
             },
             {
                 'getuser': lambda usr, mode, qtype: f'https://akatsuki.pw/api/get_user?u={usr}&m={mode}&type={qtype}',
@@ -38,7 +40,8 @@ class APIService:
                 'getbmaposu': lambda b: f'https://osu.ppy.sh/osu/{b}',
                 'getavatar': lambda usr: f'https://a.akatsuki.pw/{usr}',
                 'getprofileurl': lambda usr: f'https://akatsuki.pw/u/{usr}',
-                'getbmapurl': lambda mode, s, b: f'https://akatsuki.pw/b/{b}?mode={mode}'
+                'getbmapurl': lambda mode, s, b: f'https://akatsuki.pw/b/{b}?mode={mode}',
+                'getusrscores': lambda usr, mode, b, qtype, limit: f'https://akatsuki.pw/api/get_scores?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}&b={b}'
             },
             {
                 'getuser': lambda usr, mode, qtype: f'http://akatsuki.pw/api/v1/users/rxfull?{"name" if qtype is "string" else "id"}={usr}',
@@ -48,7 +51,8 @@ class APIService:
                 'getbmaposu': lambda b: f'https://osu.ppy.sh/osu/{b}',
                 'getavatar': lambda usr: f'https://a.akatsuki.pw/{usr}',
                 'getprofileurl': lambda usr: f'https://akatsuki.pw/rx/u/{usr}',
-                'getbmapurl': lambda mode, s, b: f'https://akatsuki.pw/b/{b}?mode={mode}'
+                'getbmapurl': lambda mode, s, b: f'https://akatsuki.pw/b/{b}?mode={mode}',
+                'getusrscores': lambda usr, mode, b, qtype, limit: f'https://akatsuki.pw/api/get_scores?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}&b={b}'
             },
             {
                 'getuser': lambda usr, mode, qtype: f'https://enjuu.click/api/get_user?u={usr}&m={mode}&type={qtype}',
@@ -58,7 +62,8 @@ class APIService:
                 'getbmaposu': lambda b: f'https://osu.ppy.sh/osu/{b}',
                 'getavatar': lambda usr: f'https://a.enjuu.click/{usr}',
                 'getprofileurl': lambda usr: f'https://enjuu.click/u/{usr}',
-                'getbmapurl': lambda mode, s, b: f'https://enjuu.click/b/{b}?mode={mode}'
+                'getbmapurl': lambda mode, s, b: f'https://enjuu.click/b/{b}?mode={mode}',
+                'getusrscores': lambda usr, mode, b, qtype, limit: f'https://enjuu.click/api/get_scores?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}&b={b}'
             }
         ]
 
@@ -243,4 +248,25 @@ class APIService:
                     raise ValueError("Invalid query or API down.")
                 else:
                     return self.__cleanTopRes(res)
-                    
+
+    async def getusrscores(self, **kwargs):
+
+        usr = kwargs.pop('usr')
+
+        mode = kwargs.pop('mode') if 'mode' in kwargs else 0
+
+        b = kwargs.pop('b')
+
+        qtype = kwargs.pop('qtype') if 'qtype' in kwargs else 'id'
+
+        limit = kwargs.pop('limit') if 'limit' in kwargs else None
+
+        server = self.__osuServers[kwargs.pop('server')] if 'server' in kwargs else 0
+
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get( self.__API_URLs[server]['getusrscores'](usr, mode, b, qtype, limit) ) as r:
+                res = await r.json()
+                if res == []:
+                    raise ValueError("Invalid query or API down.")
+                else:
+                    return self.__cleanTopRes(res)
