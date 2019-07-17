@@ -1,3 +1,2 @@
 [submodule "commons/osu/catchthepp"]
-	path = commons/osu/catchthepp
-	url = git@github.com:NiceAesth/catch-the-pp.git
+	url = https://github.com/NiceAesth/catch-the-pp.git
