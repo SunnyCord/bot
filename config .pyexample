@@ -1,20 +1,31 @@
-DEBUG=False
-OSU_API = ''
+DEBUG=True
+
+class lavalink:
+    password = ''
+    port = 
+
+class mongoDB:
+    URI = ""
+
+class osu:
+    token = ''
+
 class debugConf:
     TOKEN = ''
     COLOR = 0x045bce
-	MONGODB = 'sunny-dev'
-	PREFIXES = ['s.dev', 'sunnydev ', '?dev']
+    MONGODB = 'sunny-dev'
+    PREFIXES = ['s.']
+    REDIS = False
+    MONGODBCFG = mongoDB
+    LAVALINKCFG = lavalink
+    OSUCFG = osu
 
 class conf:
     TOKEN = ''
     COLOR = 0xd74613
-	MONGODB = 'sunny'
-	PREFIXES = ['s.', 'sunny ', '?']
-    
-class lavalink:
-    PASSWORD = ''
-    PORT = 80
-
-class mongoDB:
-    URI = ''
+    MONGODB = 'sunny'
+    PREFIXES = ['sdev.']
+    REDIS = True
+    MONGODBCFG = mongoDB
+    LAVALINKCFG = lavalink
+    OSUCFG = osu

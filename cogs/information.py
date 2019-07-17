@@ -1,12 +1,5 @@
 import discord
-import config as cfg
 from discord.ext import commands
-
-def get_config():
-    if cfg.DEBUG==True:
-        return cfg.debugConf
-    else:
-        return cfg.conf
 
 class Information(commands.Cog):
     """Retrieve information about various items."""
@@ -23,7 +16,7 @@ class Information(commands.Cog):
         else:
             game = None
         voice_state = None if not user.voice else user.voice.channel
-        embed = discord.Embed(timestamp=ctx.message.created_at, colour=get_config().COLOR)
+        embed = discord.Embed(timestamp=ctx.message.created_at, colour=self.bot.configs.COLOR)
         embed.add_field(name='User ID', value=user.id, inline=True)
         embed.add_field(name='Nick', value=user.nick, inline=True)
         embed.add_field(name='Status', value=user.status, inline=True)
@@ -43,7 +36,7 @@ class Information(commands.Cog):
         role_count = len(ctx.guild.roles)
         emoji_count = len(ctx.guild.emojis)
         channel_count = len([x for x in ctx.guild.channels if isinstance(x, discord.channel.TextChannel)])
-        embed = discord.Embed(color=get_config().COLOR, timestamp=ctx.message.created_at)
+        embed = discord.Embed(color=self.bot.configs.COLOR, timestamp=ctx.message.created_at)
         embed.add_field(name='Name (ID)', value=f"{ctx.guild.name} ({ctx.guild.id})")
         embed.add_field(name='Owner', value=ctx.guild.owner, inline=False)
         embed.add_field(name='Members', value=ctx.guild.member_count)
