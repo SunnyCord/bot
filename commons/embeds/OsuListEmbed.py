@@ -14,6 +14,7 @@ class OsuListEmbed(discord.Embed):
         __limit = kwargs.pop('limit', 0)
         __url = kwargs.pop('url')
         __style = kwargs.pop('style', 0)
+        __footertext = kwargs.pop('footertext', None)
         self.ranks = {
             "F": "<:F_:504305414846808084>",
             "D": "<:D_:504305448673869834>",
@@ -34,10 +35,15 @@ class OsuListEmbed(discord.Embed):
 
         self.set_author(name = __title, icon_url = __authorico, url = __url)
         self.set_thumbnail(url = __thumbnail)
+
+        if __footertext is not None:
+            self.set_footer(text=__footertext)    
+
         for index, item in enumerate(__list):
             
             descAppend = ""
             previewIndex = index+1
+            currentBeatmap = __beatmaps[index] if __beatmaps is not None else __beatmap
 
             if len(__list) == 1:
                 previewIndex = __limit
@@ -45,12 +51,12 @@ class OsuListEmbed(discord.Embed):
             if __style == 0:
                 #index. artist - title (creator) [version] + modstring [sr]
                 title = '\u200b'
-                descAppend = f"**{previewIndex}. [{__beatmaps[index]['artist']} - {__beatmaps[index]['title']} ({__beatmaps[index]['creator']}) [{__beatmaps[index]['version']}]]({__beatmaps[index]['beatmap_url']}) + {item['modString']} [{__beatmaps[index]['difficultyrating']}★]**"
+                descAppend = f"**{previewIndex}. [{currentBeatmap['artist']} - {currentBeatmap['title']} ({currentBeatmap['creator']}) [{currentBeatmap['version']}]]({currentBeatmap['beatmap_url']}) + {item['modString']} [{currentBeatmap['difficultyrating']}★]**"
 
             if __style == 1:
-                title = f"{index}. ``{item['modString']}`` [{__beatmaps[index]['difficultyrating']}★]"
+                title = f"{index+1}. ``{item['modString']}`` [{currentBeatmap['difficultyrating']}★]"
 
-            self.add_element(item, __beatmaps[index], title, descAppend)
+            self.add_element(item, currentBeatmap, title, descAppend)
 
     def add_element(self, element, beatmap, title, descAppend = ""):
 
