@@ -32,7 +32,7 @@ class Mode:
         ]
 
         __idArg = kwargs.pop ('id', 0)
-        
+
         self.id = __modeDict[__idArg]['id']
         self.icon = __modeDict[__idArg]['icon']
         self.name = __modeDict[__idArg]['name']
