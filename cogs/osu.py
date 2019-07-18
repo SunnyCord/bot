@@ -133,7 +133,7 @@ class osu(commands.Cog, name='osu!'):
         mode = mode, beatmap = beatmap[0])
 
         await ctx.send(f"**Most Recent osu! {mode.name} Play for {profile['username']} on {server.name}:**", embed=result)
-            
+
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.command(aliases=["ot", "tt", "ct", "mt", "taikotop", "ctbtop", "maniatop"])
     async def osutop(self, ctx, *, args=None):
