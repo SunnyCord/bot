@@ -1,5 +1,6 @@
 import aiohttp
 from io import StringIO
+from commons.osu import osuClasses
 
 class APIService:
 
@@ -66,15 +67,6 @@ class APIService:
                 'getusrscores': lambda usr, mode, b, qtype, limit: f'https://enjuu.click/api/get_scores?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}&b={b}'
             }
         ]
-
-        self.__osuServers = {
-            'bancho': 0,
-            'ripple': 1,
-            'akatsuki': 2,
-            'akatsukirx': 3,
-            'enjuu': 4,
-            'gatari': 5
-        }
 
     def __convAkaRXProfile(self, res, mode = 0): #Converts akatsuki!rx fullrx API response to a bancho-like one
         modes = {0: "std", 1: "taiko", 2: "ctb", 3: "mania"}
@@ -157,11 +149,11 @@ class APIService:
 
         usr = kwargs.pop('usr')
 
-        mode = kwargs.pop('mode') if 'mode' in kwargs else 0
+        mode = kwargs.pop('mode', osuClasses.Mode()).id
 
-        qtype = kwargs.pop('qtype') if 'qtype' in kwargs else 'id'
+        qtype = kwargs.pop('qtype', 'id')
 
-        server = self.__osuServers[kwargs.pop('server')] if 'server' in kwargs else 0
+        server = kwargs.pop('server', osuClasses.Server()).id
 
         async with aiohttp.ClientSession() as cs:
             async with cs.get( self.__API_URLs[server]['getuser'](usr, mode, qtype) ) as r:
@@ -178,17 +170,17 @@ class APIService:
 
     async def getbmap(self, **kwargs):
 
-        mode = kwargs.pop('mode') if 'mode' in kwargs else 0
+        mode = kwargs.pop('mode', osuClasses.Mode()).id
 
-        s = kwargs.pop('s') if 's' in kwargs else None
+        s = kwargs.pop('s', None)
 
-        b = kwargs.pop('b') if 'b' in kwargs else None
+        b = kwargs.pop('b', None)
 
-        server = self.__osuServers[kwargs.pop('server')] if 'server' in kwargs else 0
+        server = kwargs.pop('server', osuClasses.Server()).id
 
-        limit = kwargs.pop('limit') if 'limit' in kwargs else 1
+        limit = kwargs.pop('limit', 1)
 
-        mods = self.__cleanMods(kwargs.pop('mods'), mode) if 'mods' in kwargs else 0
+        mods = self.__cleanMods(kwargs.pop('mods', 0), mode)
 
         async with aiohttp.ClientSession() as cs:
             async with cs.get( self.__API_URLs[server]['getbmap'](mode, s, b, limit, mods) ) as r:
@@ -203,7 +195,7 @@ class APIService:
 
         b = kwargs.pop('b')
 
-        server = self.__osuServers[kwargs.pop('server')] if 'server' in kwargs else 0
+        server = kwargs.pop('server', osuClasses.Server()).id
 
         async with aiohttp.ClientSession() as cs:
             async with cs.get( self.__API_URLs[server]['getbmaposu'](b) ) as r:
@@ -213,13 +205,13 @@ class APIService:
 
         usr = kwargs.pop('usr')
 
-        mode = kwargs.pop('mode') if 'mode' in kwargs else 0
+        mode = kwargs.pop('mode', osuClasses.Mode()).id
 
-        qtype = kwargs.pop('qtype') if 'qtype' in kwargs else 'id'
+        qtype = kwargs.pop('qtype', 'id')
 
-        limit = kwargs.pop('limit') if 'limit' in kwargs else None
+        limit = kwargs.pop('limit', None)
 
-        server = self.__osuServers[kwargs.pop('server')] if 'server' in kwargs else 0
+        server = kwargs.pop('server', osuClasses.Server()).id
 
         async with aiohttp.ClientSession() as cs:
             async with cs.get( self.__API_URLs[server]['getrecent'](usr, mode, qtype, limit) ) as r:
@@ -233,13 +225,13 @@ class APIService:
 
         usr = kwargs.pop('usr')
 
-        mode = kwargs.pop('mode') if 'mode' in kwargs else 0
+        mode = kwargs.pop('mode', osuClasses.Mode()).id
 
-        qtype = kwargs.pop('qtype') if 'qtype' in kwargs else 'id'
+        qtype = kwargs.pop('qtype', 'id')
 
-        limit = kwargs.pop('limit') if 'limit' in kwargs else None
+        limit = kwargs.pop('limit', None)
 
-        server = self.__osuServers[kwargs.pop('server')] if 'server' in kwargs else 0
+        server = kwargs.pop('server', osuClasses.Server()).id
 
         async with aiohttp.ClientSession() as cs:
             async with cs.get( self.__API_URLs[server]['getusrtop'](usr, mode, qtype, limit) ) as r:
@@ -253,15 +245,15 @@ class APIService:
 
         usr = kwargs.pop('usr')
 
-        mode = kwargs.pop('mode') if 'mode' in kwargs else 0
+        mode = kwargs.pop('mode', osuClasses.Mode()).id
 
         b = kwargs.pop('b')
 
-        qtype = kwargs.pop('qtype') if 'qtype' in kwargs else 'id'
+        qtype = kwargs.pop('qtype', 'id')
 
-        limit = kwargs.pop('limit') if 'limit' in kwargs else None
+        limit = kwargs.pop('limit', None)
 
-        server = self.__osuServers[kwargs.pop('server')] if 'server' in kwargs else 0
+        server = kwargs.pop('server', osuClasses.Server()).id
 
         async with aiohttp.ClientSession() as cs:
             async with cs.get( self.__API_URLs[server]['getusrscores'](usr, mode, b, qtype, limit) ) as r:
