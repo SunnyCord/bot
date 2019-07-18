@@ -1,7 +1,7 @@
 from commons.osu import osuClasses
 
 def getModeInfo(invoke):
-    
+
     if invoke in ["osu", "osutop", "ot"]:
         return osuClasses.Mode()
 
@@ -28,7 +28,7 @@ def parseArgs(**kwargs):
     recentList = False
 
     args = args.split(" ")
-    
+
     if '-bancho' in args:
         args.pop(args.index('-bancho'))
 
