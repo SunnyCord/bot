@@ -1,5 +1,4 @@
-import asyncio, sys, traceback, os
-import discord
+import asyncio, sys, traceback, os, discord, sentry_sdk
 from discord.ext import commands
 import config as cfg
 from commons import mongoIO
@@ -12,20 +11,16 @@ def get_config():
 
 def get_prefix(bot, message):
     """A callable Prefix for our bot. This could be edited to allow per server prefixes."""
-    prefixes = bot.configs.PREFIXES
-    if mongoIO.isBlacklisted(message.author):
+    if mongoIO.isBlacklisted(message.author) or not message.guild:
         return ' '
-    if not message.guild:
-        return ' '
-    guildPref = None
-    if message.guild:
-        guildPref = mongoIO.getSetting(message.guild.id, 'prefix')
-    if guildPref is not None:
-        prefixes.append(guildPref)
-    return commands.when_mentioned_or(*prefixes)(bot, message)
+    guildPref = mongoIO.getSetting(message.guild.id, 'prefix') if message.guild else None
+    result = guildPref if guildPref is not None else bot.configs.PREFIXES
+    return commands.when_mentioned_or(*result)(bot, message)
 
 def list_module(directory):
     return (f for f in os.listdir(directory) if f.endswith('.py'))
+
+sentry_sdk.init(cfg.SENTRY)
 
 class Sunny(commands.AutoShardedBot):
     def __init__(self, **kwargs):
@@ -38,20 +33,20 @@ class Sunny(commands.AutoShardedBot):
 
     async def on_ready(self):
         print(r"""
-  .--.--.                                                  
- /  /    '.                                                
-|  :  /`. /          ,--,      ,---,      ,---,            
-;  |  |--`         ,'_ /|  ,-+-. /  | ,-+-. /  |           
-|  :  ;_      .--. |  | : ,--.'|'   |,--.'|'   |     .--,  
- \  \    `. ,'_ /| :  . ||   |  ,"' |   |  ,"' |   /_ ./|  
-  `----.   \|  ' | |  . .|   | /  | |   | /  | |, ' , ' :  
-  __ \  \  ||  | ' |  | ||   | |  | |   | |  | /___/ \: |  
- /  /`--'  /:  | : ;  ; ||   | |  |/|   | |  |/ .  \  ' |  
-'--'.     / '  :  `--'   \   | |--' |   | |--'   \  ;   :  
-  `--'---'  :  ,      .-./   |/     |   |/        \  \  ;  
-             `--`----'   '---'      '---'          :  \  \ 
-                                                    \  ' ; 
-                                                     `--`  
+  .--.--.
+ /  /    '.
+|  :  /`. /          ,--,      ,---,      ,---,
+;  |  |--`         ,'_ /|  ,-+-. /  | ,-+-. /  |
+|  :  ;_      .--. |  | : ,--.'|'   |,--.'|'   |     .--,
+ \  \    `. ,'_ /| :  . ||   |  ,"' |   |  ,"' |   /_ ./|
+  `----.   \|  ' | |  . .|   | /  | |   | /  | |, ' , ' :
+  __ \  \  ||  | ' |  | ||   | |  | |   | |  | /___/ \: |
+ /  /`--'  /:  | : ;  ; ||   | |  |/|   | |  |/ .  \  ' |
+'--'.     / '  :  `--'   \   | |--' |   | |--'   \  ;   :
+  `--'---'  :  ,      .-./   |/     |   |/        \  \  ;
+             `--`----'   '---'      '---'          :  \  \
+                                                    \  ' ;
+                                                     `--`
         """)
         print(f'\n\nLogged in as: {self.user.name} - {self.user.id}\nVersion: {discord.__version__}\n')
         print(f'Successfully logged in and booted...!')
@@ -77,16 +72,15 @@ class Sunny(commands.AutoShardedBot):
 
 async def run():
 
-    bot = Sunny(command_prefix=get_prefix, description='Sunny Bot', activity=discord.Streaming(name='AfterWind', type=1, url='https://www.twitch.tv/afterwind_'))
+    bot = Sunny(command_prefix=get_prefix, description='Sunny Bot', activity=discord.Streaming(name='Nice Aesthetics', type=1, url='https://www.twitch.tv/niceaesthetic'))
     bot.load_extension("jishaku")
     bot.remove_command('help')
 
-    try:
-        await bot.start(bot.configs.TOKEN, bot=True, reconnect=True)
-
-    except KeyboardInterrupt:
-        await bot.logout()
+    await bot.start(bot.configs.TOKEN, bot=True, reconnect=True)
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(run())
+    try:
+        loop.run_until_complete(run())
+    except KeyboardInterrupt:
+        print("Stopping bot!")
