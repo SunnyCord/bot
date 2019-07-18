@@ -1,5 +1,4 @@
-import discord, aiohttp, re
-from io import StringIO
+import discord, re
 from discord.ext import commands
 from datetime import datetime
 from commons.osu import osuhelpers
@@ -122,7 +121,7 @@ class osu(commands.Cog, name='osu!'):
         if recentp[0]["rank"] == 'F' and mode.id == 0:
             recentp[0]['completion'] = f'\n> **Completion:** {playDict["completion"]}%'
         
-        recentp[0]['if_fc'] = '' 
+        recentp[0]['if_fc'] = ''
         if recentp[0]["perfect"] == 0 and mode.id == 0:
             recentp[0]['if_fc'] = f" ({playDict['pp_fc']} for {playDict['accuracy_fc']}% FC)"
 
@@ -251,14 +250,14 @@ class osu(commands.Cog, name='osu!'):
         beatmap = await self.osuAPI.getbmap(mode=mode, b=beatmap_id, mods=tops[0]["enabled_mods"])
 
         for index, _ in enumerate(tops):
-            
+    
             bmapfile = await self.osuAPI.getbmaposu(mode=mode, b=beatmap_id)
             _, playDict = await self.bot.loop.run_in_executor(None, ppc.calculatePlay, bmapfile, mode.id, tops[0])
             tops[index]['pp_fc'] = playDict['pp_fc']
             tops[index]['accuracy'] = playDict['accuracy']
             tops[index]['modString'] = playDict['modString']
 
-            tops[index]['if_fc'] = '' 
+            tops[index]['if_fc'] = ''
             if tops[index]["perfect"] == 0 and mode == 0:
                 tops[index]['if_fc'] = f" ({playDict['pp_fc']} for {playDict['accuracy_fc']}% FC)"
 

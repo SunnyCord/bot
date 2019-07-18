@@ -41,8 +41,9 @@ def ctbCalc(bmap, accuracy: float, count0: int, mods: int, max_combo: int):
 def maniaCalc():
     return "N/A", "Not implemented."
 
-def calculatePlay(bmap, mode: int = 0, play = [], calcPP: int = 1):
+def calculatePlay(bmap, mode: int = 0, play = None, calcPP: int = 1):
 
+    play = play or []
     count0, count50, count100, count300, countgeki, countkatu = play['countmiss'], play['count50'], play['count100'], play['count300'], play['countgeki'], play['countkatu']
     combo, mods, perfect = play['maxcombo'], play['enabled_mods'], play['perfect']
 

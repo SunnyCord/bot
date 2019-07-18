@@ -68,7 +68,8 @@ class APIService:
             }
         ]
 
-    def __convAkaRXProfile(self, res, mode = 0): #Converts akatsuki!rx fullrx API response to a bancho-like one
+    @classmethod
+    def __convAkaRXProfile(cls, res, mode = 0): #Converts akatsuki!rx fullrx API response to a bancho-like one
         modes = {0: "std", 1: "taiko", 2: "ctb", 3: "mania"}
         if res['code'] != 200:
             raise ValueError("Invalid query or API down.")
@@ -99,7 +100,8 @@ class APIService:
             }
         ]
 
-    def __cleanProfileRes(self, res):
+    @classmethod
+    def __cleanProfileRes(cls, res):
         res[0]["pp_rank"] = int(res[0]["pp_rank"])
         res[0]["pp_country_rank"] = int(res[0]["pp_country_rank"])
         res[0]["pp_raw"] = float(res[0]["pp_raw"])
@@ -111,8 +113,9 @@ class APIService:
         res[0]["level_progress"] = round((float(res[0]["level"])%1*100), 2)
 
         return res
-    
-    def __cleanBmapRes(self, res):
+
+    @classmethod
+    def __cleanBmapRes(cls, res):
         for index, diff in enumerate(res):
             res[index]['beatmapset_id'] = int(diff['beatmapset_id'])
             res[index]['approved'] = int(diff['approved'])
@@ -120,7 +123,8 @@ class APIService:
 
         return res
 
-    def __cleanRecentRes(self, res):
+    @classmethod
+    def __cleanRecentRes(cls, res):
         for index, play in enumerate(res):
             res[index]['countmiss'] = int(play['countmiss'])
             res[index]['count50'] = int(play['count50'])
@@ -134,10 +138,12 @@ class APIService:
 
         return res
 
-    def __cleanTopRes(self, res):
-        return self.__cleanRecentRes(res)
+    @classmethod
+    def __cleanTopRes(cls, res):
+        return cls.__cleanRecentRes(res)
 
-    def __cleanMods(self, modnum, mode):
+    @classmethod
+    def __cleanMods(cls, modnum, mode):
         cleanModNum = 0
         if modnum & 1<<9: cleanModNum += 64
         elif modnum & 1<<6: cleanModNum += 64

@@ -101,7 +101,7 @@ class Server:
 
                 except KeyError:
                     __idArg = 0
-        
+
         self.id = __serverDict[__idArg]['id']
         self.icon = __serverDict[__idArg]['icon']
         self.name = __serverDict[__idArg]['name']

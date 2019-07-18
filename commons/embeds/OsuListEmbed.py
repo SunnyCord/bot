@@ -40,10 +40,10 @@ class OsuListEmbed(discord.Embed):
         self.set_thumbnail(url = __thumbnail)
 
         if __footertext is not None:
-            self.set_footer(text=__footertext, icon_url=(__footericon if __footericon is not None else discord.Embed.Empty))    
+            self.set_footer(text=__footertext, icon_url=(__footericon if __footericon is not None else discord.Embed.Empty))
 
         for index, item in enumerate(__list):
-            
+
             descAppend = ""
             previewIndex = index+1
             currentBeatmap = __beatmaps[index] if __beatmaps is not None else __beatmap

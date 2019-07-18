@@ -3,7 +3,8 @@ from commons.osu import osuClasses
 
 class OsuProfileEmbed(discord.Embed):
 
-    def __secondsToText(self, secs):
+    @classmethod
+    def __secondsToText(cls, secs):
         result = "0 seconds"
         if secs >0:
             days = secs//86400
