@@ -1,4 +1,4 @@
-import discord, re
+import re
 from discord.ext import commands
 from datetime import datetime
 from commons.osu import osuhelpers
@@ -201,7 +201,7 @@ class osu(commands.Cog, name='osu!'):
             tops[index]['accuracy'] = playDict['accuracy']
             tops[index]['modString'] = playDict['modString']
 
-            tops[index]['if_fc'] = '' 
+            tops[index]['if_fc'] = ''
             if tops[index]["perfect"] == 0 and mode == 0:
                 tops[index]['if_fc'] = f" ({playDict['pp_fc']} for {playDict['accuracy_fc']}% FC)"
 
@@ -250,7 +250,7 @@ class osu(commands.Cog, name='osu!'):
         beatmap = await self.osuAPI.getbmap(mode=mode, b=beatmap_id, mods=tops[0]["enabled_mods"])
 
         for index, _ in enumerate(tops):
-    
+
             bmapfile = await self.osuAPI.getbmaposu(mode=mode, b=beatmap_id)
             _, playDict = await self.bot.loop.run_in_executor(None, ppc.calculatePlay, bmapfile, mode.id, tops[0])
             tops[index]['pp_fc'] = playDict['pp_fc']

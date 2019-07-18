@@ -1,3 +1,3 @@
-from commons.embeds.OsuProfileEmbed import *
-from commons.embeds.OsuRecentEmbed import *
-from commons.embeds.OsuListEmbed import *
+from commons.embeds.OsuProfileEmbed import OsuProfileEmbed
+from commons.embeds.OsuRecentEmbed import OsuRecentEmbed
+from commons.embeds.OsuListEmbed import OsuListEmbed
