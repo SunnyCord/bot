@@ -1,21 +1,20 @@
+from commons.osu import osuClasses
+
 def getModeInfo(invoke):
+    
     if invoke in ["osu", "osutop", "ot"]:
-        mode = 0
-        mode_icon = "https://i.imgur.com/lT2nqls.png"
-        mode_name = "Standard"
+        return osuClasses.Mode()
+
     if invoke in ["taiko", "taikotop", "tt"]:
-        mode = 1
-        mode_icon = "https://i.imgur.com/G6bzM0X.png"
-        mode_name = "Taiko"
+        return osuClasses.Mode(id=1)
+
     if invoke in ["ctb", "ctbtop", "ct"]:
-        mode = 2
-        mode_icon = "https://i.imgur.com/EsanYkH.png"
-        mode_name = "Catch the Beat"
+        return osuClasses.Mode(id=2)
+
     if invoke in ["mania", "maniatop", "mt"]:
-        mode=3
-        mode_icon = "https://i.imgur.com/0uZM1PZ.png"
-        mode_name = "Mania"
-    return mode, mode_icon, mode_name
+        return osuClasses.Mode(id=3)
+
+    return osuClasses.Mode()
 
 def parseArgs(**kwargs):
 

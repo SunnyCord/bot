@@ -15,6 +15,7 @@ class OsuListEmbed(discord.Embed):
         __url = kwargs.pop('url')
         __style = kwargs.pop('style', 0)
         __footertext = kwargs.pop('footertext', None)
+        __footericon = kwargs.pop('footericon', None)
         self.ranks = {
             "F": "<:F_:504305414846808084>",
             "D": "<:D_:504305448673869834>",
@@ -24,7 +25,9 @@ class OsuListEmbed(discord.Embed):
             "S": "<:S_:504305656266752021>",
             "SH": "<:SH:504305700445487105>",
             "X": "<:X_:504305739209244672>",
-            "XH": "<:XH:504305771417305112>"
+            "XH": "<:XH:504305771417305112>",
+            "SS": "<:X_:504305739209244672>",
+            "SSH": "<:XH:504305771417305112>"
         }
 
         super().__init__(
@@ -37,7 +40,7 @@ class OsuListEmbed(discord.Embed):
         self.set_thumbnail(url = __thumbnail)
 
         if __footertext is not None:
-            self.set_footer(text=__footertext)    
+            self.set_footer(text=__footertext, icon_url=(__footericon if __footericon is not None else discord.Embed.Empty))    
 
         for index, item in enumerate(__list):
             
@@ -62,8 +65,14 @@ class OsuListEmbed(discord.Embed):
 
         desc = descAppend
 
+        try:
+            date = datetime.strptime(element["date"], "%Y-%m-%d %H:%M:%S")
+
+        except Exception:
+            date = element['date']
+
         desc += f"\n> {self.ranks[element['rank']]} > **{round(float(element['pp']), 2)}pp**{element['if_fc']} > {element['accuracy']}%\n\
         > {element['maxcombo']}x/{beatmap['max_combo']}x > [{element['count300']}/{element['count100']}/{element['count50']}/{element['countmiss']}]\n\
-        > {datetime.strptime(element['date'], '%Y-%m-%d %H:%M:%S')}\n"
+        > {date}\n"
 
         self.add_field(name = title, value = desc)
