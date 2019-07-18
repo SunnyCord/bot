@@ -122,7 +122,7 @@ class osu(commands.Cog, name='osu!'):
             recentp[0]['completion'] = f'\n> **Completion:** {playDict["completion"]}%'
 
         recentp[0]['if_fc'] = ''
-        if recentp[0]["perfect"] == 0 and mode.id == 0:
+        if recentp[0]["perfect"] == 0 and recentp[0]['countmiss'] != 0 and int(beatmap[0]['max_combo']) - int(recentp[0]['maxcombo']) > 10 and mode.id == 0:
             recentp[0]['if_fc'] = f" ({playDict['pp_fc']} for {playDict['accuracy_fc']}% FC)"
 
         recentp[0]['pp'] = playDict['pp']
@@ -202,7 +202,7 @@ class osu(commands.Cog, name='osu!'):
             tops[index]['modString'] = playDict['modString']
 
             tops[index]['if_fc'] = ''
-            if tops[index]["perfect"] == 0 and mode == 0:
+            if tops[index]["perfect"] == 0 and tops[index]['countmiss'] != 0 and int(beatmap[0]['max_combo']) - int(tops[index]['maxcombo']) > 10 and mode.id == 0:
                 tops[index]['if_fc'] = f" ({playDict['pp_fc']} for {playDict['accuracy_fc']}% FC)"
 
         result = OsuListEmbed(list = tops, profile = profile, beatmaps = beatmaps, title = f"Top {limit} osu! {mode.name} for {profile['username']}", url = profile['profile_url'],\
@@ -258,7 +258,7 @@ class osu(commands.Cog, name='osu!'):
             tops[index]['modString'] = playDict['modString']
 
             tops[index]['if_fc'] = ''
-            if tops[index]["perfect"] == 0 and mode == 0:
+            if tops[index]["perfect"] == 0 and tops[index]['countmiss'] != 0 and int(beatmap[0]['max_combo']) - int(tops[index]['maxcombo']) > 10 and mode.id == 0:
                 tops[index]['if_fc'] = f" ({playDict['pp_fc']} for {playDict['accuracy_fc']}% FC)"
 
         beatmap_title = f"{beatmap[0]['artist']} - {beatmap[0]['title']} ({beatmap[0]['creator']}) [{beatmap[0]['version']}]"
