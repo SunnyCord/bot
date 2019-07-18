@@ -1,8 +1,9 @@
 DEBUG=True
+SENTRY=""
 
 class lavalink:
     password = ''
-    port = 
+    port =
 
 class mongoDB:
     URI = ""
