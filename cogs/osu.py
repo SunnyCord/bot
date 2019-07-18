@@ -155,7 +155,7 @@ class osu(commands.Cog, name='osu!'):
                 limit = 100
 
             if parsedArgs['position'] is not None and parsedArgs['recentList'] is False:
-                limit = parsedArgs['position']
+                limit = parsedArgs['position'] if parsedArgs['position'] < 100 else 100
 
         if not user:
             qtype = "id"
@@ -182,7 +182,7 @@ class osu(commands.Cog, name='osu!'):
 
         if parsedArgs['position'] is not None:
             if parsedArgs['recentList'] is True:
-                limit = parsedArgs['position']
+                limit = parsedArgs['position'] if parsedArgs['position'] < 100 else 100
                 tops = [tops[limit-1]]
             else:
                 tops = tops[limit-1:]
