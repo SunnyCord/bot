@@ -20,13 +20,14 @@ class OsuRecentEmbed(discord.Embed):
             "SS": "<:X_:504305739209244672>",
             "SSH": "<:XH:504305771417305112>"
         }
+
         nomstat = ["Unranked", "Ranked", "Approved", "Qualified", "Loved"]
         super().__init__(
             title=discord.Embed.Empty,
             color=kwargs.pop('color'),
             description=f"> {ranks[__playinfo['rank']]} > **{__playinfo['pp']}PP{__playinfo['if_fc']}** > {__playinfo['accuracy']}%\n\
             > {__playinfo['score']} > x{__playinfo['maxcombo']}/\
-            {__playinfo['maxcombo']} > [{__playinfo['count300']}/\
+            {__beatmap['max_combo']} > [{__playinfo['count300']}/\
             {__playinfo['count100']}/\
             {__playinfo['count50']}/\
             {__playinfo['countmiss']}]{__playinfo['completion']}",

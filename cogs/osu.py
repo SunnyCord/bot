@@ -110,12 +110,15 @@ class osu(commands.Cog, name='osu!'):
             redisIO.setValue(f'{ctx.message.channel.id}.mode', mode.id)
 
         bmapfile = await self.osuAPI.getbmaposu(mode=mode, b=recentp[0]["beatmap_id"])
-        beatmap = await self.osuAPI.getbmap(mode=mode, b=recentp[0]["beatmap_id"], mods=recentp[0]["enabled_mods"])
+        beatmap = await self.osuAPI.getbmap(mode=mode, b=recentp[0]["beatmap_id"], mods=recentp[0]["enabled_mods"], server = server)
 
         _, playDict = await self.bot.loop.run_in_executor(None, ppc.calculatePlay, bmapfile, mode.id, recentp[0])
 
-        beatmap[0]['objcount'] = beatmap[0]['count_normal'] + beatmap[0]['count_slider'] + beatmap[0]['count_spinner']
+        beatmap[0]['objcount'] = int(beatmap[0]['count_normal']) + int(beatmap[0]['count_slider']) + int(beatmap[0]['count_spinner'])
         beatmap[0]['mode'] = mode.id
+
+        if playDict['completion'] < 100:
+            recentp[0]['rank'] = 'F'
 
         recentp[0]['completion'] = ''
         if recentp[0]["rank"] == 'F' and mode.id == 0:
