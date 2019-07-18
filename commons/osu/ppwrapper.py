@@ -49,7 +49,7 @@ def calculateBeatmap(bmap, mods = '', mode: int = 0):
         beatmap = pyt.parser().map(bmap)
         sr = pyt.diff_calc().calc(beatmap, modsBitMask)
         objcount = beatmap.ncircles + beatmap.nsliders + beatmap.nspinners
-        
+
         n300, n100, n50 = pyt.acc_round(100, objcount, 0)
         pp_100, _, _, _, _ = pyt.ppv2(sr.aim, sr.speed, bmap=beatmap, mods=modsBitMask, n300=n300, n100=n100, n50=n50, nmiss=0)
 
@@ -63,7 +63,7 @@ def calculateBeatmap(bmap, mods = '', mode: int = 0):
         pp_95, _, _, _, _ = pyt.ppv2(sr.aim, sr.speed, bmap=beatmap, mods=modsBitMask, n300=n300, n100=n100, n50=n50, nmiss=0)
 
         modString = pyt.mods_str(modsBitMask)
-        
+
         perfDict = {
             "pp_100": round(pp_100, 2),
             "pp_99": round(pp_99, 2),
