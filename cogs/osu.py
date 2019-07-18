@@ -36,7 +36,7 @@ class osu(commands.Cog, name='osu!'):
     @commands.command(aliases=["mania", "taiko", "ctb"])
     async def osu(self, ctx, *, args = None):
         """Shows osu! stats for a user.\nOther variants: ``mania, taiko, ctb``"""
-        
+
         user, server = None, osuClasses.Server()
 
         if args is not None:
@@ -73,7 +73,7 @@ class osu(commands.Cog, name='osu!'):
     @commands.command(aliases=["rs","r"])
     async def recent(self, ctx, *, args = None):
         """Shows recent osu! plays for a user. Modes can be specified ``eg. recent -m 2``.\n*Valid Arguments:* ```fix\n-l, -m```"""
-        
+
         user, server, mode, limit = None, osuClasses.Server(), osuClasses.Mode(), 1
 
         if args is not None:
@@ -120,7 +120,7 @@ class osu(commands.Cog, name='osu!'):
         recentp[0]['completion'] = ''
         if recentp[0]["rank"] == 'F' and mode.id == 0:
             recentp[0]['completion'] = f'\n> **Completion:** {playDict["completion"]}%'
-        
+
         recentp[0]['if_fc'] = ''
         if recentp[0]["perfect"] == 0 and mode.id == 0:
             recentp[0]['if_fc'] = f" ({playDict['pp_fc']} for {playDict['accuracy_fc']}% FC)"
