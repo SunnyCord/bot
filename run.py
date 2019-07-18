@@ -5,7 +5,7 @@ import config as cfg
 from commons import mongoIO
 
 def get_config():
-    if cfg.DEBUG==True:
+    if cfg.DEBUG == True:
         return cfg.debugConf
     else:
         return cfg.conf
@@ -77,7 +77,7 @@ class Sunny(commands.AutoShardedBot):
 
 async def run():
 
-    bot = Sunny(command_prefix='sdev.', description='Sunny Bot', activity=discord.Streaming(name='Nice Aesthetics', type=1, url='https://www.twitch.tv/niceaesthetic'))
+    bot = Sunny(command_prefix=get_prefix, description='Sunny Bot', activity=discord.Streaming(name='AfterWind', type=1, url='https://www.twitch.tv/afterwind_'))
     bot.load_extension("jishaku")
     bot.remove_command('help')
 

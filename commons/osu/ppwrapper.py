@@ -41,6 +41,39 @@ def ctbCalc(bmap, accuracy: float, count0: int, mods: int, max_combo: int):
 def maniaCalc():
     return "N/A", "Not implemented."
 
+def calculateBeatmap(bmap, mods = '', mode: int = 0):
+    if mode == 0:
+        # Standard
+        # modString = pyt.mods_str(mods)
+        modsBitMask = pyt.mods_from_str(mods)
+        beatmap = pyt.parser().map(bmap)
+        sr = pyt.diff_calc().calc(beatmap, modsBitMask)
+        objcount = beatmap.ncircles + beatmap.nsliders + beatmap.nspinners
+        
+        n300, n100, n50 = pyt.acc_round(100, objcount, 0)
+        pp_100, _, _, _, _ = pyt.ppv2(sr.aim, sr.speed, bmap=beatmap, mods=modsBitMask, n300=n300, n100=n100, n50=n50, nmiss=0)
+
+        n300, n100, n50 = pyt.acc_round(99, objcount, 0)
+        pp_99, _, _, _, _ = pyt.ppv2(sr.aim, sr.speed, bmap=beatmap, mods=modsBitMask, n300=n300, n100=n100, n50=n50, nmiss=0)
+
+        n300, n100, n50 = pyt.acc_round(97, objcount, 0)
+        pp_97, _, _, _, _ = pyt.ppv2(sr.aim, sr.speed, bmap=beatmap, mods=modsBitMask, n300=n300, n100=n100, n50=n50, nmiss=0)
+
+        n300, n100, n50 = pyt.acc_round(95, objcount, 0)
+        pp_95, _, _, _, _ = pyt.ppv2(sr.aim, sr.speed, bmap=beatmap, mods=modsBitMask, n300=n300, n100=n100, n50=n50, nmiss=0)
+
+        modString = pyt.mods_str(modsBitMask)
+        
+        perfDict = {
+            "pp_100": round(pp_100, 2),
+            "pp_99": round(pp_99, 2),
+            "pp_97": round(pp_97, 2),
+            "pp_95": round(pp_95, 2),
+            "mods": modString if modString != "nomod" else "NM"
+        }
+
+    return perfDict
+
 def calculatePlay(bmap, mode: int = 0, play = None, calcPP: int = 1):
 
     play = play or []
