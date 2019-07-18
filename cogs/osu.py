@@ -268,5 +268,33 @@ class osu(commands.Cog, name='osu!'):
 
         await ctx.send(embed=result)
 
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    @commands.command(aliases=["pp"])
+    async def perf(self, ctx, *, args=None):
+        """Shows information about pp of a certain map"""
+
+        mode = osuClasses.Mode()
+
+        if self.bot.configs.REDIS is True:
+            beatmap_id = redisIO.getValue(ctx.message.channel.id)
+            mode = osuClasses.Mode(id = redisIO.getValue(f'{ctx.message.channel.id}.mode'))
+            if beatmap_id is None:
+                return await ctx.send("No beatmap found.")
+        else:
+            beatmap_id = 1917158
+        
+        mods = ""
+        if args is not None:
+            parsedArgs = osuhelpers.parseArgs(args=args)
+            mods = parsedArgs["user"]
+
+        beatmap = await self.osuAPI.getbmap(mode=mode, b=beatmap_id)
+        bmapfile = await self.osuAPI.getbmaposu(mode=mode, b=beatmap_id)
+
+        perfDict = await self.bot.loop.run_in_executor(None, ppc.calculateBeatmap, bmapfile, mods, mode.id)
+
+        result = OsuPerformanceEmbed(beatmap=beatmap[0], perfinfo=perfDict, color=self.bot.configs.COLOR)
+        await ctx.send(embed=result)
+
 def setup(bot):
     bot.add_cog(osu(bot))
