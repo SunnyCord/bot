@@ -282,7 +282,7 @@ class osu(commands.Cog, name='osu!'):
                 return await ctx.send("No beatmap found.")
         else:
             beatmap_id = 1917158
-        
+
         mods = ""
         if args is not None:
             parsedArgs = osuhelpers.parseArgs(args=args)
