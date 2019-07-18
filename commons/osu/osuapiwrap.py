@@ -13,7 +13,7 @@ class APIService:
         self.__API_URLs = [
             {
                 'getuser': lambda usr, mode, qtype: f'https://osu.ppy.sh/api/get_user?k={self.__token}&u={usr}&m={mode}&type={qtype}',
-                'getbmap': lambda mode, s, b, limit, mods: f'https://osu.ppy.sh/api/get_beatmaps?k={self.__token}&m={mode}&a=1{f"&b={b}" if b is not None else ""}{f"&b={s}" if s is not None else ""}&mods={mods}{f"&limit={limit}" if limit is not None else ""}',
+                'getbmap': lambda mode, s, b, limit, mods: f'https://osu.ppy.sh/api/get_beatmaps?k={self.__token}&m={mode}&a=1{f"&b={b}" if b is not None else ""}{f"&s={s}" if s is not None else ""}&mods={mods}{f"&limit={limit}" if limit is not None else ""}',
                 'getusrtop': lambda usr, mode, qtype, limit: f'https://osu.ppy.sh/api/get_user_best?k={self.__token}&u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
                 'getrecent': lambda usr, mode, qtype, limit: f'https://osu.ppy.sh/api/get_user_recent?k={self.__token}&u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
                 'getbmaposu': lambda b: f'https://osu.ppy.sh/osu/{b}',
@@ -24,7 +24,7 @@ class APIService:
             },
             {
                 'getuser': lambda usr, mode, qtype: f'https://ripple.moe/api/get_user?u={usr}&m={mode}&type={qtype}',
-                'getbmap': lambda mode, s, b, limit, mods: f'https://ripple.moe/api/get_beatmaps?m={mode}&a=1{f"&b={b}" if b is not None else ""}{f"&b={s}" if s is not None else ""}{f"&limit={limit}" if limit is not None else ""}',
+                'getbmap': lambda mode, s, b, limit, mods: f'https://ripple.moe/api/get_beatmaps?m={mode}&a=1{f"&b={b}" if b is not None else ""}{f"&s={s}" if s is not None else ""}{f"&limit={limit}" if limit is not None else ""}',
                 'getusrtop': lambda usr, mode, qtype, limit: f'https://ripple.moe/api/get_user_best?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
                 'getrecent': lambda usr, mode, qtype, limit: f'https://ripple.moe/api/get_user_recent?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
                 'getbmaposu': lambda b: f'https://ripple.moe/osu/{b}',
@@ -35,7 +35,7 @@ class APIService:
             },
             {
                 'getuser': lambda usr, mode, qtype: f'https://akatsuki.pw/api/get_user?u={usr}&m={mode}&type={qtype}',
-                'getbmap': lambda mode, s, b, limit, mods: f'https://akatsuki.pw/api/get_beatmaps?m={mode}&a=1{f"&b={b}" if b is not None else ""}{f"&b={s}" if s is not None else ""}{f"&limit={limit}" if limit is not None else ""}',
+                'getbmap': lambda mode, s, b, limit, mods: f'https://akatsuki.pw/api/get_beatmaps?m={mode}&a=1{f"&b={b}" if b is not None else ""}{f"&s={s}" if s is not None else ""}{f"&limit={limit}" if limit is not None else ""}',
                 'getusrtop': lambda usr, mode, qtype, limit: f'https://akatsuki.pw/api/get_user_best?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
                 'getrecent': lambda usr, mode, qtype, limit: f'https://akatsuki.pw/api/get_user_recent?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
                 'getbmaposu': lambda b: f'https://osu.ppy.sh/osu/{b}',
@@ -46,7 +46,7 @@ class APIService:
             },
             {
                 'getuser': lambda usr, mode, qtype: f'http://akatsuki.pw/api/v1/users/rxfull?{"name" if qtype is "string" else "id"}={usr}',
-                'getbmap': lambda mode, s, b, limit, mods: f'https://akatsuki.pw/api/get_beatmaps?m={mode}&a=1{f"&b={b}" if b is not None else ""}{f"&b={s}" if s is not None else ""}{f"&limit={limit}" if limit is not None else ""}',
+                'getbmap': lambda mode, s, b, limit, mods: f'https://akatsuki.pw/api/get_beatmaps?m={mode}&a=1{f"&b={b}" if b is not None else ""}{f"&s={s}" if s is not None else ""}{f"&limit={limit}" if limit is not None else ""}',
                 'getusrtop': lambda usr, mode, qtype, limit: f'https://akatsuki.pw/api/get_user_best?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
                 'getrecent': lambda usr, mode, qtype, limit: f'https://akatsuki.pw/api/get_user_recent?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
                 'getbmaposu': lambda b: f'https://osu.ppy.sh/osu/{b}',
@@ -57,7 +57,7 @@ class APIService:
             },
             {
                 'getuser': lambda usr, mode, qtype: f'https://enjuu.click/api/get_user?u={usr}&m={mode}&type={qtype}',
-                'getbmap': lambda mode, s, b, limit, mods: f'https://enjuu.click/api/get_beatmaps?m={mode}&a=1{f"&b={b}" if b is not None else ""}{f"&b={s}" if s is not None else ""}{f"&limit={limit}" if limit is not None else ""}',
+                'getbmap': lambda mode, s, b, limit, mods: f'https://enjuu.click/api/get_beatmaps?m={mode}&a=1{f"&b={b}" if b is not None else ""}{f"&s={s}" if s is not None else ""}{f"&limit={limit}" if limit is not None else ""}',
                 'getusrtop': lambda usr, mode, qtype, limit: f'https://enjuu.click/api/get_user_best?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
                 'getrecent': lambda usr, mode, qtype, limit: f'https://enjuu.click/api/get_user_recent?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
                 'getbmaposu': lambda b: f'https://osu.ppy.sh/osu/{b}',
@@ -187,7 +187,6 @@ class APIService:
         limit = kwargs.pop('limit', 1)
 
         mods = self.__cleanMods(kwargs.pop('mods', 0), mode)
-
         async with aiohttp.ClientSession() as cs:
             async with cs.get( self.__API_URLs[server]['getbmap'](mode, s, b, limit, mods) ) as r:
                 res = await r.json()

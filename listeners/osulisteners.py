@@ -9,18 +9,17 @@ class OsuListeners(commands.Cog, command_attrs=dict(hidden=True), name="osu! Cha
 
         self.bot = bot
         self.osuAPI = osuAPI.APIService(bot.configs.OSUCFG.token)
+        self.pattern = re.compile("(https?):\/\/([-\w._]+)(\/[-\w._]\?(.+)?)?(\/b\/(?P<bmapid1>[0-9]+)|\/s\/(?P<bmapsetid1>[0-9]+)|\/beatmapsets\/(?P<bmapsetid2>[0-9]+)#(?P<mode>[a-z]+)\/(?P<bmapid2>[0-9]+))")
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        #pattern = "(https?):\/\/([-\w._]+)(\/[-\w._]\?(.+)?)?(\/b\/([0-9]+)|/s\/([0-9]+)|\/beatmapsets\/([0-9]+)#[a-z]+\/([0-9]+))"
-        pattern = "(https?):\/\/([-\w._]+)(\/[-\w._]\?(.+)?)?(\/b\/(?P<bmapid1>[0-9]+)|\/s\/(?P<bmapsetid1>[0-9]+)|\/beatmapsets\/(?P<bmapsetid2>[0-9]+)#(?P<mode>[a-z]+)\/(?P<bmapid2>[0-9]+))"
-        result = re.match(pattern, message.content)
+
+        result = re.match(self.pattern, message.content)
 
         if result is None:
-            return await self.bot.process_commands(message)
+            return
 
-        s, b = '', ''
-
+        s, b = None, None
         if result.group("bmapid2") is not None:
             s = result.group("bmapsetid2")
             b = result.group("bmapid2")
@@ -31,8 +30,9 @@ class OsuListeners(commands.Cog, command_attrs=dict(hidden=True), name="osu! Cha
         else:
             s = result.group("bmapset1")
 
-        await message.channel.send(f'Found beatmap {s}/{b}')
-        
+        beatmap = await self.osuAPI.getbmap(b=b, s=s)
+        await message.channel.send(f"Found beatmap {beatmap[0]['title']}")
+
 
 
 def setup(bot):
