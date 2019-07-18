@@ -139,7 +139,7 @@ class osu(commands.Cog, name='osu!'):
     async def osutop(self, ctx, *, args=None):
         """Shows osu! top plays for a user. Modes can be specified ``eg. maniatop``.\n*Valid Arguments:* ```fix\n-r, -p```"""
 
-        user, server, mode, limit, beatmaps = None, osuClasses.Server(), osuClasses.Mode(), 5, []
+        user, server, mode, limit, beatmaps = None, osuClasses.Server(). osuClasses.Mode(), 5, []
 
         parsedArgs = {
             'recentList': False,
@@ -282,7 +282,7 @@ class osu(commands.Cog, name='osu!'):
                 return await ctx.send("No beatmap found.")
         else:
             beatmap_id = 1917158
-        
+
         mods = ""
         if args is not None:
             parsedArgs = osuhelpers.parseArgs(args=args)
