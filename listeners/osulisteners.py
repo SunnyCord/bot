@@ -6,10 +6,9 @@ class OsuListeners(commands.Cog, command_attrs=dict(hidden=True), name="osu! Cha
     """osu! Message Listeners"""
 
     def __init__(self, bot):
-
         self.bot = bot
         self.osuAPI = osuAPI.APIService(bot.configs.OSUCFG.token)
-        self.pattern = re.compile("(https?):\/\/([-\w._]+)(\/[-\w._]\?(.+)?)?(\/b\/(?P<bmapid1>[0-9]+)|\/s\/(?P<bmapsetid1>[0-9]+)|\/beatmapsets\/(?P<bmapsetid2>[0-9]+)#(?P<mode>[a-z]+)\/(?P<bmapid2>[0-9]+))")
+        self.pattern = re.compile("(https?):\/\/([-\w._]+)(\/[-\w._]\?(.+)?)?(\/b\/(?P<bmapid1>[0-9]+)|\/s\/(?P<bmapsetid1>[0-9]+)|\/beatmapsets\/(?P<bmapsetid2>[0-9]+)(#(?P<mode>[a-z]+)\/(?P<bmapid2>[0-9]+))?)")
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -20,9 +19,10 @@ class OsuListeners(commands.Cog, command_attrs=dict(hidden=True), name="osu! Cha
             return
 
         s, b = None, None
-        if result.group("bmapid2") is not None:
+        if result.group("bmapsetid2") is not None:
             s = result.group("bmapsetid2")
-            b = result.group("bmapid2")
+            if result.group("bmapid2") is not None:
+                b = result.group("bmapid2")
 
         elif result.group("bmapid1") is not None:
             b = result.group("bmapid1")
