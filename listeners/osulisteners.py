@@ -1,13 +1,12 @@
 import re
 from discord.ext import commands
-from commons.osu import osuapiwrap as osuAPI
+from commons.osu import osuapiwrap
 
 class OsuListeners(commands.Cog, command_attrs=dict(hidden=True), name="osu! Chat Listener"):
     """osu! Message Listeners"""
 
     def __init__(self, bot):
         self.bot = bot
-        self.osuAPI = osuAPI.APIService(bot.configs.OSUCFG.token)
         self.pattern = re.compile("(https?):\/\/([-\w._]+)(\/[-\w._]\?(.+)?)?(\/b\/(?P<bmapid1>[0-9]+)|\/s\/(?P<bmapsetid1>[0-9]+)|\/beatmapsets\/(?P<bmapsetid2>[0-9]+)(#(?P<mode>[a-z]+)\/(?P<bmapid2>[0-9]+))?)")
 
     @commands.Cog.listener()
@@ -30,7 +29,7 @@ class OsuListeners(commands.Cog, command_attrs=dict(hidden=True), name="osu! Cha
         else:
             s = result.group("bmapset1")
 
-        beatmap = await self.osuAPI.getbmap(b=b, s=s)
+        beatmap = await osuapiwrap.getbmap(b=b, s=s)
         await message.channel.send(f"Found beatmap {beatmap[0]['title']}")
 
 
