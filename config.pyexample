@@ -3,7 +3,7 @@ SENTRY=""
 
 class lavalink:
     password = ''
-    port =
+    port = ''
 
 class mongoDB:
     URI = ""
@@ -11,22 +11,22 @@ class mongoDB:
 class osu:
     token = ''
 
-class debugConf:
+class debugBotConfig:
     TOKEN = ''
     COLOR = 0x045bce
     MONGODB = 'sunny-dev'
-    PREFIXES = ['s.']
+    PREFIXES = ['sawdev.']
     REDIS = False
-    MONGODBCFG = mongoDB
-    LAVALINKCFG = lavalink
-    OSUCFG = osu
 
 class conf:
     TOKEN = ''
     COLOR = 0xd74613
     MONGODB = 'sunny'
-    PREFIXES = ['sdev.']
+    PREFIXES = ['saw.']
     REDIS = True
-    MONGODBCFG = mongoDB
-    LAVALINKCFG = lavalink
-    OSUCFG = osu
+
+def getBotConfig():
+    if DEBUG:
+        return debugBotConfig
+    else:
+        return conf
