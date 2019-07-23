@@ -302,8 +302,47 @@ class osu(commands.Cog, name='osu!'):
     async def scores(self, ctx, *, args = None):
         """Shows scores on the linked beatmap"""
 
-        user = None
+        args = osuhelpers.parseArgsV2(args=args, customArgs=["beatmap", "user"])
+
+        qtype = args["qtype"]
+        mode = osuClasses.Mode(id=args["mode"])
+        server = osuClasses.Server(string=args["server"])
+
+        if args["beatmap"] is None:
+            return ctx.send("No beatmap provided")
         
+        beatmap = await osuhelpers.getBeatmapFromText(args["beatmap"])
+        
+        if args["user"]:
+            user = args["user"]
+        else:
+            user = getOsu(ctx.message.author)
+            qtype = "id"
+
+        try:
+            profile = await osuapiwrap.getuser(usr = user, mode = mode, qtype = qtype, server = server)
+            tops = await osuapiwrap.getusrscores(usr = user, mode = mode, qtype = qtype, limit = 5, server = server, b = beatmap["beatmap_id"])
+
+        except ValueError:
+            return await ctx.send("User has not been found or has no plays!")
+
+        for _, top in enumerate(tops):
+            bmapfile = await osuapiwrap.getbmaposu(mode=mode, b=beatmap["beatmap_id"])
+            _, playDict = await self.bot.loop.run_in_executor(None, ppc.calculatePlay, bmapfile, mode.id, top)
+            top['pp_fc'] = playDict['pp_fc']
+            top['accuracy'] = playDict['accuracy']
+            top['modString'] = playDict['modString']
+
+            top['if_fc'] = ''
+            if top["perfect"] == 0 and top['countmiss'] != 0 and int(beatmap['max_combo']) - int(top['maxcombo']) > 10 and mode.id == 0:
+                top['if_fc'] = f" ({playDict['pp_fc']} for {playDict['accuracy_fc']}% FC)"
+
+        beatmap_title = f"{beatmap['artist']} - {beatmap['title']} ({beatmap['creator']}) [{beatmap['version']}]"
+
+        result = OsuListEmbed(list = tops, profile = profile, beatmap = beatmap, title = f"Top osu! {mode.name} for {profile['username']}  on {beatmap_title}", url = profile['profile_url'],\
+        authorico = mode.icon, thumbnail = f"https://b.ppy.sh/thumb/{beatmap['beatmapset_id']}.jpg", color = self.bot.configs.COLOR, style = 1, footertext = f'Plays from {server.name}', footericon = server.icon)
+
+        await ctx.send(embed=result)
 
 def setup(bot):
     bot.add_cog(osu(bot))

@@ -1,13 +1,7 @@
 import asyncio, sys, traceback, os, discord, sentry_sdk
 from discord.ext import commands
-import config as cfg
+import config
 from commons import mongoIO
-
-def get_config():
-    if cfg.DEBUG == True:
-        return cfg.debugConf
-    else:
-        return cfg.conf
 
 def get_prefix(bot, message):
     """A callable Prefix for our bot. This could be edited to allow per server prefixes."""
@@ -20,7 +14,7 @@ def get_prefix(bot, message):
 def list_module(directory):
     return (f for f in os.listdir(directory) if f.endswith('.py'))
 
-sentry_sdk.init(cfg.SENTRY)
+sentry_sdk.init(config.SENTRY)
 
 class Sunny(commands.AutoShardedBot):
     def __init__(self, **kwargs):
@@ -29,7 +23,7 @@ class Sunny(commands.AutoShardedBot):
             command_prefix=kwargs.pop("command_prefix"),
             activity=kwargs.pop("activity")
         )
-        self.configs=get_config()
+        self.configs=config.getBotConfig()
 
     async def on_ready(self):
         print(r"""

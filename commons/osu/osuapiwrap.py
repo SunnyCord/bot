@@ -167,9 +167,11 @@ async def getbmap(**kwargs):
 
     mode = kwargs.pop('mode', osuClasses.Mode()).id
 
-    s = kwargs.pop('s', None)
-
     b = kwargs.pop('b', None)
+
+    s = None
+    if b is None:
+        s = kwargs.pop('s', None)
 
     server = kwargs.pop('server', osuClasses.Server()).id
 

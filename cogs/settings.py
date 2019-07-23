@@ -9,7 +9,7 @@ disableKeywords = ['none','disable','off','disabled']
 
 def get_config():
     if cfg.DEBUG==True:
-        return cfg.debugConf
+        return cfg.debugBotConfig
     else:
         return cfg.conf
 
