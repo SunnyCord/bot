@@ -1,269 +1,258 @@
 import aiohttp
+import config
 from io import StringIO
 from commons.osu import osuClasses
 
-class APIService:
+__token = config.osu.token
+__bmapURLModes = ['osu', 'taiko', 'fruits', 'mania']
+__API_URLs = [
+    {
+        'getuser': lambda usr, mode, qtype: f'https://osu.ppy.sh/api/get_user?k={__token}&u={usr}&m={mode}&type={qtype}',
+        'getbmap': lambda mode, s, b, limit, mods: f'https://osu.ppy.sh/api/get_beatmaps?k={__token}&m={mode}&a=1{f"&b={b}" if b is not None else ""}{f"&s={s}" if s is not None else ""}&mods={mods}{f"&limit={limit}" if limit is not None else ""}',
+        'getusrtop': lambda usr, mode, qtype, limit: f'https://osu.ppy.sh/api/get_user_best?k={__token}&u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
+        'getrecent': lambda usr, mode, qtype, limit: f'https://osu.ppy.sh/api/get_user_recent?k={__token}&u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
+        'getbmaposu': lambda b: f'https://osu.ppy.sh/osu/{b}',
+        'getavatar': lambda usr: f'https://a.ppy.sh/{usr}',
+        'getprofileurl': lambda usr: f'https://osu.ppy.sh/users/{usr}',
+        'getbmapurl': lambda mode, s, b: f'https://osu.ppy.sh/beatmapsets/{s}#{__bmapURLModes[mode]}/{b}',
+        'getusrscores': lambda usr, mode, b, qtype, limit: f'https://osu.ppy.sh/api/get_scores?k={__token}&u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}&b={b}'
+    },
+    {
+        'getuser': lambda usr, mode, qtype: f'https://ripple.moe/api/get_user?u={usr}&m={mode}&type={qtype}',
+        'getbmap': lambda mode, s, b, limit, mods: f'https://osu.ppy.sh/api/get_beatmaps?k={__token}&m={mode}&a=1{f"&b={b}" if b is not None else ""}{f"&s={s}" if s is not None else ""}&mods={mods}{f"&limit={limit}" if limit is not None else ""}',
+        'getusrtop': lambda usr, mode, qtype, limit: f'https://ripple.moe/api/get_user_best?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
+        'getrecent': lambda usr, mode, qtype, limit: f'https://ripple.moe/api/get_user_recent?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
+        'getbmaposu': lambda b: f'https://ripple.moe/osu/{b}',
+        'getavatar': lambda usr: f'https://a.ripple.moe/{usr}',
+        'getprofileurl': lambda usr: f'https://ripple.moe/u/{usr}',
+        'getbmapurl': lambda mode, s, b: f'https://ripple.moe/b/{b}?mode={mode}',
+        'getusrscores': lambda usr, mode, b, qtype, limit: f'https://ripple.moe/api/get_scores?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}&b={b}'
+    },
+    {
+        'getuser': lambda usr, mode, qtype: f'https://akatsuki.pw/api/get_user?u={usr}&m={mode}&type={qtype}',
+        'getbmap': lambda mode, s, b, limit, mods: f'https://osu.ppy.sh/api/get_beatmaps?k={__token}&m={mode}&a=1{f"&b={b}" if b is not None else ""}{f"&s={s}" if s is not None else ""}&mods={mods}{f"&limit={limit}" if limit is not None else ""}',
+        'getusrtop': lambda usr, mode, qtype, limit: f'https://akatsuki.pw/api/get_user_best?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
+        'getrecent': lambda usr, mode, qtype, limit: f'https://akatsuki.pw/api/get_user_recent?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
+        'getbmaposu': lambda b: f'https://osu.ppy.sh/osu/{b}',
+        'getavatar': lambda usr: f'https://a.akatsuki.pw/{usr}',
+        'getprofileurl': lambda usr: f'https://akatsuki.pw/u/{usr}',
+        'getbmapurl': lambda mode, s, b: f'https://akatsuki.pw/b/{b}?mode={mode}',
+        'getusrscores': lambda usr, mode, b, qtype, limit: f'https://akatsuki.pw/api/get_scores?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}&b={b}'
+    },
+    {
+        'getuser': lambda usr, mode, qtype: f'http://akatsuki.pw/api/v1/users/rxfull?{"name" if qtype is "string" else "id"}={usr}',
+        'getbmap': lambda mode, s, b, limit, mods: f'https://osu.ppy.sh/api/get_beatmaps?k={__token}&m={mode}&a=1{f"&b={b}" if b is not None else ""}{f"&s={s}" if s is not None else ""}&mods={mods}{f"&limit={limit}" if limit is not None else ""}',
+        'getusrtop': lambda usr, mode, qtype, limit: f'https://akatsuki.pw/api/get_user_best?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
+        'getrecent': lambda usr, mode, qtype, limit: f'https://akatsuki.pw/api/get_user_recent?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
+        'getbmaposu': lambda b: f'https://osu.ppy.sh/osu/{b}',
+        'getavatar': lambda usr: f'https://a.akatsuki.pw/{usr}',
+        'getprofileurl': lambda usr: f'https://akatsuki.pw/rx/u/{usr}',
+        'getbmapurl': lambda mode, s, b: f'https://akatsuki.pw/b/{b}?mode={mode}',
+        'getusrscores': lambda usr, mode, b, qtype, limit: f'https://akatsuki.pw/api/get_scores?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}&b={b}'
+    },
+    {
+        'getuser': lambda usr, mode, qtype: f'https://enjuu.click/api/get_user?u={usr}&m={mode}&type={qtype}',
+        'getbmap': lambda mode, s, b, limit, mods: f'https://osu.ppy.sh/api/get_beatmaps?k={__token}&m={mode}&a=1{f"&b={b}" if b is not None else ""}{f"&s={s}" if s is not None else ""}&mods={mods}{f"&limit={limit}" if limit is not None else ""}',
+        'getusrtop': lambda usr, mode, qtype, limit: f'https://enjuu.click/api/get_user_best?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
+        'getrecent': lambda usr, mode, qtype, limit: f'https://enjuu.click/api/get_user_recent?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
+        'getbmaposu': lambda b: f'https://osu.ppy.sh/osu/{b}',
+        'getavatar': lambda usr: f'https://a.enjuu.click/{usr}',
+        'getprofileurl': lambda usr: f'https://enjuu.click/u/{usr}',
+        'getbmapurl': lambda mode, s, b: f'https://enjuu.click/b/{b}?mode={mode}',
+        'getusrscores': lambda usr, mode, b, qtype, limit: f'https://enjuu.click/api/get_scores?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}&b={b}'
+    }
+]
 
-    def __init__(self, token):
+def __convAkaRXProfile(res, mode = 0): #Converts akatsuki!rx fullrx API response to a bancho-like one
+    modes = {0: "std", 1: "taiko", 2: "ctb", 3: "mania"}
+    if res['code'] != 200:
+        raise ValueError("Invalid query or API down.")
+    return [
+        {
+            "user_id": res['id'],
+            "username": res['username'],
+            "join_date": res['registered_on'],
+            "count300": 0,
+            "count100": 0,
+            "count50": 0,
+            "playcount": res[modes[mode]]['playcount'],
+            "ranked_score": res[modes[mode]]['ranked_score'],
+            "total_score": res[modes[mode]]['total_score'],
+            "pp_rank": res[modes[mode]]['global_leaderboard_rank'],
+            "level": res[modes[mode]]['level'],
+            "pp_raw": res[modes[mode]]['pp'],
+            "accuracy": res[modes[mode]]['accuracy'],
+            "count_rank_ss": 0,
+            "count_rank_ssh": 0,
+            "count_rank_s": 0,
+            "count_rank_sh": 0,
+            "count_rank_a": 0,
+            "country": res['country'],
+            "total_seconds_played": res[modes[mode]]['playtime'],
+            "pp_country_rank": res[modes[mode]]['country_leaderboard_rank'],
+            "events": []
+        }
+    ]
 
-        self.__token = token
+def __cleanProfileRes(res):
+    res[0]["pp_rank"] = int(res[0]["pp_rank"])
+    res[0]["pp_country_rank"] = int(res[0]["pp_country_rank"])
+    res[0]["pp_raw"] = float(res[0]["pp_raw"])
+    res[0]["accuracy"] = round(float(res[0]["accuracy"]), 2) if res[0]["accuracy"] is not None else None
+    res[0]["total_seconds_played"] = int(res[0]["total_seconds_played"])
+    res[0]["playcount"] = int(res[0]["playcount"]) if res[0]["playcount"] is not None else None
+    res[0]["country"] = res[0]["country"] if res[0]["country"] is not None else "XX"
+    res[0]["level"] = int(float(res[0]["level"]))
+    res[0]["level_progress"] = round((float(res[0]["level"])%1*100), 2)
 
-        self.__bmapURLModes = ['osu', 'taiko', 'fruits', 'mania']
+    return res
 
-        self.__API_URLs = [
-            {
-                'getuser': lambda usr, mode, qtype: f'https://osu.ppy.sh/api/get_user?k={self.__token}&u={usr}&m={mode}&type={qtype}',
-                'getbmap': lambda mode, s, b, limit, mods: f'https://osu.ppy.sh/api/get_beatmaps?k={self.__token}&m={mode}&a=1{f"&b={b}" if b is not None else ""}{f"&s={s}" if s is not None else ""}&mods={mods}{f"&limit={limit}" if limit is not None else ""}',
-                'getusrtop': lambda usr, mode, qtype, limit: f'https://osu.ppy.sh/api/get_user_best?k={self.__token}&u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
-                'getrecent': lambda usr, mode, qtype, limit: f'https://osu.ppy.sh/api/get_user_recent?k={self.__token}&u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
-                'getbmaposu': lambda b: f'https://osu.ppy.sh/osu/{b}',
-                'getavatar': lambda usr: f'https://a.ppy.sh/{usr}',
-                'getprofileurl': lambda usr: f'https://osu.ppy.sh/users/{usr}',
-                'getbmapurl': lambda mode, s, b: f'https://osu.ppy.sh/beatmapsets/{s}#{self.__bmapURLModes[mode]}/{b}',
-                'getusrscores': lambda usr, mode, b, qtype, limit: f'https://osu.ppy.sh/api/get_scores?k={self.__token}&u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}&b={b}'
-            },
-            {
-                'getuser': lambda usr, mode, qtype: f'https://ripple.moe/api/get_user?u={usr}&m={mode}&type={qtype}',
-                'getbmap': lambda mode, s, b, limit, mods: f'https://osu.ppy.sh/api/get_beatmaps?k={self.__token}&m={mode}&a=1{f"&b={b}" if b is not None else ""}{f"&s={s}" if s is not None else ""}&mods={mods}{f"&limit={limit}" if limit is not None else ""}',
-                'getusrtop': lambda usr, mode, qtype, limit: f'https://ripple.moe/api/get_user_best?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
-                'getrecent': lambda usr, mode, qtype, limit: f'https://ripple.moe/api/get_user_recent?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
-                'getbmaposu': lambda b: f'https://ripple.moe/osu/{b}',
-                'getavatar': lambda usr: f'https://a.ripple.moe/{usr}',
-                'getprofileurl': lambda usr: f'https://ripple.moe/u/{usr}',
-                'getbmapurl': lambda mode, s, b: f'https://ripple.moe/b/{b}?mode={mode}',
-                'getusrscores': lambda usr, mode, b, qtype, limit: f'https://ripple.moe/api/get_scores?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}&b={b}'
-            },
-            {
-                'getuser': lambda usr, mode, qtype: f'https://akatsuki.pw/api/get_user?u={usr}&m={mode}&type={qtype}',
-                'getbmap': lambda mode, s, b, limit, mods: f'https://osu.ppy.sh/api/get_beatmaps?k={self.__token}&m={mode}&a=1{f"&b={b}" if b is not None else ""}{f"&s={s}" if s is not None else ""}&mods={mods}{f"&limit={limit}" if limit is not None else ""}',
-                'getusrtop': lambda usr, mode, qtype, limit: f'https://akatsuki.pw/api/get_user_best?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
-                'getrecent': lambda usr, mode, qtype, limit: f'https://akatsuki.pw/api/get_user_recent?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
-                'getbmaposu': lambda b: f'https://osu.ppy.sh/osu/{b}',
-                'getavatar': lambda usr: f'https://a.akatsuki.pw/{usr}',
-                'getprofileurl': lambda usr: f'https://akatsuki.pw/u/{usr}',
-                'getbmapurl': lambda mode, s, b: f'https://akatsuki.pw/b/{b}?mode={mode}',
-                'getusrscores': lambda usr, mode, b, qtype, limit: f'https://akatsuki.pw/api/get_scores?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}&b={b}'
-            },
-            {
-                'getuser': lambda usr, mode, qtype: f'http://akatsuki.pw/api/v1/users/rxfull?{"name" if qtype is "string" else "id"}={usr}',
-                'getbmap': lambda mode, s, b, limit, mods: f'https://osu.ppy.sh/api/get_beatmaps?k={self.__token}&m={mode}&a=1{f"&b={b}" if b is not None else ""}{f"&s={s}" if s is not None else ""}&mods={mods}{f"&limit={limit}" if limit is not None else ""}',
-                'getusrtop': lambda usr, mode, qtype, limit: f'https://akatsuki.pw/api/get_user_best?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
-                'getrecent': lambda usr, mode, qtype, limit: f'https://akatsuki.pw/api/get_user_recent?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
-                'getbmaposu': lambda b: f'https://osu.ppy.sh/osu/{b}',
-                'getavatar': lambda usr: f'https://a.akatsuki.pw/{usr}',
-                'getprofileurl': lambda usr: f'https://akatsuki.pw/rx/u/{usr}',
-                'getbmapurl': lambda mode, s, b: f'https://akatsuki.pw/b/{b}?mode={mode}',
-                'getusrscores': lambda usr, mode, b, qtype, limit: f'https://akatsuki.pw/api/get_scores?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}&b={b}'
-            },
-            {
-                'getuser': lambda usr, mode, qtype: f'https://enjuu.click/api/get_user?u={usr}&m={mode}&type={qtype}',
-                'getbmap': lambda mode, s, b, limit, mods: f'https://osu.ppy.sh/api/get_beatmaps?k={self.__token}&m={mode}&a=1{f"&b={b}" if b is not None else ""}{f"&s={s}" if s is not None else ""}&mods={mods}{f"&limit={limit}" if limit is not None else ""}',
-                'getusrtop': lambda usr, mode, qtype, limit: f'https://enjuu.click/api/get_user_best?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
-                'getrecent': lambda usr, mode, qtype, limit: f'https://enjuu.click/api/get_user_recent?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}',
-                'getbmaposu': lambda b: f'https://osu.ppy.sh/osu/{b}',
-                'getavatar': lambda usr: f'https://a.enjuu.click/{usr}',
-                'getprofileurl': lambda usr: f'https://enjuu.click/u/{usr}',
-                'getbmapurl': lambda mode, s, b: f'https://enjuu.click/b/{b}?mode={mode}',
-                'getusrscores': lambda usr, mode, b, qtype, limit: f'https://enjuu.click/api/get_scores?u={usr}&m={mode}&type={qtype}{f"&limit={limit}" if limit is not None else ""}&b={b}'
-            }
-        ]
+def __cleanBmapRes(res):
+    for index, diff in enumerate(res):
+        res[index]['beatmapset_id'] = int(diff['beatmapset_id'])
+        res[index]['approved'] = int(diff['approved'])
+        res[index]['difficultyrating'] = round(float(diff['difficultyrating']), 2)
 
-    @classmethod
-    def __convAkaRXProfile(cls, res, mode = 0): #Converts akatsuki!rx fullrx API response to a bancho-like one
-        modes = {0: "std", 1: "taiko", 2: "ctb", 3: "mania"}
-        if res['code'] != 200:
-            raise ValueError("Invalid query or API down.")
-        return [
-            {
-                "user_id": res['id'],
-                "username": res['username'],
-                "join_date": res['registered_on'],
-                "count300": 0,
-                "count100": 0,
-                "count50": 0,
-                "playcount": res[modes[mode]]['playcount'],
-                "ranked_score": res[modes[mode]]['ranked_score'],
-                "total_score": res[modes[mode]]['total_score'],
-                "pp_rank": res[modes[mode]]['global_leaderboard_rank'],
-                "level": res[modes[mode]]['level'],
-                "pp_raw": res[modes[mode]]['pp'],
-                "accuracy": res[modes[mode]]['accuracy'],
-                "count_rank_ss": 0,
-                "count_rank_ssh": 0,
-                "count_rank_s": 0,
-                "count_rank_sh": 0,
-                "count_rank_a": 0,
-                "country": res['country'],
-                "total_seconds_played": res[modes[mode]]['playtime'],
-                "pp_country_rank": res[modes[mode]]['country_leaderboard_rank'],
-                "events": []
-            }
-        ]
+    return res
 
-    @classmethod
-    def __cleanProfileRes(cls, res):
-        res[0]["pp_rank"] = int(res[0]["pp_rank"])
-        res[0]["pp_country_rank"] = int(res[0]["pp_country_rank"])
-        res[0]["pp_raw"] = float(res[0]["pp_raw"])
-        res[0]["accuracy"] = round(float(res[0]["accuracy"]), 2) if res[0]["accuracy"] is not None else None
-        res[0]["total_seconds_played"] = int(res[0]["total_seconds_played"])
-        res[0]["playcount"] = int(res[0]["playcount"]) if res[0]["playcount"] is not None else None
-        res[0]["country"] = res[0]["country"] if res[0]["country"] is not None else "XX"
-        res[0]["level"] = int(float(res[0]["level"]))
-        res[0]["level_progress"] = round((float(res[0]["level"])%1*100), 2)
+def __cleanRecentRes(res):
+    for index, play in enumerate(res):
+        res[index]['countmiss'] = int(play['countmiss'])
+        res[index]['count50'] = int(play['count50'])
+        res[index]['count100'] = int(play['count100'])
+        res[index]['count300'] = int(play['count300'])
+        res[index]['countgeki'] = int(play['countgeki'])
+        res[index]['countkatu'] = int(play['countkatu'])
+        res[index]['maxcombo'] = int(play['maxcombo'])
+        res[index]['enabled_mods'] = int(play['enabled_mods'])
+        res[index]['perfect'] = int(play['perfect'])
 
-        return res
+    return res
 
-    @classmethod
-    def __cleanBmapRes(cls, res):
-        for index, diff in enumerate(res):
-            res[index]['beatmapset_id'] = int(diff['beatmapset_id'])
-            res[index]['approved'] = int(diff['approved'])
-            res[index]['difficultyrating'] = round(float(diff['difficultyrating']), 2)
+def __cleanTopRes(res):
+    return __cleanRecentRes(res)
 
-        return res
+def __cleanMods(modnum, mode):
+    cleanModNum = 0
+    if modnum & 1<<9: cleanModNum += 64
+    elif modnum & 1<<6: cleanModNum += 64
+    if modnum & 1<<4: cleanModNum += 16
 
-    @classmethod
-    def __cleanRecentRes(cls, res):
-        for index, play in enumerate(res):
-            res[index]['countmiss'] = int(play['countmiss'])
-            res[index]['count50'] = int(play['count50'])
-            res[index]['count100'] = int(play['count100'])
-            res[index]['count300'] = int(play['count300'])
-            res[index]['countgeki'] = int(play['countgeki'])
-            res[index]['countkatu'] = int(play['countkatu'])
-            res[index]['maxcombo'] = int(play['maxcombo'])
-            res[index]['enabled_mods'] = int(play['enabled_mods'])
-            res[index]['perfect'] = int(play['perfect'])
+    return cleanModNum
 
-        return res
+async def getuser(**kwargs):
 
-    @classmethod
-    def __cleanTopRes(cls, res):
-        return cls.__cleanRecentRes(res)
+    usr = kwargs.pop('usr')
 
-    @classmethod
-    def __cleanMods(cls, modnum, mode):
-        cleanModNum = 0
-        if modnum & 1<<9: cleanModNum += 64
-        elif modnum & 1<<6: cleanModNum += 64
-        if modnum & 1<<4: cleanModNum += 16
+    mode = kwargs.pop('mode', osuClasses.Mode()).id
 
-        return cleanModNum
+    qtype = kwargs.pop('qtype', 'id')
 
-    async def getuser(self, **kwargs):
+    server = kwargs.pop('server', osuClasses.Server()).id
 
-        usr = kwargs.pop('usr')
+    async with aiohttp.ClientSession() as cs:
+        async with cs.get( __API_URLs[server]['getuser'](usr, mode, qtype) ) as r:
+            res = await r.json()
+            if res == []:
+                raise ValueError("Invalid query or API down.")
+            else:
+                if server is 3:
+                    res = __convAkaRXProfile(res)
+                if server is not 0:
+                    res[0]['total_seconds_played'] = 0
+                res[0]['avatar_url'], res[0]['profile_url'] = __API_URLs[server]['getavatar'](res[0]['user_id']), __API_URLs[server]['getprofileurl'](res[0]['user_id'])
+                return __cleanProfileRes(res)[0]
 
-        mode = kwargs.pop('mode', osuClasses.Mode()).id
+async def getbmap(**kwargs):
 
-        qtype = kwargs.pop('qtype', 'id')
+    mode = kwargs.pop('mode', osuClasses.Mode()).id
 
-        server = kwargs.pop('server', osuClasses.Server()).id
+    s = kwargs.pop('s', None)
 
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get( self.__API_URLs[server]['getuser'](usr, mode, qtype) ) as r:
-                res = await r.json()
-                if res == []:
-                    raise ValueError("Invalid query or API down.")
-                else:
-                    if server is 3:
-                        res = self.__convAkaRXProfile(res)
-                    if server is not 0:
-                        res[0]['total_seconds_played'] = 0
-                    res[0]['avatar_url'], res[0]['profile_url'] = self.__API_URLs[server]['getavatar'](res[0]['user_id']), self.__API_URLs[server]['getprofileurl'](res[0]['user_id'])
-                    return self.__cleanProfileRes(res)[0]
+    b = kwargs.pop('b', None)
 
-    async def getbmap(self, **kwargs):
+    server = kwargs.pop('server', osuClasses.Server()).id
 
-        mode = kwargs.pop('mode', osuClasses.Mode()).id
+    limit = kwargs.pop('limit', 1)
 
-        s = kwargs.pop('s', None)
+    mods = __cleanMods(kwargs.pop('mods', 0), mode)
+    async with aiohttp.ClientSession() as cs:
+        async with cs.get( __API_URLs[server]['getbmap'](mode, s, b, limit, mods) ) as r:
+            res = await r.json()
+            if res == []:
+                raise ValueError("Invalid query or API down.")
+            else:
+                res[0]['beatmap_url'] = __API_URLs[server]['getbmapurl'](mode, res[0]['beatmapset_id'], b)
+                return __cleanBmapRes(res)
 
-        b = kwargs.pop('b', None)
+async def getbmaposu(**kwargs):
 
-        server = kwargs.pop('server', osuClasses.Server()).id
+    b = kwargs.pop('b')
 
-        limit = kwargs.pop('limit', 1)
+    server = kwargs.pop('server', osuClasses.Server()).id
 
-        mods = self.__cleanMods(kwargs.pop('mods', 0), mode)
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get( self.__API_URLs[server]['getbmap'](mode, s, b, limit, mods) ) as r:
-                res = await r.json()
-                if res == []:
-                    raise ValueError("Invalid query or API down.")
-                else:
-                    res[0]['beatmap_url'] = self.__API_URLs[server]['getbmapurl'](mode, res[0]['beatmapset_id'], b)
-                    return self.__cleanBmapRes(res)
+    async with aiohttp.ClientSession() as cs:
+        async with cs.get( __API_URLs[server]['getbmaposu'](b) ) as r:
+            return StringIO(await r.text())
 
-    async def getbmaposu(self, **kwargs):
+async def getrecent(**kwargs):
 
-        b = kwargs.pop('b')
+    usr = kwargs.pop('usr')
 
-        server = kwargs.pop('server', osuClasses.Server()).id
+    mode = kwargs.pop('mode', osuClasses.Mode()).id
 
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get( self.__API_URLs[server]['getbmaposu'](b) ) as r:
-                return StringIO(await r.text())
+    qtype = kwargs.pop('qtype', 'id')
 
-    async def getrecent(self, **kwargs):
+    limit = kwargs.pop('limit', None)
 
-        usr = kwargs.pop('usr')
+    server = kwargs.pop('server', osuClasses.Server()).id
 
-        mode = kwargs.pop('mode', osuClasses.Mode()).id
+    async with aiohttp.ClientSession() as cs:
+        async with cs.get( __API_URLs[server]['getrecent'](usr, mode, qtype, limit) ) as r:
+            res = await r.json()
+            if res == []:
+                raise ValueError("Invalid query or API down.")
+            else:
+                return __cleanRecentRes(res)
 
-        qtype = kwargs.pop('qtype', 'id')
+async def getusrtop(**kwargs):
 
-        limit = kwargs.pop('limit', None)
+    usr = kwargs.pop('usr')
 
-        server = kwargs.pop('server', osuClasses.Server()).id
+    mode = kwargs.pop('mode', osuClasses.Mode()).id
 
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get( self.__API_URLs[server]['getrecent'](usr, mode, qtype, limit) ) as r:
-                res = await r.json()
-                if res == []:
-                    raise ValueError("Invalid query or API down.")
-                else:
-                    return self.__cleanRecentRes(res)
+    qtype = kwargs.pop('qtype', 'id')
 
-    async def getusrtop(self, **kwargs):
+    limit = kwargs.pop('limit', None)
 
-        usr = kwargs.pop('usr')
+    server = kwargs.pop('server', osuClasses.Server()).id
 
-        mode = kwargs.pop('mode', osuClasses.Mode()).id
+    async with aiohttp.ClientSession() as cs:
+        async with cs.get( __API_URLs[server]['getusrtop'](usr, mode, qtype, limit) ) as r:
+            res = await r.json()
+            if res == []:
+                raise ValueError("Invalid query or API down.")
+            else:
+                return __cleanTopRes(res)
 
-        qtype = kwargs.pop('qtype', 'id')
+async def getusrscores(**kwargs):
 
-        limit = kwargs.pop('limit', None)
+    usr = kwargs.pop('usr')
 
-        server = kwargs.pop('server', osuClasses.Server()).id
+    mode = kwargs.pop('mode', osuClasses.Mode()).id
 
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get( self.__API_URLs[server]['getusrtop'](usr, mode, qtype, limit) ) as r:
-                res = await r.json()
-                if res == []:
-                    raise ValueError("Invalid query or API down.")
-                else:
-                    return self.__cleanTopRes(res)
+    b = kwargs.pop('b')
 
-    async def getusrscores(self, **kwargs):
+    qtype = kwargs.pop('qtype', 'id')
 
-        usr = kwargs.pop('usr')
+    limit = kwargs.pop('limit', None)
 
-        mode = kwargs.pop('mode', osuClasses.Mode()).id
+    server = kwargs.pop('server', osuClasses.Server()).id
 
-        b = kwargs.pop('b')
-
-        qtype = kwargs.pop('qtype', 'id')
-
-        limit = kwargs.pop('limit', None)
-
-        server = kwargs.pop('server', osuClasses.Server()).id
-
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get( self.__API_URLs[server]['getusrscores'](usr, mode, b, qtype, limit) ) as r:
-                res = await r.json()
-                if res == []:
-                    raise ValueError("Invalid query or API down.")
-                else:
-                    return self.__cleanTopRes(res)
+    async with aiohttp.ClientSession() as cs:
+        async with cs.get( __API_URLs[server]['getusrscores'](usr, mode, b, qtype, limit) ) as r:
+            res = await r.json()
+            if res == []:
+                raise ValueError("Invalid query or API down.")
+            else:
+                return __cleanTopRes(res)
