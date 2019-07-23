@@ -1,3 +1,4 @@
+import re
 from commons.osu import osuClasses
 
 def getModeInfo(invoke):
@@ -116,3 +117,21 @@ def getMods(number):
     if number & 1<<27:  mod_list.append('3K')
     if number & 1<<28:  mod_list.append('2K')
     return ''.join(mod_list)
+
+__patternBeatmapLink = re.compile("(https?):\/\/([-\w._]+)(\/[-\w._]\?(.+)?)?(\/b\/(?P<bmapid1>[0-9]+)|\/s\/(?P<bmapsetid1>[0-9]+)|\/beatmapsets\/(?P<bmapsetid2>[0-9]+)#(?P<mode>[a-z]+)\/(?P<bmapid2>[0-9]+))")
+__patternBeatmapId = re.compile("^(?P<bmapid>[0-9]+)$")
+
+def getBeatmapFromText(text):
+    resultLink = __patternBeatmapLink.match(text)
+    if resultLink is not None:
+        setId, beatmapId = None, None
+        if resultLink.group("bmapsetid2") is not None:
+            setId = resultLink.group("bmapsetid2")
+            if resultLink.group("bmapid2") is not None:
+                beatmapId = resultLink.group("bmapid2")
+        elif resultLink.group("bmapid1") is not None:
+            beatmapId = resultLink.group("bmapid1")
+        else:
+            setId = resultLink.group("bmapset1")
+        return await self.osuAPI.getbmap(b=beatmapId, s=setId)
+
