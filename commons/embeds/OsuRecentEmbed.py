@@ -36,4 +36,4 @@ class OsuRecentEmbed(discord.Embed):
         self.set_author(name=f"{__beatmap['title']} [{__beatmap['version']}] ({__beatmap['creator']}) +{__playinfo['modString']} [{__beatmap['difficultyrating']}★]",\
         url=f"https://osu.ppy.sh/b/{__playinfo['beatmap_id']}", icon_url=__userstats["avatar_url"])
         self.set_thumbnail(url=f"https://b.ppy.sh/thumb/{__beatmap['beatmapset_id']}.jpg")
-        self.set_footer(text=f"{nomstat[__beatmap['approved']]} | osu! {__mode.name} Play", icon_url=__mode.icon)
+        self.set_footer(text=f"{nomstat[__beatmap['approved']]} | osu! {__mode.nameFull} Play", icon_url=__mode.icon)
