@@ -19,8 +19,8 @@ class OsuProfileEmbed(discord.Embed):
 
     def __init__(self, **kwargs):
         __userstats = kwargs.pop('userstats')
-        __mode = kwargs.pop('modeinfo', osuClasses.Mode())
-        __server = kwargs.get('server', osuClasses.Server())
+        __mode = kwargs.pop('modeinfo', osuClasses.Mode.STANDARD)   
+        __server = kwargs.get('server', osuClasses.Server.BANCHO)
         super().__init__(
             title=discord.Embed.Empty,
             color=kwargs.pop('color'),
@@ -34,6 +34,6 @@ class OsuProfileEmbed(discord.Embed):
             **>Ranks/day:** {int(__userstats['pp_raw']/__userstats['total_seconds_played']*86400) if __userstats['total_seconds_played'] > 0 else 0}",
             timestamp=kwargs.pop("timestamp")
         )
-        self.set_author(name=f"osu! {__mode.name} stats for {__userstats['username']} on {__server.name}", url=__userstats["profile_url"], icon_url=__mode.icon)
+        self.set_author(name=f"osu! {__mode.name} stats for {__userstats['username']} on {__server.name.lower()}", url=__userstats["profile_url"], icon_url=__mode.icon)
         self.set_thumbnail(url=__userstats["avatar_url"])
         self.set_footer(text=f"#{__userstats['pp_country_rank']}", icon_url=f"https://osu.ppy.sh/images/flags/{__userstats['country']}.png")

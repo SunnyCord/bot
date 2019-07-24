@@ -45,7 +45,7 @@ def calculateBeatmap(bmap, mods = '', mode: int = 0):
     if mode == 0:
         # Standard
         # modString = pyt.mods_str(mods)
-        modsBitMask = pyt.mods_from_str(mods)
+        modsBitMask = pyt.mods_from_str(mods if mods else '')
         beatmap = pyt.parser().map(bmap)
         sr = pyt.diff_calc().calc(beatmap, modsBitMask)
         objcount = beatmap.ncircles + beatmap.nsliders + beatmap.nspinners

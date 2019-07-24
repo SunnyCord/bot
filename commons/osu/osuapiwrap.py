@@ -144,11 +144,11 @@ async def getuser(**kwargs):
 
     usr = kwargs.pop('usr')
 
-    mode = kwargs.pop('mode', osuClasses.Mode()).id
+    mode = kwargs.pop('mode', osuClasses.Mode.STANDARD).id
 
     qtype = kwargs.pop('qtype', 'id')
 
-    server = kwargs.pop('server', osuClasses.Server()).id
+    server = kwargs.pop('server', osuClasses.Server.BANCHO).id
 
     async with aiohttp.ClientSession() as cs:
         async with cs.get( __API_URLs[server]['getuser'](usr, mode, qtype) ) as r:
@@ -165,7 +165,7 @@ async def getuser(**kwargs):
 
 async def getbmap(**kwargs):
 
-    mode = kwargs.pop('mode', osuClasses.Mode()).id
+    mode = kwargs.pop('mode', osuClasses.Mode.STANDARD).id
 
     b = kwargs.pop('b', None)
 
@@ -173,7 +173,7 @@ async def getbmap(**kwargs):
     if b is None:
         s = kwargs.pop('s', None)
 
-    server = kwargs.pop('server', osuClasses.Server()).id
+    server = kwargs.pop('server', osuClasses.Server.BANCHO).id
 
     limit = kwargs.pop('limit', 1)
 
@@ -191,7 +191,7 @@ async def getbmaposu(**kwargs):
 
     b = kwargs.pop('b')
 
-    server = kwargs.pop('server', osuClasses.Server()).id
+    server = kwargs.pop('server', osuClasses.Server.BANCHO).id
 
     async with aiohttp.ClientSession() as cs:
         async with cs.get( __API_URLs[server]['getbmaposu'](b) ) as r:
@@ -201,13 +201,13 @@ async def getrecent(**kwargs):
 
     usr = kwargs.pop('usr')
 
-    mode = kwargs.pop('mode', osuClasses.Mode()).id
+    mode = kwargs.pop('mode', osuClasses.Mode.STANDARD).id
 
     qtype = kwargs.pop('qtype', 'id')
 
     limit = kwargs.pop('limit', None)
 
-    server = kwargs.pop('server', osuClasses.Server()).id
+    server = kwargs.pop('server', osuClasses.Server.BANCHO).id
 
     async with aiohttp.ClientSession() as cs:
         async with cs.get( __API_URLs[server]['getrecent'](usr, mode, qtype, limit) ) as r:
@@ -221,13 +221,13 @@ async def getusrtop(**kwargs):
 
     usr = kwargs.pop('usr')
 
-    mode = kwargs.pop('mode', osuClasses.Mode()).id
+    mode = kwargs.pop('mode', osuClasses.Mode.STANDARD).id
 
     qtype = kwargs.pop('qtype', 'id')
 
     limit = kwargs.pop('limit', None)
 
-    server = kwargs.pop('server', osuClasses.Server()).id
+    server = kwargs.pop('server', osuClasses.Server.BANCHO).id
 
     async with aiohttp.ClientSession() as cs:
         async with cs.get( __API_URLs[server]['getusrtop'](usr, mode, qtype, limit) ) as r:
@@ -241,7 +241,7 @@ async def getusrscores(**kwargs):
 
     usr = kwargs.pop('usr')
 
-    mode = kwargs.pop('mode', osuClasses.Mode()).id
+    mode = kwargs.pop('mode', osuClasses.Mode.STANDARD).id
 
     b = kwargs.pop('b')
 
@@ -249,7 +249,7 @@ async def getusrscores(**kwargs):
 
     limit = kwargs.pop('limit', None)
 
-    server = kwargs.pop('server', osuClasses.Server()).id
+    server = kwargs.pop('server', osuClasses.Server.BANCHO).id
 
     async with aiohttp.ClientSession() as cs:
         async with cs.get( __API_URLs[server]['getusrscores'](usr, mode, b, qtype, limit) ) as r:

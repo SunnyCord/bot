@@ -4,53 +4,40 @@ import commons.redisIO as redisIO
 from commons.osu import osuapiwrap
 from commons.osu import osuClasses
 
-def getModeInfo(invoke):
-
-    if invoke in ["osu", "osutop", "ot"]:
-        return osuClasses.Mode()
-
-    if invoke in ["taiko", "taikotop", "tt"]:
-        return osuClasses.Mode(id=1)
-
-    if invoke in ["ctb", "ctbtop", "ct"]:
-        return osuClasses.Mode(id=2)
-
-    if invoke in ["mania", "maniatop", "mt"]:
-        return osuClasses.Mode(id=3)
-
-    return osuClasses.Mode()
-
 def parseArgsV2(**kwargs):
-
     args = kwargs.pop("args")
     validArgs = kwargs.pop("validArgs") if 'validArgs' in kwargs else []
     customArgs = kwargs.pop("customArgs") if 'customArgs' in kwargs else []
 
     qtype = "string"
-    server = 'bancho'
-    mode = 0
+    server = osuClasses.Server.BANCHO
+    mode = osuClasses.Mode.STANDARD
     position = None
     recentList = False
 
-    args = args.split(" ")
+    if args is None:
+        args = []
+    else:
+        args = args.split(" ")
 
     if '-bancho' in args:
+        server = osuClasses.Server.BANCHO
         args.pop(args.index('-bancho'))
 
     if '-ripple' in args:
-        server = 'ripple'
+        server = osuClasses.Server.RIPPLE
         args.pop(args.index('-ripple'))
 
     if '-akatsukirx' in args:
-        server = 'akatsukirx'
+        server = osuClasses.Server.AKATSUKIRX
         args.pop(args.index('-akatsukirx'))
 
     if '-akatsuki' in args:
-        server = 'akatsuki'
+        server = osuClasses.Server.AKATSUKI
         args.pop(args.index('-akatsuki'))
 
     if '-enjuu' in args:
-        server = 'enjuu'
+        server = osuClasses.Server.ENJUU
         args.pop(args.index('-enjuu'))
 
     if '-r' in args and '-r' in validArgs:
@@ -62,14 +49,14 @@ def parseArgsV2(**kwargs):
         args.pop(args.index('-l'))
 
     if '-m' not in args:
-        mode = 0
+        mode = osuClasses.Mode.STANDARD
 
     elif '-m' in validArgs:
         try:
-            mode = int(args[args.index('-m') + 1])
+            mode = osuClasses.Mode.fromId(int(args[args.index('-m') + 1]))
             args.pop(args.index('-m') + 1)
         except Exception:
-            mode = 0
+            mode = osuClasses.Mode.STANDARD
         args.pop(args.index('-m'))
 
     if '-p' in validArgs and '-p' in args:
@@ -79,8 +66,6 @@ def parseArgsV2(**kwargs):
         except Exception:
             position = 0
         args.pop(args.index('-p'))
-
-    # leftover = ' '.join(args)
 
     parsedArgs = {
         'qtype': qtype,
@@ -227,9 +212,9 @@ async def getBeatmapFromHistory(ctx):
     if config.getBotConfig().REDIS:
         beatmap_id = redisIO.getValue(ctx.message.channel.id)
         if beatmap_id is None:
-            return await ctx.send("No beatmap found.")
+            return None
     
-        mode = osuClasses.Mode(id = redisIO.getValue(f'{ctx.message.channel.id}.mode'))
-        return await osuapiwrap.getbmap(b=beatmap_id, mode=mode)[0]
+        mode = osuClasses.Mode.fromId(redisIO.getValue(f'{ctx.message.channel.id}.mode'))
+        return (await osuapiwrap.getbmap(b=beatmap_id, mode=mode))[0]
     else:
-        return await osuapiwrap.getbmap(b='1917158')[0]
+        return (await osuapiwrap.getbmap(b='1917158'))[0]

@@ -23,7 +23,7 @@ class osu(commands.Cog, name='osu!'):
         try:
             parsedArgs = osuhelpers.parseArgs(args=args)
             username = parsedArgs['user']
-            profile = await osuapiwrap.getuser(usr = username, mode = osuClasses.Mode(), qtype = 'string', server=osuClasses.Server(string = parsedArgs['server']))
+            profile = await osuapiwrap.getuser(usr = username, mode = osuClasses.Mode.STANDARD, qtype = 'string', server=osuClasses.Server.fromName(parsedArgs['server']))
             setOsu(ctx.message.author, profile['user_id'])
             await ctx.send(f"osu! profile succesfully set to {profile['username']}")
 
@@ -35,11 +35,14 @@ class osu(commands.Cog, name='osu!'):
     async def osu(self, ctx, *, args = None):
         """Shows osu! stats for a user.\nOther variants: ``mania, taiko, ctb``"""
 
-        user, server = None, osuClasses.Server()
+        user = None
+        server = osuClasses.Server.BANCHO
 
         if args is not None:
             parsedArgs = osuhelpers.parseArgs(args=args)
-            user, qtype, server = parsedArgs['user'], parsedArgs['qtype'], osuClasses.Server(string = parsedArgs['server'])
+            user = parsedArgs['user']
+            qtype = parsedArgs['qtype']
+            server = osuClasses.Server.fromName(parsedArgs['server'])
 
         if not user:
             qtype = "id"
@@ -52,7 +55,7 @@ class osu(commands.Cog, name='osu!'):
         if not user:
             return await ctx.send("Please set your profile!")
 
-        mode = osuhelpers.getModeInfo( ctx.invoked_with )
+        mode = osuClasses.Mode.fromCommand(ctx.invoked_with)
 
         try:
             profile = await osuapiwrap.getuser(usr = user, mode = mode, qtype = qtype, server = server)
@@ -72,11 +75,17 @@ class osu(commands.Cog, name='osu!'):
     async def recent(self, ctx, *, args = None):
         """Shows recent osu! plays for a user. Modes can be specified ``eg. recent -m 2``.\n*Valid Arguments:* ```fix\n-l, -m```"""
 
-        user, server, mode, limit = None, osuClasses.Server(), osuClasses.Mode(), 1
+        user = None
+        server = osuClasses.Server.BANCHO
+        mode = osuClasses.Mode.STANDARD
+        limit = 1
 
         if args is not None:
             parsedArgs = osuhelpers.parseArgs(args=args, validArgs=['-l', '-m'])
-            user, qtype, server, mode = parsedArgs['user'], parsedArgs['qtype'], osuClasses.Server(string = parsedArgs['server']), osuClasses.Mode(id = parsedArgs['mode'])
+            user = parsedArgs['user']
+            qtype = parsedArgs['qtype']
+            server = osuClasses.Server.fromName(parsedArgs['server'])
+            mode = osuClasses.Mode.fromId(parsedArgs['mode'])
             limit = 5 if parsedArgs['recentList'] is True else 1
 
         if not user:
@@ -140,18 +149,24 @@ class osu(commands.Cog, name='osu!'):
     async def osutop(self, ctx, *, args=None):
         """Shows osu! top plays for a user. Modes can be specified ``eg. maniatop``.\n*Valid Arguments:* ```fix\n-r, -p```"""
 
-        user, server, mode, limit, beatmaps = None, osuClasses.Server(), osuClasses.Mode(), 5, []
+        user = None
+        server = osuClasses.Server.BANCHO
+        limit = 5
+        beatmaps = []
 
         parsedArgs = {
             'recentList': False,
             'position': None
         }
 
-        mode = osuhelpers.getModeInfo( ctx.invoked_with )
+        mode = osuClasses.Mode.fromCommand( ctx.invoked_with )
 
         if args is not None:
             parsedArgs = osuhelpers.parseArgs(args=args, validArgs=['-r', '-p'])
-            user, qtype, server = parsedArgs['user'], parsedArgs['qtype'], osuClasses.Server(string = parsedArgs['server'])
+            user = parsedArgs['user']
+            qtype = parsedArgs['qtype']
+            server = osuClasses.Server.fromName(parsedArgs['server'])
+            
             if parsedArgs['recentList'] is True:
                 limit = 100
 
@@ -216,11 +231,14 @@ class osu(commands.Cog, name='osu!'):
     async def compare(self, ctx, *, args=None):
         """Shows your best scores on the last linked map."""
 
-        user, server, mode, limit = None, osuClasses.Server(), osuClasses.Mode(), 5
+        user = None
+        server = osuClasses.Server.BANCHO
+        mode = osuClasses.Mode.STANDARD
+        limit = 5
 
         if self.bot.configs.REDIS is True:
             beatmap_id = redisIO.getValue(ctx.message.channel.id)
-            mode = osuClasses.Mode(id = redisIO.getValue(f'{ctx.message.channel.id}.mode'))
+            mode = osuClasses.Mode.fromId(redisIO.getValue(f'{ctx.message.channel.id}.mode'))
             if beatmap_id is None:
                 return await ctx.send("No beatmap found.")
         else:
@@ -228,7 +246,9 @@ class osu(commands.Cog, name='osu!'):
 
         if args is not None:
             parsedArgs = osuhelpers.parseArgs(args=args)
-            user, qtype, server = parsedArgs['user'], parsedArgs['qtype'], osuClasses.Server(string = parsedArgs['server'])
+            user = parsedArgs['user']
+            qtype = parsedArgs['qtype']
+            server = osuClasses.Server.fromName(parsedArgs['server'])
 
         if not user:
             qtype = "id"
@@ -274,27 +294,29 @@ class osu(commands.Cog, name='osu!'):
     async def perf(self, ctx, *, args=None):
         """Shows information about pp of a certain map"""
 
-        mode = osuClasses.Mode()
+        args = osuhelpers.parseArgsV2(args=args, customArgs=["beatmap", "mods"])
+        mode = args["mode"]
+        
+        if args["beatmap"]:
+            beatmap = await osuhelpers.getBeatmapFromText(args["beatmap"])
+        else:
+            beatmap = await osuhelpers.getBeatmapFromHistory(ctx)
+
+        if beatmap is None:
+            await ctx.send("Failed to find any maps")
+            return
 
         if self.bot.configs.REDIS is True:
-            beatmap_id = redisIO.getValue(ctx.message.channel.id)
-            mode = osuClasses.Mode(id = redisIO.getValue(f'{ctx.message.channel.id}.mode'))
-            if beatmap_id is None:
-                return await ctx.send("No beatmap found.")
-        else:
-            beatmap_id = 1917158
+            redisIO.setValue(ctx.message.channel.id, beatmap["beatmap_id"])
+            redisIO.setValue(f'{ctx.message.channel.id}.mode', mode.id)
 
-        mods = ""
-        if args is not None:
-            parsedArgs = osuhelpers.parseArgs(args=args)
-            mods = parsedArgs["user"]
+        mods = args["mods"]
 
-        beatmap = await osuapiwrap.getbmap(mode=mode, b=beatmap_id)
-        bmapfile = await osuapiwrap.getbmaposu(mode=mode, b=beatmap_id)
+        bmapfile = await osuapiwrap.getbmaposu(mode=mode, b=beatmap["beatmap_id"])
 
         perfDict = await self.bot.loop.run_in_executor(None, ppc.calculateBeatmap, bmapfile, mods, mode.id)
 
-        result = OsuPerformanceEmbed(beatmap=beatmap[0], perfinfo=perfDict, color=self.bot.configs.COLOR)
+        result = OsuPerformanceEmbed(beatmap=beatmap, perfinfo=perfDict, color=self.bot.configs.COLOR)
         await ctx.send(embed=result)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
@@ -305,11 +327,12 @@ class osu(commands.Cog, name='osu!'):
         args = osuhelpers.parseArgsV2(args=args, customArgs=["beatmap", "user"])
 
         qtype = args["qtype"]
-        mode = osuClasses.Mode(id=args["mode"])
-        server = osuClasses.Server(string=args["server"])
+        mode = args["mode"]
+        server = args["server"]
 
         if args["beatmap"] is None:
-            return ctx.send("No beatmap provided")
+            await ctx.send("No beatmap provided")
+            return
         
         beatmap = await osuhelpers.getBeatmapFromText(args["beatmap"])
         
@@ -326,6 +349,10 @@ class osu(commands.Cog, name='osu!'):
         except ValueError:
             return await ctx.send("User has not been found or has no plays!")
 
+        if self.bot.configs.REDIS is True:
+            redisIO.setValue(ctx.message.channel.id, beatmap["beatmap_id"])
+            redisIO.setValue(f'{ctx.message.channel.id}.mode', mode.id)
+
         for _, top in enumerate(tops):
             bmapfile = await osuapiwrap.getbmaposu(mode=mode, b=beatmap["beatmap_id"])
             _, playDict = await self.bot.loop.run_in_executor(None, ppc.calculatePlay, bmapfile, mode.id, top)
@@ -335,11 +362,11 @@ class osu(commands.Cog, name='osu!'):
 
             top['if_fc'] = ''
             if top["perfect"] == 0 and top['countmiss'] != 0 and int(beatmap['max_combo']) - int(top['maxcombo']) > 10 and mode.id == 0:
-                top['if_fc'] = f" ({playDict['pp_fc']} for {playDict['accuracy_fc']}% FC)"
+                top['if_fc'] = f" ({playDict['pp_fc']} forr {playDict['accuracy_fc']}% FC)"
 
-        beatmap_title = f"{beatmap['artist']} - {beatmap['title']} ({beatmap['creator']}) [{beatmap['version']}]"
+        beatmap_title = f"{beatmap['artist']} - {beatmap['rtitle']} ({beatmap['creator']}) [{beatmap['version']}]"
 
-        result = OsuListEmbed(list = tops, profile = profile, beatmap = beatmap, title = f"Top osu! {mode.name} for {profile['username']}  on {beatmap_title}", url = profile['profile_url'],\
+        result = OsuListEmbed(list = tops, profile = profile, beatmap = beatmap, title = f"Top osu! {mode.name} for {profile['username']} on {beatmap_title}", url = profile['profile_url'],\
         authorico = mode.icon, thumbnail = f"https://b.ppy.sh/thumb/{beatmap['beatmapset_id']}.jpg", color = self.bot.configs.COLOR, style = 1, footertext = f'Plays from {server.name}', footericon = server.icon)
 
         await ctx.send(embed=result)
