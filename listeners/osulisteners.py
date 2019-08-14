@@ -11,7 +11,9 @@ class OsuListeners(commands.Cog, command_attrs=dict(hidden=True), name="osu! Cha
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        beatmap = osuhelpers.getBeatmapFromText(message.content)
+        beatmap = await osuhelpers.getBeatmapFromText(message.content)
+        if beatmap is None:
+            return
         await message.channel.send(f"Found beatmap {beatmap['title']}")
 
 

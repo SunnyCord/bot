@@ -1,7 +1,7 @@
 import aiohttp
 import config
 from io import StringIO
-from commons.osu import osuClasses
+import commons.osu.classes as osuClasses
 
 __token = config.osu.token
 __bmapURLModes = ['osu', 'taiko', 'fruits', 'mania']

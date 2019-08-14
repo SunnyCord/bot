@@ -4,7 +4,7 @@ from datetime import datetime
 from commons.osu import osuhelpers
 from commons.osu import ppwrapper as ppc
 from commons.osu import osuapiwrap
-from commons.osu import osuClasses
+import commons.osu.classes as osuClasses
 from commons.mongoIO import getOsu, setOsu
 from commons.embeds import *
 import commons.redisIO as redisIO
@@ -142,7 +142,7 @@ class osu(commands.Cog, name='osu!'):
         result = OsuRecentEmbed(color = self.bot.configs.COLOR, timestamp = date, userstats = profile, playinfo = recentp[0],\
         mode = mode, beatmap = beatmap[0])
 
-        await ctx.send(f"**Most Recent osu! {mode.name} Play for {profile['username']} on {server.name}:**", embed=result)
+        await ctx.send(f"**Most Recent osu! {mode.nameFull} Play for {profile['username']} on {server.name.lower()}:**", embed=result)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.command(aliases=["ot", "tt", "ct", "mt", "taikotop", "ctbtop", "maniatop"])
@@ -221,8 +221,8 @@ class osu(commands.Cog, name='osu!'):
             if tops[index]["perfect"] == 0 and tops[index]['countmiss'] != 0 and int(beatmap[0]['max_combo']) - int(tops[index]['maxcombo']) > 10 and mode.id == 0:
                 tops[index]['if_fc'] = f" ({playDict['pp_fc']} for {playDict['accuracy_fc']}% FC)"
 
-        result = OsuListEmbed(list = tops, profile = profile, beatmaps = beatmaps, title = f"Top {limit} osu! {mode.name} for {profile['username']}", url = profile['profile_url'],\
-        authorico = mode.icon, thumbnail = profile['avatar_url'], color = self.bot.configs.COLOR, limit = limit, footertext = f'Plays from {server.name}', footericon = server.icon)
+        result = OsuListEmbed(list = tops, profile = profile, beatmaps = beatmaps, title = f"Top {limit} osu! {mode.nameFull} for {profile['username']}", url = profile['profile_url'],\
+        authorico = mode.icon, thumbnail = profile['avatar_url'], color = self.bot.configs.COLOR, limit = limit, footertext = f'Plays from {server.name.lower()}', footericon = server.icon)
 
         await ctx.send(embed=result)
 
@@ -284,8 +284,8 @@ class osu(commands.Cog, name='osu!'):
 
         beatmap_title = f"{beatmap[0]['artist']} - {beatmap[0]['title']} ({beatmap[0]['creator']}) [{beatmap[0]['version']}]"
 
-        result = OsuListEmbed(list = tops, profile = profile, beatmap = beatmap[0], title = f"Top osu! {mode.name} for {profile['username']}  on {beatmap_title}", url = profile['profile_url'],\
-        authorico = mode.icon, thumbnail = f"https://b.ppy.sh/thumb/{beatmap[0]['beatmapset_id']}.jpg", color = self.bot.configs.COLOR, style = 1, footertext = f'Plays from {server.name}', footericon = server.icon)
+        result = OsuListEmbed(list = tops, profile = profile, beatmap = beatmap[0], title = f"Top osu! {mode.nameFull} for {profile['username']} on {beatmap_title}", url = profile['profile_url'],\
+        authorico = mode.icon, thumbnail = f"https://b.ppy.sh/thumb/{beatmap[0]['beatmapset_id']}.jpg", color = self.bot.configs.COLOR, style = 1, footertext = f'Plays from {server.name.lower()}', footericon = server.icon)
 
         await ctx.send(embed=result)
 
@@ -294,7 +294,7 @@ class osu(commands.Cog, name='osu!'):
     async def perf(self, ctx, *, args=None):
         """Shows information about pp of a certain map"""
 
-        args = osuhelpers.parseArgsV2(args=args, customArgs=["beatmap", "mods"])
+        args = osuhelpers.parseArgsV2(args=args, customArgs=["mods", "beatmap"])
         mode = args["mode"]
         
         if args["beatmap"]:
@@ -364,10 +364,10 @@ class osu(commands.Cog, name='osu!'):
             if top["perfect"] == 0 and top['countmiss'] != 0 and int(beatmap['max_combo']) - int(top['maxcombo']) > 10 and mode.id == 0:
                 top['if_fc'] = f" ({playDict['pp_fc']} forr {playDict['accuracy_fc']}% FC)"
 
-        beatmap_title = f"{beatmap['artist']} - {beatmap['rtitle']} ({beatmap['creator']}) [{beatmap['version']}]"
+        beatmap_title = f"{beatmap['artist']} - {beatmap['title']} ({beatmap['creator']}) [{beatmap['version']}]"
 
-        result = OsuListEmbed(list = tops, profile = profile, beatmap = beatmap, title = f"Top osu! {mode.name} for {profile['username']} on {beatmap_title}", url = profile['profile_url'],\
-        authorico = mode.icon, thumbnail = f"https://b.ppy.sh/thumb/{beatmap['beatmapset_id']}.jpg", color = self.bot.configs.COLOR, style = 1, footertext = f'Plays from {server.name}', footericon = server.icon)
+        result = OsuListEmbed(list = tops, profile = profile, beatmap = beatmap, title = f"Top osu! {mode.nameFull} for {profile['username']} on {beatmap_title}", url = profile['profile_url'],\
+        authorico = mode.icon, thumbnail = f"https://b.ppy.sh/thumb/{beatmap['beatmapset_id']}.jpg", color = self.bot.configs.COLOR, style = 1, footertext = f'Plays from {server.name.lower()}', footericon = server.icon)
 
         await ctx.send(embed=result)
 

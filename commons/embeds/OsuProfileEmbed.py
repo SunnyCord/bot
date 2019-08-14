@@ -1,5 +1,5 @@
 import discord
-from commons.osu import osuClasses
+import commons.osu.classes as osuClasses
 
 class OsuProfileEmbed(discord.Embed):
 
