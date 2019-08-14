@@ -124,12 +124,11 @@ class osu(commands.Cog, name='osu!'):
         beatmap[0]['objcount'] = int(beatmap[0]['count_normal']) + int(beatmap[0]['count_slider']) + int(beatmap[0]['count_spinner'])
         beatmap[0]['mode'] = mode.id
 
+        recentp[0]['completion'] = 100
         if playDict['completion'] < 100:
             recentp[0]['rank'] = 'F'
-
-        recentp[0]['completion'] = ''
-        if recentp[0]["rank"] == 'F' and mode.id == 0:
-            recentp[0]['completion'] = f'\n> **Completion:** {playDict["completion"]}%'
+            if mode.id == 0:
+                recentp[0]['completion'] = playDict["completion"]
 
         recentp[0]['if_fc'] = ''
         if recentp[0]["perfect"] == 0 and recentp[0]['countmiss'] != 0 and int(beatmap[0]['max_combo']) - int(recentp[0]['maxcombo']) > 10 and mode.id == 0:
