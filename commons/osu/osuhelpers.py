@@ -1,8 +1,8 @@
 import re
 import config
+import commons.osu.classes as osuClasses
 import commons.redisIO as redisIO
 from commons.osu import osuapiwrap
-from commons.osu import osuClasses
 
 def parseArgsV2(**kwargs):
     args = kwargs.pop("args")
