@@ -1,4 +1,4 @@
-import commons.osu.classes as osuClasses
+import commons.osu.classes as osu
 
 class Score:
     """Abstract class representing a score.
@@ -54,25 +54,25 @@ class Score:
         self.user_id:int = jsonResponse["user_id"]
         self.rank:str = jsonResponse["rank"]
 
-    def accuracy(self, mode: osuClasses.Mode):
+    def accuracy(self, mode: osu.Mode):
         """Calculated accuracy.
         See Also
         --------
         <https://osu.ppy.sh/help/wiki/Accuracy>
         """
-        if mode is osuClasses.Mode.STANDARD:
+        if mode is osu.Mode.STANDARD:
             return (
                 (6 * self.count300 + 2 * self.count100 + self.count50) /
                 (6 * (self.count300 + self.count100 + self.count50 + self.countmiss)))
-        if mode is osuClasses.Mode.TAIKO:
+        if mode is osu.Mode.TAIKO:
             return (
                 (self.count300 + self.countgeki + (0.5*(self.count100 + self.countkatu))) /
                 (self.count300 + self.countgeki + self.count100 + self.countkatu + self.countmiss))
-        if mode is osuClasses.Mode.MANIA:
+        if mode is osu.Mode.MANIA:
             return (
                 (6 * (self.countgeki + self.count300) + 4 * self.countkatu + 2 * self.count100 + self.count50) /
                 (6 * (self.countgeki + self.count300 + self.countkatu + self.count100 + self.count50 + self.countmiss)))
-        if mode is osuClasses.Mode.CTB:
+        if mode is osu.Mode.CTB:
             return (
                 (self.count50 + self.count100 + self.count300) /
                 (self.count50 + self.count100 + self.count300 + self.countmiss + self.countkatu))
@@ -102,7 +102,7 @@ class BeatmapScore(Score):
     def __init__(self, jsonResponse):
         self.username:str = jsonResponse["username"]
         self.pp:float = jsonResponse["pp"]
-        self.enabled_mods:Mods = jsonResponse["enabled_mods"]
+        self.enabled_mods:osu.Mod = osu.Mod.fromStr(jsonResponse["enabled_mods"])
         self.date:str = jsonResponse["date"]
         self.score_id:int = jsonResponse["score_id"]
         self.replay_available:bool = jsonResponse["replay_available"]

@@ -1,4 +1,6 @@
-class OsuMod:
+from enum import Flag
+
+class Mod(Flag):
     """Bitwise Flags representing osu! mods.
     Notes
     -----
@@ -12,50 +14,55 @@ class OsuMod:
         # Check if any of given flags are set.
         OsuMod.keyMod in flags
     """
-    NoMod = 0
-    NoFail = 1, "NF"
-    Easy = 2, "EZ"
-    TouchDevice = 4, "TD"
-    Hidden = 8, "HD"
-    HardRock = 16, "HR"
-    SuddenDeath = 32, "SD"
-    DoubleTime = 64, "DT"
-    Relax = 128, "RX"
-    HalfTime = 256, "HT"
-    Nightcore = 512, "NC"  # Only set along with DoubleTime. i.e: NC only gives 576
-    Flashlight = 1024, "FL"
-    Autoplay = 2048
-    SpunOut = 4096, "SO"
-    Autopilot = 8192, "AP"  # Called Relax2 on osu api documentation
-    Perfect = 16384, "PF"  # Only set along with SuddenDeth. i.e: PF only gives 16416
-    Key4 = 32768, "4K"
-    Key5 = 65536, "5K"
-    Key6 = 131072, "6K"
-    Key7 = 262144, "7K"
-    Key8 = 524288, "8K"
-    FadeIn = 1048576, "FI"
-    Random = 2097152, "RD"
-    LastMod = 4194304
-    Key9 = 16777216, "9K"
-    Key10 = 33554432, "10K"
-    Key1 = 67108864, "1K"
-    Key3 = 134217728, "3K"
-    Key2 = 268435456, "2K"
+    NoMod = (0)
+    NoFail = (1, "NF")
+    Easy = (2, "EZ")
+    TouchDevice = (4, "TD")
+    Hidden = (8, "HD")
+    HardRock = (16, "HR")
+    SuddenDeath = (32, "SD")
+    DoubleTime = (64, "DT")
+    Relax = (128, "RX")
+    HalfTime = (256, "HT")
+    Nightcore = (512, "NC")  # Only set along with DoubleTime. i.e: NC only gives 576
+    Flashlight = (1024, "FL")
+    Autoplay = (2048)
+    SpunOut = (4096, "SO")
+    Autopilot = (8192, "AP")  # Called Relax2 on osu api documentation
+    Perfect = (16384, "PF")  # Only set along with SuddenDeth. i.e: PF only gives 16416
+    Key4 = (32768, "4K")
+    Key5 = (65536, "5K")
+    Key6 = (131072, "6K")
+    Key7 = (262144, "7K")
+    Key8 = (524288, "8K")
+    FadeIn = (1048576, "FI")
+    Random = (2097152, "RD")
+    LastMod = (4194304)
+    Key9 = (16777216, "9K")
+    Key10 = (33554432, "10K")
+    Key1 = (67108864, "1K")
+    Key3 = (134217728, "3K")
+    Key2 = (268435456, "2K")
 
     def __init__(self, value, shortname=""):
+        self._value = value
         self._shortname = shortname
 
     def __str__(self):
         return self.longname
 
     @property
+    def value(self):
+        return self._value
+
+    @property
     def _flags_clean_nightcore(self):
         value = self.value
-        if OsuMod.Nightcore in self:
-            value &= ~OsuMod.DoubleTime.value
-        if OsuMod.Perfect in self:
-            value &= ~OsuMod.SuddenDeath.value
-        yield from OsuMod(value).enabled_flags
+        if Mod.Nightcore in self:
+            value &= ~Mod.DoubleTime[0]
+        if Mod.Perfect in self:
+            value &= ~Mod.SuddenDeath[0]
+        yield from Mod(value).enabled_flags
 
     @property
     def shortname(self):
@@ -66,7 +73,7 @@ class OsuMod:
     def longname(self):
         """The long name representing this mod. (e.g. Hidden DoubleTime)"""
         return " ".join(tpl.name for tpl in self._flags_clean_nightcore)
-
+        
     def __format__(self, format_spec):
         """Format an OsuMod.
         Formats
@@ -81,3 +88,11 @@ class OsuMod:
             return self.longname
         else:
             return self.__str__()
+
+    @staticmethod
+    def fromStr(mods) -> 'Mod':
+        value = 0
+        for mod in list(Mod):
+            if mod in mods.upper():
+                value |= mod[0]
+        return value
