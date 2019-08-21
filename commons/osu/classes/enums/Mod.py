@@ -1,6 +1,6 @@
-from enum import Flag
+from enum import Enum
 
-class Mod(Flag):
+class Mod(Enum):
     """Bitwise Flags representing osu! mods.
     Notes
     -----
@@ -14,7 +14,7 @@ class Mod(Flag):
         # Check if any of given flags are set.
         OsuMod.keyMod in flags
     """
-    NoMod = (0)
+    NoMod = (0, "")
     NoFail = (1, "NF")
     Easy = (2, "EZ")
     TouchDevice = (4, "TD")
@@ -44,55 +44,24 @@ class Mod(Flag):
     Key3 = (134217728, "3K")
     Key2 = (268435456, "2K")
 
-    def __init__(self, value, shortname=""):
-        self._value = value
-        self._shortname = shortname
+    def __init__(self, value, short_name=""):
+        self.bitmask = value
+        self.short_name = short_name
 
-    def __str__(self):
-        return self.longname
+    def __int__(self):
+        return self.bitmask
 
-    @property
-    def value(self):
-        return self._value
-
-    @property
-    def _flags_clean_nightcore(self):
-        value = self.value
-        if Mod.Nightcore in self:
-            value &= ~Mod.DoubleTime[0]
-        if Mod.Perfect in self:
-            value &= ~Mod.SuddenDeath[0]
-        yield from Mod(value).enabled_flags
-
-    @property
-    def shortname(self):
-        """The initialism representing this mod. (e.g. HDHR)"""
-        return "".join(tpl._shortname for tpl in self._flags_clean_nightcore)
-
-    @property
-    def longname(self):
-        """The long name representing this mod. (e.g. Hidden DoubleTime)"""
-        return " ".join(tpl.name for tpl in self._flags_clean_nightcore)
-        
     def __format__(self, format_spec):
         """Format an OsuMod.
         Formats
         -------
         s
-            shortname e.g. HDHR
+            short_name e.g. HDHR
         l
-            longname e.g. Hidden HardRock"""
+            long_name e.g. Hidden HardRock"""
         if format_spec == "s":
-            return self.shortname
+            return self.short_name
         elif format_spec == "l":
-            return self.longname
+            return self.long_name
         else:
             return self.__str__()
-
-    @staticmethod
-    def fromStr(mods) -> 'Mod':
-        value = 0
-        for mod in list(Mod):
-            if mod in mods.upper():
-                value |= mod[0]
-        return value

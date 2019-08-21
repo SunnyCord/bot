@@ -1,5 +1,7 @@
 import commons.osu.classes as osu
 
+from datetime import datetime
+
 class Score:
     """Abstract class representing a score.
     Attributes
@@ -13,8 +15,8 @@ class Score:
         In catch: number of "droplet" hits
     count100 : int
         Number of "100" hits
-        In taiko: number of "good" hits
-        In catch: number of "drop" hits
+        In taiko: number of "good" hitscombo
+        In catch: number of "drop" hitscombo
     count300 : int
         Number of "300" hits
         In taiko: number of "great" hits
@@ -41,41 +43,49 @@ class Score:
     ---------
     <https://osu.ppy.sh/wiki/Score>
     """
-    def __init__(self, jsonResponse):
-        self.score:int = jsonResponse["score"]
-        self.maxcombo:int = jsonResponse["maxcombo"]
-        self.count50:int = jsonResponse["count50"]
-        self.count100:int = jsonResponse["count100"]
-        self.count300:int = jsonResponse["count300"]
-        self.countmiss:int = jsonResponse["countmiss"]
-        self.countkatu:int = jsonResponse["countkatu"]
-        self.countgeki:int = jsonResponse["countgeki"]
-        self.perfect:bool = jsonResponse["perfect"]
-        self.user_id:int = jsonResponse["user_id"]
-        self.rank:str = jsonResponse["rank"]
+    def __init__(self, json_response, server:osu.Server = osu.Server.BANCHO, mode:osu.Mode = osu.Mode.STANDARD):
+        self.server = server
+        self.mode = mode
+        self.score:int = int(json_response["score"])
+        self.maxcombo:int = int(json_response["maxcombo"])
+        self.count50:int = int(json_response["count50"])
+        self.count100:int = int(json_response["count100"])
+        self.count300:int = int(json_response["count300"])
+        self.countmiss:int = int(json_response["countmiss"])
+        self.countkatu:int = int(json_response["countkatu"])
+        self.countgeki:int = int(json_response["countgeki"])
+        self.perfect:bool = bool(int(json_response["perfect"]))
+        self.user_id:int = int(json_response["user_id"])
+        self.rank:osu.Rank = osu.Rank[json_response["rank"]]
+        self.enabled_mods:osu.Mod = osu.Mods(int(json_response["enabled_mods"]))
+        self.performance:osu.Performance = None
+        self.date:datetime = datetime.strptime(json_response["date"], "%Y-%m-%d %H:%M:%S")
 
-    def accuracy(self, mode: osu.Mode):
+    def accuracy(self, if_fc:bool = False):
         """Calculated accuracy.
         See Also
         --------
         <https://osu.ppy.sh/help/wiki/Accuracy>
         """
-        if mode is osu.Mode.STANDARD:
+        if self.mode is osu.Mode.STANDARD:
             return (
-                (6 * self.count300 + 2 * self.count100 + self.count50) /
+                (6 * (self.count300 + (self.countmiss if if_fc else 0)) + 2 * self.count100 + self.count50) /
                 (6 * (self.count300 + self.count100 + self.count50 + self.countmiss)))
-        if mode is osu.Mode.TAIKO:
+        if self.mode is osu.Mode.TAIKO:
             return (
                 (self.count300 + self.countgeki + (0.5*(self.count100 + self.countkatu))) /
                 (self.count300 + self.countgeki + self.count100 + self.countkatu + self.countmiss))
-        if mode is osu.Mode.MANIA:
+        if self.mode is osu.Mode.MANIA:
             return (
                 (6 * (self.countgeki + self.count300) + 4 * self.countkatu + 2 * self.count100 + self.count50) /
                 (6 * (self.countgeki + self.count300 + self.countkatu + self.count100 + self.count50 + self.countmiss)))
-        if mode is osu.Mode.CTB:
+        if self.mode is osu.Mode.CTB:
             return (
                 (self.count50 + self.count100 + self.count300) /
                 (self.count50 + self.count100 + self.count300 + self.countmiss + self.countkatu))
+
+    def total_hits(self):
+        return self.count300 + self.count100 + self.count50 + self.countmiss
 
 class BeatmapScore(Score):
     """Class representing a score attached to a beatmap.
@@ -99,13 +109,12 @@ class BeatmapScore(Score):
     <https://osu.ppy.sh/wiki/Score>
     """
 
-    def __init__(self, jsonResponse):
-        self.username:str = jsonResponse["username"]
-        self.pp:float = jsonResponse["pp"]
-        self.enabled_mods:osu.Mod = osu.Mod.fromStr(jsonResponse["enabled_mods"])
-        self.date:str = jsonResponse["date"]
-        self.score_id:int = jsonResponse["score_id"]
-        self.replay_available:bool = jsonResponse["replay_available"]
+    def __init__(self, json_response, server:osu.Server = osu.Server.BANCHO, mode:osu.Mode = osu.Mode.STANDARD):
+        super().__init__(json_response, server, mode)
+        # self.username:str = json_response["username"]
+        self.pp:float = float(json_response["pp"])
+        self.score_id:int = int(json_response["score_id"])
+        self.replay_available:bool = bool(json_response["replay_available"])
 
     def __repr__(self):
         return "<{0.__module__}.BeatmapScore user_id={0.user_id} score_id={0.score_id} date={0.date}>".format(self)
@@ -115,3 +124,30 @@ class BeatmapScore(Score):
 
     def __eq__(self, other):
         return self.score_id == other.score_id
+
+
+class RecentScore(Score):
+    """Class representing a recent score.
+    See :class:`Score`
+    Attributes
+    -----------
+    beatmap_id : int
+        Beatmap the score is for.
+    enabled_mods : :class:`osuapi.enums.OsuMod`
+        Enabled modifiers
+
+    date : datetime
+
+        When the score was played.
+
+    See Also
+    ---------import 
+    <https://import 
+    """
+    def __init__(self, json_response, server:osu.Server = osu.Server.BANCHO, mode:osu.Mode = osu.Mode.STANDARD):
+        super().__init__(json_response, server, mode)
+        self.beatmap_id:int = int(json_response["beatmap_id"])
+
+    def __repr__(self):
+        return "<{0.__module__}.SoloScore user_id={0.user_id} beatmap_id={0.beatmap_id} date={0.date}>".format(self)
+

@@ -1,44 +1,28 @@
 import discord
+import commons.osu.classes as osu
+import config
 
 class OsuRecentEmbed(discord.Embed):
 
-    def __init__(self, **kwargs):
-        __userstats = kwargs.pop('userstats')
-        __info = kwargs.pop('playinfo')
-        __mode = kwargs.pop('mode')
-        __beatmap = kwargs.pop('beatmap')
-        ranks = {
-            "F": "<:F_:504305414846808084>",
-            "D": "<:D_:504305448673869834>",
-            "C": "<:C_:504305500364472350>",
-            "B": "<:B_:504305539291938816>",
-            "A": "<:A_:504305622297083904>",
-            "S": "<:S_:504305656266752021>",
-            "SH": "<:SH:504305700445487105>",
-            "X": "<:X_:504305739209244672>",
-            "XH": "<:XH:504305771417305112>",
-            "SS": "<:X_:504305739209244672>",
-            "SSH": "<:XH:504305771417305112>"
-        }
-
-        nomstat = ["Unranked", "Ranked", "Approved", "Qualified", "Loved"]
-
+    def __init__(self, score:osu.Score, beatmap:osu.Beatmap):
         description = f"""
-> {ranks[__info['rank']]} > **{__info['pp']}PP{__info['if_fc']}** > {__info['accuracy']}%
-> {__info['score']} > x{__info['maxcombo']}/{__beatmap['max_combo']} > [{__info['count300']}/{__info['count100']}/{__info['count50']}/{__info['countmiss']}]"""
+> {score.rank.icon} > **{round(score.performance.pp, 2)}PP""" + (f"({round(score.performance.pp_fc, 2)}PP for {round(score.accuracy(True) * 100, 2)}% FC)" if not score.perfect else "") + f"""** > {round(score.accuracy() * 100, 2)}%
+> {score.score} > x{score.maxcombo}/{beatmap.max_combo} > [{score.count300}/{score.count100}/{score.count50}/{score.countmiss}]"""
 
-        if __info['completion'] != 100:
+        if score.performance.completion != 100:
             description += f"""
-> **Completion:** {__info['completion']}%"""
+> **Completion:** {score.performance.completion}%"""
 
         super().__init__(
-            title=discord.Embed.Empty,
-            color=kwargs.pop('color'),
+            title=discord.Embed.Empty, 
+            color=config.getBotConfig().COLOR,
             description=description,
-            timestamp=kwargs.pop("timestamp")
+            timestamp=score.date
         )
         
-        self.set_author(name=f"{__beatmap['title']} [{__beatmap['version']}] ({__beatmap['creator']}) +{__info['modString']} [{__beatmap['difficultyrating']}★]",\
-        url=f"https://osu.ppy.sh/b/{__info['beatmap_id']}", icon_url=__userstats["avatar_url"])
-        self.set_thumbnail(url=f"https://b.ppy.sh/thumb/{__beatmap['beatmapset_id']}.jpg")
-        self.set_footer(text=f"{nomstat[__beatmap['approved']]} | osu! {__mode.nameFull} Play", icon_url=__mode.icon)
+        self.set_author(
+            name=f"{beatmap.title} [{beatmap.version}] ({beatmap.creator}) +{str(score.enabled_mods)} [{round(score.performance.star_rating, 2)}★]",
+            url=score.server.url_beatmap + str(beatmap.beatmap_id),
+            icon_url=score.server.url_avatar + str(score.user_id))
+        self.set_thumbnail(url=f"https://b.ppy.sh/thumb/{beatmap.beatmapset_id}.jpg")
+        self.set_footer(text=f"{beatmap.status.name.lower()} | osu! {score.mode.name_full} Play", icon_url=score.mode.icon)
