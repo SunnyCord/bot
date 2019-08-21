@@ -1,5 +1,6 @@
 import discord
-import commons.osu.classes as osuClasses
+import commons.osu.classes as osu
+from datetime import datetime
 
 class OsuProfileEmbed(discord.Embed):
 
@@ -17,23 +18,19 @@ class OsuProfileEmbed(discord.Embed):
             ("{0} second{1} ".format(seconds, "s" if seconds!=1 else "") if seconds else "")
         return result
 
-    def __init__(self, **kwargs):
-        __userstats = kwargs.pop('userstats')
-        __mode = kwargs.pop('modeinfo', osuClasses.Mode.STANDARD)   
-        __server = kwargs.get('server', osuClasses.Server.BANCHO)
+    def __init__(self, user:osu.User, mode:osu.Mode, color:str):
         super().__init__(
             title=discord.Embed.Empty,
-            color=kwargs.pop('color'),
-            description=f"**>Rank:** #{__userstats['pp_rank']}\n\
-            **>PP:** {__userstats['pp_raw']}\n\
-            **>Accuracy:** {__userstats['accuracy']}%\n\
-            **>Level:** {__userstats['level']} ({__userstats['level_progress']}%)\n\
-            **>Playtime:** {self.__secondsToText(__userstats['total_seconds_played'])}\n\
-            **>Playcount:** {__userstats['playcount']}\n\
-            **>PP/hour:** {int(__userstats['pp_raw']/__userstats['total_seconds_played']*3600) if __userstats['total_seconds_played'] > 0 else 0}\n\
-            **>Ranks/day:** {int(__userstats['pp_raw']/__userstats['total_seconds_played']*86400) if __userstats['total_seconds_played'] > 0 else 0}",
-            timestamp=kwargs.pop("timestamp")
+            color=color,
+            description=f"**>Rank:** #{user.pp_rank}\n\
+            **>PP:** {user.pp_raw}\n\
+            **>Accuracy:** {round(user.accuracy, 2)}%\n\
+            **>Level:** {int(user.level)} ({user.level_progress}%)\n\
+            **>Playtime:** {self.__secondsToText(user.total_seconds_played)}\n\
+            **>Playcount:** {user.playcount}\n\
+            **>PP/hour:** {int(user.pp_raw/user.total_seconds_played*3600) if user.total_seconds_played > 0 else 0}",
+            timestamp=datetime.utcnow()
         )
-        self.set_author(name=f"osu! {__mode.name} stats for {__userstats['username']} on {__server.name.lower()}", url=__userstats["profile_url"], icon_url=__mode.icon)
-        self.set_thumbnail(url=__userstats["avatar_url"])
-        self.set_footer(text=f"#{__userstats['pp_country_rank']}", icon_url=f"https://osu.ppy.sh/images/flags/{__userstats['country']}.png")
+        self.set_author(name=f"osu! {mode.name_full} stats for {user.username} on {user.server.name.lower()}", url=user.profile_url, icon_url=mode.icon)
+        self.set_thumbnail(url=user.avatar_url)
+        self.set_footer(text=f"#{user.pp_country_rank}", icon_url=f"https://osu.ppy.sh/images/flags/{user.country}.png")

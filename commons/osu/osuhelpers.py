@@ -1,6 +1,6 @@
 import re
 import config
-import commons.osu.classes as osuClasses
+import commons.osu.classes as osu
 import commons.redisIO as redisIO
 from commons.osu import osuapiwrap
 
@@ -10,8 +10,8 @@ def parseArgsV2(**kwargs):
     customArgs = kwargs.pop("customArgs") if 'customArgs' in kwargs else []
 
     qtype = "string"
-    server = osuClasses.Server.BANCHO
-    mode = osuClasses.Mode.STANDARD
+    server = osu.Server.BANCHO
+    mode = osu.Mode.STANDARD
     position = None
     recentList = False
 
@@ -21,23 +21,23 @@ def parseArgsV2(**kwargs):
         args = args.split(" ")
 
     if '-bancho' in args:
-        server = osuClasses.Server.BANCHO
+        server = osu.Server.BANCHO
         args.pop(args.index('-bancho'))
 
     if '-ripple' in args:
-        server = osuClasses.Server.RIPPLE
+        server = osu.Server.RIPPLE
         args.pop(args.index('-ripple'))
 
     if '-akatsukirx' in args:
-        server = osuClasses.Server.AKATSUKIRX
+        server = osu.Server.AKATSUKIRX
         args.pop(args.index('-akatsukirx'))
 
     if '-akatsuki' in args:
-        server = osuClasses.Server.AKATSUKI
+        server = osu.Server.AKATSUKI
         args.pop(args.index('-akatsuki'))
 
     if '-enjuu' in args:
-        server = osuClasses.Server.ENJUU
+        server = osu.Server.ENJUU
         args.pop(args.index('-enjuu'))
 
     if '-r' in args and '-r' in validArgs:
@@ -49,14 +49,14 @@ def parseArgsV2(**kwargs):
         args.pop(args.index('-l'))
 
     if '-m' not in args:
-        mode = osuClasses.Mode.STANDARD
+        mode = osu.Mode.STANDARD
 
     elif '-m' in validArgs:
         try:
-            mode = osuClasses.Mode.fromId(int(args[args.index('-m') + 1]))
+            mode = osu.Mode.fromId(int(args[args.index('-m') + 1]))
             args.pop(args.index('-m') + 1)
         except Exception:
-            mode = osuClasses.Mode.STANDARD
+            mode = osu.Mode.STANDARD
         args.pop(args.index('-m'))
 
     if '-p' in validArgs and '-p' in args:
@@ -186,35 +186,34 @@ def getMods(number):
 __patternBeatmapLink = re.compile(r"(https?):\/\/([-\w._]+)(\/[-\w._]\?(.+)?)?(\/b(eatmaps)?\/(?P<bmapid1>[0-9]+)|\/s\/(?P<bmapsetid1>[0-9]+)|\/beatmapsets\/(?P<bmapsetid2>[0-9]+)(#(?P<mode>[a-z]+)\/(?P<bmapid2>[0-9]+))?)")
 __patternBeatmapId = re.compile(r"^(?P<bmapid>[0-9]+)$")
 
-async def getBeatmapFromText(text):
+async def getBeatmapFromText(text) -> osu.Beatmap:
     resultLink = __patternBeatmapLink.match(text)
     if resultLink is not None:
         setId, beatmapId = None, None
         if resultLink.group("bmapsetid2") is not None:
-            setId = resultLink.group("bmapsetid2")
+            setId = int(resultLink.group("bmapsetid2"))
             if resultLink.group("bmapid2") is not None:
-                beatmapId = resultLink.group("bmapid2")
+                beatmapId = int(resultLink.group("bmapid2"))
         elif resultLink.group("bmapid1") is not None:
-            beatmapId = resultLink.group("bmapid1")
+            beatmapId = int(resultLink.group("bmapid1"))
         else:
-            setId = resultLink.group("bmapset1")
-        result = (await osuapiwrap.getbmap(b=beatmapId, s=setId))
-        return result[0]
+            setId = int(resultLink.group("bmapset1"))
+        return await osuapiwrap.getbmap(beatmapId, setId)
     
     resultId = __patternBeatmapId.match(text)
     if resultId is not None:
-        beatmapId = resultId.group("bmapid")
-        return (await osuapiwrap.getbmap(b=beatmapId))[0]
+        beatmapId = int(resultId.group("bmapid"))
+        return await osuapiwrap.getbmap(beatmapId)
 
     return None
 
-async def getBeatmapFromHistory(ctx):
+async def getBeatmapFromHistory(ctx) -> osu.Beatmap:
     if config.getBotConfig().REDIS:
         beatmap_id = redisIO.getValue(ctx.message.channel.id)
         if beatmap_id is None:
             return None
     
-        mode = osuClasses.Mode.fromId(redisIO.getValue(f'{ctx.message.channel.id}.mode'))
-        return (await osuapiwrap.getbmap(b=beatmap_id, mode=mode))[0]
+        mode = osu.Mode.fromId(redisIO.getValue(f'{ctx.message.channel.id}.mode'))
+        return await osuapiwrap.getbmap(beatmap_id, mode=mode)
     else:
-        return (await osuapiwrap.getbmap(b='1917158'))[0]
+        return await osuapiwrap.getbmap(1917158)

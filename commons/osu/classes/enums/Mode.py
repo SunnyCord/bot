@@ -6,29 +6,11 @@ class Mode(Enum):
     CTB = (2, 'https://i.imgur.com/EsanYkH.png', 'Catch the Beat', 'CTB')
     MANIA = (3, 'https://i.imgur.com/0uZM1PZ.png', 'Mania', 'M')
     
-    def __init__(self, id:int, icon:str, nameFull:str, nameShort:str):
-        self.__id = id
-        self.__icon = icon
-        self.__nameFull = nameFull
-        self.__nameShort = nameShort
-
-
-    # Maybe there is a better way to provide public members for an enum
-    @property
-    def id(self) -> str:
-        return self.__id
-
-    @property
-    def icon(self) -> str:
-        return self.__icon
-
-    @property
-    def nameFull(self) -> str:
-        return self.__nameFull 
-
-    @property        
-    def nameShort(self) -> str:
-        return self.__nameShort
+    def __init__(self, id:int, icon:str, name_full:str, name_short:str):
+        self.id:int = id
+        self.icon:str = icon
+        self.name_full:str = name_full
+        self.name_short:str = name_short
 
     @staticmethod
     def fromId(id) -> 'Mode':
