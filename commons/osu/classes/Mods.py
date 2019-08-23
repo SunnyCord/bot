@@ -19,5 +19,10 @@ class Mods:
 
         result:str = ""
         for mod in self._mod_list:
+            if osu.Mod.Nightcore in self._mod_list and mod is osu.Mod.DoubleTime:
+                continue
+            if osu.Mod.Perfect in self._mod_list and mod is osu.Mod.SuddenDeath:
+                continue
+                
             result += mod.short_name
         return result

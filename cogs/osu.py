@@ -116,7 +116,7 @@ class osu(commands.Cog, name='osu!'):
         beatmap:osuClasses.Beatmap = await osuapiwrap.getbmap(recent_score.beatmap_id, mode=mode, server=server, mods=recent_score.enabled_mods)
         beatmap.max_combo = bmapfile.max_combo()
 
-        recent_score.performance = await self.bot.loop.run_in_executor(None, ppc.calculatePlayV2, bmapfile, recent_score)
+        recent_score.performance = await self.bot.loop.run_in_executor(None, ppc.calculatePlay, bmapfile, recent_score)
 
         result = OsuRecentEmbed(recent_score, beatmap)
 
@@ -191,7 +191,7 @@ class osu(commands.Cog, name='osu!'):
             beatmap:osuClasses.Beatmap = await osuapiwrap.getbmap(top.beatmap_id, mode=mode, server=server, mods=top.enabled_mods)
             bmapfile:pyt.beatmap = await osuapiwrap.getbmaposu(top.beatmap_id, server)
             beatmap.max_combo = bmapfile.max_combo()
-            top.performance = await self.bot.loop.run_in_executor(None, ppc.calculatePlayV2, bmapfile, top)
+            top.performance = await self.bot.loop.run_in_executor(None, ppc.calculatePlay, bmapfile, top)
 
             beatmaps.append(beatmap)
 
@@ -262,7 +262,7 @@ class osu(commands.Cog, name='osu!'):
         for index, top in enumerate(tops):
             bmapfile:pyt.beatmap = await osuapiwrap.getbmaposu(beatmap.beatmap_id)
             beatmap.max_combo = bmapfile.max_combo()
-            top.performance = await self.bot.loop.run_in_executor(None, ppc.calculatePlayV2, bmapfile, top)
+            top.performance = await self.bot.loop.run_in_executor(None, ppc.calculatePlay, bmapfile, top)
         
         title = f"Top osu! {mode.name_full} for {profile.username} on {beatmap.title}[{beatmap.version}]"
         result = OsuListEmbed(title, tops, [ beatmap ] * len(tops), profile, 1)
