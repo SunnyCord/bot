@@ -22,13 +22,13 @@ class OsuProfileEmbed(discord.Embed):
         super().__init__(
             title=discord.Embed.Empty,
             color=color,
-            description=f"**>Rank:** #{user.pp_rank}\n\
-            **>PP:** {user.pp_raw}\n\
-            **>Accuracy:** {round(user.accuracy, 2)}%\n\
-            **>Level:** {int(user.level)} ({user.level_progress}%)\n\
-            **>Playtime:** {self.__secondsToText(user.total_seconds_played)}\n\
-            **>Playcount:** {user.playcount}\n\
-            **>PP/hour:** {int(user.pp_raw/user.total_seconds_played*3600) if user.total_seconds_played > 0 else 0}",
+            description=f"> **Rank:** #{user.pp_rank}\n\
+> **PP:** {user.pp_raw}\n\
+> **Accuracy:** {round(user.accuracy, 2)}%\n\
+> **Level:** {int(user.level)} ({user.level_progress}%)\n\
+> **Playtime:** {self.__secondsToText(user.total_seconds_played)}\n\
+> **Playcount:** {user.playcount}\n\
+> **PP/hour:** {int(user.pp_raw/user.total_seconds_played*3600) if user.total_seconds_played > 0 else 0}",
             timestamp=datetime.utcnow()
         )
         self.set_author(name=f"osu! {mode.name_full} stats for {user.username} on {user.server.name.lower()}", url=user.profile_url, icon_url=mode.icon)
