@@ -3,9 +3,19 @@ import commons.osu.classes as osu
 class Mods:
     def __init__(self, mods):
         self._mod_list:list = []
-        for mod in list(osu.Mod):
-            if type(mods) is str and mod.short_name in mods or type(mods) is int and int(mod) & mods:
-                self._mod_list.append(mod)
+
+        if type(mods) is str:
+            mods = mods.upper()
+            for i in range(0, len(mods), 2):
+                mod_str:str = mods[i:i+2]
+                mod:osu.Mod = osu.Mod.get_by_short_name(mod_str)
+                if mod is not None and mod not in self._mod_list:
+                    self._mod_list.append(mod)
+
+        if type(mods) is int:
+            for mod in list(osu.Mod):
+                if int(mod) & mods:
+                    self._mod_list.append(mod)
                 
     def __int__(self):
         result:int = 0
