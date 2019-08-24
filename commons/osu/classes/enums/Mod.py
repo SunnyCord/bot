@@ -26,7 +26,7 @@ class Mod(Enum):
     HalfTime = (256, "HT")
     Nightcore = (512, "NC")  # Only set along with DoubleTime. i.e: NC only gives 576
     Flashlight = (1024, "FL")
-    Autoplay = (2048)
+    Autoplay = (2048, "")
     SpunOut = (4096, "SO")
     Autopilot = (8192, "AP")  # Called Relax2 on osu api documentation
     Perfect = (16384, "PF")  # Only set along with SuddenDeth. i.e: PF only gives 16416
@@ -65,3 +65,10 @@ class Mod(Enum):
             return self.long_name
         else:
             return self.__str__()
+
+    @classmethod
+    def get_by_short_name(cls, mod_str):
+        for mod in list(Mod):
+            if mod.short_name == mod_str:
+                return mod
+        return None

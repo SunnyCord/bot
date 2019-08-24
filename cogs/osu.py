@@ -202,7 +202,7 @@ class osu(commands.Cog, name='osu!'):
         else:
             title = f"Top {len(tops)} osu! {profile.mode.name_full} plays for {profile.username}"
 
-        result = OsuListEmbed(title, tops, beatmaps, profile, 0)
+        result = OsuListEmbed(title, tops, beatmaps, profile, 0, parsedArgs['position'] if parsedArgs['position'] is not None else 1)
         await ctx.send(embed=result)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
@@ -250,12 +250,12 @@ class osu(commands.Cog, name='osu!'):
         if beatmap is None:
             return
 
-        try:
-            profile:osu.User = await osuapiwrap.getuser(user, qtype, mode, server)
-            tops:List[osuClasses.BeatmapScore] = await osuapiwrap.getusrscores(profile, beatmap.beatmap_id, limit)
+        # try:
+        profile:osu.User = await osuapiwrap.getuser(user, qtype, mode, server)
+        tops:List[osuClasses.BeatmapScore] = await osuapiwrap.getusrscores(profile, beatmap.beatmap_id, limit)
 
-        except ValueError:
-            return await ctx.send("User has not been found or has no plays!")
+        # except ValueError:
+        #     return await ctx.send("User has not been found or has no plays!")
 
         index:int
         top:osuClasses.Score

@@ -59,7 +59,7 @@ async def getuser(
                     res = __convAkaRXProfile(res)
                 if server is not osu.Server.BANCHO:
                     res[0]['total_seconds_played'] = 0
-                return osu.User(res[0], server)
+                return osu.User(res[0], server, mode)
 
 async def getbmap(
         beatmap_id:int=None, 
@@ -124,7 +124,7 @@ async def getusrtop(
             'u': user.user_id,
             'type': 'id',
             'limit': limit,
-            'mode': user.mode.id
+            'm': user.mode.id
         }
         async with cs.get( user.server.api_getusrtop, params=params ) as r:
             res = await r.json()
@@ -144,7 +144,7 @@ async def getusrscores(
             'u': user.user_id,
             'type': 'id',
             'b': beatmap_id,
-            'mode': user.mode.id
+            'm': user.mode.id
         }
         async with cs.get( user.server.api_getusrscores, params=params ) as r:
             res = await r.json()
