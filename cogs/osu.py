@@ -133,6 +133,7 @@ class osu(commands.Cog, name='osu!'):
         mode = osuClasses.Mode.fromCommand( ctx.invoked_with )
         recent:bool = False
         positions:List[int] = range(1, 100)
+        parsedArgs = None
 
         if args is not None:
             parsedArgs = osuhelpers.parseArgsV2(args=args, customArgs=['user'])
@@ -162,17 +163,21 @@ class osu(commands.Cog, name='osu!'):
         except ValueError:
             return await ctx.send("User has not been found or has no plays!")
 
-        if parsedArgs['recent']:
-            sorted_tops = sorted(tops, key=lambda x: x.date, reverse=True)
-            positions = list(map(lambda top: tops.index(top) + 1, sorted_tops))
-            tops = sorted_tops
-            
-        if parsedArgs['position'] is None:
+        if parsedArgs:
+            if parsedArgs['recent']:
+                sorted_tops = sorted(tops, key=lambda x: x.date, reverse=True)
+                positions = list(map(lambda top: tops.index(top) + 1, sorted_tops))
+                tops = sorted_tops
+                
+            if parsedArgs['position'] is None:
+                tops = tops[:5]
+                positions = positions[:5]
+            else:
+                tops = tops[parsedArgs['position'] - 1 : parsedArgs['position']]
+                positions = positions[parsedArgs['position'] - 1 : parsedArgs['position']]
+        else:
             tops = tops[:5]
             positions = positions[:5]
-        else:
-            tops = tops[parsedArgs['position'] - 1 : parsedArgs['position']]
-            positions = positions[parsedArgs['position'] - 1 : parsedArgs['position']]
 
         if self.bot.configs.REDIS is True:
             redisIO.setValue(ctx.message.channel.id, tops[0].beatmap_id)
@@ -189,7 +194,7 @@ class osu(commands.Cog, name='osu!'):
             top.performance = await self.bot.loop.run_in_executor(None, ppc.calculatePlay, bmapfile, top)
 
             beatmaps.append(beatmap)
-        title = f'Top plays on osu! {user.mode.name_full} for {user.username}'
+        title = f'Top plays on osu! {profile.mode.name_full} for {profile.username}'
         result = OsuListEmbed(title, tops, beatmaps, profile, positions, 0)
         await ctx.send(embed=result)
 
