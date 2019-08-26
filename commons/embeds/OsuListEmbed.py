@@ -6,14 +6,14 @@ from typing import List
 
 class OsuListEmbed(discord.Embed):
 
-    def __init__(self, scores:List[osu.Score], beatmaps:List[osu.Beatmap], user:osu.User, positions:List[int], style:int = 1):
+    def __init__(self, title:str, scores:List[osu.Score], beatmaps:List[osu.Beatmap], user:osu.User, positions:List[int] = None, style:int = 1):
         super().__init__(
             title = discord.Embed.Empty,
             color = config.conf.COLOR,
             description = discord.Embed.Empty
         )
 
-        self.set_author(name = f'Top plays on osu! {user.mode.name_full} for {user.username}', icon_url = user.mode.icon, url = user.profile_url)
+        self.set_author(name = title, icon_url = user.mode.icon, url = user.profile_url)
         self.set_thumbnail(url = user.avatar_url)
         self.set_footer(text=f'Plays from {user.server.name_full}', icon_url=(user.server.icon if user.server.icon is not None else discord.Embed.Empty))
 

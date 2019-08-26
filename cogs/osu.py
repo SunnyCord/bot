@@ -189,8 +189,8 @@ class osu(commands.Cog, name='osu!'):
             top.performance = await self.bot.loop.run_in_executor(None, ppc.calculatePlay, bmapfile, top)
 
             beatmaps.append(beatmap)
-        
-        result = OsuListEmbed(tops, beatmaps, profile, positions, 0)
+        title = f'Top plays on osu! {user.mode.name_full} for {user.username}'
+        result = OsuListEmbed(title, tops, beatmaps, profile, positions, 0)
         await ctx.send(embed=result)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
@@ -253,7 +253,7 @@ class osu(commands.Cog, name='osu!'):
             top.performance = await self.bot.loop.run_in_executor(None, ppc.calculatePlay, bmapfile, top)
         
         title = f"Top osu! {mode.name_full} for {profile.username} on {beatmap.title}[{beatmap.version}]"
-        result = OsuListEmbed(title, tops, [ beatmap ] * len(tops), profile, 1)
+        result = OsuListEmbed(title, tops, [ beatmap ] * len(tops), profile)
 
         await ctx.send(embed=result)
 
