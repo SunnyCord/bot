@@ -2,7 +2,7 @@ from enum import Enum
 import commons.osu.classes as osu
 
 class Server(Enum):
-    BANCHO = (0, 'https://i.imgur.com/0aZpJjl.png',
+    BANCHO = (0, 'Bancho', 'https://i.imgur.com/0aZpJjl.png',
         'https://osu.ppy.sh/api/get_user',
         'https://osu.ppy.sh/api/get_beatmaps',
         'https://osu.ppy.sh/api/get_user_best',
@@ -14,7 +14,7 @@ class Server(Enum):
         'https://osu.ppy.sh/api/get_scores'
     )
 
-    RIPPLE = (1, 'https://i.imgur.com/l4tTouZ.png',
+    RIPPLE = (1, 'Ripple', 'https://i.imgur.com/l4tTouZ.png',
         'https://ripple.moe/api/get_user',
         'https://osu.ppy.sh/api/get_beatmaps',
         'https://ripple.moe/api/get_user_best',
@@ -26,7 +26,7 @@ class Server(Enum):
         'https://ripple.moe/api/get_scores'
     )
 
-    AKATSUKI = (2, 'https://i.imgur.com/ic7kEkO.png',
+    AKATSUKI = (2, 'Akatsuki' ,'https://i.imgur.com/ic7kEkO.png',
         'https://akatsuki.pw/api/get_user',
         'https://osu.ppy.sh/api/get_beatmaps',
         'https://akatsuki.pw/api/get_user_best',
@@ -38,7 +38,7 @@ class Server(Enum):
         'https://akatsuki.pw/api/get_scores'
     )
 
-    AKATSUKIRX = (3, 'https://i.imgur.com/ic7kEkO.png',
+    AKATSUKIRX = (3, 'Akatsuki Relax', 'https://i.imgur.com/ic7kEkO.png',
         'http://akatsuki.pw/api/v1/users/rxfull',
         'https://osu.ppy.sh/api/get_beatmaps',
         'https://akatsuki.pw/api/get_user_best',
@@ -50,7 +50,7 @@ class Server(Enum):
         'https://akatsuki.pw/api/get_scores'
     )
 
-    ENJUU = (4, 'https://i.imgur.com/OO6MrW7.png',
+    ENJUU = (4, 'Enjuu', 'https://i.imgur.com/OO6MrW7.png',
         'https://enjuu.click/api/get_user',
         'https://osu.ppy.sh/api/get_beatmaps',
         'https://enjuu.click/api/get_user_best',
@@ -62,9 +62,9 @@ class Server(Enum):
         'https://enjuu.click/api/get_scores')
     
     #TODO: Add gatari API links
-    GATARI = (5, 'https://i.imgur.com/IAkYdrI.png', '', '', '', '', '', '', '', '', '')
+    GATARI = (5, 'Gatari' ,'https://i.imgur.com/IAkYdrI.png', '', '', '', '', '', '', '', '', '')
 
-    def __init__(self, id:int, icon:str,
+    def __init__(self, id:int, name_full:str, icon:str,
             api_getuser:str,
             api_getbmap:str,
             api_getusrtop:str,
@@ -74,8 +74,9 @@ class Server(Enum):
             url_profile:str,
             url_beatmap:str,
             api_getusrscores:str):
-        self.__id = id
-        self.__icon = icon
+        self.id = id
+        self.name_full = name_full
+        self.icon = icon
         self.api_getuser:str = api_getuser
         self.api_getbmap:str = api_getbmap
         self.api_getusrtop:str = api_getusrtop
@@ -86,15 +87,6 @@ class Server(Enum):
         self.url_avatar:str = url_avatar
         self.url_profile:str = url_profile
         self.url_beatmap:str = url_beatmap        
-
-    # Maybe there is a better way to provide public members for an enum
-    @property
-    def id(self) -> str:
-        return self.__id
-
-    @property
-    def icon(self) -> str:
-        return self.__icon
 
     @staticmethod
     def from_name(param:str) -> 'Server':

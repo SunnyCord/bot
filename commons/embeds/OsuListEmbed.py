@@ -15,7 +15,7 @@ class OsuListEmbed(discord.Embed):
 
         self.set_author(name = f'Top plays on osu! {user.mode.name_full} for {user.username}', icon_url = user.mode.icon, url = user.profile_url)
         self.set_thumbnail(url = user.avatar_url)
-        self.set_footer(text=f'Plays from {user.server.name.lower()}', icon_url=(user.server.icon if user.server.icon is not None else discord.Embed.Empty))
+        self.set_footer(text=f'Plays from {user.server.name_full}', icon_url=(user.server.icon if user.server.icon is not None else discord.Embed.Empty))
 
         index:int
         score:osu.Score
