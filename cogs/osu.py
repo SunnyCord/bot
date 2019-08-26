@@ -130,25 +130,20 @@ class osu(commands.Cog, name='osu!'):
         user = None
         server = osuClasses.Server.BANCHO
         limit = 5
-
-        parsedArgs = {
-            'recentList': False,
-            'position': None
-        }
-
         mode = osuClasses.Mode.fromCommand( ctx.invoked_with )
+        recent:bool = False
+        positions:List[int] = range(1, 100)
 
         if args is not None:
-            parsedArgs = osuhelpers.parseArgs(args=args, validArgs=['-r', '-p'])
+            parsedArgs = osuhelpers.parseArgsV2(args=args, customArgs=['user'])
             user = parsedArgs['user']
             qtype = parsedArgs['qtype']
-            server = osuClasses.Server.from_name(parsedArgs['server'])
+            server = parsedArgs['server']
             
-            if parsedArgs['recentList'] is True:
+            if parsedArgs['recent'] is True:
                 limit = 100
-
-            if parsedArgs['position'] is not None and parsedArgs['recentList'] is False:
-                limit = parsedArgs['position'] if parsedArgs['position'] < 100 else 100
+            elif parsedArgs['position'] is not None:
+                limit = min(parsedArgs['position'], 100)
 
         if not user:
             qtype = "id"
@@ -164,20 +159,20 @@ class osu(commands.Cog, name='osu!'):
         try:
             profile:osuClasses.User = await osuapiwrap.getuser(user, qtype, mode, server)
             tops:List[osuClasses.RecentScore] = await osuapiwrap.getusrtop(profile, limit)
-
         except ValueError:
             return await ctx.send("User has not been found or has no plays!")
 
-        if parsedArgs['recentList'] is True:
-            tops.sort(key=lambda x: x.date, reverse=True)
+        if parsedArgs['recent']:
+            sorted_tops = sorted(tops, key=lambda x: x.date, reverse=True)
+            positions = list(map(lambda top: tops.index(top) + 1, sorted_tops))
+            tops = sorted_tops
+            
+        if parsedArgs['position'] is None:
             tops = tops[:5]
-
-        if parsedArgs['position'] is not None:
-            if parsedArgs['recentList'] is True:
-                limit = parsedArgs['position'] if parsedArgs['position'] < 100 else 100
-                tops = [tops[limit-1]]
-            else:
-                tops = tops[limit-1:]
+            positions = positions[:5]
+        else:
+            tops = tops[parsedArgs['position'] - 1 : parsedArgs['position']]
+            positions = positions[parsedArgs['position'] - 1 : parsedArgs['position']]
 
         if self.bot.configs.REDIS is True:
             redisIO.setValue(ctx.message.channel.id, tops[0].beatmap_id)
@@ -194,15 +189,8 @@ class osu(commands.Cog, name='osu!'):
             top.performance = await self.bot.loop.run_in_executor(None, ppc.calculatePlay, bmapfile, top)
 
             beatmaps.append(beatmap)
-
-        if parsedArgs['recentList'] is True:
-            title = f"Most recent top plays on osu! {profile.mode.name_full} for {profile.username}"
-        elif parsedArgs['position'] is not None:
-            title = f"Top play on position {limit} on osu! {profile.mode.name_full} for {profile.username}"
-        else:
-            title = f"Top {len(tops)} osu! {profile.mode.name_full} plays for {profile.username}"
-
-        result = OsuListEmbed(title, tops, beatmaps, profile, 0, parsedArgs['position'] if parsedArgs['position'] is not None else 1)
+        
+        result = OsuListEmbed(tops, beatmaps, profile, positions, 0)
         await ctx.send(embed=result)
 
     @commands.cooldown(1, 1, commands.BucketType.user)

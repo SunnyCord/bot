@@ -6,14 +6,14 @@ from commons.osu import osuapiwrap
 
 def parseArgsV2(**kwargs):
     args = kwargs.pop("args")
-    validArgs = kwargs.pop("validArgs") if 'validArgs' in kwargs else []
     customArgs = kwargs.pop("customArgs") if 'customArgs' in kwargs else []
 
     qtype = "string"
     server = osu.Server.BANCHO
     mode = osu.Mode.STANDARD
     position = None
-    recentList = False
+    recent = False
+    l_flag = False
 
     if args is None:
         args = []
@@ -40,18 +40,15 @@ def parseArgsV2(**kwargs):
         server = osu.Server.ENJUU
         args.pop(args.index('-enjuu'))
 
-    if '-r' in args and '-r' in validArgs:
-        recentList = True
+    if '-r' in args:
+        recent = True
         args.pop(args.index('-r'))
 
-    if '-l' in args and '-l' in validArgs:
-        recentList = True
+    if '-l' in args:
+        l_flag = True
         args.pop(args.index('-l'))
 
-    if '-m' not in args:
-        mode = osu.Mode.STANDARD
-
-    elif '-m' in validArgs:
+    if '-m' in args:
         try:
             mode = osu.Mode.fromId(int(args[args.index('-m') + 1]))
             args.pop(args.index('-m') + 1)
@@ -59,7 +56,7 @@ def parseArgsV2(**kwargs):
             mode = osu.Mode.STANDARD
         args.pop(args.index('-m'))
 
-    if '-p' in validArgs and '-p' in args:
+    if '-p' in args:
         try:
             position = int(args[args.index('-p') + 1])
             args.pop(args.index('-p') + 1)
@@ -71,8 +68,9 @@ def parseArgsV2(**kwargs):
         'qtype': qtype,
         'mode': mode,
         'server': server,
-        'recentList': recentList,
-        'position': position
+        'position': position,
+        'recent': recent,
+        'l_flag': l_flag
     }
 
     for index, name in enumerate(customArgs):
