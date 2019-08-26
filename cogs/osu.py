@@ -120,7 +120,7 @@ class osu(commands.Cog, name='osu!'):
 
         result = OsuRecentEmbed(recent_score, beatmap)
 
-        await ctx.send(f"**Most Recent osu! {mode.name_full} Play for {profile.username} on {server.name.lower()}:**", embed=result)
+        await ctx.send(f"**Most Recent osu! {mode.name_full} Play for {profile.username} on {server.name_full}:**", embed=result)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.command(aliases=["ot", "tt", "ct", "mt", "taikotop", "ctbtop", "maniatop"])

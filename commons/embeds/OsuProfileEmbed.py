@@ -31,6 +31,6 @@ class OsuProfileEmbed(discord.Embed):
 > **PP/hour:** {int(user.pp_raw/user.total_seconds_played*3600) if user.total_seconds_played > 0 else 0}",
             timestamp=datetime.utcnow()
         )
-        self.set_author(name=f"osu! {mode.name_full} stats for {user.username} on {user.server.name.lower()}", url=user.profile_url, icon_url=mode.icon)
+        self.set_author(name=f"osu! {mode.name_full} stats for {user.username} on {user.server.name_full}", url=user.profile_url, icon_url=mode.icon)
         self.set_thumbnail(url=user.avatar_url)
         self.set_footer(text=f"#{user.pp_country_rank}", icon_url=f"https://osu.ppy.sh/images/flags/{user.country}.png")
