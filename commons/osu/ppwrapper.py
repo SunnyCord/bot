@@ -82,18 +82,17 @@ def calculatePlay(beatmap:pyt.beatmap, score:osu.Score, calcPP:int = 1) -> osu.P
         if calcPP == 1:
             pp, _, _, _, _ = pyt.ppv2(sr.aim, sr.speed, bmap=beatmap, mods=int(score.enabled_mods), n300=score.count300, n100=score.count100, n50=score.count50, nmiss=score.countmiss, combo=score.maxcombo)
         
-        # pp_fc = 0 
-        # accuracy_fc = 0
-        # if score.perfect == 0:
-        pp_fc, _, _, _, _ = pyt.ppv2(sr.aim, sr.speed, bmap=beatmap, mods=int(score.enabled_mods), n300=score.count300, n100=score.count100, n50=score.count50, nmiss=0, combo=beatmap.max_combo())
+        accuracy_fc = ((objcount - score.count100 - score.count50) * 6 + score.count100 * 2 + score.count50) / (objcount * 6)
+        n300, n100, n50 = pyt.acc_round(accuracy_fc * 100, objcount, 0)
+        pp_fc, _, _, _, _ = pyt.ppv2(sr.aim, sr.speed, bmap=beatmap, mods=int(score.enabled_mods), n300=n300, n100=n100, n50=n50, nmiss=0, combo=beatmap.max_combo())
             
-        return osu.Performance(pp, pp_fc, round((score.total_hits() * 100) / objcount, 2), sr.total)
+        return osu.Performance(pp, pp_fc, accuracy_fc, round((score.total_hits() * 100) / objcount, 2), sr.total)
 
-    elif score.mode == osu.Mode.CTB:
-        accuracy = acc.ctbCalc(score.count0, score.countkatu, score.count50, score.count100, score.count300)
-        #beatmap = Beatmap(bmap)
-        difficulty = Difficulty(beatmap, int(score.enabled_mods))
-        pp = 0
-        if calcPP == 1:
-            pp = round(calculate_pp(difficulty, accuracy, score.combo, score.count0), 2)
-        return osu.Performance(pp, 0, accuracy, 0, 100)
+    # elif score.mode == osu.Mode.CTB:
+    #     accuracy = acc.ctbCalc(score.countmiss, score.countkatu, score.count50, score.count100, score.count300)
+    #     beatmap = Beatmap(beatmap)
+    #     difficulty = Difficulty(beatmap, int(score.enabled_mods))
+    #     pp = 0
+    #     if calcPP == 1:
+    #         pp = round(calculate_pp(difficulty, accuracy, score.combo, score.countmiss), 2)
+    #     return osu.Performance(pp, 0, accuracy, 0, 100)

@@ -61,7 +61,7 @@ class Score:
         self.performance:osu.Performance = None
         self.date:datetime = datetime.strptime(json_response["date"], "%Y-%m-%d %H:%M:%S")
 
-    def accuracy(self, if_fc:bool = False):
+    def accuracy(self):
         """Calculated accuracy.
         See Also
         --------
@@ -69,7 +69,7 @@ class Score:
         """
         if self.mode is osu.Mode.STANDARD:
             return (
-                (6 * (self.count300 + (self.countmiss if if_fc else 0)) + 2 * self.count100 + self.count50) /
+                (6 * self.count300 + 2 * self.count100 + self.count50) /
                 (6 * (self.count300 + self.count100 + self.count50 + self.countmiss)))
         if self.mode is osu.Mode.TAIKO:
             return (
