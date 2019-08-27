@@ -15,7 +15,7 @@ def get_prefix(bot, message):
     if mongoIO.isBlacklisted(message.author) or not message.guild:
         return ' '
     guildPref = mongoIO.getSetting(message.guild.id, 'prefix') if message.guild else None
-    result = bot.configs.PREFIXES.copy().append(guildPref) if guildPref is not None else bot.configs.PREFIXES
+    result = bot.configs.PREFIXES + [guildPref] if guildPref is not None else bot.configs.PREFIXES
     return commands.when_mentioned_or(*result)(bot, message)
 
 def list_module(directory):
