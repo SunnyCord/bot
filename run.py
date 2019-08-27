@@ -30,6 +30,13 @@ class Sunny(commands.AutoShardedBot):
         )
         self.configs=config.getBotConfig()
 
+    async def is_owner(self, user: discord.User):
+        if user.id in config.OWNERS:
+            return True
+
+        # Else fall back to the original
+        return await super().is_owner(user)
+
     async def on_ready(self):
         print(r"""
   .--.--.
