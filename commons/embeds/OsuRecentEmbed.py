@@ -6,7 +6,7 @@ class OsuRecentEmbed(discord.Embed):
 
     def __init__(self, score:osu.Score, beatmap:osu.Beatmap):
         description = f"""
-> {score.rank.icon} > **{round(score.performance.pp, 2)}PP """ + (f"({round(score.performance.pp_fc, 2)}PP for {round(score.accuracy(True) * 100, 2)}% FC)" if not score.perfect else "") + f"""** > {round(score.accuracy() * 100, 2)}%
+> {score.rank.icon} > **{round(score.performance.pp, 2)}PP """ + (f"({round(score.performance.pp_fc, 2)}PP for {round(score.performance.accuracy_fc * 100, 2)}% FC)" if not score.perfect else "") + f"""** > {round(score.accuracy() * 100, 2)}%
 > {score.score} > x{score.maxcombo}/{beatmap.max_combo} > [{score.count300}/{score.count100}/{score.count50}/{score.countmiss}]"""
 
         if score.performance.completion != 100:

@@ -113,7 +113,7 @@ async def getrecent(
             if res == []:
                 raise ValueError("Invalid query or API down.")
             else:
-                return list(map(lambda recent: osu.RecentScore(recent), res))
+                return list(map(lambda recent: osu.RecentScore(recent, user.server, user.mode), res))
 
 async def getusrtop(
         user:osu.User,
