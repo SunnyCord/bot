@@ -243,12 +243,12 @@ class osu(commands.Cog, name='osu!'):
         if beatmap is None:
             return
 
-        # try:
-        profile:osu.User = await osuapiwrap.getuser(user, qtype, mode, server)
-        tops:List[osuClasses.BeatmapScore] = await osuapiwrap.getusrscores(profile, beatmap.beatmap_id, limit)
+        try:
+            profile:osu.User = await osuapiwrap.getuser(user, qtype, mode, server)
+            tops:List[osuClasses.BeatmapScore] = await osuapiwrap.getusrscores(profile, beatmap.beatmap_id, limit)
 
-        # except ValueError:
-        #     return await ctx.send("User has not been found or has no plays!")
+        except ValueError:
+            return await ctx.send("User has not been found or has no plays on the beatmap!")
 
         index:int
         top:osuClasses.Score
