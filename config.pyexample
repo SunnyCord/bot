@@ -1,5 +1,6 @@
 DEBUG=True
 SENTRY=""
+OWNERS = []
 
 class lavalink:
     password = ''
