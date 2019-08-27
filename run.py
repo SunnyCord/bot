@@ -1,7 +1,14 @@
-import asyncio, sys, traceback, os, discord, sentry_sdk
+import asyncio, sys, traceback, os, discord
 from discord.ext import commands
 import config
 from commons import mongoIO
+
+try:
+    import sentry_sdk
+    sentry_sdk.init(config.SENTRY)
+except ImportError:
+    print("[SENTRY] Failed to initialize sentry.")
+
 
 def get_prefix(bot, message):
     """A callable Prefix for our bot. This could be edited to allow per server prefixes."""
@@ -13,8 +20,6 @@ def get_prefix(bot, message):
 
 def list_module(directory):
     return (f for f in os.listdir(directory) if f.endswith('.py'))
-
-sentry_sdk.init(config.SENTRY)
 
 class Sunny(commands.AutoShardedBot):
     def __init__(self, **kwargs):
