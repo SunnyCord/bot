@@ -19,7 +19,6 @@ class Settings(commands.Cog):
         self.bot = bot
 
     @checks.is_admin()
-    @checks.is_blacklisted()
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command()
     async def prefix(self, ctx, prefix: str):
