@@ -11,7 +11,7 @@ import commons.redisIO as redisIO
 import pyttanko as pyt
 from typing import List
 
-class osu(commands.Cog, name='osu!'):
+class osuCog(commands.Cog, name='osu!'):
     """osu! related commands.\n*Valid Arguments:* ```fix\n-ripple, -akatsuki, akatsukirx, -enjuu```"""
 
     def __init__(self, bot):
@@ -132,7 +132,7 @@ class osu(commands.Cog, name='osu!'):
         limit = 5
         mode = osuClasses.Mode.fromCommand( ctx.invoked_with )
         recent:bool = False
-        positions:List[int] = range(1, 100)
+        positions:List[int] = range(1, 101)
         parsedArgs = None
 
         if args is not None:
@@ -215,6 +215,9 @@ class osu(commands.Cog, name='osu!'):
             elif 's' == ctx.invoked_with or 'scores' == ctx.invoked_with:
                 parsedArgs = osuhelpers.parseArgsV2(args=args, customArgs=["beatmap", "user"])
                 if parsedArgs['beatmap']:
+                    if self.bot.configs.REDIS is True:
+                        redisIO.setValue(ctx.message.channel.id, beatmap.beatmap_id)
+                        redisIO.setValue(f'{ctx.message.channel.id}.mode', mode.id)
                     beatmap = await osuhelpers.getBeatmapFromText(parsedArgs['beatmap'])
             user = parsedArgs['user']
             qtype = parsedArgs['qtype']
@@ -244,7 +247,7 @@ class osu(commands.Cog, name='osu!'):
             return
 
         try:
-            profile:osu.User = await osuapiwrap.getuser(user, qtype, mode, server)
+            profile:osuClasses.User = await osuapiwrap.getuser(user, qtype, mode, server)
             tops:List[osuClasses.BeatmapScore] = await osuapiwrap.getusrscores(profile, beatmap.beatmap_id, limit)
 
         except ValueError:
@@ -292,4 +295,4 @@ class osu(commands.Cog, name='osu!'):
         await ctx.send(embed=result)
 
 def setup(bot):
-    bot.add_cog(osu(bot))
+    bot.add_cog(osuCog(bot))
