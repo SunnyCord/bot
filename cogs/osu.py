@@ -215,10 +215,10 @@ class osuCog(commands.Cog, name='osu!'):
             elif 's' == ctx.invoked_with or 'scores' == ctx.invoked_with:
                 parsedArgs = osuhelpers.parseArgsV2(args=args, customArgs=["beatmap", "user"])
                 if parsedArgs['beatmap']:
+                    beatmap = await osuhelpers.getBeatmapFromText(parsedArgs['beatmap'])
                     if self.bot.configs.REDIS is True:
                         redisIO.setValue(ctx.message.channel.id, beatmap.beatmap_id)
                         redisIO.setValue(f'{ctx.message.channel.id}.mode', mode.id)
-                    beatmap = await osuhelpers.getBeatmapFromText(parsedArgs['beatmap'])
             user = parsedArgs['user']
             qtype = parsedArgs['qtype']
             server = parsedArgs['server']
