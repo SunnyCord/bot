@@ -126,9 +126,9 @@ async def getrecent(
             if user.server is osu.Server.AKATSUKIRX or user.server is osu.Server.SIROHIRX:
                 params['rx'] = 1
                 if params['type'] == 'id':
-                    params['id'] = usr
+                    params['id'] = user.user_id
                 else:
-                    params['name'] = usr
+                    params['name'] = user.username
 
         async with cs.get( user.server.api_getrecent, params=params ) as r:
             res = await r.json()
@@ -156,9 +156,9 @@ async def getusrtop(
             if user.server is osu.Server.AKATSUKIRX or user.server is osu.Server.SIROHIRX:
                 params['rx'] = 1
                 if params['type'] == 'id':
-                    params['id'] = usr
+                    params['id'] = user.user_id
                 else:
-                    params['name'] = usr
+                    params['name'] = user.username
 
         async with cs.get( user.server.api_getusrtop, params=params ) as r:
             res = await r.json()
@@ -188,9 +188,9 @@ async def getusrscores(
             if user.server is osu.Server.AKATSUKIRX or user.server is osu.Server.SIROHIRX:
                 params['rx'] = 1
                 if params['type'] == 'id':
-                    params['id'] = usr
+                    params['id'] = user.user_id
                 else:
-                    params['name'] = usr
+                    params['name'] = user.username
 
         async with cs.get( user.server.api_getusrscores, params=params ) as r:
             res = await r.json()
