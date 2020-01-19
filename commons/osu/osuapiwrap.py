@@ -121,9 +121,9 @@ async def getrecent(
             'limit': limit
         }
 
-        if server is not osu.Server.BANCHO:
+        if user.server is not osu.Server.BANCHO:
             params.pop('k')
-            if server is osu.Server.AKATSUKIRX or server is osu.Server.SIROHIRX:
+            if user.server is osu.Server.AKATSUKIRX or user.server is osu.Server.SIROHIRX:
                 if qtype == 'id':
                     params['id'] = usr
                 else:
@@ -148,9 +148,9 @@ async def getusrtop(
             'm': user.mode.id
         }
 
-        if server is not osu.Server.BANCHO:
+        if user.server is not osu.Server.BANCHO:
             params.pop('k')
-            if server is osu.Server.AKATSUKIRX or server is osu.Server.SIROHIRX:
+            if user.server is osu.Server.AKATSUKIRX or user.server is osu.Server.SIROHIRX:
                 if qtype == 'id':
                     params['id'] = usr
                 else:
@@ -177,9 +177,9 @@ async def getusrscores(
             'm': user.mode.id
         }
 
-        if server is not osu.Server.BANCHO:
+        if user.server is not osu.Server.BANCHO:
             params.pop('k')
-            if server is osu.Server.AKATSUKIRX or server is osu.Server.SIROHIRX:
+            if user.server is osu.Server.AKATSUKIRX or user.server is osu.Server.SIROHIRX:
                 if qtype == 'id':
                     params['id'] = usr
                 else:
