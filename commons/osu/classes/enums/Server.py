@@ -62,7 +62,32 @@ class Server(Enum):
         'https://enjuu.click/api/get_scores')
     
     #TODO: Add gatari API links
-    GATARI = (5, 'Gatari' ,'https://i.imgur.com/IAkYdrI.png', '', '', '', '', '', '', '', '', '')
+    GATARI = (5, 'Gatari' ,'https://i.imgur.com/IAkYdrI.png',
+        'https://api.gatari.pw/user/stats', '', '', '', '', '', '', '', '')
+
+    SIROHI = (6, 'Sirohi' ,'https://i.imgur.com/l4tTouZ.png',
+        'https://sirohi.xyz/api/get_user',
+        'https://osu.ppy.sh/api/get_beatmaps',
+        'https://sirohi.xyz/api/get_user_best',
+        'https://sirohi.xyz/api/get_user_recent',
+        'https://osu.ppy.sh/osu/',
+        'https://a.sirohi.xyz/',
+        'https://sirohi.xyz/u/',
+        'https://sirohi.xyz/b/',
+        'https://sirohi.xyz/api/get_scores'
+    )
+
+    SIROHIRX = (7, 'Akatsuki Relax', 'https://i.imgur.com/ic7kEkO.png',
+        'http://sirohi.xyz/api/v1/users/rxfull',
+        'https://osu.ppy.sh/api/get_beatmaps',
+        'https://sirohi.xyz/api/get_user_best',
+        'https://sirohi.xyz/api/get_user_recent',
+        'https://osu.ppy.sh/osu/',
+        'https://a.sirohi.xyz/',
+        'https://sirohi.xyz/rx/u/',
+        'https://sirohi.xyz/b/',
+        'https://sirohi.xyz/api/get_scores'
+    )
 
     def __init__(self, id:int, name_full:str, icon:str,
             api_getuser:str,
