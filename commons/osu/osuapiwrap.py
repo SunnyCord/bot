@@ -47,10 +47,18 @@ async def getuser(
         params = {
             'k': __token,
             'u': usr,
-            'id': usr, #for relax servers
             'm': mode.id,
             'type': qtype
         }
+
+        if server is not osu.Server.BANCHO:
+            params.pop('k')
+            if server is osu.Server.AKATSUKIRX or server is osu.Server.SIROHIRX:
+                if qtype == 'id':
+                    params['id'] = usr
+                else:
+                    params['name'] = usr
+
         async with cs.get( server.api_getuser, params = params ) as r:
             res = await r.json()
             if res == []:
