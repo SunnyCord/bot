@@ -125,7 +125,7 @@ async def getrecent(
             params.pop('k')
             if user.server is osu.Server.AKATSUKIRX or user.server is osu.Server.SIROHIRX:
                 params['rx'] = 1
-                if qtype == 'id':
+                if params['type'] == 'id':
                     params['id'] = usr
                 else:
                     params['name'] = usr
@@ -155,7 +155,7 @@ async def getusrtop(
             params.pop('k')
             if user.server is osu.Server.AKATSUKIRX or user.server is osu.Server.SIROHIRX:
                 params['rx'] = 1
-                if qtype == 'id':
+                if params['type'] == 'id':
                     params['id'] = usr
                 else:
                     params['name'] = usr
@@ -187,7 +187,7 @@ async def getusrscores(
             params.pop('k')
             if user.server is osu.Server.AKATSUKIRX or user.server is osu.Server.SIROHIRX:
                 params['rx'] = 1
-                if qtype == 'id':
+                if params['type'] == 'id':
                     params['id'] = usr
                 else:
                     params['name'] = usr
