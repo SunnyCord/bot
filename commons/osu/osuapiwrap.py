@@ -47,6 +47,7 @@ async def getuser(
         params = {
             'k': __token,
             'u': usr,
+            'id': usr, #for relax servers
             'm': mode.id,
             'type': qtype
         }
@@ -55,7 +56,7 @@ async def getuser(
             if res == []:
                 raise ValueError("Invalid query or API down.")
             else:
-                if server is osu.Server.AKATSUKIRX:
+                if server is osu.Server.AKATSUKIRX or server is osu.Server.SIROHIRX:
                     res = __convAkaRXProfile(res)
                 if server is not osu.Server.BANCHO:
                     res[0]['total_seconds_played'] = 0

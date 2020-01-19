@@ -40,6 +40,14 @@ def parseArgsV2(**kwargs):
         server = osu.Server.ENJUU
         args.pop(args.index('-enjuu'))
 
+    if '-sirohirx' in args:
+        server = osu.Server.SIROHIRX
+        args.pop(args.index('-sirohirx'))
+
+    if '-sirohi' in args:
+        server = osu.Server.SIROHI
+        args.pop(args.index('-sirohi'))
+
     if '-r' in args:
         recent = True
         args.pop(args.index('-r'))
