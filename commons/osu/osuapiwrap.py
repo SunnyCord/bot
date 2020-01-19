@@ -87,6 +87,9 @@ async def getbmap(
             'a': 1
         }
 
+        if server is not osu.Server.BANCHO:
+            params.pop('k')
+
         if beatmap_id is None:
             params['s'] = beatmapset_id
         else:
@@ -117,6 +120,15 @@ async def getrecent(
             'm': user.mode.id,
             'limit': limit
         }
+
+        if server is not osu.Server.BANCHO:
+            params.pop('k')
+            if server is osu.Server.AKATSUKIRX or server is osu.Server.SIROHIRX:
+                if qtype == 'id':
+                    params['id'] = usr
+                else:
+                    params['name'] = usr
+
         async with cs.get( user.server.api_getrecent, params=params ) as r:
             res = await r.json()
             if res == []:
@@ -135,6 +147,15 @@ async def getusrtop(
             'limit': limit,
             'm': user.mode.id
         }
+
+        if server is not osu.Server.BANCHO:
+            params.pop('k')
+            if server is osu.Server.AKATSUKIRX or server is osu.Server.SIROHIRX:
+                if qtype == 'id':
+                    params['id'] = usr
+                else:
+                    params['name'] = usr
+
         async with cs.get( user.server.api_getusrtop, params=params ) as r:
             res = await r.json()
             if res == []:
@@ -155,6 +176,15 @@ async def getusrscores(
             'b': beatmap_id,
             'm': user.mode.id
         }
+
+        if server is not osu.Server.BANCHO:
+            params.pop('k')
+            if server is osu.Server.AKATSUKIRX or server is osu.Server.SIROHIRX:
+                if qtype == 'id':
+                    params['id'] = usr
+                else:
+                    params['name'] = usr
+
         async with cs.get( user.server.api_getusrscores, params=params ) as r:
             res = await r.json()
             if res == []:
