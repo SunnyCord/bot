@@ -167,6 +167,8 @@ async def getusrtop(
             else:
                 if user.server is osu.Server.AKATSUKIRX or user.server is osu.Server.SIROHIRX:
                     res = res['scores']
+                    for index, _ in res:
+                        res[index]['maxcombo'] = res['max_combo']
                 return list(map(lambda top: osu.RecentScore(top), res))
 
 async def getusrscores(
