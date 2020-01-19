@@ -92,7 +92,8 @@ class Score:
         try:
             self.date:datetime = datetime.strptime(json_response["date"], "%Y-%m-%d %H:%M:%S")
         except KeyError:
-            self.date:datetime = datetime.strptime(json_response["time"], "%Y-%m-%dT%H:%M:%S+%Z")
+            cleanedDate = json_response['time'].split('+', 1)[0]
+            self.date:datetime = datetime.strptime(cleanedDate, "%Y-%m-%dT%H:%M:%S")
 
     def accuracy(self):
         """Calculated accuracy.
