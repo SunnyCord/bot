@@ -32,7 +32,7 @@ def __convAkaRXProfile(res, mode = 0): #Converts akatsuki!rx fullrx API response
             "count_rank_sh": 0,
             "count_rank_a": 0,
             "country": res['country'],
-            "total_seconds_played": res[modes[mode]]['playtime'],
+            "total_seconds_played": res[modes[mode]]['play_time'],
             "pp_country_rank": res[modes[mode]]['country_leaderboard_rank'],
             "events": []
         }
