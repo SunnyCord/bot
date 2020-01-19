@@ -120,6 +120,14 @@ def parseArgs(**kwargs):
         server = 'enjuu'
         args.pop(args.index('-enjuu'))
 
+    if '-sirohirx' in args:
+        server = 'sirohirx'
+        args.pop(args.index('-sirohirx'))
+
+    if '-sirohi' in args:
+        server = 'sirohi'
+        args.pop(args.index('-sirohi'))
+
     if '-r' in args and '-r' in validArgs:
         recentList = True
         args.pop(args.index('-r'))
