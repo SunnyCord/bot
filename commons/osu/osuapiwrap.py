@@ -99,7 +99,7 @@ async def getbmap(
             if res == []:
                 raise ValueError("Invalid query or API down.")
             else:
-                print(res)
+                raise ValueError(res)
                 return osu.Beatmap(res[0], server)
 
 async def getbmaposu(
