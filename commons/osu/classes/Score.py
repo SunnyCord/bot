@@ -180,7 +180,10 @@ class RecentScore(Score):
     """
     def __init__(self, json_response, server:osu.Server = osu.Server.BANCHO, mode:osu.Mode = osu.Mode.STANDARD):
         super().__init__(json_response, server, mode)
-        self.beatmap_id:int = int(json_response["beatmap_id"])
+        try:
+            self.beatmap_id:int = int(json_response["beatmap_id"])
+        except KeyError:
+            self.beatmap_id:int = int(json_response["beatmap"]["beatmap_id"])
 
     def __repr__(self):
         return "<{0.__module__}.SoloScore user_id={0.user_id} beatmap_id={0.beatmap_id} date={0.date}>".format(self)
