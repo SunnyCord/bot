@@ -51,18 +51,48 @@ class Score:
             self.maxcombo:int = int(json_response["maxcombo"])
         except KeyError: #Relax Server Formatting
             self.maxcombo:int = int(json_response["max_combo"])
-        self.count50:int = int(json_response["count50"])
-        self.count100:int = int(json_response["count100"])
-        self.count300:int = int(json_response["count300"])
-        self.countmiss:int = int(json_response["countmiss"])
-        self.countkatu:int = int(json_response["countkatu"])
-        self.countgeki:int = int(json_response["countgeki"])
-        self.perfect:bool = bool(int(json_response["perfect"]))
-        self.user_id:int = int(json_response["user_id"])
+        try:
+            self.count50:int = int(json_response["count50"])
+        except KeyError:
+            self.count50:int = int(json_response["count_50"])
+        try:
+            self.count100:int = int(json_response["count100"])
+        except KeyError:
+            self.count100:int = int(json_response["count_100"])
+        try:
+            self.count300:int = int(json_response["count300"])
+        except KeyError:
+            self.count300:int = int(json_response["count_300"])
+        try:
+            self.countmiss:int = int(json_response["countmiss"])
+        except KeyError:
+            self.countmiss:int = int(json_response["count_miss"])
+        try:
+            self.countkatu:int = int(json_response["countkatu"])
+        except KeyError:
+            self.countkatu:int = int(json_response["count_katu"])
+        try:
+            self.countgeki:int = int(json_response["countgeki"])
+        except KeyError:
+            self.countgeki:int = int(json_response["count_geki"])
+        try:
+            self.perfect:bool = bool(int(json_response["perfect"]))
+        except KeyError:
+            self.perfect:bool = bool(int(json_response["full_combo"]))
+        try:
+            self.user_id:int = int(json_response["user_id"])
+        except KeyError:
+            self.user_id:int = int(json_response["id"])
         self.rank:osu.Rank = osu.Rank[json_response["rank"]]
-        self.enabled_mods:osu.Mod = osu.Mods(int(json_response["enabled_mods"]))
+        try:
+            self.enabled_mods:osu.Mod = osu.Mods(int(json_response["enabled_mods"]))
+        except KeyError:
+            self.enabled_mods:osu.Mod = osu.Mods(int(json_response["mods"]))
         self.performance:osu.Performance = None
-        self.date:datetime = datetime.strptime(json_response["date"], "%Y-%m-%d %H:%M:%S")
+        try:
+            self.date:datetime = datetime.strptime(json_response["date"], "%Y-%m-%d %H:%M:%S")
+        except KeyError:
+            self.date:datetime = datetime.strptime(json_response["time"], "%Y-%m-%d %H:%M:%S")
 
     def accuracy(self):
         """Calculated accuracy.
