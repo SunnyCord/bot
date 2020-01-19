@@ -87,9 +87,6 @@ async def getbmap(
             'a': 1
         }
 
-        if server is not osu.Server.BANCHO:
-            params.pop('k')
-
         if beatmap_id is None:
             params['s'] = beatmapset_id
         else:
@@ -99,7 +96,6 @@ async def getbmap(
             if res == []:
                 raise ValueError("Invalid query or API down.")
             else:
-                raise ValueError(res)
                 return osu.Beatmap(res[0], server)
 
 async def getbmaposu(
