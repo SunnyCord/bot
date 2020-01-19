@@ -124,6 +124,7 @@ async def getrecent(
         if user.server is not osu.Server.BANCHO:
             params.pop('k')
             if user.server is osu.Server.AKATSUKIRX or user.server is osu.Server.SIROHIRX:
+                params['rx'] = 1
                 if qtype == 'id':
                     params['id'] = usr
                 else:
@@ -134,6 +135,8 @@ async def getrecent(
             if res == []:
                 raise ValueError("Invalid query or API down.")
             else:
+                if user.server is osu.Server.AKATSUKIRX or user.server is osu.Server.SIROHIRX:
+                    res = res['scores']
                 return list(map(lambda recent: osu.RecentScore(recent, user.server, user.mode), res))
 
 async def getusrtop(
@@ -151,6 +154,7 @@ async def getusrtop(
         if user.server is not osu.Server.BANCHO:
             params.pop('k')
             if user.server is osu.Server.AKATSUKIRX or user.server is osu.Server.SIROHIRX:
+                params['rx'] = 1
                 if qtype == 'id':
                     params['id'] = usr
                 else:
@@ -161,6 +165,8 @@ async def getusrtop(
             if res == []:
                 raise ValueError("Invalid query or API down.")
             else:
+                if user.server is osu.Server.AKATSUKIRX or user.server is osu.Server.SIROHIRX:
+                    res = res['scores']
                 return list(map(lambda top: osu.RecentScore(top), res))
 
 async def getusrscores(
@@ -180,6 +186,7 @@ async def getusrscores(
         if user.server is not osu.Server.BANCHO:
             params.pop('k')
             if user.server is osu.Server.AKATSUKIRX or user.server is osu.Server.SIROHIRX:
+                params['rx'] = 1
                 if qtype == 'id':
                     params['id'] = usr
                 else:
@@ -190,4 +197,9 @@ async def getusrscores(
             if res == []:
                 raise ValueError("Invalid query or API down.")
             else:
+                if user.server is not osu.Server.BANCHO:
+                    try:
+                        res = res['scores']
+                    except:
+                        pass
                 return list(map(lambda score: osu.BeatmapScore(score), res))
