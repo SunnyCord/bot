@@ -77,7 +77,7 @@ class Server(Enum):
         'https://sirohi.xyz/api/get_scores'
     )
 
-    SIROHIRX = (7, 'Akatsuki Relax', 'https://i.imgur.com/ic7kEkO.png',
+    SIROHIRX = (7, 'Sirohi Relax', 'https://i.imgur.com/ic7kEkO.png',
         'http://sirohi.xyz/api/v1/users/rxfull',
         'https://osu.ppy.sh/api/get_beatmaps',
         'https://sirohi.xyz/api/get_user_best',
