@@ -47,7 +47,10 @@ class Score:
         self.server = server
         self.mode = mode
         self.score:int = int(json_response["score"])
-        self.maxcombo:int = int(json_response["maxcombo"])
+        try:
+            self.maxcombo:int = int(json_response["maxcombo"])
+        except KeyError: #Relax Server Formatting
+            self.maxcombo:int = int(json_response["max_combo"])
         self.count50:int = int(json_response["count50"])
         self.count100:int = int(json_response["count100"])
         self.count300:int = int(json_response["count300"])
