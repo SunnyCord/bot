@@ -117,6 +117,7 @@ class osuCog(commands.Cog, name='osu!'):
         beatmap.max_combo = bmapfile.max_combo()
 
         recent_score.performance = await self.bot.loop.run_in_executor(None, ppc.calculatePlay, bmapfile, recent_score)
+        recent_score.performance.pp = recent_score.pp if recent_score.pp != 0 else recent_score.performance.pp
 
         result = OsuRecentEmbed(recent_score, beatmap)
 
