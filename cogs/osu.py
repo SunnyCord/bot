@@ -192,6 +192,7 @@ class osuCog(commands.Cog, name='osu!'):
             bmapfile:pyt.beatmap = await osuapiwrap.getbmaposu(top.beatmap_id, server)
             beatmap.max_combo = bmapfile.max_combo()
             top.performance = await self.bot.loop.run_in_executor(None, ppc.calculatePlay, bmapfile, top)
+            top.performance.pp = top.pp if top.pp is not 0
 
             beatmaps.append(beatmap)
         title = f'Top plays on osu! {profile.mode.name_full} for {profile.username}'
