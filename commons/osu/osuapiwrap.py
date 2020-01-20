@@ -38,7 +38,7 @@ def __convAkaRXProfile(res, mode = 0): #Converts akatsuki!rx fullrx API response
                 "events": []
             }
         ]
-    except KeyError
+    except KeyError:
         return [
             {
                 "user_id": res['id'],
