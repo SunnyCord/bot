@@ -8,9 +8,9 @@ class OsuRecentEmbed(discord.Embed):
         if score.performance.completion != 100:
             score.rank = osu.Rank.F #Weird non-bancho API behaviour
 
-        description = f"""> {score.rank.icon} > **{round(score.performance.pp, 2)}PP """ +\
-        (f"({round(score.performance.pp_fc, 2)}PP for {round(score.performance.accuracy_fc * 100, 2)}% FC)" if not score.perfect else "") +\
-         f"""** > {round(score.accuracy() * 100, 2)}%\n > {score.score} > x{score.maxcombo}/{beatmap.max_combo} > [{score.count300}/{score.count100}/{score.count50}/{score.countmiss}]"""
+        description = f"""
+> {score.rank.icon} > **{round(score.performance.pp, 2)}PP""" + (f"({round(score.performance.pp_fc, 2)}PP for {round(score.performance.accuracy_fc * 100, 2)}% FC)" if not score.perfect else "") + f"""** > {round(score.accuracy() * 100, 2)}%
+> {score.score} > x{score.maxcombo}/{beatmap.max_combo} > [{score.count300}/{score.count100}/{score.count50}/{score.countmiss}]"""
 
         if score.performance.completion != 100:
             description += f"""
