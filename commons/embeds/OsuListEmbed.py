@@ -41,4 +41,4 @@ class OsuListEmbed(discord.Embed):
 > {score.score} > x{score.maxcombo}/{beatmap.max_combo} > [{score.count300}/{score.count100}/{score.count50}/{score.countmiss}]
 > {score.date}"""
 
-            self.add_field(name = field_title, value = field_description)
+            self.add_field(name = field_title, value = field_description. inline=False)
