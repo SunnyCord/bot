@@ -90,11 +90,11 @@ class Score:
             self.enabled_mods:osu.Mod = osu.Mods(int(json_response["mods"]))
         self.performance:osu.Performance = None
         try:
-            self.date:datetime = datetime.strptime(json_response["date"], "%Y-%m-%d %H:%M:%S")
-        try:
             self.pp:float = float(json_response["pp"] or 0)
         except:
             self.pp = 0
+        try:
+            self.date:datetime = datetime.strptime(json_response["date"], "%Y-%m-%d %H:%M:%S")
         except KeyError:
             cleanedDate = json_response['time'].split('+', 1)[0]
             self.date:datetime = datetime.strptime(cleanedDate, "%Y-%m-%dT%H:%M:%S")
