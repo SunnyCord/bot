@@ -79,6 +79,8 @@ class Score:
             self.perfect:bool = bool(int(json_response["perfect"]))
         except KeyError:
             self.perfect:bool = bool(int(json_response["full_combo"]))
+        if self.server is osu.Server.AKATSUKIRX or osu.Server.SIROHIRX:
+            self.perfect = True
         try:
             self.user_id:int = int(json_response["user_id"])
         except KeyError:
