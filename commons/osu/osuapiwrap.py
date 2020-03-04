@@ -205,7 +205,8 @@ async def getusrscores(
             'u': user.user_id,
             'type': 'id',
             'b': beatmap_id,
-            'm': user.mode.id
+            'm': user.mode.id,
+            'limit': limit
         }
 
         if user.server is not osu.Server.BANCHO:
