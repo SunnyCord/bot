@@ -8,3 +8,4 @@ websockets
 pyttanko
 redis
 jishaku
+sentry-sdk
