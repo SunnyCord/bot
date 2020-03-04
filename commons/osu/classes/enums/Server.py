@@ -65,7 +65,7 @@ class Server(Enum):
     GATARI = (5, 'Gatari' ,'https://i.imgur.com/IAkYdrI.png',
         'https://api.gatari.pw/user/stats', '', '', '', '', '', '', '', '')
 
-    SIROHI = (6, 'Sirohi' ,'https://i.imgur.com/l4tTouZ.png',
+    SIROHI = (6, 'Sirohi' ,'https://sirohi.xyz/static/favicon.png',
         'https://sirohi.xyz/api/get_user',
         'https://osu.ppy.sh/api/get_beatmaps',
         'https://sirohi.xyz/api/get_user_best',
@@ -77,7 +77,7 @@ class Server(Enum):
         'https://sirohi.xyz/api/get_scores'
     )
 
-    SIROHIRX = (7, 'Sirohi Relax', 'https://i.imgur.com/l4tTouZ.png',
+    SIROHIRX = (7, 'Sirohi Relax', 'https://sirohi.xyz/static/favicon.png',
         'http://sirohi.xyz/api/v1/users/rxfull',
         'https://osu.ppy.sh/api/get_beatmaps',
         'https://sirohi.xyz/api/v1/users/scores/best',
