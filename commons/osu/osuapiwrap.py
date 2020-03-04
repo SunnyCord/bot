@@ -224,7 +224,7 @@ async def getusrscores(
             else:
                 if user.server is not osu.Server.BANCHO:
                     try:
-                        res = res['scores'][limit:]
+                        res = res['scores'][:limit]
                     except:
                         pass
                 return list(map(lambda score: osu.BeatmapScore(score), res))
