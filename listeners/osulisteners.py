@@ -15,7 +15,7 @@ class OsuListeners(commands.Cog, command_attrs=dict(hidden=True), name="osu! Cha
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        beatmap = await osuhelpers.getBeatmapFromText(message.content)
+        beatmap = await osuhelpers.getBeatmapFromText(message.content, True)
         if beatmap is None:
             return
         async with aiohttp.ClientSession() as session:
