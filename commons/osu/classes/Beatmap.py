@@ -117,7 +117,7 @@ class Beatmap:
         self.count_normal:int = int(json_response["count_normal"])
         self.count_slider:int = int(json_response["count_slider"])
         self.count_spinner:int = int(json_response["count_spinner"])
-        self.max_combo:int = 0 #int(json_response["max_combo"]) if json_response["max_combo"] is not None else None - no response from osu!API
+        self.max_combo:int = int(json_response["max_combo"]) if json_response["max_combo"] is not None else None # - no response from osu!API
         self.download_unavailable:bool = bool(json_response["download_unavailable"])
         self.audio_unavailable:bool = bool(json_response["audio_unavailable"])
 
