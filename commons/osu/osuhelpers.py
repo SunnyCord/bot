@@ -200,7 +200,7 @@ def getMods(number):
 __patternBeatmapLink = re.compile(r"(https?):\/\/([-\w._]+)(\/[-\w._]\?(.+)?)?(\/b(eatmaps)?\/(?P<bmapid1>[0-9]+)|\/s\/(?P<bmapsetid1>[0-9]+)|\/beatmapsets\/(?P<bmapsetid2>[0-9]+)(#(?P<mode>[a-z]+)\/(?P<bmapid2>[0-9]+))?)")
 __patternBeatmapId = re.compile(r"^(?P<bmapid>[0-9]+)$")
 
-async def getBeatmapFromText(text) -> osu.Beatmap:
+async def getBeatmapFromText(text, ignoreID = False) -> osu.Beatmap:
     resultLink = __patternBeatmapLink.match(text)
     if resultLink is not None:
         setId, beatmapId = None, None
@@ -214,10 +214,11 @@ async def getBeatmapFromText(text) -> osu.Beatmap:
             setId = int(resultLink.group("bmapset1"))
         return await osuapiwrap.getbmap(beatmapId, setId)
     
-    resultId = __patternBeatmapId.match(text)
-    if resultId is not None:
-        beatmapId = int(resultId.group("bmapid"))
-        return await osuapiwrap.getbmap(beatmapId)
+    if not ignoreID:
+        resultId = __patternBeatmapId.match(text)
+        if resultId is not None:
+            beatmapId = int(resultId.group("bmapid"))
+            return await osuapiwrap.getbmap(beatmapId)
 
     return None
 
