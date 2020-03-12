@@ -67,8 +67,8 @@ def __convAkaRXProfile(res, mode = 0): #Converts akatsuki!rx fullrx API response
         ]
 
 async def getuser(
-        usr, 
-        qtype:str='id', 
+        usr,
+        qtype:str='id',
         mode:osu.Mode=osu.Mode.STANDARD,
         server:osu.Server=osu.Server.BANCHO) -> osu.User:
     async with aiohttp.ClientSession() as cs:
@@ -99,11 +99,11 @@ async def getuser(
                 return osu.User(res[0], server, mode)
 
 async def getbmap(
-        beatmap_id:int=None, 
+        beatmap_id:int=None,
         beatmapset_id:int=None,
-        mode:osu.Mode=osu.Mode.STANDARD, 
-        server:osu.Server=osu.Server.BANCHO, 
-        mods:osu.Mods=osu.Mods(0), 
+        mode:osu.Mode=osu.Mode.STANDARD,
+        server:osu.Server=osu.Server.BANCHO,
+        mods:osu.Mods=osu.Mods(0),
         limit:int=1) -> osu.Beatmap:
     # mods = __cleanMods(kwargs.pop('mods', 0), mode)
     async with aiohttp.ClientSession() as cs:
@@ -118,7 +118,7 @@ async def getbmap(
         if beatmap_id is None:
             params['s'] = beatmapset_id
         else:
-            params['b'] = beatmap_id          
+            params['b'] = beatmap_id
         async with cs.get( server.api_getbmap, params=params ) as r:
             res = await r.json()
             if res == []:
@@ -225,6 +225,6 @@ async def getusrscores(
                 if user.server is not osu.Server.BANCHO:
                     try:
                         res = res['scores']
-                    except:
+                    except Exception:
                         pass
                 return list(map(lambda score: osu.BeatmapScore(score), res[:limit]))

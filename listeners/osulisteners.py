@@ -1,10 +1,8 @@
-import re, aiohttp, discord
+import aiohttp, discord
 import commons.redisIO as redisIO
 from io import BytesIO
 from discord.ext import commands
-from commons.osu import osuapiwrap
 from commons.osu import osuhelpers
-from commons.mongoIO import getOsu
 from commons.embeds.BeatmapEmbed import BeatmapEmbed
 
 class OsuListeners(commands.Cog, command_attrs=dict(hidden=True), name="osu! Chat Listener"):
@@ -27,7 +25,7 @@ class OsuListeners(commands.Cog, command_attrs=dict(hidden=True), name="osu! Cha
             redisIO.setValue(message.channel.id, beatmap.beatmap_id)
             redisIO.setValue(f'{message.channel.id}.mode', beatmap.mode)
 
-        botReply = await message.channel.send(embed=BeatmapEmbed(beatmap), file=discord.File(f, filename="Preview.mp3"))
+        await message.channel.send(embed=BeatmapEmbed(beatmap), file=discord.File(f, filename="Preview.mp3"))
 
 
 def setup(bot):
