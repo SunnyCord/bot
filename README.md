@@ -9,10 +9,23 @@
 > -   Lavalink Server
 > -   mongoDB
 > -   Redis
+> -   osu! API Key (osu! Commands)
 
-### Changelog *(as of 11/02/19)*
+### Changelog *(as of 12/03/20)*
 ****
 
+> `v1.4.0S120320` [( 505c5b )](https://github.com/NiceAesth/Sunny/commit/ddcd607e6c60b99f7719f1ea61bb263676d6f1f1)
+> -   Add beatmap listener
+> -   Rewrite large part of osu! code
+> -   Add new osu! commands (score, pp, etc.)
+> -   Add private servers
+> -   Rewrite osu! API handler portion
+> -   Create classes for all entities from the osu!API
+> -   Add sentry error reporting
+> -   Fix some issues
+> -   Add owner permissions as config item
+> -   Preserve API PP values if they are present
+>
 > `v1.3.2S110219` [( 505c5b )](https://github.com/NiceAesth/Sunny/commit/505c5ba11de11ed3673aad1416bc7a2f073cc0b4)
 > -   Moved std PP calculations to pyttanko
 > -   Implement speed rebalance and other PP changes
