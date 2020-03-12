@@ -49,7 +49,7 @@ class osuCog(commands.Cog, name='osu!'):
             qtype = "id"
             user = getOsu(ctx.message.author)
 
-        if user and type(user) is str and user.startswith("<@") and user.endswith(">"):
+        if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
             qtype = "id"
             user = getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
 
@@ -93,7 +93,7 @@ class osuCog(commands.Cog, name='osu!'):
             qtype = "id"
             user = getOsu(ctx.message.author)
 
-        if user and type(user) is str and user.startswith("<@") and user.endswith(">"):
+        if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
             qtype = "id"
             user = getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
 
@@ -150,7 +150,7 @@ class osuCog(commands.Cog, name='osu!'):
             qtype = "id"
             user = getOsu(ctx.message.author)
 
-        if user and type(user) is str and user.startswith("<@") and user.endswith(">"):
+        if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
             qtype = "id"
             user = getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
 
