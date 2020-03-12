@@ -5,6 +5,7 @@ pymongo
 lavalink
 aiohttp
 websockets
-aiohttp
 pyttanko
 redis
+jishaku
+sentry-sdk

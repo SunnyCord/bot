@@ -3,6 +3,13 @@
 
 <br>
 
+### Requirements
+****
+
+> -   Lavalink Server
+> -   mongoDB
+> -   Redis
+
 ### Changelog *(as of 11/02/19)*
 ****
 
