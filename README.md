@@ -14,7 +14,7 @@
 ### Changelog *(as of 12/03/20)*
 ****
 
-> `v1.4.0S120320` [( 505c5b )](https://github.com/NiceAesth/Sunny/commit/ddcd607e6c60b99f7719f1ea61bb263676d6f1f1)
+> `v1.4.0S120320` [( ddcd60 )](https://github.com/NiceAesth/Sunny/commit/ddcd607e6c60b99f7719f1ea61bb263676d6f1f1)
 > -   Add beatmap listener
 > -   Rewrite large part of osu! code
 > -   Add new osu! commands (score, pp, etc.)
