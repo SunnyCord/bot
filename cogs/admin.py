@@ -62,7 +62,7 @@ class Admin(commands.Cog):
                         embed.set_thumbnail(url=user.avatar_url)
                         await ctx.send(embed=embed)
                     except Exception:
-                        pass
+                        print(f'User {user.name} could not be unmuted!')
             else:
                 await ctx.send(f'User {user.mention} is already muted.')
 

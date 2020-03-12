@@ -4,7 +4,7 @@ import config as cfg
 
 def get_config():
     if cfg.DEBUG==True:
-        return cfg.debugConf
+        return cfg.debugBotConfig
     else:
         return cfg.conf
 

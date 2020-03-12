@@ -1,14 +1,7 @@
 import discord
 from discord.ext import commands
-import config as cfg
 
 #https://gist.github.com/StudioMFTechnologies/ad41bfd32b2379ccffe90b0e34128b8b
-
-def get_config():
-    if cfg.DEBUG==True:
-        return cfg.debugConf
-    else:
-        return cfg.conf
 
 class Help(commands.Cog):
     """Displays the message you are currently viewing!"""
@@ -21,7 +14,7 @@ class Help(commands.Cog):
         """Gets all cogs and commands of mine."""
         if not cog:
             helpEmbed=discord.Embed(title='Available Cogs',
-                            description=f'Use `{ctx.prefix}help *cog*` to find out more about them!', color=get_config().COLOR)
+                            description=f'Use `{ctx.prefix}help *cog*` to find out more about them!', color=self.bot.configs.COLOR)
             cogs_desc = ''
             for x in self.bot.cogs:
                 cogs_desc += f'**{x}** - {self.bot.cogs[x].__doc__}\n'
@@ -37,7 +30,7 @@ class Help(commands.Cog):
                 for x in self.bot.cogs:
                     for y in cog:
                         if x == y:
-                            helpEmbed=discord.Embed(title=f'{cog[0]} Commands',description=self.bot.cogs[cog[0]].__doc__, color=get_config().COLOR)
+                            helpEmbed=discord.Embed(title=f'{cog[0]} Commands',description=self.bot.cogs[cog[0]].__doc__, color=self.bot.configs.COLOR)
                             for c in self.bot.get_cog(y).get_commands():
                                 if not c.hidden:
                                     helpEmbed.add_field(name=c.name,value=c.help,inline=False)
