@@ -3,8 +3,6 @@ import commons.osu.classes as osu
 from commons.osu.catchthepp.osu_parser.beatmap import Beatmap
 from commons.osu.catchthepp.osu.ctb.difficulty import Difficulty
 from commons.osu.catchthepp.ppCalc import calculate_pp
-from commons.osu import accuracycalculator as acc
-from commons.osu import osuhelpers
 
 
 def getObjectCount(bmap):
@@ -74,18 +72,18 @@ def calculateBeatmap(beatmap:pyt.beatmap, mods:osu.Mods, mode:osu.Mode = osu.Mod
     return perfDict
 
 def calculatePlay(beatmap:pyt.beatmap, score:osu.Score, calcPP:int = 1) -> osu.Performance:
-    
+
     if score.mode == osu.Mode.STANDARD:
         objcount = beatmap.ncircles + beatmap.nsliders + beatmap.nspinners
         sr = pyt.diff_calc().calc(beatmap, int(score.enabled_mods))
 
         if calcPP == 1:
             pp, _, _, _, _ = pyt.ppv2(sr.aim, sr.speed, bmap=beatmap, mods=int(score.enabled_mods), n300=score.count300, n100=score.count100, n50=score.count50, nmiss=score.countmiss, combo=score.maxcombo)
-        
+
         accuracy_fc = ((objcount - score.count100 - score.count50) * 6 + score.count100 * 2 + score.count50) / (objcount * 6)
         n300, n100, n50 = pyt.acc_round(accuracy_fc * 100, objcount, 0)
         pp_fc, _, _, _, _ = pyt.ppv2(sr.aim, sr.speed, bmap=beatmap, mods=int(score.enabled_mods), n300=n300, n100=n100, n50=n50, nmiss=0, combo=beatmap.max_combo())
-            
+
         return osu.Performance(pp, pp_fc, accuracy_fc, round((score.total_hits() * 100) / objcount, 2), sr.total)
 
     # elif score.mode == osu.Mode.CTB:

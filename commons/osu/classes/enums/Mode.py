@@ -5,7 +5,7 @@ class Mode(Enum):
     TAIKO = (1, 'https://i.imgur.com/G6bzM0X.png', 'Taiko', 'T')
     CTB = (2, 'https://i.imgur.com/EsanYkH.png', 'Catch the Beat', 'CTB')
     MANIA = (3, 'https://i.imgur.com/0uZM1PZ.png', 'Mania', 'M')
-    
+
     def __init__(self, id:int, icon:str, name_full:str, name_short:str):
         self.id:int = id
         self.icon:str = icon
@@ -14,7 +14,7 @@ class Mode(Enum):
 
     @staticmethod
     def fromId(id) -> 'Mode':
-        if type(id) is not 'int':
+        if not isinstance(id, int):
             id = int(id)
 
         for mode in list(Mode):

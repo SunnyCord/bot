@@ -1,5 +1,4 @@
 from enum import Enum
-import commons.osu.classes as osu
 
 class Server(Enum):
     BANCHO = (0, 'Bancho', 'https://i.imgur.com/0aZpJjl.png',
@@ -60,7 +59,7 @@ class Server(Enum):
         'https://enjuu.click/u/',
         'https://enjuu.click/b/',
         'https://enjuu.click/api/get_scores')
-    
+
     #TODO: Add gatari API links
     GATARI = (5, 'Gatari' ,'https://i.imgur.com/IAkYdrI.png',
         'https://api.gatari.pw/user/stats', '', '', '', '', '', '', '', '')
@@ -111,7 +110,7 @@ class Server(Enum):
 
         self.url_avatar:str = url_avatar
         self.url_profile:str = url_profile
-        self.url_beatmap:str = url_beatmap        
+        self.url_beatmap:str = url_beatmap
 
     @staticmethod
     def from_name(param:str) -> 'Server':

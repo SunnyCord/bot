@@ -1,6 +1,5 @@
 import re
 from discord.ext import commands
-from datetime import datetime
 from commons.osu import osuhelpers
 from commons.osu import ppwrapper as ppc
 from commons.osu import osuapiwrap
@@ -141,7 +140,7 @@ class osuCog(commands.Cog, name='osu!'):
             user = parsedArgs['user']
             qtype = parsedArgs['qtype']
             server = parsedArgs['server']
-            
+
             if parsedArgs['recent'] is True:
                 limit = 100
             elif parsedArgs['position'] is not None:
@@ -169,7 +168,7 @@ class osuCog(commands.Cog, name='osu!'):
                 sorted_tops = sorted(tops, key=lambda x: x.date, reverse=True)
                 positions = list(map(lambda top: tops.index(top) + 1, sorted_tops))
                 tops = sorted_tops
-                
+
             if parsedArgs['position'] is None:
                 tops = tops[:5]
                 positions = positions[:5]
@@ -225,13 +224,13 @@ class osuCog(commands.Cog, name='osu!'):
             qtype = parsedArgs['qtype']
             server = parsedArgs['server']
 
-            
+
 
         if not user:
             qtype = "id"
             user = getOsu(ctx.message.author)
 
-        if user and type(user) is str and user.startswith("<@") and user.endswith(">"):
+        if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
             qtype = "id"
             user = getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
 
@@ -241,7 +240,7 @@ class osuCog(commands.Cog, name='osu!'):
         if 'c' == ctx.invoked_with or 'compare' == ctx.invoked_with and beatmap is None:
             if self.bot.configs.REDIS is True:
                 mode = osuClasses.Mode.fromId(redisIO.getValue(f'{ctx.message.channel.id}.mode'))
-                beatmap = await osuapiwrap.getbmap(redisIO.getValue(ctx.message.channel.id), mode=mode, server=server) 
+                beatmap = await osuapiwrap.getbmap(redisIO.getValue(ctx.message.channel.id), mode=mode, server=server)
             else:
                 beatmap = await osuapiwrap.getbmap(1917158)
 
@@ -255,13 +254,12 @@ class osuCog(commands.Cog, name='osu!'):
         except ValueError:
             return await ctx.send("User has not been found or has no plays on the beatmap!")
 
-        index:int
         top:osuClasses.Score
-        for index, top in enumerate(tops):
+        for _, top in enumerate(tops):
             bmapfile:pyt.beatmap = await osuapiwrap.getbmaposu(beatmap.beatmap_id)
             beatmap.max_combo = bmapfile.max_combo()
             top.performance = await self.bot.loop.run_in_executor(None, ppc.calculatePlay, bmapfile, top)
-        
+
         title = f"Top osu! {mode.name_full} for {profile.username} on {beatmap.title}[{beatmap.version}]"
         result = OsuListEmbed(title, tops, [ beatmap ] * len(tops), profile)
 
@@ -274,7 +272,7 @@ class osuCog(commands.Cog, name='osu!'):
 
         args = osuhelpers.parseArgsV2(args=args, customArgs=["mods", "beatmap"])
         mode = args["mode"]
-        
+
         if args["beatmap"]:
             beatmap:osuClasses.Beatmap = await osuhelpers.getBeatmapFromText(args["beatmap"])
         else:

@@ -1,7 +1,6 @@
 import discord
 import config
 import commons.osu.classes as osu
-from datetime import datetime
 from typing import List
 
 class OsuListEmbed(discord.Embed):
