@@ -93,7 +93,7 @@ class Score:
         self.performance:osu.Performance = None
         try:
             self.pp:float = float(json_response["pp"] or 0)
-        except:
+        except Exception:
             self.pp = 0
         try:
             self.date:datetime = datetime.strptime(json_response["date"], "%Y-%m-%d %H:%M:%S")
@@ -181,8 +181,8 @@ class RecentScore(Score):
         When the score was played.
 
     See Also
-    ---------import 
-    <https://import 
+    ---------
+    <https://osu.ppy.sh/wiki/Score>
     """
     def __init__(self, json_response, server:osu.Server = osu.Server.BANCHO, mode:osu.Mode = osu.Mode.STANDARD):
         super().__init__(json_response, server, mode)

@@ -76,7 +76,7 @@ class User:
             self.count_rank_ssh:int = int(json_response["count_rank_ssh"])
         else:
             self.count_rank_ssh:int = 0
-            
+
         if "count_rank_sh" in json_response and json_response["count_rank_sh"] is not None:
             self.count_rank_sh:int = int(json_response["count_rank_sh"])
         else:

@@ -4,7 +4,7 @@ class Mods:
     def __init__(self, mods):
         self._mod_list:list = []
 
-        if type(mods) is str:
+        if isinstance(mods, str):
             mods = mods.upper()
             for i in range(0, len(mods), 2):
                 mod_str:str = mods[i:i+2]
@@ -12,11 +12,11 @@ class Mods:
                 if mod is not None and mod not in self._mod_list:
                     self._mod_list.append(mod)
 
-        if type(mods) is int:
+        if isinstance(mods, int):
             for mod in list(osu.Mod):
                 if int(mod) & mods:
                     self._mod_list.append(mod)
-                
+
     def __int__(self):
         result:int = 0
         for mod in self._mod_list:
@@ -33,6 +33,6 @@ class Mods:
                 continue
             if osu.Mod.Perfect in self._mod_list and mod is osu.Mod.SuddenDeath:
                 continue
-                
+
             result += mod.short_name
         return result
