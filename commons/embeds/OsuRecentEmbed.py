@@ -17,12 +17,12 @@ class OsuRecentEmbed(discord.Embed):
 > **Completion:** {score.performance.completion}%"""
 
         super().__init__(
-            title=discord.Embed.Empty, 
+            title=discord.Embed.Empty,
             color=config.getBotConfig().COLOR,
             description=description,
             timestamp=score.date
         )
-        
+
         self.set_author(
             name=f"{beatmap.title} [{beatmap.version}] ({beatmap.creator}) +{str(score.enabled_mods)} [{round(score.performance.star_rating, 2)}★]",
             url=score.server.url_beatmap + str(beatmap.beatmap_id),

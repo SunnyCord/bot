@@ -10,7 +10,7 @@ class OsuPerformanceEmbed(discord.Embed):
             url=beatmap.beatmap_url,
             color = config.conf.COLOR
         )
-        
+
         self.set_thumbnail(url=f"https://b.ppy.sh/thumb/{beatmap.beatmapset_id}.jpg")
         self.add_field(name='100%', value=f"{perf_info['pp_100']}pp", inline=True)
         self.add_field(name='97%', value=f"{perf_info['pp_97']}pp", inline=True)

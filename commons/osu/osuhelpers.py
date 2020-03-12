@@ -213,7 +213,7 @@ async def getBeatmapFromText(text, ignoreID = False) -> osu.Beatmap:
         else:
             setId = int(resultLink.group("bmapset1"))
         return await osuapiwrap.getbmap(beatmapId, setId)
-    
+
     if not ignoreID:
         resultId = __patternBeatmapId.match(text)
         if resultId is not None:
@@ -227,7 +227,7 @@ async def getBeatmapFromHistory(ctx) -> osu.Beatmap:
         beatmap_id = redisIO.getValue(ctx.message.channel.id)
         if beatmap_id is None:
             return None
-    
+
         mode = osu.Mode.fromId(redisIO.getValue(f'{ctx.message.channel.id}.mode'))
         return await osuapiwrap.getbmap(beatmap_id, mode=mode)
     else:
