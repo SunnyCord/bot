@@ -1,0 +1,25 @@
+{
+    "redis": true,
+    "__comment": "select -> index of config to use (starting from 0)",
+    "select": 0,
+    "configs": [
+        {
+            "mongo": {
+                "URI": "",
+                "database": "sunny",
+                "timeout": 10000
+            },
+            "lavalink": {
+                "password": "",
+                "port": 8080
+            },
+            "sentry": "",
+            "command_prefixes": ["s."],
+            "color": "0xd74613",
+            "token": "",
+            "osuAPI": "",
+            "owners": [ ],
+            "splashArt": "Sunny"
+        }
+    ]
+}
