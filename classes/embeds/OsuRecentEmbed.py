@@ -1,10 +1,9 @@
 import discord
-import commons.osu.classes as osu
-import config
+import classes.osu as osu
 
 class OsuRecentEmbed(discord.Embed):
 
-    def __init__(self, score:osu.Score, beatmap:osu.Beatmap):
+    def __init__(self, score:osu.Score, beatmap:osu.Beatmap, color: str):
         if score.performance.completion != 100:
             score.rank = osu.Rank.F #Weird non-bancho API behaviour
 
@@ -18,7 +17,7 @@ class OsuRecentEmbed(discord.Embed):
 
         super().__init__(
             title=discord.Embed.Empty,
-            color=config.getBotConfig().COLOR,
+            color=color,
             description=description,
             timestamp=score.date
         )

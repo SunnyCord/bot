@@ -1,14 +1,13 @@
 import discord
-import config
-import commons.osu.classes as osu
+import classes.osu as osu
 from typing import List
 
 class OsuListEmbed(discord.Embed):
 
-    def __init__(self, title:str, scores:List[osu.Score], beatmaps:List[osu.Beatmap], user:osu.User, positions:List[int] = None, style:int = 1):
+    def __init__(self, title:str,  color: str, scores:List[osu.Score], beatmaps:List[osu.Beatmap], user:osu.User, positions:List[int] = None, style:int = 1):
         super().__init__(
             title = discord.Embed.Empty,
-            color = config.conf.COLOR,
+            color = color,
             description = discord.Embed.Empty
         )
 

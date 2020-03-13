@@ -1,5 +1,5 @@
 import pyttanko as pyt
-import commons.osu.classes as osu
+import classes.osu as osu
 from commons.osu.catchthepp.osu_parser.beatmap import Beatmap
 from commons.osu.catchthepp.osu.ctb.difficulty import Difficulty
 from commons.osu.catchthepp.ppCalc import calculate_pp
