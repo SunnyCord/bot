@@ -11,7 +11,8 @@ class osuHelper():
     def __init__(self, token):
         self.osuAPI = osuapiwrap.osuAPI(token)
 
-    def parseArgsV2(self, **kwargs):
+    @staticmethod
+    def parseArgsV2(**kwargs):
         args = kwargs.pop("args")
         customArgs = kwargs.pop("customArgs") if 'customArgs' in kwargs else []
 
@@ -96,7 +97,8 @@ class osuHelper():
 
         return parsedArgs
 
-    def parseArgs(self, **kwargs):
+    @staticmethod
+    def parseArgs(**kwargs):
         args = kwargs.pop("args")
         validArgs = kwargs.pop("validArgs") if 'validArgs' in kwargs else []
 
@@ -175,7 +177,8 @@ class osuHelper():
 
         return parsedArgs
 
-    def getMods(self, number):
+    @staticmethod
+    def getMods(number):
         mod_list= []
         if number == 0:	mod_list.append('NM')
         if number & 1<<0:   mod_list.append('NF')

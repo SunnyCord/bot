@@ -1,13 +1,11 @@
 import os
 import json
-import random
-import discord
 from typing import List, Dict
 
 class Config():
 
     def __init__(
-        self, redis: bool, mongo: Dict, lavalink: Dict, sentry: str, command_prefixes: List, token: str, 
+        self, redis: bool, mongo: Dict, lavalink: Dict, sentry: str, command_prefixes: List, token: str,
         osuAPI:str, owners:List[int], splashArt: str, color: int
     ):
         self.redis = redis

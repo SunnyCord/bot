@@ -1,5 +1,4 @@
 import discord
-from motor import motor_asyncio
 
 class mongoIO():
 

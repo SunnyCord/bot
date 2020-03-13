@@ -1,9 +1,10 @@
 import discord
+from discord.ext import commands
 from motor import motor_asyncio
 from classes.config import Config
 from commons.mongoIO import mongoIO
 
-class Sunny(discord.ext.commands.AutoShardedBot):
+class Sunny(commands.AutoShardedBot):
 
     @staticmethod
     async def __get_prefix(self, message):
@@ -12,7 +13,7 @@ class Sunny(discord.ext.commands.AutoShardedBot):
             return ' '
         guildPref = await self.mongoIO.getSetting(message.guild, 'prefix') if message.guild else None
         result = self.config.command_prefixes + [guildPref] if guildPref is not None else self.config.command_prefixes
-        return discord.ext.commands.when_mentioned_or(*result)(self, message)
+        return commands.when_mentioned_or(*result)(self, message)
 
     def __init__(self, **kwargs):
         super().__init__(
@@ -35,4 +36,4 @@ class Sunny(discord.ext.commands.AutoShardedBot):
 
         # Else fall back to the original
         return await super().is_owner(user)
-    
+

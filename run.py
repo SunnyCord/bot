@@ -1,6 +1,5 @@
-import asyncio, sys, traceback, os, discord, pyfiglet
-from discord.ext import commands
 from classes.bot import Sunny
+import asyncio, sys, traceback, os, discord, pyfiglet
 
 bot = Sunny (
         description='Sunny Bot', activity=discord.Streaming (

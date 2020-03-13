@@ -64,7 +64,7 @@ def __convAkaRXProfile(res, mode = 0): #Converts akatsuki!rx fullrx API response
             ]
 
 class osuAPI():
-    
+
     def __init__(self, token):
         self.__token = token
 
