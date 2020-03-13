@@ -103,7 +103,7 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-config\.py
+config\.json
 
 application\.yml
 
@@ -114,3 +114,7 @@ Pipfile
 lavalink/
 
 Lavalink.jar
+
+.vscode/
+
+config,json

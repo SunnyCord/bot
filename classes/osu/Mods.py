@@ -1,4 +1,4 @@
-import commons.osu.classes as osu
+import classes.osu as osu
 
 class Mods:
     def __init__(self, mods):

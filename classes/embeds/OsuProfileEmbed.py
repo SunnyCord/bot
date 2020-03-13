@@ -1,5 +1,5 @@
 import discord
-import commons.osu.classes as osu
+import classes.osu as osu
 from datetime import datetime
 
 class OsuProfileEmbed(discord.Embed):
