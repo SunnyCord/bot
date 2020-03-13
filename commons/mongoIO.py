@@ -25,6 +25,8 @@ class mongoIO():
 		a = await self.db.users.find_one( {"id": {"$eq": member.id} } )
 		if a is None:
 			return None
+		if "preferredServer" not in a:
+			a["preferredServer"] = 0
 		return a["osu"], a["preferredServer"]
 
 	async def setOsu(self, member: discord.Member, osuID: int, osuServer: int = 0):
