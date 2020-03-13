@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-from commons import mongoIO
 from commons import checks
 from datetime import datetime
 import time
