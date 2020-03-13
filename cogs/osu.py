@@ -203,7 +203,7 @@ class osuCog(commands.Cog, name='osu!'):
 
             beatmaps.append(beatmap)
         title = f'Top plays on osu! {profile.mode.name_full} for {profile.username}'
-        result = OsuListEmbed(title, tops, beatmaps, profile, positions, 0, self.bot.config.color)
+        result = OsuListEmbed(title, self.bot.config.color, tops, beatmaps, profile, positions, 0)
         await ctx.send(embed=result)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
