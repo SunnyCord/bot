@@ -117,3 +117,11 @@ class Server(Enum):
         if param.startswith('-'):
             param = param[1:]
         return Server[param.upper()]
+
+
+    @classmethod
+    def from_id(cls, id):
+        for item in cls:
+            if item.value[0] == id:
+                return item
+        raise ValueError("%r is not a valid %s id" % (id, cls.__name__))

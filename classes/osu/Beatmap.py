@@ -1,4 +1,4 @@
-import commons.osu.classes as osu
+import classes.osu as osu
 
 class Beatmap:
     """Class representing a beatmap

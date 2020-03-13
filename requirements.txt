@@ -1,7 +1,7 @@
 discord.py
 dnspython
 GitPython
-pymongo
+motor
 lavalink
 aiohttp
 websockets
@@ -9,3 +9,4 @@ pyttanko
 redis
 jishaku
 sentry-sdk
+pyfiglet

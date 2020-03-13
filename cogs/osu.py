@@ -1,20 +1,21 @@
 import re
-from discord.ext import commands
-from commons.osu import osuhelpers
-from commons.osu import ppwrapper as ppc
-from commons.osu import osuapiwrap
-import commons.osu.classes as osuClasses
-from commons.mongoIO import getOsu, setOsu
-from commons.embeds import *
-import commons.redisIO as redisIO
 import pyttanko as pyt
 from typing import List
+from classes.embeds import *
+import commons.redisIO as redisIO
+from discord.ext import commands
+import classes.osu as osuClasses
+from commons.osu import osuapiwrap
+from commons.osu.osuhelpers import osuHelper
+from commons.osu import ppwrapper as ppc
 
 class osuCog(commands.Cog, name='osu!'):
     """osu! related commands.\n*Valid Arguments:* ```fix\n-ripple, -akatsuki, akatsukirx, -enjuu```"""
 
     def __init__(self, bot):
         self.bot = bot
+        self.osuAPI = osuapiwrap.osuAPI(bot.config.osuAPI)
+        self.osuhelpers = osuHelper(bot.config.osuAPI)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command()
@@ -22,10 +23,10 @@ class osuCog(commands.Cog, name='osu!'):
         """Sets the osu! profile for the message author. ``eg. osuset Nice Aesthetics``"""
 
         try:
-            parsedArgs = osuhelpers.parseArgsV2(args=args, customArgs=["user"])
+            parsedArgs = self.osuhelpers.parseArgsV2(args=args, customArgs=["user"])
             username = parsedArgs['user']
-            profile:osuClasses.User = await osuapiwrap.getuser(username, 'string', server=parsedArgs['server'])
-            setOsu(ctx.message.author, profile.user_id)
+            profile:osuClasses.User = await self.osuAPI.getuser(username, 'string', server=parsedArgs['server'])
+            await self.bot.mongoIO.setOsu(ctx.message.author, profile.user_id, parsedArgs['server'].id)
             await ctx.send(f"osu! profile succesfully set to {profile.username}")
 
         except ValueError:
@@ -40,18 +41,20 @@ class osuCog(commands.Cog, name='osu!'):
         server = osuClasses.Server.BANCHO
 
         if args is not None:
-            parsedArgs = osuhelpers.parseArgs(args=args)
+            parsedArgs = self.osuhelpers.parseArgs(args=args)
             user = parsedArgs['user']
             qtype = parsedArgs['qtype']
             server = osuClasses.Server.from_name(parsedArgs['server'])
 
         if not user:
             qtype = "id"
-            user = getOsu(ctx.message.author)
+            user, serverID = await self.bot.mongoIO.getOsu(ctx.message.author)
+            server = osuClasses.Server.from_id(serverID)
 
         if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
             qtype = "id"
-            user = getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
+            user, server = await self.bot.mongoIO.getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
+            server = osuClasses.Server.from_id(serverID)
 
         if not user:
             return await ctx.send("Please set your profile!")
@@ -59,13 +62,13 @@ class osuCog(commands.Cog, name='osu!'):
         mode = osuClasses.Mode.fromCommand(ctx.invoked_with)
 
         try:
-            user:osuClasses.User = await osuapiwrap.getuser(usr = user, mode = mode, qtype = qtype, server = server)
+            user:osuClasses.User = await self.osuAPI.getuser(usr = user, mode = mode, qtype = qtype, server = server)
 
         except ValueError:
             return await ctx.send("User has not been found or has not played enough!")
 
         if (user.playcount is not None) and (user.accuracy is not None):
-            result = OsuProfileEmbed(user, mode, self.bot.configs.COLOR)
+            result = OsuProfileEmbed(user, mode, self.bot.config.color)
             return await ctx.send(embed = result)
 
         else:
@@ -82,7 +85,7 @@ class osuCog(commands.Cog, name='osu!'):
         limit = 1
 
         if args is not None:
-            parsedArgs = osuhelpers.parseArgs(args=args, validArgs=['-l', '-m'])
+            parsedArgs = self.osuhelpers.parseArgs(args=args, validArgs=['-l', '-m'])
             user = parsedArgs['user']
             qtype = parsedArgs['qtype']
             server = osuClasses.Server.from_name(parsedArgs['server'])
@@ -91,34 +94,36 @@ class osuCog(commands.Cog, name='osu!'):
 
         if not user:
             qtype = "id"
-            user = getOsu(ctx.message.author)
+            user, serverID = await self.bot.mongoIO.getOsu(ctx.message.author)
+            server = osuClasses.Server.from_id(serverID)
 
         if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
             qtype = "id"
-            user = getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
+            user, server = await self.bot.mongoIO.getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
+            server = osuClasses.Server.from_id(serverID)
 
         if not user:
             return await ctx.send("Please set your profile!")
 
         try:
-            profile:osuClasses.User = await osuapiwrap.getuser(user, qtype, mode, server)
-            recent_score:osuClasses.RecentScore = (await osuapiwrap.getrecent(profile, limit))[0]
+            profile:osuClasses.User = await self.osuAPI.getuser(user, qtype, mode, server)
+            recent_score:osuClasses.RecentScore = (await self.osuAPI.getrecent(profile, limit))[0]
 
         except ValueError:
             return await ctx.send("User has not been found or has no recent plays!")
 
-        if self.bot.configs.REDIS is True:
+        if self.bot.config.redis is True:
             redisIO.setValue(ctx.message.channel.id, recent_score.beatmap_id)
             redisIO.setValue(f'{ctx.message.channel.id}.mode', mode.id)
 
-        bmapfile:pyt.beatmap = await osuapiwrap.getbmaposu(beatmap_id=recent_score.beatmap_id)
-        beatmap:osuClasses.Beatmap = await osuapiwrap.getbmap(recent_score.beatmap_id, mode=mode, server=server, mods=recent_score.enabled_mods)
+        bmapfile:pyt.beatmap = await self.osuAPI.getbmaposu(beatmap_id=recent_score.beatmap_id)
+        beatmap:osuClasses.Beatmap = await self.osuAPI.getbmap(recent_score.beatmap_id, mode=mode, server=server, mods=recent_score.enabled_mods)
         beatmap.max_combo = bmapfile.max_combo()
 
         recent_score.performance = await self.bot.loop.run_in_executor(None, ppc.calculatePlay, bmapfile, recent_score)
         recent_score.performance.pp = recent_score.pp if recent_score.pp != 0 else recent_score.performance.pp
 
-        result = OsuRecentEmbed(recent_score, beatmap)
+        result = OsuRecentEmbed(recent_score, beatmap, self.bot.config.color)
 
         await ctx.send(f"**Most Recent osu! {mode.name_full} Play for {profile.username} on {server.name_full}:**", embed=result)
 
@@ -136,7 +141,7 @@ class osuCog(commands.Cog, name='osu!'):
         parsedArgs = None
 
         if args is not None:
-            parsedArgs = osuhelpers.parseArgsV2(args=args, customArgs=['user'])
+            parsedArgs = self.osuhelpers.parseArgsV2(args=args, customArgs=['user'])
             user = parsedArgs['user']
             qtype = parsedArgs['qtype']
             server = parsedArgs['server']
@@ -148,18 +153,20 @@ class osuCog(commands.Cog, name='osu!'):
 
         if not user:
             qtype = "id"
-            user = getOsu(ctx.message.author)
+            user, serverID = await self.bot.mongoIO.getOsu(ctx.message.author)
+            server = osuClasses.Server.from_id(serverID)
 
         if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
             qtype = "id"
-            user = getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
+            user, server = await self.bot.mongoIO.getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
+            server = osuClasses.Server.from_id(serverID)
 
         if not user:
             return await ctx.send("Please set your profile!")
 
         try:
-            profile:osuClasses.User = await osuapiwrap.getuser(user, qtype, mode, server)
-            tops:List[osuClasses.RecentScore] = await osuapiwrap.getusrtop(profile, limit)
+            profile:osuClasses.User = await self.osuAPI.getuser(user, qtype, mode, server)
+            tops:List[osuClasses.RecentScore] = await self.osuAPI.getusrtop(profile, limit)
         except ValueError:
             return await ctx.send("User has not been found or has no plays!")
 
@@ -179,7 +186,7 @@ class osuCog(commands.Cog, name='osu!'):
             tops = tops[:5]
             positions = positions[:5]
 
-        if self.bot.configs.REDIS is True:
+        if self.bot.config.redis is True:
             redisIO.setValue(ctx.message.channel.id, tops[0].beatmap_id)
             redisIO.setValue(f'{ctx.message.channel.id}.mode', mode.id)
 
@@ -188,15 +195,15 @@ class osuCog(commands.Cog, name='osu!'):
         index:int
         top:osuClasses.Score
         for index, top in enumerate(tops):
-            beatmap:osuClasses.Beatmap = await osuapiwrap.getbmap(top.beatmap_id, mode=mode, server=server, mods=top.enabled_mods)
-            bmapfile:pyt.beatmap = await osuapiwrap.getbmaposu(top.beatmap_id, server)
+            beatmap:osuClasses.Beatmap = await self.osuAPI.getbmap(top.beatmap_id, mode=mode, server=server, mods=top.enabled_mods)
+            bmapfile:pyt.beatmap = await self.osuAPI.getbmaposu(top.beatmap_id, server)
             beatmap.max_combo = bmapfile.max_combo()
             top.performance = await self.bot.loop.run_in_executor(None, ppc.calculatePlay, bmapfile, top)
             top.performance.pp = top.pp if top.pp != 0 else top.performance.pp
 
             beatmaps.append(beatmap)
         title = f'Top plays on osu! {profile.mode.name_full} for {profile.username}'
-        result = OsuListEmbed(title, tops, beatmaps, profile, positions, 0)
+        result = OsuListEmbed(title, tops, beatmaps, profile, positions, 0, self.bot.config.color)
         await ctx.send(embed=result)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
@@ -212,56 +219,56 @@ class osuCog(commands.Cog, name='osu!'):
 
         if args is not None:
             if 'c' == ctx.invoked_with or 'compare' == ctx.invoked_with:
-                parsedArgs = osuhelpers.parseArgsV2(args=args, customArgs=["user", "beatmap"])
+                parsedArgs = self.osuhelpers.parseArgsV2(args=args, customArgs=["user", "beatmap"])
             elif 's' == ctx.invoked_with or 'scores' == ctx.invoked_with:
-                parsedArgs = osuhelpers.parseArgsV2(args=args, customArgs=["beatmap", "user"])
+                parsedArgs = self.osuhelpers.parseArgsV2(args=args, customArgs=["beatmap", "user"])
                 if parsedArgs['beatmap']:
-                    beatmap = await osuhelpers.getBeatmapFromText(parsedArgs['beatmap'])
-                    if self.bot.configs.REDIS is True:
+                    beatmap = await self.osuhelpers.getBeatmapFromText(parsedArgs['beatmap'])
+                    if self.bot.config.redis is True:
                         redisIO.setValue(ctx.message.channel.id, beatmap.beatmap_id)
                         redisIO.setValue(f'{ctx.message.channel.id}.mode', mode.id)
             user = parsedArgs['user']
             qtype = parsedArgs['qtype']
             server = parsedArgs['server']
 
-
-
         if not user:
             qtype = "id"
-            user = getOsu(ctx.message.author)
+            user, serverID = await self.bot.mongoIO.getOsu(ctx.message.author)
+            server = osuClasses.Server.from_id(serverID)
 
         if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
             qtype = "id"
-            user = getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
+            user, server = await self.bot.mongoIO.getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
+            server = osuClasses.Server.from_id(serverID)
 
         if not user:
             return await ctx.send("Please set your profile!")
 
         if 'c' == ctx.invoked_with or 'compare' == ctx.invoked_with and beatmap is None:
-            if self.bot.configs.REDIS is True:
+            if self.bot.config.redis is True:
                 mode = osuClasses.Mode.fromId(redisIO.getValue(f'{ctx.message.channel.id}.mode'))
-                beatmap = await osuapiwrap.getbmap(redisIO.getValue(ctx.message.channel.id), mode=mode, server=server)
+                beatmap = await self.osuAPI.getbmap(redisIO.getValue(ctx.message.channel.id), mode=mode, server=server)
             else:
-                beatmap = await osuapiwrap.getbmap(1917158)
+                beatmap = await self.osuAPI.getbmap(1917158)
 
         if beatmap is None:
             return
 
         try:
-            profile:osuClasses.User = await osuapiwrap.getuser(user, qtype, mode, server)
-            tops:List[osuClasses.BeatmapScore] = await osuapiwrap.getusrscores(profile, beatmap.beatmap_id, limit)
+            profile:osuClasses.User = await self.osuAPI.getuser(user, qtype, mode, server)
+            tops:List[osuClasses.BeatmapScore] = await self.osuAPI.getusrscores(profile, beatmap.beatmap_id, limit)
 
         except ValueError:
             return await ctx.send("User has not been found or has no plays on the beatmap!")
 
         top:osuClasses.Score
         for _, top in enumerate(tops):
-            bmapfile:pyt.beatmap = await osuapiwrap.getbmaposu(beatmap.beatmap_id)
+            bmapfile:pyt.beatmap = await self.osuAPI.getbmaposu(beatmap.beatmap_id)
             beatmap.max_combo = bmapfile.max_combo()
             top.performance = await self.bot.loop.run_in_executor(None, ppc.calculatePlay, bmapfile, top)
 
         title = f"Top osu! {mode.name_full} for {profile.username} on {beatmap.title}[{beatmap.version}]"
-        result = OsuListEmbed(title, tops, [ beatmap ] * len(tops), profile)
+        result = OsuListEmbed(title, self.bot.config.color, tops, [ beatmap ] * len(tops), profile)
 
         await ctx.send(embed=result)
 
@@ -270,28 +277,28 @@ class osuCog(commands.Cog, name='osu!'):
     async def perf(self, ctx, *, args=None):
         """Shows information about pp of a certain map"""
 
-        args = osuhelpers.parseArgsV2(args=args, customArgs=["mods", "beatmap"])
+        args = self.osuhelpers.parseArgsV2(args=args, customArgs=["mods", "beatmap"])
         mode = args["mode"]
 
         if args["beatmap"]:
-            beatmap:osuClasses.Beatmap = await osuhelpers.getBeatmapFromText(args["beatmap"])
+            beatmap:osuClasses.Beatmap = await self.osuhelpers.getBeatmapFromText(args["beatmap"])
         else:
-            beatmap:osuClasses.Beatmap = await osuhelpers.getBeatmapFromHistory(ctx)
+            beatmap:osuClasses.Beatmap = await self.osuhelpers.getBeatmapFromHistory(ctx)
 
         if beatmap is None:
             await ctx.send("Failed to find any maps")
             return
 
-        if self.bot.configs.REDIS is True:
+        if self.bot.config.redis is True:
             redisIO.setValue(ctx.message.channel.id, beatmap.beatmap_id)
             redisIO.setValue(f'{ctx.message.channel.id}.mode', mode.id)
 
         mods:osuClasses.Mods = osuClasses.Mods(args["mods"])
 
-        bmapfile:pyt.beatmap = await osuapiwrap.getbmaposu(beatmap.beatmap_id)
+        bmapfile:pyt.beatmap = await self.osuAPI.getbmaposu(beatmap.beatmap_id)
         perfDict = await self.bot.loop.run_in_executor(None, ppc.calculateBeatmap, bmapfile, mods, mode.id)
 
-        result = OsuPerformanceEmbed(beatmap, perfDict)
+        result = OsuPerformanceEmbed(beatmap, perfDict, self.bot.config.color)
         await ctx.send(embed=result)
 
 def setup(bot):

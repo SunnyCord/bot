@@ -1,4 +1,4 @@
-import commons.osu.classes as osu
+import classes.osu as osu
 
 class User:
     """Class representing a user.

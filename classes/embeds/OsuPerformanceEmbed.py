@@ -1,14 +1,13 @@
 import discord
-import commons.osu.classes as osu
-import config
+import classes.osu as osu
 
 class OsuPerformanceEmbed(discord.Embed):
 
-    def __init__(self, beatmap:osu.Beatmap, perf_info:dict):
+    def __init__(self, beatmap:osu.Beatmap, perf_info:dict, color: str):
         super().__init__(
             title = f"{beatmap.title} [{beatmap.version}] ({beatmap.creator}) [{round(perf_info['star_rating'], 2)}★] +{str(perf_info['mods'])}",
             url=beatmap.beatmap_url,
-            color = config.conf.COLOR
+            color = color
         )
 
         self.set_thumbnail(url=f"https://b.ppy.sh/thumb/{beatmap.beatmapset_id}.jpg")

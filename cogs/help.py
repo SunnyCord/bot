@@ -14,7 +14,7 @@ class Help(commands.Cog):
         """Gets all cogs and commands of mine."""
         if not cog:
             helpEmbed=discord.Embed(title='Available Cogs',
-                            description=f'Use `{ctx.prefix}help *cog*` to find out more about them!', color=self.bot.configs.COLOR)
+                            description=f'Use `{ctx.prefix}help *cog*` to find out more about them!', color=self.bot.config.color)
             cogs_desc = ''
             for x in self.bot.cogs:
                 cogs_desc += f'**{x}** - {self.bot.cogs[x].__doc__}\n'
