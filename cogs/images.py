@@ -19,7 +19,7 @@ class Image(commands.Cog):
             async with cs.get('https://some-random-api.ml/facts/cat') as r:
                 res = await r.json()
                 fact = res['fact']
-        embed = discord.Embed(title='🐈 Kitty!', description=f"**Cat Fact:**\n{fact}", color=self.bot.configs.COLOR).set_image(url=imgUrl)
+        embed = discord.Embed(title='🐈 Kitty!', description=f"**Cat Fact:**\n{fact}", color=self.bot.config.color).set_image(url=imgUrl)
         await ctx.send(embed=embed)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -34,7 +34,7 @@ class Image(commands.Cog):
             async with cs.get('https://some-random-api.ml/facts/dog') as r:
                 res = await r.json()
                 fact = res['fact']
-        embed = discord.Embed(title='🐕 Doggo!', description=f"**Dog Fact:**\n{fact}", color=self.bot.configs.COLOR).set_image(url=imgUrl)
+        embed = discord.Embed(title='🐕 Doggo!', description=f"**Dog Fact:**\n{fact}", color=self.bot.config.color).set_image(url=imgUrl)
         await ctx.send(embed=embed)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -49,7 +49,7 @@ class Image(commands.Cog):
             async with cs.get('https://some-random-api.ml/facts/fox') as r:
                 res = await r.json()
                 fact = res['fact']
-        embed = discord.Embed(title='🦊 Pure floof!', description=f"**Fox Fact:**\n{fact}", color=self.bot.configs.COLOR).set_image(url=imgUrl)
+        embed = discord.Embed(title='🦊 Pure floof!', description=f"**Fox Fact:**\n{fact}", color=self.bot.config.color).set_image(url=imgUrl)
         await ctx.send(embed=embed)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -60,7 +60,7 @@ class Image(commands.Cog):
             async with cs.get('https://some-random-api.ml/pikachuimg') as r:
                 res = await r.json()
                 imgUrl = res['link']
-        embed = discord.Embed(title='Pika!', color=self.bot.configs.COLOR).set_image(url=imgUrl)
+        embed = discord.Embed(title='Pika!', color=self.bot.config.color).set_image(url=imgUrl)
         await ctx.send(embed=embed)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -71,7 +71,7 @@ class Image(commands.Cog):
             async with cs.get('https://some-random-api.ml/img/birb') as r:
                 res = await r.json()
                 imgUrl = res['link']
-        embed = discord.Embed(title='🐦 Birb!', color=self.bot.configs.COLOR).set_image(url=imgUrl)
+        embed = discord.Embed(title='🐦 Birb!', color=self.bot.config.color).set_image(url=imgUrl)
         await ctx.send(embed=embed)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -82,7 +82,7 @@ class Image(commands.Cog):
             async with cs.get('https://random-d.uk/api/v2/random') as r:
                 res = await r.json()
                 imgUrl = res['url']
-        embed = discord.Embed(title='🦆 Quack!', color=self.bot.configs.COLOR).set_image(url=imgUrl)
+        embed = discord.Embed(title='🦆 Quack!', color=self.bot.config.color).set_image(url=imgUrl)
         await ctx.send(embed=embed)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -97,7 +97,7 @@ class Image(commands.Cog):
             async with cs.get('https://some-random-api.ml/facts/panda') as r:
                 res = await r.json()
                 fact = res['fact']
-        embed = discord.Embed(title='🐼 Panda!', description=f"**Panda Fact:**\n{fact}", color=self.bot.configs.COLOR).set_image(url=imgUrl)
+        embed = discord.Embed(title='🐼 Panda!', description=f"**Panda Fact:**\n{fact}", color=self.bot.config.color).set_image(url=imgUrl)
         await ctx.send(embed=embed)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -108,7 +108,7 @@ class Image(commands.Cog):
             async with cs.get('https://some-random-api.ml/img/koala') as r:
                 res = await r.json()
                 imgUrl = res['link']
-        embed = discord.Embed(title='🐨 Koala!', color=self.bot.configs.COLOR).set_image(url=imgUrl)
+        embed = discord.Embed(title='🐨 Koala!', color=self.bot.config.color).set_image(url=imgUrl)
         await ctx.send(embed=embed)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -119,7 +119,7 @@ class Image(commands.Cog):
             async with cs.get('https://some-random-api.ml/animu/wink') as r:
                 res = await r.json()
                 imgUrl = res['link']
-        embed = discord.Embed(title=f'{ctx.message.author.name} winks 😉', color=self.bot.configs.COLOR).set_image(url=imgUrl)
+        embed = discord.Embed(title=f'{ctx.message.author.name} winks 😉', color=self.bot.config.color).set_image(url=imgUrl)
         await ctx.send(embed=embed)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -130,7 +130,7 @@ class Image(commands.Cog):
             async with cs.get('https://some-random-api.ml/animu/pat') as r:
                 res = await r.json()
                 imgUrl = res['link']
-        embed = discord.Embed(title=f'{ctx.message.author.name} pats {f"themselves. 😔" if user is None else f"{user.name} <:angery:545969728527663114>"}', color=self.bot.configs.COLOR).set_image(url=imgUrl)
+        embed = discord.Embed(title=f'{ctx.message.author.name} pats {f"themselves. 😔" if user is None else f"{user.name} <:angery:545969728527663114>"}', color=self.bot.config.color).set_image(url=imgUrl)
         await ctx.send(embed=embed)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -141,14 +141,14 @@ class Image(commands.Cog):
             async with cs.get('https://some-random-api.ml/animu/hug') as r:
                 res = await r.json()
                 imgUrl = res['link']
-        embed = discord.Embed(title=f'{ctx.message.author.name} hugs {f"themselves. 😔" if user is None else f"{user.name} <:angery:545969728527663114>"}', color=self.bot.configs.COLOR).set_image(url=imgUrl)
+        embed = discord.Embed(title=f'{ctx.message.author.name} hugs {f"themselves. 😔" if user is None else f"{user.name} <:angery:545969728527663114>"}', color=self.bot.config.color).set_image(url=imgUrl)
         await ctx.send(embed=embed)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command()
     async def avatar(self, ctx, user : discord.Member = None):
         """Gets a user's avatar. Returns invoker's avatar if no user is specified."""
-        embed = discord.Embed(title=f"{ctx.message.author.name if user is None else user.name}'s avatar.", color=self.bot.configs.COLOR).set_image(url=ctx.message.author.avatar_url if user is None else user.avatar_url)
+        embed = discord.Embed(title=f"{ctx.message.author.name if user is None else user.name}'s avatar.", color=self.bot.config.color).set_image(url=ctx.message.author.avatar_url if user is None else user.avatar_url)
         await ctx.send(embed=embed)
 
 def setup(bot):

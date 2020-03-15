@@ -30,7 +30,7 @@ class Help(commands.Cog):
                 for x in self.bot.cogs:
                     for y in cog:
                         if x == y:
-                            helpEmbed=discord.Embed(title=f'{cog[0]} Commands',description=self.bot.cogs[cog[0]].__doc__, color=self.bot.configs.COLOR)
+                            helpEmbed=discord.Embed(title=f'{cog[0]} Commands',description=self.bot.cogs[cog[0]].__doc__, color=self.bot.config.color)
                             for c in self.bot.get_cog(y).get_commands():
                                 if not c.hidden:
                                     helpEmbed.add_field(name=c.name,value=c.help,inline=False)
