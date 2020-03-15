@@ -22,7 +22,7 @@ class OsuListeners(commands.Cog, command_attrs=dict(hidden=True), name="osu! Cha
                 if resp.status==200:
                     f=BytesIO(await resp.read())
 
-        if self.bot.configs.REDIS is True:
+        if self.bot.config.redis is True:
             redisIO.setValue(message.channel.id, beatmap.beatmap_id)
             redisIO.setValue(f'{message.channel.id}.mode', beatmap.mode)
 
