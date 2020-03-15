@@ -16,7 +16,7 @@ class Fun(commands.Cog):
     async def poll(self, ctx, *, args):
         """Creates a poll. Takes the polltext as an argument."""
         await ctx.message.delete()
-        embed=discord.Embed(title="Poll:", description=args, color=self.bot.configs.COLOR)
+        embed=discord.Embed(title="Poll:", description=args, color=self.bot.config.color)
         embed.set_author(name=ctx.message.author.name, icon_url=ctx.message.author.avatar_url)
         embed.set_thumbnail(url=random_line('pollimages'))
         message = await ctx.send(embed=embed)
