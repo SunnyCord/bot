@@ -53,7 +53,7 @@ class osuCog(commands.Cog, name='osu!'):
 
         if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
             qtype = "id"
-            user, server = await self.bot.mongoIO.getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
+            user, serverID = await self.bot.mongoIO.getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
             server = osuClasses.Server.from_id(serverID)
 
         if not user:
@@ -99,7 +99,7 @@ class osuCog(commands.Cog, name='osu!'):
 
         if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
             qtype = "id"
-            user, server = await self.bot.mongoIO.getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
+            user, serverID = await self.bot.mongoIO.getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
             server = osuClasses.Server.from_id(serverID)
 
         if not user:
@@ -158,7 +158,7 @@ class osuCog(commands.Cog, name='osu!'):
 
         if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
             qtype = "id"
-            user, server = await self.bot.mongoIO.getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
+            user, serverID = await self.bot.mongoIO.getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
             server = osuClasses.Server.from_id(serverID)
 
         if not user:
@@ -238,7 +238,7 @@ class osuCog(commands.Cog, name='osu!'):
 
         if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
             qtype = "id"
-            user, server = await self.bot.mongoIO.getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
+            user, serverID = await self.bot.mongoIO.getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
             server = osuClasses.Server.from_id(serverID)
 
         if not user:
