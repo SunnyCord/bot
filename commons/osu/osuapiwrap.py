@@ -4,69 +4,70 @@ import classes.osu as osu
 import pyttanko as pyt
 from typing import List
 
-def __convAkaRXProfile(res, mode = 0): #Converts akatsuki!rx fullrx API response to a bancho-like one
-        modes = {0: "std", 1: "taiko", 2: "ctb", 3: "mania"}
-        if res['code'] != 200:
-            raise ValueError("Invalid query or API down.")
-        try:
-            return [
-                {
-                    "user_id": res['id'],
-                    "username": res['username'],
-                    "join_date": res['registered_on'],
-                    "count300": 0,
-                    "count100": 0,
-                    "count50": 0,
-                    "playcount": res[modes[mode]]['playcount'],
-                    "ranked_score": res[modes[mode]]['ranked_score'],
-                    "total_score": res[modes[mode]]['total_score'],
-                    "pp_rank": res[modes[mode]]['global_leaderboard_rank'],
-                    "level": res[modes[mode]]['level'],
-                    "pp_raw": res[modes[mode]]['pp'],
-                    "accuracy": res[modes[mode]]['accuracy'],
-                    "count_rank_ss": 0,
-                    "count_rank_ssh": 0,
-                    "count_rank_s": 0,
-                    "count_rank_sh": 0,
-                    "count_rank_a": 0,
-                    "country": res['country'],
-                    "total_seconds_played": res[modes[mode]]['play_time'],
-                    "pp_country_rank": res[modes[mode]]['country_leaderboard_rank'],
-                    "events": []
-                }
-            ]
-        except KeyError:
-            return [
-                {
-                    "user_id": res['id'],
-                    "username": res['username'],
-                    "join_date": res['registered_on'],
-                    "count300": 0,
-                    "count100": 0,
-                    "count50": 0,
-                    "playcount": res[modes[mode]]['playcount'],
-                    "ranked_score": res[modes[mode]]['ranked_score'],
-                    "total_score": res[modes[mode]]['total_score'],
-                    "pp_rank": res[modes[mode]]['global_leaderboard_rank'],
-                    "level": res[modes[mode]]['level'],
-                    "pp_raw": res[modes[mode]]['pp'],
-                    "accuracy": res[modes[mode]]['accuracy'],
-                    "count_rank_ss": 0,
-                    "count_rank_ssh": 0,
-                    "count_rank_s": 0,
-                    "count_rank_sh": 0,
-                    "count_rank_a": 0,
-                    "country": res['country'],
-                    "total_seconds_played": res[modes[mode]]['total_playtime'],
-                    "pp_country_rank": res[modes[mode]]['country_leaderboard_rank'],
-                    "events": []
-                }
-            ]
-
 class osuAPI():
 
     def __init__(self, token):
         self.__token = token
+
+    @staticmethod
+    def __convAkaRXProfile(res, mode = 0): #Converts akatsuki!rx fullrx API response to a bancho-like one
+            modes = {0: "std", 1: "taiko", 2: "ctb", 3: "mania"}
+            if res['code'] != 200:
+                raise ValueError("Invalid query or API down.")
+            try:
+                return [
+                    {
+                        "user_id": res['id'],
+                        "username": res['username'],
+                        "join_date": res['registered_on'],
+                        "count300": 0,
+                        "count100": 0,
+                        "count50": 0,
+                        "playcount": res[modes[mode]]['playcount'],
+                        "ranked_score": res[modes[mode]]['ranked_score'],
+                        "total_score": res[modes[mode]]['total_score'],
+                        "pp_rank": res[modes[mode]]['global_leaderboard_rank'],
+                        "level": res[modes[mode]]['level'],
+                        "pp_raw": res[modes[mode]]['pp'],
+                        "accuracy": res[modes[mode]]['accuracy'],
+                        "count_rank_ss": 0,
+                        "count_rank_ssh": 0,
+                        "count_rank_s": 0,
+                        "count_rank_sh": 0,
+                        "count_rank_a": 0,
+                        "country": res['country'],
+                        "total_seconds_played": res[modes[mode]]['play_time'],
+                        "pp_country_rank": res[modes[mode]]['country_leaderboard_rank'],
+                        "events": []
+                    }
+                ]
+            except KeyError:
+                return [
+                    {
+                        "user_id": res['id'],
+                        "username": res['username'],
+                        "join_date": res['registered_on'],
+                        "count300": 0,
+                        "count100": 0,
+                        "count50": 0,
+                        "playcount": res[modes[mode]]['playcount'],
+                        "ranked_score": res[modes[mode]]['ranked_score'],
+                        "total_score": res[modes[mode]]['total_score'],
+                        "pp_rank": res[modes[mode]]['global_leaderboard_rank'],
+                        "level": res[modes[mode]]['level'],
+                        "pp_raw": res[modes[mode]]['pp'],
+                        "accuracy": res[modes[mode]]['accuracy'],
+                        "count_rank_ss": 0,
+                        "count_rank_ssh": 0,
+                        "count_rank_s": 0,
+                        "count_rank_sh": 0,
+                        "count_rank_a": 0,
+                        "country": res['country'],
+                        "total_seconds_played": res[modes[mode]]['total_playtime'],
+                        "pp_country_rank": res[modes[mode]]['country_leaderboard_rank'],
+                        "events": []
+                    }
+                ]
 
     async def getuser(
             self,
@@ -96,7 +97,7 @@ class osuAPI():
                     raise ValueError("Invalid query or API down.")
                 else:
                     if server is osu.Server.AKATSUKIRX or server is osu.Server.SIROHIRX:
-                        res = __convAkaRXProfile(res)
+                        res = self.__convAkaRXProfile(res)
                     if server is not osu.Server.BANCHO:
                         res[0]['total_seconds_played'] = 0
                     return osu.User(res[0], server, mode)
