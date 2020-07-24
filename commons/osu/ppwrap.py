@@ -30,7 +30,7 @@ class ppAPI():
 
         result = await resp.json()
 
-        return osu.Performance(result['pp'], 0, 0, 0, result['sr'], result['max_combo'])
+        return osu.Performance(result['pp'], 0, 0, result['completion'], result['sr'], result['max_combo'])
 
     async def calculateBeatmap(self, beatmapID, mods, mode: int = None):
 
