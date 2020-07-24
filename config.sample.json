@@ -18,6 +18,10 @@
             "color": "0xd74613",
             "token": "",
             "osuAPI": "",
+            "ppAPI": {
+                "URL": "https://pp.aesth.dev",
+                "secret": "potato"
+            },
             "owners": [ ],
             "splashArt": "Sunny"
         }
