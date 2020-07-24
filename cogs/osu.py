@@ -191,7 +191,7 @@ class osuCog(commands.Cog, name='osu!'):
         for index, top in enumerate(tops):
             beatmap:osuClasses.Beatmap = await self.bot.osuAPI.getbmap(top.beatmap_id, mode=mode, server=server, mods=top.enabled_mods)
 
-            top.performance = await self.bot.ppAPI.calculateScore(top)
+            top.performance = await self.bot.ppAPI.calculateScore(top, mode)
             top.performance.pp = top.pp if top.pp != 0 else top.performance.pp
             beatmap.max_combo = beatmap.max_combo if beatmap.max_combo !=0 else top.performance.max_combo
 
