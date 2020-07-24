@@ -5,7 +5,7 @@ class Performance:
         self.accuracy_fc:float = accuracy_fc
         self.completion:float = completion
         self.star_rating:float = star_rating
-        self.max_combo:int
+        self.max_combo:int = max_combo
 
 class BeatmapPerformance:
     def __init__(self, pp_100:float, pp_99:float, pp_97:float, pp_95:float, star_rating:float, max_combo:int, mods):
