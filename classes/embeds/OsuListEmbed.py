@@ -35,7 +35,7 @@ class OsuListEmbed(discord.Embed):
                 field_title += f"{displayed_index}. ``{str(score.enabled_mods)}`` [{round(score.performance.star_rating, 2)}★]"
 
             field_description += f"""
-> {score.rank.icon} > **{round(score.performance.pp, 2)}PP""" + (f"({round(score.performance.pp_fc, 2)}PP for {round(score.performance.accuracy_fc * 100, 2)}% FC)" if not score.perfect else "") + f"""** > {round(score.accuracy() * 100, 2)}%
+> {score.rank.icon} > **{round(score.performance.pp, 2)}PP""" + (f"({round(score.performance.pp_fc, 2)}PP for {round(score.performance.accuracy_fc, 2)}% FC)" if not score.perfect else "") + f"""** > {round(score.performance.accuracy, 2)}%
 > {score.score} > x{score.maxcombo}/{beatmap.max_combo} > [{score.count300}/{score.count100}/{score.count50}/{score.countmiss}]
 > {score.date}"""
 
