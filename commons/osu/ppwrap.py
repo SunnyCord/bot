@@ -45,5 +45,7 @@ class ppAPI():
         }
 
         resp = await self.__session.post(f"{self.__URL}/api/map", json=payload)
+
         result = await resp.json()
+
         return osu.BeatmapPerformance(result['pp_100'], result['pp_99'], result['pp_97'], result['pp_95'], result['sr'], result['max_combo'], mods)
