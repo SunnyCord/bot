@@ -290,10 +290,9 @@ class osuCog(commands.Cog, name='osu!'):
 
         mods:osuClasses.Mods = osuClasses.Mods(args["mods"])
 
-        bmapfile:pyt.beatmap = await self.bot.osuAPI.getbmaposu(beatmap.beatmap_id)
-        perfDict = await self.bot.loop.run_in_executor(None, ppc.calculateBeatmap, bmapfile, mods, mode.id)
+        perf = await self.bot.ppAPI.calculateBeatmap(beatmap.beatmap_id, mods, mode)
 
-        result = OsuPerformanceEmbed(beatmap, perfDict, self.bot.config.color)
+        result = OsuPerformanceEmbed(beatmap, perf, self.bot.config.color)
         await ctx.send(embed=result)
 
 def setup(bot):
