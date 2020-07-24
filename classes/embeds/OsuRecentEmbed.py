@@ -13,7 +13,7 @@ class OsuRecentEmbed(discord.Embed):
 
         if score.performance.completion != 100:
             description += f"""
-> **Completion:** {score.performance.completion}%"""
+> **Completion:** {round(score.performance.completion, 2)}%"""
 
         super().__init__(
             title=discord.Embed.Empty,
