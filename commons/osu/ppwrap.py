@@ -9,11 +9,14 @@ class ppAPI():
         self.__URL = URL
         self.__session = aiohttp.ClientSession()
 
-    async def calculateScore(self, score):
+    async def calculateScore(self, score, mode:int = None):
+
+        if mode is None:
+            mode = score.mode
 
         payload = {
             "secret": self.__secret,
-            "mode": int(score.mode),
+            "mode": int(mode),
             "score": score.score,
             "count300": score.count300,
             "count100": score.count100,
