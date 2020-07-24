@@ -85,7 +85,7 @@ class osuAPI():
 
             if server is not osu.Server.BANCHO:
                 params.pop('k')
-                if server is osu.Server.AKATSUKIRX or server is osu.Server.SIROHIRX:
+                if server is osu.Server.AKATSUKIRX:
                     if qtype == 'id':
                         params['id'] = usr
                     else:
@@ -96,7 +96,7 @@ class osuAPI():
                 if res == []:
                     raise ValueError("Invalid query or API down.")
                 else:
-                    if server is osu.Server.AKATSUKIRX or server is osu.Server.SIROHIRX:
+                    if server is osu.Server.AKATSUKIRX:
                         res = self.__convAkaRXProfile(res)
                     if server is not osu.Server.BANCHO:
                         res[0]['total_seconds_played'] = 0
@@ -155,7 +155,7 @@ class osuAPI():
 
             if user.server is not osu.Server.BANCHO:
                 params.pop('k')
-                if user.server is osu.Server.AKATSUKIRX or user.server is osu.Server.SIROHIRX:
+                if user.server is osu.Server.AKATSUKIRX:
                     params['rx'] = 1
                     if params['type'] == 'id':
                         params['id'] = user.user_id
@@ -167,7 +167,7 @@ class osuAPI():
                 if res == []:
                     raise ValueError("Invalid query or API down.")
                 else:
-                    if user.server is osu.Server.AKATSUKIRX or user.server is osu.Server.SIROHIRX:
+                    if user.server is osu.Server.AKATSUKIRX:
                         res = res['scores']
                     return list(map(lambda recent: osu.RecentScore(recent, user.server, user.mode), res))
 
@@ -186,7 +186,7 @@ class osuAPI():
 
             if user.server is not osu.Server.BANCHO:
                 params.pop('k')
-                if user.server is osu.Server.AKATSUKIRX or user.server is osu.Server.SIROHIRX:
+                if user.server is osu.Server.AKATSUKIRX:
                     params['rx'] = 1
                     if params['type'] == 'id':
                         params['id'] = user.user_id
@@ -198,7 +198,7 @@ class osuAPI():
                 if res == []:
                     raise ValueError("Invalid query or API down.")
                 else:
-                    if user.server is osu.Server.AKATSUKIRX or user.server is osu.Server.SIROHIRX:
+                    if user.server is osu.Server.AKATSUKIRX:
                         res = res['scores']
                     return list(map(lambda top: osu.RecentScore(top), res))
 
@@ -219,7 +219,7 @@ class osuAPI():
 
             if user.server is not osu.Server.BANCHO:
                 params.pop('k')
-                if user.server is osu.Server.AKATSUKIRX or user.server is osu.Server.SIROHIRX:
+                if user.server is osu.Server.AKATSUKIRX:
                     params['rx'] = 1
                     if params['type'] == 'id':
                         params['id'] = user.user_id

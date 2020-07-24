@@ -1,15 +1,15 @@
 import re
 import classes.osu as osu
 import commons.redisIO as redisIO
-from commons.osu import osuapiwrap
 
 patternBeatmapLink = re.compile(r"(https?):\/\/([-\w._]+)(\/[-\w._]\?(.+)?)?(\/b(eatmaps)?\/(?P<bmapid1>[0-9]+)|\/s\/(?P<bmapsetid1>[0-9]+)|\/beatmapsets\/(?P<bmapsetid2>[0-9]+)(#(?P<mode>[a-z]+)\/(?P<bmapid2>[0-9]+))?)")
 patternBeatmapId = re.compile(r"^(?P<bmapid>[0-9]+)$")
 
 class osuHelper():
 
-    def __init__(self, token):
-        self.osuAPI = osuapiwrap.osuAPI(token)
+    def __init__(self, bot):
+        self.bot = bot
+        self.osuAPI = self.bot.osuAPI
 
     @staticmethod
     def parseArgsV2(**kwargs):
@@ -47,14 +47,6 @@ class osuHelper():
         if '-enjuu' in args:
             server = osu.Server.ENJUU
             args.pop(args.index('-enjuu'))
-
-        if '-sirohirx' in args:
-            server = osu.Server.SIROHIRX
-            args.pop(args.index('-sirohirx'))
-
-        if '-sirohi' in args:
-            server = osu.Server.SIROHI
-            args.pop(args.index('-sirohi'))
 
         if '-r' in args:
             recent = True
@@ -128,14 +120,6 @@ class osuHelper():
         if '-enjuu' in args:
             server = 'enjuu'
             args.pop(args.index('-enjuu'))
-
-        if '-sirohirx' in args:
-            server = 'sirohirx'
-            args.pop(args.index('-sirohirx'))
-
-        if '-sirohi' in args:
-            server = 'sirohi'
-            args.pop(args.index('-sirohi'))
 
         if '-r' in args and '-r' in validArgs:
             recentList = True

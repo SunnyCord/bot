@@ -64,30 +64,6 @@ class Server(Enum):
     GATARI = (5, 'Gatari' ,'https://i.imgur.com/IAkYdrI.png',
         'https://api.gatari.pw/user/stats', '', '', '', '', '', '', '', '')
 
-    SIROHI = (6, 'Sirohi' ,'https://sirohi.xyz/static/favicon.png',
-        'https://sirohi.xyz/api/get_user',
-        'https://osu.ppy.sh/api/get_beatmaps',
-        'https://sirohi.xyz/api/get_user_best',
-        'https://sirohi.xyz/api/get_user_recent',
-        'https://osu.ppy.sh/osu/',
-        'https://a.sirohi.xyz/',
-        'https://sirohi.xyz/u/',
-        'https://sirohi.xyz/b/',
-        'https://sirohi.xyz/api/get_scores'
-    )
-
-    SIROHIRX = (7, 'Sirohi Relax', 'https://sirohi.xyz/static/favicon.png',
-        'http://sirohi.xyz/api/v1/users/rxfull',
-        'https://osu.ppy.sh/api/get_beatmaps',
-        'https://sirohi.xyz/api/v1/users/scores/best',
-        'https://sirohi.xyz/api/v1/users/scores/recent',
-        'https://osu.ppy.sh/osu/',
-        'https://a.sirohi.xyz/',
-        'https://sirohi.xyz/rx/u/',
-        'https://sirohi.xyz/b/',
-        'https://sirohi.xyz/api/get_scores'
-    )
-
     def __init__(self, id:int, name_full:str, icon:str,
             api_getuser:str,
             api_getbmap:str,

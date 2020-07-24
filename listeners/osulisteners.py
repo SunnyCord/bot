@@ -2,7 +2,6 @@ import aiohttp, discord
 import commons.redisIO as redisIO
 from io import BytesIO
 from discord.ext import commands
-from commons.osu.osuhelpers import osuHelper
 from classes.embeds.BeatmapEmbed import BeatmapEmbed
 
 class OsuListeners(commands.Cog, command_attrs=dict(hidden=True), name="osu! Chat Listener"):
@@ -10,11 +9,10 @@ class OsuListeners(commands.Cog, command_attrs=dict(hidden=True), name="osu! Cha
 
     def __init__(self, bot):
         self.bot = bot
-        self.osuhelpers = osuHelper(bot.config.osuAPI)
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        beatmap = await self.osuhelpers.getBeatmapFromText(message.content, True)
+        beatmap = await self.bot.osuHelpers.getBeatmapFromText(message.content, True)
         if beatmap is None:
             return
         async with aiohttp.ClientSession() as session:

@@ -12,6 +12,9 @@ class Mode(Enum):
         self.name_full:str = name_full
         self.name_short:str = name_short
 
+    def __int__(self):
+        return self.id
+
     @staticmethod
     def fromId(id) -> 'Mode':
         if not isinstance(id, int):
