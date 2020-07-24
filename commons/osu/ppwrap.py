@@ -33,7 +33,19 @@ class ppAPI():
 
         result = await resp.json()
 
-        return osu.Performance(result['pp'], 0, result['accuracy'], 0, result['completion'], result['sr'], result['max_combo'])
+        pp_fc, acc_fc = 0, 0
+        if score.maxcombo != result['max_combo'] and result['mode'] != 3:
+            payload['combo'] = result['max_combo']
+            payload['count300'] += payload['count0']
+            payload['count0'] = 0
+            if result['mode'] == 2:
+                payload['count50'] += payload['katus']
+                payload['katus'] = 0
+            resp_fc = await self.__session.post(f"{self.__URL}/api/score", json=payload)
+            result_fc = await resp_fc.json()
+            pp_fc, acc_fc = result_fc['pp'], result_fc['accuracy']
+
+        return osu.Performance(result['pp'], pp_fc, result['accuracy'], acc_fc, result['completion'], result['sr'], result['max_combo'])
 
     async def calculateBeatmap(self, beatmapID, mods, mode: int = None):
 
