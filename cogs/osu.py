@@ -115,7 +115,7 @@ class osuCog(commands.Cog, name='osu!'):
 
         recent_score.performance = await self.bot.ppAPI.calculateScore(recent_score)
         recent_score.performance.pp = recent_score.pp if recent_score.pp != 0 else recent_score.performance.pp
-        beatmap.max_combo = beatmap.max_combo if beatmap.max_combo !=0 else recent_score.performance.max_combo
+        beatmap.max_combo = beatmap.max_combo if beatmap.max_combo else recent_score.performance.max_combo
 
         result = OsuRecentEmbed(recent_score, beatmap, self.bot.config.color)
 
@@ -192,8 +192,8 @@ class osuCog(commands.Cog, name='osu!'):
             beatmap:osuClasses.Beatmap = await self.bot.osuAPI.getbmap(top.beatmap_id, mode=mode, server=server, mods=top.enabled_mods)
 
             top.performance = await self.bot.ppAPI.calculateScore(top, mode)
-            top.performance.pp = top.pp if top.pp != 0 else top.performance.pp
-            beatmap.max_combo = beatmap.max_combo if beatmap.max_combo !=0 else top.performance.max_combo
+            top.performance.pp = top.pp if top.pp else top.performance.pp
+            beatmap.max_combo = beatmap.max_combo if beatmap.max_combo else top.performance.max_combo
 
             beatmaps.append(beatmap)
 
