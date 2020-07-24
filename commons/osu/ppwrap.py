@@ -8,7 +8,7 @@ class ppAPI():
         self.__secret = secret
         self.__URL = URL
         self.__session = aiohttp.ClientSession()
-    
+
     async def calculateScore(self, score):
 
         payload = {
@@ -26,19 +26,24 @@ class ppAPI():
             "mapID": score.beatmap_id
         }
 
-        resp = await self.__session.post(f"{self.__URL}/api", json=payload)
+        resp = await self.__session.post(f"{self.__URL}/api/score", json=payload)
 
         result = await resp.json()
 
         return osu.Performance(result['pp'], 0, 0, 0, result['sr'], result['max_combo'])
-    
-    async def calculateBeatmap(self, beatmap, mods, mode: int = None):
+
+    async def calculateBeatmap(self, beatmapID, mods, mode: int = None):
 
         if mode is None:
             mode = beatmap.mode
-        
-        # To-do
 
+        payload = {
+            "secret": self.__secret,
+            "mode": int(mode),
+            "mods": int(mods),
+            "mapID": beatmapID
+        }
 
-
-    
+        resp = await self.__session.post(f"{self.__URL}/api/map", json=payload)
+        result = await resp.json()
+        return osu.BeatmapPerformance(result['pp_100'], result['pp_99'], result['pp_97'], result['pp_95'], result['sr'], result['max_combo'], mods)
