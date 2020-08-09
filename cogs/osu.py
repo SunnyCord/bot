@@ -5,17 +5,12 @@ from classes.embeds import *
 import commons.redisIO as redisIO
 from discord.ext import commands
 import classes.osu as osuClasses
-from commons.osu import osuapiwrap
-from commons.osu.osuhelpers import osuHelper
-from commons.osu import ppwrapper as ppc
 
 class osuCog(commands.Cog, name='osu!'):
     """osu! related commands.\n*Valid Arguments:* ```fix\n-ripple, -akatsuki, akatsukirx, -enjuu```"""
 
     def __init__(self, bot):
         self.bot = bot
-        self.osuAPI = osuapiwrap.osuAPI(bot.config.osuAPI)
-        self.osuhelpers = osuHelper(bot.config.osuAPI)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command()
@@ -23,9 +18,9 @@ class osuCog(commands.Cog, name='osu!'):
         """Sets the osu! profile for the message author. ``eg. osuset Nice Aesthetics``"""
 
         try:
-            parsedArgs = self.osuhelpers.parseArgsV2(args=args, customArgs=["user"])
+            parsedArgs = self.bot.osuHelpers.parseArgsV2(args=args, customArgs=["user"])
             username = parsedArgs['user']
-            profile:osuClasses.User = await self.osuAPI.getuser(username, 'string', server=parsedArgs['server'])
+            profile:osuClasses.User = await self.bot.osuAPI.getuser(username, 'string', server=parsedArgs['server'])
             await self.bot.mongoIO.setOsu(ctx.message.author, profile.user_id, parsedArgs['server'].id)
             await ctx.send(f"osu! profile succesfully set to {profile.username}")
 
@@ -41,7 +36,7 @@ class osuCog(commands.Cog, name='osu!'):
         server = osuClasses.Server.BANCHO
 
         if args is not None:
-            parsedArgs = self.osuhelpers.parseArgs(args=args)
+            parsedArgs = self.bot.osuHelpers.parseArgs(args=args)
             user = parsedArgs['user']
             qtype = parsedArgs['qtype']
             server = osuClasses.Server.from_name(parsedArgs['server'])
@@ -51,7 +46,7 @@ class osuCog(commands.Cog, name='osu!'):
             user, serverID = await self.bot.mongoIO.getOsu(ctx.message.author)
             server = osuClasses.Server.from_id(serverID)
 
-        if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
+        if isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
             qtype = "id"
             user, serverID = await self.bot.mongoIO.getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
             server = osuClasses.Server.from_id(serverID)
@@ -62,7 +57,7 @@ class osuCog(commands.Cog, name='osu!'):
         mode = osuClasses.Mode.fromCommand(ctx.invoked_with)
 
         try:
-            user:osuClasses.User = await self.osuAPI.getuser(usr = user, mode = mode, qtype = qtype, server = server)
+            user:osuClasses.User = await self.bot.osuAPI.getuser(usr = user, mode = mode, qtype = qtype, server = server)
 
         except ValueError:
             return await ctx.send("User has not been found or has not played enough!")
@@ -85,7 +80,7 @@ class osuCog(commands.Cog, name='osu!'):
         limit = 1
 
         if args is not None:
-            parsedArgs = self.osuhelpers.parseArgs(args=args, validArgs=['-l', '-m'])
+            parsedArgs = self.bot.osuHelpers.parseArgs(args=args, validArgs=['-l', '-m'])
             user = parsedArgs['user']
             qtype = parsedArgs['qtype']
             server = osuClasses.Server.from_name(parsedArgs['server'])
@@ -106,8 +101,8 @@ class osuCog(commands.Cog, name='osu!'):
             return await ctx.send("Please set your profile!")
 
         try:
-            profile:osuClasses.User = await self.osuAPI.getuser(user, qtype, mode, server)
-            recent_score:osuClasses.RecentScore = (await self.osuAPI.getrecent(profile, limit))[0]
+            profile:osuClasses.User = await self.bot.osuAPI.getuser(user, qtype, mode, server)
+            recent_score:osuClasses.RecentScore = (await self.bot.osuAPI.getrecent(profile, limit))[0]
 
         except ValueError:
             return await ctx.send("User has not been found or has no recent plays!")
@@ -116,12 +111,11 @@ class osuCog(commands.Cog, name='osu!'):
             redisIO.setValue(ctx.message.channel.id, recent_score.beatmap_id)
             redisIO.setValue(f'{ctx.message.channel.id}.mode', mode.id)
 
-        bmapfile:pyt.beatmap = await self.osuAPI.getbmaposu(beatmap_id=recent_score.beatmap_id)
-        beatmap:osuClasses.Beatmap = await self.osuAPI.getbmap(recent_score.beatmap_id, mode=mode, server=server, mods=recent_score.enabled_mods)
-        beatmap.max_combo = bmapfile.max_combo()
+        beatmap:osuClasses.Beatmap = await self.bot.osuAPI.getbmap(recent_score.beatmap_id, mode=mode, server=server, mods=recent_score.enabled_mods)
 
-        recent_score.performance = await self.bot.loop.run_in_executor(None, ppc.calculatePlay, bmapfile, recent_score)
+        recent_score.performance = await self.bot.ppAPI.calculateScore(recent_score)
         recent_score.performance.pp = recent_score.pp if recent_score.pp != 0 else recent_score.performance.pp
+        beatmap.max_combo = beatmap.max_combo if beatmap.max_combo else recent_score.performance.max_combo
 
         result = OsuRecentEmbed(recent_score, beatmap, self.bot.config.color)
 
@@ -141,7 +135,7 @@ class osuCog(commands.Cog, name='osu!'):
         parsedArgs = None
 
         if args is not None:
-            parsedArgs = self.osuhelpers.parseArgsV2(args=args, customArgs=['user'])
+            parsedArgs = self.bot.osuHelpers.parseArgsV2(args=args, customArgs=['user'])
             user = parsedArgs['user']
             qtype = parsedArgs['qtype']
             server = parsedArgs['server']
@@ -165,8 +159,8 @@ class osuCog(commands.Cog, name='osu!'):
             return await ctx.send("Please set your profile!")
 
         try:
-            profile:osuClasses.User = await self.osuAPI.getuser(user, qtype, mode, server)
-            tops:List[osuClasses.RecentScore] = await self.osuAPI.getusrtop(profile, limit)
+            profile:osuClasses.User = await self.bot.osuAPI.getuser(user, qtype, mode, server)
+            tops:List[osuClasses.RecentScore] = await self.bot.osuAPI.getusrtop(profile, limit)
         except ValueError:
             return await ctx.send("User has not been found or has no plays!")
 
@@ -195,13 +189,14 @@ class osuCog(commands.Cog, name='osu!'):
         index:int
         top:osuClasses.Score
         for index, top in enumerate(tops):
-            beatmap:osuClasses.Beatmap = await self.osuAPI.getbmap(top.beatmap_id, mode=mode, server=server, mods=top.enabled_mods)
-            bmapfile:pyt.beatmap = await self.osuAPI.getbmaposu(top.beatmap_id, server)
-            beatmap.max_combo = bmapfile.max_combo()
-            top.performance = await self.bot.loop.run_in_executor(None, ppc.calculatePlay, bmapfile, top)
-            top.performance.pp = top.pp if top.pp != 0 else top.performance.pp
+            beatmap:osuClasses.Beatmap = await self.bot.osuAPI.getbmap(top.beatmap_id, mode=mode, server=server, mods=top.enabled_mods)
+
+            top.performance = await self.bot.ppAPI.calculateScore(top, mode)
+            top.performance.pp = top.pp if top.pp else top.performance.pp
+            beatmap.max_combo = beatmap.max_combo if beatmap.max_combo else top.performance.max_combo
 
             beatmaps.append(beatmap)
+
         title = f'Top plays on osu! {profile.mode.name_full} for {profile.username}'
         result = OsuListEmbed(title, self.bot.config.color, tops, beatmaps, profile, positions, 0)
         await ctx.send(embed=result)
@@ -219,11 +214,11 @@ class osuCog(commands.Cog, name='osu!'):
 
         if args is not None:
             if 'c' == ctx.invoked_with or 'compare' == ctx.invoked_with:
-                parsedArgs = self.osuhelpers.parseArgsV2(args=args, customArgs=["user", "beatmap"])
+                parsedArgs = self.bot.osuHelpers.parseArgsV2(args=args, customArgs=["user", "beatmap"])
             elif 's' == ctx.invoked_with or 'scores' == ctx.invoked_with:
-                parsedArgs = self.osuhelpers.parseArgsV2(args=args, customArgs=["beatmap", "user"])
+                parsedArgs = self.bot.osuHelpers.parseArgsV2(args=args, customArgs=["beatmap", "user"])
                 if parsedArgs['beatmap']:
-                    beatmap = await self.osuhelpers.getBeatmapFromText(parsedArgs['beatmap'])
+                    beatmap = await self.bot.osuHelpers.getBeatmapFromText(parsedArgs['beatmap'])
                     if self.bot.config.redis is True:
                         redisIO.setValue(ctx.message.channel.id, beatmap.beatmap_id)
                         redisIO.setValue(f'{ctx.message.channel.id}.mode', mode.id)
@@ -247,25 +242,25 @@ class osuCog(commands.Cog, name='osu!'):
         if 'c' == ctx.invoked_with or 'compare' == ctx.invoked_with and beatmap is None:
             if self.bot.config.redis is True:
                 mode = osuClasses.Mode.fromId(redisIO.getValue(f'{ctx.message.channel.id}.mode'))
-                beatmap = await self.osuAPI.getbmap(redisIO.getValue(ctx.message.channel.id), mode=mode, server=server)
+                beatmap = await self.bot.osuAPI.getbmap(redisIO.getValue(ctx.message.channel.id), mode=mode, server=server)
             else:
-                beatmap = await self.osuAPI.getbmap(1917158)
+                return ctx.send("Redis is disabled in the config. Please contact the owner of this instance!")
 
         if beatmap is None:
             return
 
         try:
-            profile:osuClasses.User = await self.osuAPI.getuser(user, qtype, mode, server)
-            tops:List[osuClasses.BeatmapScore] = await self.osuAPI.getusrscores(profile, beatmap.beatmap_id, limit)
+            profile:osuClasses.User = await self.bot.osuAPI.getuser(user, qtype, mode, server)
+            tops:List[osuClasses.BeatmapScore] = await self.bot.osuAPI.getusrscores(profile, beatmap.beatmap_id, limit)
 
         except ValueError:
             return await ctx.send("User has not been found or has no plays on the beatmap!")
 
         top:osuClasses.Score
         for _, top in enumerate(tops):
-            bmapfile:pyt.beatmap = await self.osuAPI.getbmaposu(beatmap.beatmap_id)
-            beatmap.max_combo = bmapfile.max_combo()
-            top.performance = await self.bot.loop.run_in_executor(None, ppc.calculatePlay, bmapfile, top)
+            top.performance = await self.bot.ppAPI.calculateScore(top)
+            top.performance.pp = top.pp if top.pp != 0 else top.performance.pp
+            beatmap.max_combo = beatmap.max_combo if beatmap.max_combo !=0 else top.performance.max_combo
 
         title = f"Top osu! {mode.name_full} for {profile.username} on {beatmap.title}[{beatmap.version}]"
         result = OsuListEmbed(title, self.bot.config.color, tops, [ beatmap ] * len(tops), profile)
@@ -277,13 +272,13 @@ class osuCog(commands.Cog, name='osu!'):
     async def perf(self, ctx, *, args=None):
         """Shows information about pp of a certain map"""
 
-        args = self.osuhelpers.parseArgsV2(args=args, customArgs=["mods", "beatmap"])
+        args = self.bot.osuHelpers.parseArgsV2(args=args, customArgs=["mods", "beatmap"])
         mode = args["mode"]
 
         if args["beatmap"]:
-            beatmap:osuClasses.Beatmap = await self.osuhelpers.getBeatmapFromText(args["beatmap"])
+            beatmap:osuClasses.Beatmap = await self.bot.osuHelpers.getBeatmapFromText(args["beatmap"])
         else:
-            beatmap:osuClasses.Beatmap = await self.osuhelpers.getBeatmapFromHistory(ctx)
+            beatmap:osuClasses.Beatmap = await self.bot.osuHelpers.getBeatmapFromHistory(ctx)
 
         if beatmap is None:
             await ctx.send("Failed to find any maps")
@@ -295,10 +290,9 @@ class osuCog(commands.Cog, name='osu!'):
 
         mods:osuClasses.Mods = osuClasses.Mods(args["mods"])
 
-        bmapfile:pyt.beatmap = await self.osuAPI.getbmaposu(beatmap.beatmap_id)
-        perfDict = await self.bot.loop.run_in_executor(None, ppc.calculateBeatmap, bmapfile, mods, mode.id)
+        perf = await self.bot.ppAPI.calculateBeatmap(beatmap.beatmap_id, mods, mode)
 
-        result = OsuPerformanceEmbed(beatmap, perfDict, self.bot.config.color)
+        result = OsuPerformanceEmbed(beatmap, perf, self.bot.config.color)
         await ctx.send(embed=result)
 
 def setup(bot):

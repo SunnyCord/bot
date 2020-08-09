@@ -87,7 +87,6 @@ class User:
         else:
             self.join_date:int = None
 
-
         self.server:osu.Server = server
         self.mode:osu.Mode = mode
         self.avatar_url:str = server.url_avatar + str(self.user_id)
