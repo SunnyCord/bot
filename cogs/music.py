@@ -184,11 +184,13 @@ class Music(commands.Cog):
 
     @commands.command(aliases=['vol'])	
     async def volume(self, ctx, volume: int = None):	
-        """ Changes the player's volume (0-1000). """	
+        """ Changes the player's volume (0-100). """	
+
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)	
 
         if not volume:	
             return await ctx.send(f'🔈 | {player.volume}%')	
+        volume = min(volume, 100)
 
         await player.set_volume(volume)  # Lavalink will automatically cap values between, or equal to 0-1000.	
         await ctx.send(f'🔈 | Set to {player.volume}%')	
