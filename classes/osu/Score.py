@@ -149,9 +149,10 @@ class BeatmapScore(Score):
     <https://osu.ppy.sh/wiki/Score>
     """
 
-    def __init__(self, json_response, server:osu.Server = osu.Server.BANCHO, mode:osu.Mode = osu.Mode.STANDARD):
+    def __init__(self, json_response, beatmap_id: int, server:osu.Server = osu.Server.BANCHO, mode:osu.Mode = osu.Mode.STANDARD):
         super().__init__(json_response, server, mode)
         # self.username:str = json_response["username"]
+        self.beatmap_id = beatmap_id
         self.pp:float = float(json_response["pp"] or 0)
         self.score_id:int = int(json_response["score_id"])
         self.replay_available:bool = bool(json_response["replay_available"])

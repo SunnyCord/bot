@@ -236,4 +236,4 @@ class osuAPI():
                             res = res['scores']
                         except Exception:
                             pass
-                    return list(map(lambda score: osu.BeatmapScore(score), res[:limit]))
+                    return list(map(lambda score: osu.BeatmapScore(score, beatmap_id), res[:limit]))
