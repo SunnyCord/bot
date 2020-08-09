@@ -6,7 +6,7 @@ class Config():
 
     def __init__(
         self, redis: bool, mongo: Dict, lavalink: Dict, sentry: str, command_prefixes: List, token: str,
-        osuAPI:str, owners:List[int], splashArt: str, color: int
+        osuAPI:str, ppAPI: Dict, owners:List[int], splashArt: str, color: int
     ):
         self.redis = redis
         self.mongo = mongo
@@ -15,6 +15,7 @@ class Config():
         self.command_prefixes = command_prefixes
         self.token = token
         self.osuAPI = osuAPI
+        self.ppAPI = ppAPI
         self.owners = owners
         self.splashArt = splashArt
         self.color = color
@@ -40,6 +41,7 @@ class Config():
                 selectedConfig["command_prefixes"],
                 str(selectedConfig["token"]),
                 str(selectedConfig["osuAPI"]),
+                selectedConfig["ppAPI"],
                 list(selectedConfig["owners"]),
                 str(selectedConfig["splashArt"]),
                 int(selectedConfig["color"], 16)

@@ -3,6 +3,9 @@ from discord.ext import commands
 from motor import motor_asyncio
 from classes.config import Config
 from commons.mongoIO import mongoIO
+from commons.osu.ppwrap import ppAPI
+from commons.osu.osuapiwrap import osuAPI
+from commons.osu.osuhelpers import osuHelper
 
 class Sunny(commands.AutoShardedBot):
 
@@ -24,6 +27,9 @@ class Sunny(commands.AutoShardedBot):
         self.config=Config.fromJSON("config.json")
         self.motorClient = motor_asyncio.AsyncIOMotorClient(self.config.mongo['URI'], serverSelectionTimeoutMS=self.config.mongo['timeout'])
         self.mongoIO = mongoIO(self)
+        self.osuAPI = osuAPI(self.config.osuAPI)
+        self.osuHelpers = osuHelper(self)
+        self.ppAPI = ppAPI(self.config.ppAPI["URL"], self.config.ppAPI["secret"])
 
     async def on_message(self, msg): # Ignore messages
         if not self.is_ready() or msg.author.bot:
