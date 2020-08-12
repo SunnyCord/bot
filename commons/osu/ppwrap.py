@@ -35,7 +35,7 @@ class ppAPI():
 
         pp_fc, acc_fc = 0, 0
         if score.maxcombo != result['max_combo'] and result['mode'] != 3:
-            objcount = payload['objcount']
+            objcount = result['objcount']
             mistimedhits = payload['count50'] + payload['count100'] + payload['count0']
             payload['combo'] = result['max_combo']
             payload['count300'] =  objcount - mistimedhits
