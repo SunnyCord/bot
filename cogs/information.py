@@ -8,6 +8,7 @@ class Information(commands.Cog):
         self.bot = bot
 
     @commands.command()
+    @commands.guild_only()
     async def userinfo(self, ctx, user: discord.Member = None):
         if user is None:
             user = ctx.message.author
@@ -32,6 +33,7 @@ class Information(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
+    @commands.guild_only()
     async def serverinfo(self, ctx):
         role_count = len(ctx.guild.roles)
         emoji_count = len(ctx.guild.emojis)
