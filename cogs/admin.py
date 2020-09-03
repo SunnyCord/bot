@@ -9,6 +9,7 @@ class Admin(commands.Cog):
         self.bot = bot
 
     @checks.can_kick()
+    @commands.guild_only()
     @commands.command()
     async def kick(self, ctx, user : discord.Member):
         """Kicks a user from the server."""
@@ -22,6 +23,7 @@ class Admin(commands.Cog):
             await ctx.send(embed=embed)
 
     @checks.can_ban()
+    @commands.guild_only()
     @commands.command()
     async def ban(self, ctx, user : discord.Member):
         """Bans a user from the server."""
@@ -35,6 +37,7 @@ class Admin(commands.Cog):
             await ctx.send(embed=embed)
 
     @checks.can_mute()
+    @commands.guild_only()
     @commands.command()
     async def mute(self, ctx, user : discord.Member, time: int):
         """Prevents a user from speaking for a specified amount of time."""
@@ -67,6 +70,7 @@ class Admin(commands.Cog):
                 await ctx.send(f'User {user.mention} is already muted.')
 
     @checks.can_mute()
+    @commands.guild_only()
     @commands.command()
     async def unmute(self, ctx, user: discord.Member):
         """Unmutes a user."""
@@ -79,6 +83,7 @@ class Admin(commands.Cog):
             await user.remove_roles(rolem)
 
     @checks.can_managemsg()
+    @commands.guild_only()
     @commands.command()
     async def prune(self, ctx, count: int):
         """Deletes a specified amount of messages. (Max 100)"""
