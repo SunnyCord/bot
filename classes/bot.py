@@ -17,7 +17,7 @@ class Sunny(commands.AutoShardedBot):
             return ' ' # Ignore if user is blacklisted or message is not in a guild
 
         guildPref = await self.mongoIO.getSetting(message.guild, 'prefix')
-        result = self.config.command_prefixes
+        result = self.config.command_prefixes.copy()
         if guildPref is not None:
             result += [guildPref]
         return commands.when_mentioned_or(*result)(self, message)
