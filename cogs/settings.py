@@ -12,6 +12,7 @@ class Settings(commands.Cog):
 
     @checks.is_admin()
     @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.guild_only()
     @commands.command()
     async def prefix(self, ctx, prefix: str):
         """Sets the server-wide prefix."""
@@ -50,6 +51,7 @@ class Settings(commands.Cog):
 
     @commands.is_owner()
     @commands.command(hidden=True)
+    @commands.guild_only()
     async def blacklist(self, ctx, user: discord.Member):
         """Blacklists a user from the bot. (Owner-only)"""
         if not await self.bot.mongoIO.userExists(user):
@@ -61,6 +63,7 @@ class Settings(commands.Cog):
 
     @commands.is_owner()
     @commands.command(hidden=True)
+    @commands.guild_only()
     async def unblacklist(self, ctx, user: discord.Member):
         """Unblacklists a user from the bot. (Owner-only)"""
         await self.bot.mongoIO.unblacklistUser(user)
