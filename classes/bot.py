@@ -11,7 +11,7 @@ class Sunny(commands.AutoShardedBot):
 
     @staticmethod
     async def __get_prefix(self, message):
-        """A callable Prefix for our bot. This also has the ability to ignore certan messages by passing an empty string."""
+        """A callable Prefix for our bot. This also has the ability to ignore certain messages by passing an empty string."""
         
         if await self.mongoIO.isBlacklisted(message.author) or not message.guild:
             return ' ' # Ignore if user is blacklisted or message is not in a guild
