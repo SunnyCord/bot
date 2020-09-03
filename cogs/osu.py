@@ -1,5 +1,4 @@
 import re
-import pyttanko as pyt
 from typing import List
 from classes.embeds import *
 import commons.redisIO as redisIO
