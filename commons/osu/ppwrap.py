@@ -1,6 +1,5 @@
 import aiohttp
 import classes.osu as osu
-from typing import List
 
 class ppAPI():
 
