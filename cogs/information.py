@@ -42,19 +42,19 @@ class Information(commands.Cog):
         channel_count = len([x for x in ctx.guild.channels if isinstance(x, discord.channel.TextChannel)])
         embed = discord.Embed(color=self.bot.config.color, timestamp=ctx.message.created_at)
         embed_values = {
-        	"Name (ID)": f"{ctx.guild.name} ({ctx.guild.id})",
-        	"Owner": ctx.guild.owner,
-        	"Member Count": ctx.guild.member_count,
-        	"Text Channels": str(channel_count),
-        	"Region": ctx.guild.region,
-        	"Verification Level": str(ctx.guild.verification_level),
-        	"Highest Role": ctx.guild.roles[-1],
-        	"Number of Roles": str(role_count),
-        	"Number of Emotes": str(emoji_count),
-        	"Created On": ctx.guild.created_at.__format__('%A, %d. %B %Y @ %H:%M:%S')
+        	"Name (ID)": (f"{ctx.guild.name} ({ctx.guild.id})", False),
+        	"Owner": (ctx.guild.owner, False),
+        	"Member Count": (ctx.guild.member_count, True),
+        	"Text Channels": (str(channel_count), True),
+        	"Region": (ctx.guild.region, True),
+        	"Verification Level": (str(ctx.guild.verification_level), True),
+        	"Highest Role": (ctx.guild.roles[-1], True),
+        	"Number of Roles": (str(role_count), True),
+        	"Number of Emotes": (str(emoji_count), True),
+        	"Created On": (ctx.guild.created_at.__format__('%A, %d. %B %Y @ %H:%M:%S'), True)
         }
-        for n, v in embed_values.items(): 
-        	embed.add_field(name=n, value=v, inline=True)
+        for n, v in embed_values.items():
+        	embed.add_field(name=n, value=v[0], inline=v[1])
         embed.set_thumbnail(url=ctx.guild.icon_url)
         embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
         embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
