@@ -62,6 +62,3 @@
 > -   `S` **marks the state of the version e.g. *E*xperimental / *U*nstable / *S*table**
 > -   `DDMMYY` **marks the day, month and year of the change**
 > -   example: `v1.2.3E010190`
-
-
-[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/S6S31UL25)
