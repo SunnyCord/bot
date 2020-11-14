@@ -29,7 +29,7 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):
         elif isinstance(error, commands.CheckFailure):
             return await ctx.send(f'You do not have the required permission for ``{ctx.command}``.')
 
-        exc = f'{type(error).__name__}: {error}'
+        exc = f'{type(error).__name__}'
         embed = discord.Embed(title="Oh no! An error has occured", color=discord.Color.red())
         embed.add_field(name="Error:", value=f"{exc}\nIf you can, please open an issue: https://github.com/NiceAesth/Sunny/issues")
         embed.set_thumbnail(url="https://i.imgur.com/szL6ReL.png")
