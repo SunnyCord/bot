@@ -258,6 +258,6 @@ class osuAPI():
                                 pass
                         return list(map(lambda score: osu.BeatmapScore(score, beatmap_id), res[:limit]))
 
-                except Exception:
-                    raise ValueError("Invalid query or API down.")
+            except Exception:
+                raise ValueError("Invalid query or API down.")
 
