@@ -274,10 +274,14 @@ class osuCog(commands.Cog, name='osu!'):
         args = self.bot.osuHelpers.parseArgsV2(args=args, customArgs=["mods", "beatmap"])
         mode = args["mode"]
 
-        if args["beatmap"]:
-            beatmap:osuClasses.Beatmap = await self.bot.osuHelpers.getBeatmapFromText(args["beatmap"])
-        else:
-            beatmap:osuClasses.Beatmap = await self.bot.osuHelpers.getBeatmapFromHistory(ctx)
+        try:
+            if args["beatmap"]:
+                beatmap:osuClasses.Beatmap = await self.bot.osuHelpers.getBeatmapFromText(args["beatmap"])
+            else:
+                beatmap:osuClasses.Beatmap = await self.bot.osuHelpers.getBeatmapFromHistory(ctx)
+
+        except ValueError:
+            return await ctx.send("User has not been found or has no plays on the beatmap!")
 
         if beatmap is None:
             await ctx.send("Failed to find any maps")
