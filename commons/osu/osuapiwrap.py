@@ -207,18 +207,18 @@ class osuAPI():
                     else:
                         params['name'] = user.username
 
-                try:
-                    async with cs.get( user.server.api_getusrtop, params=params ) as r:
-                        res = await r.json()
-                        if res == []:
-                            raise ValueError("Invalid query or API down.")
-                        else:
-                            if user.server is osu.Server.AKATSUKIRX:
-                                res = res['scores']
-                            return list(map(lambda top: osu.RecentScore(top), res))
+            try:
+                async with cs.get( user.server.api_getusrtop, params=params ) as r:
+                    res = await r.json()
+                    if res == []:
+                        raise ValueError("Invalid query or API down.")
+                    else:
+                        if user.server is osu.Server.AKATSUKIRX:
+                            res = res['scores']
+                        return list(map(lambda top: osu.RecentScore(top), res))
 
-                except Exception:
-                    raise ValueError("Invalid query or API down.")
+            except Exception:
+                raise ValueError("Invalid query or API down.")
 
 
     async def getusrscores(
