@@ -42,12 +42,22 @@ class osuCog(commands.Cog, name='osu!'):
 
         if not user:
             qtype = "id"
-            user, serverID = await self.bot.mongoIO.getOsu(ctx.message.author)
+            try:
+                user, serverID = await self.bot.mongoIO.getOsu(ctx.message.author)
+            except Exception:
+                return await ctx.send("Please set your profile!")
             server = osuClasses.Server.from_id(serverID)
 
-        if isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
+        if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
             qtype = "id"
-            user, serverID = await self.bot.mongoIO.getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
+            mentioned_id = int(re.sub('[^0-9]','', user))
+            mentioned = ctx.guild.get_member(mentioned_id)
+            if mentioned is None: # If member not in cache, fetch from api
+                mentioned = await ctx.guild.fetch_member(mentioned_id)
+            try:
+                user, serverID = await self.bot.mongoIO.getOsu(mentioned)
+            except Exception:
+                return await ctx.send("Please set your profile!")
             server = osuClasses.Server.from_id(serverID)
 
         if not user:
@@ -88,14 +98,23 @@ class osuCog(commands.Cog, name='osu!'):
 
         if not user:
             qtype = "id"
-            user, serverID = await self.bot.mongoIO.getOsu(ctx.message.author)
+            try:
+                user, serverID = await self.bot.mongoIO.getOsu(ctx.message.author)
+            except Exception:
+                return await ctx.send("Please set your profile!")
             server = osuClasses.Server.from_id(serverID)
 
         if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
             qtype = "id"
-            user, serverID = await self.bot.mongoIO.getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
+            mentioned_id = int(re.sub('[^0-9]','', user))
+            mentioned = ctx.guild.get_member(mentioned_id)
+            if mentioned is None: # If member not in cache, fetch from api
+                mentioned = await ctx.guild.fetch_member(mentioned_id)
+            try:
+                user, serverID = await self.bot.mongoIO.getOsu(mentioned)
+            except Exception:
+                return await ctx.send("Please set your profile!")
             server = osuClasses.Server.from_id(serverID)
-
         if not user:
             return await ctx.send("Please set your profile!")
 
@@ -146,12 +165,22 @@ class osuCog(commands.Cog, name='osu!'):
 
         if not user:
             qtype = "id"
-            user, serverID = await self.bot.mongoIO.getOsu(ctx.message.author)
+            try:
+                user, serverID = await self.bot.mongoIO.getOsu(ctx.message.author)
+            except Exception:
+                return await ctx.send("Please set your profile!")
             server = osuClasses.Server.from_id(serverID)
 
         if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
             qtype = "id"
-            user, serverID = await self.bot.mongoIO.getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
+            mentioned_id = int(re.sub('[^0-9]','', user))
+            mentioned = ctx.guild.get_member(mentioned_id)
+            if mentioned is None: # If member not in cache, fetch from api
+                mentioned = await ctx.guild.fetch_member(mentioned_id)
+            try:
+                user, serverID = await self.bot.mongoIO.getOsu(mentioned)
+            except Exception:
+                return await ctx.send("Please set your profile!")
             server = osuClasses.Server.from_id(serverID)
 
         if not user:
@@ -227,16 +256,23 @@ class osuCog(commands.Cog, name='osu!'):
 
         if not user:
             qtype = "id"
-            user, serverID = await self.bot.mongoIO.getOsu(ctx.message.author)
+            try:
+                user, serverID = await self.bot.mongoIO.getOsu(ctx.message.author)
+            except Exception:
+                return await ctx.send("Please set your profile!")
             server = osuClasses.Server.from_id(serverID)
 
         if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
             qtype = "id"
-            user, serverID = await self.bot.mongoIO.getOsu(ctx.guild.get_member(int(re.sub('[^0-9]','', user))))
+            mentioned_id = int(re.sub('[^0-9]','', user))
+            mentioned = ctx.guild.get_member(mentioned_id)
+            if mentioned is None: # If member not in cache, fetch from api
+                mentioned = await ctx.guild.fetch_member(mentioned_id)
+            try:
+                user, serverID = await self.bot.mongoIO.getOsu(mentioned)
+            except Exception:
+                return await ctx.send("Please set your profile!")
             server = osuClasses.Server.from_id(serverID)
-
-        if not user:
-            return await ctx.send("Please set your profile!")
 
         if 'c' == ctx.invoked_with or 'compare' == ctx.invoked_with and beatmap is None:
             if self.bot.config.redis is True:
