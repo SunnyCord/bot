@@ -53,6 +53,8 @@ class Admin(commands.Cog):
                 embed.set_thumbnail(url=user.avatar_url)
                 await ctx.send(embed=embed)
                 await user.add_roles(rolem)
+                # This is needed because of how caching has changed in discord.py, won't be necessary in rewrite as I will handle mutes with the database
+                user = await ctx.message.guild.fetch_member(user.id)
                 await sleep(time)
                 if rolem in user.roles:
                     try:
