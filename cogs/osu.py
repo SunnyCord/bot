@@ -1,4 +1,4 @@
-import re
+from commons.regex import id_rx
 from typing import List
 from classes.embeds import *
 import commons.redisIO as redisIO
@@ -43,13 +43,10 @@ class osuCog(commands.Cog, name='osu!'):
 
         if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
             qtype = "id"
-            mentioned_id = int(re.sub('[^0-9]','', user))
+            mentioned_id = int(id_rx.sub(r'', user))
             mentioned = await self.bot.ensure_member(mentioned_id, ctx.guild)
             user, serverID = await self.bot.mongoIO.getOsu(mentioned)
             server = osuClasses.Server.from_id(serverID)
-
-        if not user:
-            return await ctx.send("Please set your profile!")
 
         mode = osuClasses.Mode.fromCommand(ctx.invoked_with)
         user:osuClasses.User = await self.bot.osuAPI.getuser(usr = user, mode = mode, qtype = qtype, server = server)
@@ -86,12 +83,10 @@ class osuCog(commands.Cog, name='osu!'):
 
         if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
             qtype = "id"
-            mentioned_id = int(re.sub('[^0-9]','', user))
+            mentioned_id = int(id_rx.sub(r'', user))
             mentioned = await self.bot.ensure_member(mentioned_id, ctx.guild)
             user, serverID = await self.bot.mongoIO.getOsu(mentioned)
             server = osuClasses.Server.from_id(serverID)
-        if not user:
-            return await ctx.send("Please set your profile!")
 
         profile:osuClasses.User = await self.bot.osuAPI.getuser(user, qtype, mode, server)
         recent_score:osuClasses.RecentScore = (await self.bot.osuAPI.getrecent(profile, limit))[0]
@@ -141,13 +136,10 @@ class osuCog(commands.Cog, name='osu!'):
 
         if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
             qtype = "id"
-            mentioned_id = int(re.sub('[^0-9]','', user))
+            mentioned_id = int(id_rx.sub(r'', user))
             mentioned = await self.bot.ensure_member(mentioned_id, ctx.guild)
             user, serverID = await self.bot.mongoIO.getOsu(mentioned)
             server = osuClasses.Server.from_id(serverID)
-
-        if not user:
-            return await ctx.send("Please set your profile!")
 
         profile:osuClasses.User = await self.bot.osuAPI.getuser(user, qtype, mode, server)
         tops:List[osuClasses.RecentScore] = await self.bot.osuAPI.getusrtop(profile, limit)
@@ -221,7 +213,7 @@ class osuCog(commands.Cog, name='osu!'):
 
         if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
             qtype = "id"
-            mentioned_id = int(re.sub('[^0-9]','', user))
+            mentioned_id = int(id_rx.sub(r'', user))
             mentioned = await self.bot.ensure_member(mentioned_id, ctx.guild)
             user, serverID = await self.bot.mongoIO.getOsu(mentioned)
             server = osuClasses.Server.from_id(serverID)

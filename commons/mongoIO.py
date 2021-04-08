@@ -28,7 +28,7 @@ class mongoIO():
 			raise Exceptions.DatabaseMissingError("osu")
 		if "preferredServer" not in databaseUser:
 			databaseUser["preferredServer"] = 0
-		return databaseUser["osu"], databaseUser["preferredServer"]
+		return databaseUser["osu"], int(databaseUser["preferredServer"])
 
 	async def setOsu(self, member: discord.Member, osuID: int, osuServer: int = 0):
 		if not await self.userExists(member):
@@ -74,8 +74,7 @@ class mongoIO():
 			)
 
 	async def isBlacklisted(self, member: discord.Member):
-		databaseUser = await self.db.users.find_one( {"id": {"$eq": member.id} } )
-		if databaseUser is None:
+		if ( databaseUser := await self.db.users.find_one({"id": {"$eq": member.id} }) ) is None:
 			return False
 		return databaseUser["blacklisted"]
 
@@ -88,12 +87,10 @@ class mongoIO():
 		)
 
 	async def serverExists(self, server: discord.Guild):
-		exists = await self.db.settings.find_one( {"id": {"$eq": server.id} } )
-		return exists is not None
+		return ( await self.db.settings.find_one( {"id": {"$eq": server.id} } ) is not None )
 
 	async def getSetting(self, server: discord.Guild, setting: str):
-		databaseGuild = await self.db.settings.find_one( {"id": {"$eq": server.id} } )
-		if databaseGuild is None:
+		if ( databaseGuild := await self.db.settings.find_one( {"id": {"$eq": server.id} } ) ) is None:
 			return None
 		return databaseGuild[setting]
 

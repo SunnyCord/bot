@@ -26,7 +26,10 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):
 
         elif isinstance(error, commands.CommandOnCooldown):
             return await ctx.send("Slow down! You are on a %.2fs cooldown." % error.retry_after)
-        
+
+        if isinstance(error, commands.CommandInvokeError):
+            await ctx.send(error.original)
+
         elif isinstance(error, Exceptions.OsuAPIError):
             if error.queryType == "get_user":
                 return await ctx.send(f"User has not been found on {error.server.name_full} or has not played enough!")
@@ -40,7 +43,7 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):
                 return await ctx.send(f"User has no scores on this beatmap on {error.server.name_full}!")
             else:
                 return await ctx.send("Unknown API error.")
-        
+
         elif isinstance(error, Exceptions.DatabaseMissingError):
             if  error.queryType == "osu":
                 return await ctx.send("Please set your profile!")

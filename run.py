@@ -24,7 +24,7 @@ async def on_ready():
         print(f'Successfully logged in and booted...!')
 
         #Load Modules
-        module_folders = ['listeners', 'cogs']
+        module_folders = ['listeners', 'cogs', 'tasks']
         for module in module_folders:
             for extension in list_module(module):
                 try:

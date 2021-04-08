@@ -1,8 +1,6 @@
 import discord
 from discord.ext import commands
 
-#https://gist.github.com/StudioMFTechnologies/ad41bfd32b2379ccffe90b0e34128b8b
-
 class Help(commands.Cog):
     """Displays the message you are currently viewing!"""
     def __init__(self,bot):

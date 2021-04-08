@@ -96,15 +96,15 @@ class osuAPI():
             if user.server is not osu.Server.BANCHO:
                 params.pop('k')
 
-            #try:
-            async with cs.get( user.server.api_getrecent, params=params ) as r:
-                if (res := await r.json()) == []:
-                    raise ValueError("Response is empty.")
-                else:
-                    return list(map(lambda recent: osu.RecentScore(recent, user.server, user.mode), res))
+            try:
+                async with cs.get( user.server.api_getrecent, params=params ) as r:
+                    if (res := await r.json()) == []:
+                        raise ValueError("Response is empty.")
+                    else:
+                        return list(map(lambda recent: osu.RecentScore(recent, user.server, user.mode), res))
 
-            #except Exception:
-            #    raise OsuAPIError(user.server, "get_recent","Invalid query or API down.")
+            except Exception:
+                raise OsuAPIError(user.server, "get_recent","Invalid query or API down.")
 
     async def getusrtop(self, user:osu.User, limit:int = 1) -> List[osu.RecentScore]:
 

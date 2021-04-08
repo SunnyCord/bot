@@ -1,9 +1,7 @@
-import re
 import classes.osu as osu
 import commons.redisIO as redisIO
+from commons.regex import beatmap_id_rx, beatmap_link_rx
 
-patternBeatmapLink = re.compile(r"(https?):\/\/([-\w._]+)(\/[-\w._]\?(.+)?)?(\/b(eatmaps)?\/(?P<bmapid1>[0-9]+)|\/s\/(?P<bmapsetid1>[0-9]+)|\/beatmapsets\/(?P<bmapsetid2>[0-9]+)(#(?P<mode>[a-z]+)\/(?P<bmapid2>[0-9]+))?)")
-patternBeatmapId = re.compile(r"^(?P<bmapid>[0-9]+)$")
 
 class osuHelper():
 
@@ -176,7 +174,7 @@ class osuHelper():
         return ''.join(mod_list)
 
     async def getBeatmapFromText(self, text, ignoreID = False) -> osu.Beatmap:
-        resultLink = patternBeatmapLink.match(text)
+        resultLink = beatmap_link_rx.match(text)
         if resultLink is not None:
             setId, beatmapId = None, None
             if resultLink.group("bmapsetid2") is not None:
@@ -190,7 +188,7 @@ class osuHelper():
             return await self.osuAPI.getbmap(beatmapId, setId)
 
         if not ignoreID:
-            resultId = patternBeatmapId.match(text)
+            resultId = beatmap_id_rx.match(text)
             if resultId is not None:
                 beatmapId = int(resultId.group("bmapid"))
                 return await self.osuAPI.getbmap(beatmapId)
