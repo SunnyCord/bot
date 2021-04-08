@@ -28,6 +28,7 @@ class Sunny(commands.AutoShardedBot):
         super().__init__(
             description=kwargs.pop("description"),
             command_prefix=self.__get_prefix,
+            intents=discord.Intents.all(),
             activity=kwargs.pop("activity")
         )
         self.config=Config.fromJSON("config.json")
