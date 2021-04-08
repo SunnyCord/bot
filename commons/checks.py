@@ -11,9 +11,9 @@ def check_permissions(ctx, perms):
 
 def is_gowner(**perms):
     def predicate(ctx):
-        if ctx.message.guild is None:
+        if ctx.guild is None:
             return False
-        guild = ctx.message.guild
+        guild = ctx.guild
         owner = guild.owner
 
         if ctx.message.author.id == owner.id:

@@ -1,5 +1,4 @@
 import discord, asyncio
-from discord.utils import get
 from discord.ext import commands
 
 class CronTask(commands.Cog):
@@ -14,7 +13,20 @@ class CronTask(commands.Cog):
 
         while not self.bot.is_closed():
 
-            await asyncio.sleep(300) # Check every 5 minutes
+            mutes = await self.bot.mongoIO.getExpiredMutes()
+
+            for mute in mutes:
+                guild = await self.bot.ensure_guild(mute['guildID'])
+                member = await self.bot.ensure_member(mute['memberID'], guild)
+                rolem = discord.utils.get(guild.roles, name='Muted')
+                if rolem in member.roles:
+                    try:
+                        await member.remove_roles(rolem)
+                        await self.bot.mongoIO.unmuteUser(member, guild)
+                    except Exception:
+                        print(f'User {member.name} could not be unmuted!')
+
+            await asyncio.sleep(10) # Check every 10 seconds
 
 def setup(bot):
     bot.add_cog(CronTask(bot))

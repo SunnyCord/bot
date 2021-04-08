@@ -10,3 +10,4 @@ redis
 jishaku
 sentry-sdk
 pyfiglet
+pytimeparse

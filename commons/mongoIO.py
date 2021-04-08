@@ -1,4 +1,5 @@
 import discord
+import datetime
 import classes.exceptions as Exceptions
 
 class mongoIO():
@@ -19,12 +20,10 @@ class mongoIO():
 		)
 
 	async def userExists(self, member:discord.Member):
-		exists = await self.db.users.find_one( {"id": {"$eq": member.id} } )
-		return exists is not None
+		return ( await self.db.users.find_one( {"id": {"$eq": member.id} } ) ) is not None
 
 	async def getOsu(self, member: discord.Member):
-		databaseUser = await self.db.users.find_one( {"id": {"$eq": member.id} } )
-		if databaseUser is None:
+		if ( databaseUser := await self.db.users.find_one( {"id": {"$eq": member.id} } ) ) is None:
 			raise Exceptions.DatabaseMissingError("osu")
 		if "preferredServer" not in databaseUser:
 			databaseUser["preferredServer"] = 0
@@ -73,6 +72,24 @@ class mongoIO():
 				}
 			)
 
+	async def muteUser(self, member: discord.Member, guild: discord.Guild, ends):
+		await self.db.mutes.update_one(
+			{"memberID": member.id, "guildID": guild.id},
+			{
+				"$set": {
+					"memberID": member.id,
+					"guildID": guild.id,
+					"ends":  ends
+				}
+			}, upsert=True
+		)
+
+	async def unmuteUser(self, member: discord.Member, guild: discord.Guild):
+		await self.db.mutes.delete_many({"memberID": member.id, "guildID": guild.id})
+
+	async def getExpiredMutes(self):
+		return await self.db.mutes.find({ "ends": {"$lt": datetime.datetime.utcnow()} }).to_list(None)
+
 	async def isBlacklisted(self, member: discord.Member):
 		if ( databaseUser := await self.db.users.find_one({"id": {"$eq": member.id} }) ) is None:
 			return False
@@ -110,4 +127,5 @@ class mongoIO():
 
 	async def wipe(self):
 		await self.db.users.delete_many({})
+		await self.db.mutes.delete_many({})
 		await self.db.settings.delete_many({})

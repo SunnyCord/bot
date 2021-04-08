@@ -38,6 +38,11 @@ class Sunny(commands.AutoShardedBot):
         self.osuHelpers = osuHelper(self)
         self.ppAPI = ppAPI(self.config.ppAPI["URL"], self.config.ppAPI["secret"])
 
+    async def ensure_guild(self, query):
+        if (guild := self.get_guild(query)) is None:
+            guild = await self.fetch_guild(query)
+        return guild
+
     async def on_message(self, msg):
         ignore = not msg.guild
         ignore |= msg.author.bot

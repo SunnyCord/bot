@@ -1,7 +1,7 @@
-import discord
+import discord, datetime
 from discord.ext import commands
 from commons import checks
-from asyncio import sleep
+from pytimeparse.timeparse import timeparse
 
 class Admin(commands.Cog):
     """Commands for managing Discord servers."""
@@ -13,78 +13,65 @@ class Admin(commands.Cog):
     async def kick(self, ctx, user : discord.Member):
         """Kicks a user from the server."""
         if ctx.author == user:
-            await ctx.send("You cannot kick yourself.")
-        else:
-            await user.kick()
-            embed = discord.Embed(title=f'User {user.name} has been kicked.', color=0x00ff00)
-            embed.add_field(name="Goodbye!", value=":boot:")
-            embed.set_thumbnail(url=user.avatar_url)
-            await ctx.send(embed=embed)
+            return await ctx.send("You cannot kick yourself.")
+        await user.kick()
+        embed = discord.Embed(title=f'User {user.name} has been kicked.', color=0x00ff00)
+        embed.add_field(name="Goodbye!", value=":boot:")
+        embed.set_thumbnail(url=user.avatar_url)
+        await ctx.send(embed=embed)
 
     @checks.can_ban()
     @commands.command()
     async def ban(self, ctx, user : discord.Member):
         """Bans a user from the server."""
         if ctx.author == user:
-            await ctx.send("You cannot ban yourself.")
-        else:
-            await user.ban()
-            embed = discord.Embed(title=f'User {user.name} has been banned.', color=0x00ff00)
-            embed.add_field(name="Goodbye!", value=":hammer:")
-            embed.set_thumbnail(url=user.avatar_url)
-            await ctx.send(embed=embed)
+            return await ctx.send("You cannot ban yourself.")
+        await user.ban()
+        embed = discord.Embed(title=f'User {user.name} has been banned.', color=0x00ff00)
+        embed.add_field(name="Goodbye!", value=":hammer:")
+        embed.set_thumbnail(url=user.avatar_url)
+        await ctx.send(embed=embed)
 
     @checks.can_mute()
     @commands.command()
-    async def mute(self, ctx, user : discord.Member, time: int):
+    async def mute(self, ctx, user : discord.Member, time: str):
         """Prevents a user from speaking for a specified amount of time."""
         if ctx.author == user:
-            await ctx.send("You cannot mute yourself.")
-        else:
-            rolem = discord.utils.get(ctx.message.guild.roles, name='Muted')
-            if rolem is None:
-                embed=discord.Embed(title="Muted role", url="http://echo-bot.wikia.com/wiki/Setting_up_the_muted_role", description="The mute command requires a role named 'Muted'.", color=0xff0000)
-                embed.set_author(name=self.bot.user.name, icon_url=self.bot.user.avatar_url)
-                embed.set_footer(text="Without this role, the command will not work.")
-                await ctx.send(embed=embed)
-            elif rolem not in user.roles:
-                embed = discord.Embed(title=f'User {user.name} has been successfully muted for {time}s.', color=0x00ff00)
-                embed.add_field(name="Shhh!", value=":zipper_mouth:")
-                embed.set_thumbnail(url=user.avatar_url)
-                await ctx.send(embed=embed)
-                await user.add_roles(rolem)
-                user = await  self.bot.ensure_member(user.id, guild)
-                await sleep(time)
-                if rolem in user.roles:
-                    try:
-                        await user.remove_roles(rolem)
-                        embed = discord.Embed(title=f'User {user.name} has been automatically unmuted.', color=0x00ff00)
-                        embed.add_field(name="Welcome back!", value=":open_mouth:")
-                        embed.set_thumbnail(url=user.avatar_url)
-                        await ctx.send(embed=embed)
-                    except Exception:
-                        print(f'User {user.name} could not be unmuted!')
-            else:
-                await ctx.send(f'User {user.mention} is already muted.')
+            return await ctx.send("You cannot mute yourself.")
+        if (rolem := discord.utils.get(ctx.guild.roles, name='Muted')) is None:
+            return ctx.send("You have not set up the 'Muted' role!")
+        if rolem in user.roles:
+            return await ctx.send(f'User {user.mention} is already muted.')
+        await user.add_roles(rolem)
+        if time.isnumeric():
+            time += "s"
+        duration = datetime.timedelta(seconds=timeparse(time))
+        ends = datetime.datetime.utcnow() + duration
+        await self.bot.mongoIO.muteUser(user, ctx.guild, ends)
+        embed = discord.Embed(title=f'User {user.name} has been successfully muted for {duration}s.', color=0x00ff00)
+        embed.add_field(name="Shhh!", value=":zipper_mouth:")
+        embed.set_thumbnail(url=user.avatar_url)
+        await ctx.send(embed=embed)
 
     @checks.can_mute()
     @commands.command()
     async def unmute(self, ctx, user: discord.Member):
         """Unmutes a user."""
-        rolem = discord.utils.get(ctx.message.guild.roles, name='Muted')
-        if rolem in user.roles:
-            embed = discord.Embed(title=f'User {user.name} has been manually unmuted.', color=0x00ff00)
-            embed.add_field(name="Welcome back!", value=":open_mouth:")
-            embed.set_thumbnail(url=user.avatar_url)
-            await ctx.send(embed=embed)
-            await user.remove_roles(rolem)
+        rolem = discord.utils.get(ctx.guild.roles, name='Muted')
+        if rolem not in user.roles:
+            return await ctx.send("User is not muted.")
+        embed = discord.Embed(title=f'User {user.name} has been unmuted.', color=0x00ff00)
+        embed.add_field(name="Welcome back!", value=":open_mouth:")
+        embed.set_thumbnail(url=user.avatar_url)
+        await ctx.send(embed=embed)
+        await user.remove_roles(rolem)
+        await self.bot.mongoIO.unmuteUser(user, ctx.guild)
 
     @checks.can_managemsg()
     @commands.command()
     async def prune(self, ctx, count: int):
         """Deletes a specified amount of messages. (Max 100)"""
-        if count>100:
-            count = 100
+        count = max(1, min(count, 100))
         await ctx.message.channel.purge(limit=count, bulk=True)
 
     @checks.can_managemsg()
