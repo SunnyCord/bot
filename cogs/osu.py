@@ -1,4 +1,4 @@
-import re
+from commons.regex import id_rx
 from typing import List
 from classes.embeds import *
 import commons.redisIO as redisIO
@@ -6,7 +6,7 @@ from discord.ext import commands
 import classes.osu as osuClasses
 
 class osuCog(commands.Cog, name='osu!'):
-    """osu! related commands.\n*Valid Arguments:* ```fix\n-ripple, -akatsuki, akatsukirx, -enjuu```"""
+    """osu! related commands.\n*Valid Arguments:* ```fix\n-ripple, -akatsuki```"""
 
     def __init__(self, bot):
         self.bot = bot
@@ -15,16 +15,12 @@ class osuCog(commands.Cog, name='osu!'):
     @commands.command()
     async def osuset(self, ctx, *, args):
         """Sets the osu! profile for the message author. ``eg. osuset Nice Aesthetics``"""
+        parsedArgs = self.bot.osuHelpers.parseArgsV2(args=args, customArgs=["user"])
+        username = parsedArgs['user']
+        profile:osuClasses.User = await self.bot.osuAPI.getuser(username, 'string', server=parsedArgs['server'])
+        await self.bot.mongoIO.setOsu(ctx.message.author, profile.user_id, parsedArgs['server'].id)
+        await ctx.send(f"osu! profile succesfully set to {profile.username}")
 
-        try:
-            parsedArgs = self.bot.osuHelpers.parseArgsV2(args=args, customArgs=["user"])
-            username = parsedArgs['user']
-            profile:osuClasses.User = await self.bot.osuAPI.getuser(username, 'string', server=parsedArgs['server'])
-            await self.bot.mongoIO.setOsu(ctx.message.author, profile.user_id, parsedArgs['server'].id)
-            await ctx.send(f"osu! profile succesfully set to {profile.username}")
-
-        except ValueError:
-            await ctx.send("User has not been found!")
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.command(aliases=["mania", "taiko", "ctb"])
@@ -42,34 +38,18 @@ class osuCog(commands.Cog, name='osu!'):
 
         if not user:
             qtype = "id"
-            try:
-                user, serverID = await self.bot.mongoIO.getOsu(ctx.message.author)
-            except Exception:
-                return await ctx.send("Please set your profile!")
+            user, serverID = await self.bot.mongoIO.getOsu(ctx.message.author)
             server = osuClasses.Server.from_id(serverID)
 
         if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
             qtype = "id"
-            mentioned_id = int(re.sub('[^0-9]','', user))
-            mentioned = ctx.guild.get_member(mentioned_id)
-            if mentioned is None: # If member not in cache, fetch from api
-                mentioned = await ctx.guild.fetch_member(mentioned_id)
-            try:
-                user, serverID = await self.bot.mongoIO.getOsu(mentioned)
-            except Exception:
-                return await ctx.send("Please set your profile!")
+            mentioned_id = int(id_rx.sub(r'', user))
+            mentioned = await self.bot.ensure_member(mentioned_id, ctx.guild)
+            user, serverID = await self.bot.mongoIO.getOsu(mentioned)
             server = osuClasses.Server.from_id(serverID)
 
-        if not user:
-            return await ctx.send("Please set your profile!")
-
         mode = osuClasses.Mode.fromCommand(ctx.invoked_with)
-
-        try:
-            user:osuClasses.User = await self.bot.osuAPI.getuser(usr = user, mode = mode, qtype = qtype, server = server)
-
-        except ValueError:
-            return await ctx.send("User has not been found or has not played enough!")
+        user:osuClasses.User = await self.bot.osuAPI.getuser(usr = user, mode = mode, qtype = qtype, server = server)
 
         if (user.playcount is not None) and (user.accuracy is not None):
             result = OsuProfileEmbed(user, mode, self.bot.config.color)
@@ -98,32 +78,18 @@ class osuCog(commands.Cog, name='osu!'):
 
         if not user:
             qtype = "id"
-            try:
-                user, serverID = await self.bot.mongoIO.getOsu(ctx.message.author)
-            except Exception:
-                return await ctx.send("Please set your profile!")
+            user, serverID = await self.bot.mongoIO.getOsu(ctx.message.author)
             server = osuClasses.Server.from_id(serverID)
 
         if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
             qtype = "id"
-            mentioned_id = int(re.sub('[^0-9]','', user))
-            mentioned = ctx.guild.get_member(mentioned_id)
-            if mentioned is None: # If member not in cache, fetch from api
-                mentioned = await ctx.guild.fetch_member(mentioned_id)
-            try:
-                user, serverID = await self.bot.mongoIO.getOsu(mentioned)
-            except Exception:
-                return await ctx.send("Please set your profile!")
+            mentioned_id = int(id_rx.sub(r'', user))
+            mentioned = await self.bot.ensure_member(mentioned_id, ctx.guild)
+            user, serverID = await self.bot.mongoIO.getOsu(mentioned)
             server = osuClasses.Server.from_id(serverID)
-        if not user:
-            return await ctx.send("Please set your profile!")
 
-        try:
-            profile:osuClasses.User = await self.bot.osuAPI.getuser(user, qtype, mode, server)
-            recent_score:osuClasses.RecentScore = (await self.bot.osuAPI.getrecent(profile, limit))[0]
-
-        except ValueError:
-            return await ctx.send("User has not been found or has no recent plays!")
+        profile:osuClasses.User = await self.bot.osuAPI.getuser(user, qtype, mode, server)
+        recent_score:osuClasses.RecentScore = (await self.bot.osuAPI.getrecent(profile, limit))[0]
 
         if self.bot.config.redis is True:
             redisIO.setValue(ctx.message.channel.id, recent_score.beatmap_id)
@@ -165,32 +131,18 @@ class osuCog(commands.Cog, name='osu!'):
 
         if not user:
             qtype = "id"
-            try:
-                user, serverID = await self.bot.mongoIO.getOsu(ctx.message.author)
-            except Exception:
-                return await ctx.send("Please set your profile!")
+            user, serverID = await self.bot.mongoIO.getOsu(ctx.message.author)
             server = osuClasses.Server.from_id(serverID)
 
         if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
             qtype = "id"
-            mentioned_id = int(re.sub('[^0-9]','', user))
-            mentioned = ctx.guild.get_member(mentioned_id)
-            if mentioned is None: # If member not in cache, fetch from api
-                mentioned = await ctx.guild.fetch_member(mentioned_id)
-            try:
-                user, serverID = await self.bot.mongoIO.getOsu(mentioned)
-            except Exception:
-                return await ctx.send("Please set your profile!")
+            mentioned_id = int(id_rx.sub(r'', user))
+            mentioned = await self.bot.ensure_member(mentioned_id, ctx.guild)
+            user, serverID = await self.bot.mongoIO.getOsu(mentioned)
             server = osuClasses.Server.from_id(serverID)
 
-        if not user:
-            return await ctx.send("Please set your profile!")
-
-        try:
-            profile:osuClasses.User = await self.bot.osuAPI.getuser(user, qtype, mode, server)
-            tops:List[osuClasses.RecentScore] = await self.bot.osuAPI.getusrtop(profile, limit)
-        except ValueError:
-            return await ctx.send("User has not been found or has no plays!")
+        profile:osuClasses.User = await self.bot.osuAPI.getuser(user, qtype, mode, server)
+        tops:List[osuClasses.RecentScore] = await self.bot.osuAPI.getusrtop(profile, limit)
 
         if parsedArgs:
             if parsedArgs['recent']:
@@ -256,22 +208,14 @@ class osuCog(commands.Cog, name='osu!'):
 
         if not user:
             qtype = "id"
-            try:
-                user, serverID = await self.bot.mongoIO.getOsu(ctx.message.author)
-            except Exception:
-                return await ctx.send("Please set your profile!")
+            user, serverID = await self.bot.mongoIO.getOsu(ctx.message.author)
             server = osuClasses.Server.from_id(serverID)
 
         if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
             qtype = "id"
-            mentioned_id = int(re.sub('[^0-9]','', user))
-            mentioned = ctx.guild.get_member(mentioned_id)
-            if mentioned is None: # If member not in cache, fetch from api
-                mentioned = await ctx.guild.fetch_member(mentioned_id)
-            try:
-                user, serverID = await self.bot.mongoIO.getOsu(mentioned)
-            except Exception:
-                return await ctx.send("Please set your profile!")
+            mentioned_id = int(id_rx.sub(r'', user))
+            mentioned = await self.bot.ensure_member(mentioned_id, ctx.guild)
+            user, serverID = await self.bot.mongoIO.getOsu(mentioned)
             server = osuClasses.Server.from_id(serverID)
 
         if 'c' == ctx.invoked_with or 'compare' == ctx.invoked_with and beatmap is None:
@@ -284,12 +228,8 @@ class osuCog(commands.Cog, name='osu!'):
         if beatmap is None:
             return
 
-        try:
-            profile:osuClasses.User = await self.bot.osuAPI.getuser(user, qtype, mode, server)
-            tops:List[osuClasses.BeatmapScore] = await self.bot.osuAPI.getusrscores(profile, beatmap.beatmap_id, limit)
-
-        except ValueError:
-            return await ctx.send("User has not been found or has no plays on the beatmap!")
+        profile:osuClasses.User = await self.bot.osuAPI.getuser(user, qtype, mode, server)
+        tops:List[osuClasses.BeatmapScore] = await self.bot.osuAPI.getusrscores(profile, beatmap.beatmap_id, limit)
 
         top:osuClasses.Score
         for _, top in enumerate(tops):
@@ -310,14 +250,10 @@ class osuCog(commands.Cog, name='osu!'):
         args = self.bot.osuHelpers.parseArgsV2(args=args, customArgs=["mods", "beatmap"])
         mode = args["mode"]
 
-        try:
-            if args["beatmap"]:
-                beatmap:osuClasses.Beatmap = await self.bot.osuHelpers.getBeatmapFromText(args["beatmap"])
-            else:
-                beatmap:osuClasses.Beatmap = await self.bot.osuHelpers.getBeatmapFromHistory(ctx)
-
-        except ValueError:
-            return await ctx.send("User has not been found or has no plays on the beatmap!")
+        if args["beatmap"]:
+            beatmap:osuClasses.Beatmap = await self.bot.osuHelpers.getBeatmapFromText(args["beatmap"])
+        else:
+            beatmap:osuClasses.Beatmap = await self.bot.osuHelpers.getBeatmapFromHistory(ctx)
 
         if beatmap is None:
             await ctx.send("Failed to find any maps")

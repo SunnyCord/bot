@@ -3,7 +3,7 @@ import asyncio, sys, traceback, os, discord, pyfiglet
 
 bot = Sunny (
         description='Sunny Bot', activity=discord.Streaming (
-                                name='Nice Aesthetics', type=1, url='https://www.twitch.tv/niceaesthetic'
+                                name='Nice Aesthetics', type=1, url='https://www.twitch.tv/niceaesth'
                             )
     )
 
@@ -24,7 +24,7 @@ async def on_ready():
         print(f'Successfully logged in and booted...!')
 
         #Load Modules
-        module_folders = ['listeners', 'cogs']
+        module_folders = ['listeners', 'cogs', 'tasks']
         for module in module_folders:
             for extension in list_module(module):
                 try:
