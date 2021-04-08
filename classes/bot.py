@@ -12,15 +12,17 @@ class Sunny(commands.AutoShardedBot):
     @staticmethod
     async def __get_prefix(self, message):
         """A callable Prefix for our bot. This also has the ability to ignore certain messages by passing an empty string."""
-
-        if await self.mongoIO.isBlacklisted(message.author) or not message.guild:
-            return ' ' # Ignore if user is blacklisted or message is not in a guild
-
         guildPref = await self.mongoIO.getSetting(message.guild, 'prefix')
         result = self.config.command_prefixes.copy()
         if guildPref is not None:
             result += [guildPref]
         return commands.when_mentioned_or(*result)(self, message)
+
+    @staticmethod
+    async def ensure_member(query, guild: discord.Guild):
+        if (member := guild.get_member(query)) is None:
+            member = await guild.fetch_member(query)
+        return member
 
     def __init__(self, **kwargs):
         super().__init__(
@@ -35,15 +37,18 @@ class Sunny(commands.AutoShardedBot):
         self.osuHelpers = osuHelper(self)
         self.ppAPI = ppAPI(self.config.ppAPI["URL"], self.config.ppAPI["secret"])
 
-    async def on_message(self, msg): # Ignore messages
-        if not self.is_ready() or msg.author.bot:
+    async def on_message(self, msg):
+        ignore = not msg.guild
+        ignore |= msg.author.bot
+        ignore |= not self.is_ready()
+        ignore |= await self.mongoIO.isBlacklisted(msg.author)
+        if ignore:
            return
         await self.process_commands(msg)
 
     async def is_owner(self, user: discord.User):
         if user.id in self.config.owners:
             return True
-
         # Else fall back to the original
         return await super().is_owner(user)
 

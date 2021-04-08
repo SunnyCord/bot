@@ -36,17 +36,9 @@ class osuHelper():
             server = osu.Server.RIPPLE
             args.pop(args.index('-ripple'))
 
-        if '-akatsukirx' in args:
-            server = osu.Server.AKATSUKIRX
-            args.pop(args.index('-akatsukirx'))
-
         if '-akatsuki' in args:
             server = osu.Server.AKATSUKI
             args.pop(args.index('-akatsuki'))
-
-        if '-enjuu' in args:
-            server = osu.Server.ENJUU
-            args.pop(args.index('-enjuu'))
 
         if '-r' in args:
             recent = True
@@ -109,17 +101,9 @@ class osuHelper():
             server = 'ripple'
             args.pop(args.index('-ripple'))
 
-        if '-akatsukirx' in args:
-            server = 'akatsukirx'
-            args.pop(args.index('-akatsukirx'))
-
         if '-akatsuki' in args:
             server = 'akatsuki'
             args.pop(args.index('-akatsuki'))
-
-        if '-enjuu' in args:
-            server = 'enjuu'
-            args.pop(args.index('-enjuu'))
 
         if '-r' in args and '-r' in validArgs:
             recentList = True

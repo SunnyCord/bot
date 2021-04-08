@@ -3,7 +3,7 @@ import asyncio, sys, traceback, os, discord, pyfiglet
 
 bot = Sunny (
         description='Sunny Bot', activity=discord.Streaming (
-                                name='Nice Aesthetics', type=1, url='https://www.twitch.tv/niceaesthetic'
+                                name='Nice Aesthetics', type=1, url='https://www.twitch.tv/niceaesth'
                             )
     )
 

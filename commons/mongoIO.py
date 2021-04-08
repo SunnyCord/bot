@@ -1,4 +1,5 @@
 import discord
+import classes.exceptions as Exceptions
 
 class mongoIO():
 
@@ -22,12 +23,12 @@ class mongoIO():
 		return exists is not None
 
 	async def getOsu(self, member: discord.Member):
-		a = await self.db.users.find_one( {"id": {"$eq": member.id} } )
-		if a is None:
-			return None
-		if "preferredServer" not in a:
-			a["preferredServer"] = 0
-		return a["osu"], a["preferredServer"]
+		databaseUser = await self.db.users.find_one( {"id": {"$eq": member.id} } )
+		if databaseUser is None:
+			raise Exceptions.DatabaseMissingError("osu")
+		if "preferredServer" not in databaseUser:
+			databaseUser["preferredServer"] = 0
+		return databaseUser["osu"], databaseUser["preferredServer"]
 
 	async def setOsu(self, member: discord.Member, osuID: int, osuServer: int = 0):
 		if not await self.userExists(member):
@@ -73,10 +74,10 @@ class mongoIO():
 			)
 
 	async def isBlacklisted(self, member: discord.Member):
-		a = await self.db.users.find_one( {"id": {"$eq": member.id} } )
-		if a is None:
+		databaseUser = await self.db.users.find_one( {"id": {"$eq": member.id} } )
+		if databaseUser is None:
 			return False
-		return a["blacklisted"]
+		return databaseUser["blacklisted"]
 
 	async def addServer(self, server: discord.Guild, prefix: str = None):
 		await self.db.settings.insert_one(
@@ -91,10 +92,10 @@ class mongoIO():
 		return exists is not None
 
 	async def getSetting(self, server: discord.Guild, setting: str):
-		a = await self.db.settings.find_one( {"id": {"$eq": server.id} } )
-		if a is None:
+		databaseGuild = await self.db.settings.find_one( {"id": {"$eq": server.id} } )
+		if databaseGuild is None:
 			return None
-		return a[setting]
+		return databaseGuild[setting]
 
 	async def setPrefix(self, server: discord.Guild, prefix: str):
 		if not await self.serverExists(server):

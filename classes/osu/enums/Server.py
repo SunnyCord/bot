@@ -37,19 +37,7 @@ class Server(Enum):
         'https://akatsuki.pw/api/get_scores'
     )
 
-    AKATSUKIRX = (3, 'Akatsuki Relax', 'https://i.imgur.com/ic7kEkO.png',
-        'http://akatsuki.pw/api/v1/users/rxfull',
-        'https://osu.ppy.sh/api/get_beatmaps',
-        'https://akatsuki.pw/api/v1/users/scores/best',
-        'https://akatsuki.pw/api/v1/users/scores/recent',
-        'https://osu.ppy.sh/osu/',
-        'https://a.akatsuki.pw/',
-        'https://akatsuki.pw/rx/u/',
-        'https://akatsuki.pw/b/',
-        'https://akatsuki.pw/api/get_scores'
-    )
-
-    ENJUU = (4, 'Enjuu', 'https://i.imgur.com/OO6MrW7.png',
+    ENJUU = (3, 'Enjuu', 'https://i.imgur.com/OO6MrW7.png',
         'https://enjuu.click/api/get_user',
         'https://osu.ppy.sh/api/get_beatmaps',
         'https://enjuu.click/api/get_user_best',
@@ -59,10 +47,6 @@ class Server(Enum):
         'https://enjuu.click/u/',
         'https://enjuu.click/b/',
         'https://enjuu.click/api/get_scores')
-
-    #TODO: Add gatari API links
-    GATARI = (5, 'Gatari' ,'https://i.imgur.com/IAkYdrI.png',
-        'https://api.gatari.pw/user/stats', '', '', '', '', '', '', '', '')
 
     def __init__(self, id:int, name_full:str, icon:str,
             api_getuser:str,

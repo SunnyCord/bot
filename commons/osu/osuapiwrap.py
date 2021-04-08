@@ -3,71 +3,12 @@ from io import StringIO
 import classes.osu as osu
 import pyttanko as pyt
 from typing import List
+from classes.exceptions import OsuAPIError
 
 class osuAPI():
 
     def __init__(self, token):
         self.__token = token
-
-    @staticmethod
-    def __convAkaRXProfile(res, mode = 0): #Converts akatsuki!rx fullrx API response to a bancho-like one
-            modes = {0: "std", 1: "taiko", 2: "ctb", 3: "mania"}
-            if res['code'] != 200:
-                raise ValueError("Invalid query or API down.")
-            try:
-                return [
-                    {
-                        "user_id": res['id'],
-                        "username": res['username'],
-                        "join_date": res['registered_on'],
-                        "count300": 0,
-                        "count100": 0,
-                        "count50": 0,
-                        "playcount": res[modes[mode]]['playcount'],
-                        "ranked_score": res[modes[mode]]['ranked_score'],
-                        "total_score": res[modes[mode]]['total_score'],
-                        "pp_rank": res[modes[mode]]['global_leaderboard_rank'],
-                        "level": res[modes[mode]]['level'],
-                        "pp_raw": res[modes[mode]]['pp'],
-                        "accuracy": res[modes[mode]]['accuracy'],
-                        "count_rank_ss": 0,
-                        "count_rank_ssh": 0,
-                        "count_rank_s": 0,
-                        "count_rank_sh": 0,
-                        "count_rank_a": 0,
-                        "country": res['country'],
-                        "total_seconds_played": res[modes[mode]]['play_time'],
-                        "pp_country_rank": res[modes[mode]]['country_leaderboard_rank'],
-                        "events": []
-                    }
-                ]
-            except KeyError:
-                return [
-                    {
-                        "user_id": res['id'],
-                        "username": res['username'],
-                        "join_date": res['registered_on'],
-                        "count300": 0,
-                        "count100": 0,
-                        "count50": 0,
-                        "playcount": res[modes[mode]]['playcount'],
-                        "ranked_score": res[modes[mode]]['ranked_score'],
-                        "total_score": res[modes[mode]]['total_score'],
-                        "pp_rank": res[modes[mode]]['global_leaderboard_rank'],
-                        "level": res[modes[mode]]['level'],
-                        "pp_raw": res[modes[mode]]['pp'],
-                        "accuracy": res[modes[mode]]['accuracy'],
-                        "count_rank_ss": 0,
-                        "count_rank_ssh": 0,
-                        "count_rank_s": 0,
-                        "count_rank_sh": 0,
-                        "count_rank_a": 0,
-                        "country": res['country'],
-                        "total_seconds_played": res[modes[mode]]['total_playtime'],
-                        "pp_country_rank": res[modes[mode]]['country_leaderboard_rank'],
-                        "events": []
-                    }
-                ]
 
     async def getuser(
             self,
@@ -85,26 +26,18 @@ class osuAPI():
 
             if server is not osu.Server.BANCHO:
                 params.pop('k')
-                if server is osu.Server.AKATSUKIRX:
-                    if qtype == 'id':
-                        params['id'] = usr
-                    else:
-                        params['name'] = usr
 
             try:
                 async with cs.get( server.api_getuser, params = params ) as r:
-                    res = await r.json()
-                    if res == []:
-                        raise ValueError("Invalid query or API down.")
+                    if (res := await r.json()) == []:
+                        raise ValueError("Response is empty.")
                     else:
-                        if server is osu.Server.AKATSUKIRX:
-                            res = self.__convAkaRXProfile(res)
                         if server is not osu.Server.BANCHO:
                             res[0]['total_seconds_played'] = 0
                         return osu.User(res[0], server, mode)
 
             except Exception:
-                raise ValueError("Invalid query or API down.")
+                raise OsuAPIError(server, "get_user", "Invalid query or API down.")
 
     async def getbmap(
             self,
@@ -114,7 +47,6 @@ class osuAPI():
             server:osu.Server=osu.Server.BANCHO,
             mods:osu.Mods=osu.Mods(0),
             limit:int=1) -> osu.Beatmap:
-        # mods = __cleanMods(kwargs.pop('mods', 0), mode)
         async with aiohttp.ClientSession() as cs:
             params = {
                 'k': self.__token,
@@ -131,14 +63,13 @@ class osuAPI():
 
             try:
                 async with cs.get( server.api_getbmap, params=params ) as r:
-                        res = await r.json()
-                        if res == []:
-                            raise ValueError("Invalid query or API down.")
-                        else:
-                            return osu.Beatmap(res[0], server)
+                    if (res := await r.json()) == []:
+                        raise ValueError("Response is empty.")
+                    else:
+                        return osu.Beatmap(res[0], server)
 
             except Exception:
-                raise ValueError("Invalid query or API down.")
+                raise OsuAPIError(server, "get_beatmap", "Invalid query or API down.")
 
     async def getbmaposu(
             self,
@@ -164,31 +95,19 @@ class osuAPI():
 
             if user.server is not osu.Server.BANCHO:
                 params.pop('k')
-                if user.server is osu.Server.AKATSUKIRX:
-                    params['rx'] = 1
-                    if params['type'] == 'id':
-                        params['id'] = user.user_id
-                    else:
-                        params['name'] = user.username
 
-            try:
-                async with cs.get( user.server.api_getrecent, params=params ) as r:
-                    res = await r.json()
-                    if res == []:
-                        raise ValueError("Invalid query or API down.")
+            #try:
+            async with cs.get( user.server.api_getrecent, params=params ) as r:
+                if (res := await r.json()) == []:
+                    raise ValueError("Response is empty.")
+                else:
+                    return list(map(lambda recent: osu.RecentScore(recent, user.server, user.mode), res))
 
-                    else:
-                        if user.server is osu.Server.AKATSUKIRX:
-                            res = res['scores']
-                        return list(map(lambda recent: osu.RecentScore(recent, user.server, user.mode), res))
+            #except Exception:
+            #    raise OsuAPIError(user.server, "get_recent","Invalid query or API down.")
 
-            except Exception:
-                raise ValueError("Invalid query or API down.")
+    async def getusrtop(self, user:osu.User, limit:int = 1) -> List[osu.RecentScore]:
 
-    async def getusrtop(
-            self,
-            user:osu.User,
-            limit:int = 1) -> List[osu.RecentScore]:
         async with aiohttp.ClientSession() as cs:
             params = {
                 'k': self.__token,
@@ -200,33 +119,20 @@ class osuAPI():
 
             if user.server is not osu.Server.BANCHO:
                 params.pop('k')
-                if user.server is osu.Server.AKATSUKIRX:
-                    params['rx'] = 1
-                    if params['type'] == 'id':
-                        params['id'] = user.user_id
-                    else:
-                        params['name'] = user.username
 
             try:
                 async with cs.get( user.server.api_getusrtop, params=params ) as r:
-                    res = await r.json()
-                    if res == []:
-                        raise ValueError("Invalid query or API down.")
+                    if (res := await r.json()) == []:
+                        raise ValueError("Response is empty.")
                     else:
-                        if user.server is osu.Server.AKATSUKIRX:
-                            res = res['scores']
                         return list(map(lambda top: osu.RecentScore(top), res))
 
             except Exception:
-                raise ValueError("Invalid query or API down.")
+                raise OsuAPIError(user.server, "get_user_top","Invalid query or API down.")
 
 
-    async def getusrscores(
-            self,
-            user:osu.User,
-            beatmap_id:int,
-            limit:int = 1
-        ) -> List[osu.BeatmapScore]:
+    async def getusrscores(self, user:osu.User, beatmap_id:int, limit:int = 1) -> List[osu.BeatmapScore]:
+
         async with aiohttp.ClientSession() as cs:
             params = {
                 'k': self.__token,
@@ -238,18 +144,11 @@ class osuAPI():
 
             if user.server is not osu.Server.BANCHO:
                 params.pop('k')
-                if user.server is osu.Server.AKATSUKIRX:
-                    params['rx'] = 1
-                    if params['type'] == 'id':
-                        params['id'] = user.user_id
-                    else:
-                        params['name'] = user.username
 
             try:
                 async with cs.get( user.server.api_getusrscores, params=params ) as r:
-                    res = await r.json()
-                    if res == []:
-                        raise ValueError("Invalid query or API down.")
+                    if (res := await r.json()) == []:
+                        raise ValueError("Response is empty.")
                     else:
                         if user.server is not osu.Server.BANCHO:
                             try:
@@ -259,5 +158,5 @@ class osuAPI():
                         return list(map(lambda score: osu.BeatmapScore(score, beatmap_id), res[:limit]))
 
             except Exception:
-                raise ValueError("Invalid query or API down.")
+                raise OsuAPIError(user.server, "get_user_scores","Invalid query or API down.")
 

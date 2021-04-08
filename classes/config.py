@@ -28,8 +28,7 @@ class Config():
             with open(path, "r") as configJSON:
                 configData = configJSON.read()
 
-            #try:
-                # Parse JSON file
+            # Parse JSON file
             configDict = json.loads(configData)
             selectedConfig = configDict["configs"][configDict["select"]]
             configJSON.close()
@@ -46,6 +45,3 @@ class Config():
                 str(selectedConfig["splashArt"]),
                 int(selectedConfig["color"], 16)
             )
-
-            #except Exception:
-            #    raise ValueError("Misformatted JSON provided!")
