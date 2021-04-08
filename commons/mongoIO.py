@@ -1,4 +1,6 @@
 import discord
+import datetime
+import classes.exceptions as Exceptions
 
 class mongoIO():
 
@@ -18,16 +20,14 @@ class mongoIO():
 		)
 
 	async def userExists(self, member:discord.Member):
-		exists = await self.db.users.find_one( {"id": {"$eq": member.id} } )
-		return exists is not None
+		return ( await self.db.users.find_one( {"id": {"$eq": member.id} } ) ) is not None
 
 	async def getOsu(self, member: discord.Member):
-		a = await self.db.users.find_one( {"id": {"$eq": member.id} } )
-		if a is None:
-			return None
-		if "preferredServer" not in a:
-			a["preferredServer"] = 0
-		return a["osu"], a["preferredServer"]
+		if ( databaseUser := await self.db.users.find_one( {"id": {"$eq": member.id} } ) ) is None:
+			raise Exceptions.DatabaseMissingError("osu")
+		if "preferredServer" not in databaseUser:
+			databaseUser["preferredServer"] = 0
+		return databaseUser["osu"], int(databaseUser["preferredServer"])
 
 	async def setOsu(self, member: discord.Member, osuID: int, osuServer: int = 0):
 		if not await self.userExists(member):
@@ -72,11 +72,28 @@ class mongoIO():
 				}
 			)
 
+	async def muteUser(self, member: discord.Member, guild: discord.Guild, ends):
+		await self.db.mutes.update_one(
+			{"memberID": member.id, "guildID": guild.id},
+			{
+				"$set": {
+					"memberID": member.id,
+					"guildID": guild.id,
+					"ends":  ends
+				}
+			}, upsert=True
+		)
+
+	async def unmuteUser(self, member: discord.Member, guild: discord.Guild):
+		await self.db.mutes.delete_many({"memberID": member.id, "guildID": guild.id})
+
+	async def getExpiredMutes(self):
+		return await self.db.mutes.find({ "ends": {"$lt": datetime.datetime.utcnow()} }).to_list(None)
+
 	async def isBlacklisted(self, member: discord.Member):
-		a = await self.db.users.find_one( {"id": {"$eq": member.id} } )
-		if a is None:
+		if ( databaseUser := await self.db.users.find_one({"id": {"$eq": member.id} }) ) is None:
 			return False
-		return a["blacklisted"]
+		return databaseUser["blacklisted"]
 
 	async def addServer(self, server: discord.Guild, prefix: str = None):
 		await self.db.settings.insert_one(
@@ -87,14 +104,12 @@ class mongoIO():
 		)
 
 	async def serverExists(self, server: discord.Guild):
-		exists = await self.db.settings.find_one( {"id": {"$eq": server.id} } )
-		return exists is not None
+		return ( await self.db.settings.find_one( {"id": {"$eq": server.id} } ) is not None )
 
 	async def getSetting(self, server: discord.Guild, setting: str):
-		a = await self.db.settings.find_one( {"id": {"$eq": server.id} } )
-		if a is None:
+		if ( databaseGuild := await self.db.settings.find_one( {"id": {"$eq": server.id} } ) ) is None:
 			return None
-		return a[setting]
+		return databaseGuild[setting]
 
 	async def setPrefix(self, server: discord.Guild, prefix: str):
 		if not await self.serverExists(server):
@@ -112,4 +127,5 @@ class mongoIO():
 
 	async def wipe(self):
 		await self.db.users.delete_many({})
+		await self.db.mutes.delete_many({})
 		await self.db.settings.delete_many({})

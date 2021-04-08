@@ -1,4 +1,4 @@
-> # ☀️Sunny☀️ ![Python](https://img.shields.io/badge/Python-3.6%2B-brightgreen.svg) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/5e417c4aec7b40efb8b82ae362e7ac77)](https://www.codacy.com/app/NiceAesth/Sunny?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=NiceAesth/Sunny&amp;utm_campaign=Badge_Grade)
+> # ☀️Sunny☀️ ![Python](https://img.shields.io/badge/Python-3.8%2B-brightgreen.svg) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/5e417c4aec7b40efb8b82ae362e7ac77)](https://www.codacy.com/app/NiceAesth/Sunny?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=NiceAesth/Sunny&amp;utm_campaign=Badge_Grade)
 > ## Sunny is a Discord music / moderation / osu! bot. I will not provide support to anyone attempting to self-host, but you are free to do so. If you wish to add this bot to your own server, click [here](https://discord.com/oauth2/authorize?client_id=376679719044907019&scope=bot)
 
 
@@ -12,9 +12,22 @@
 > -   Redis
 > -   osu! API Key (osu! Commands)
 
-### Changelog *(as of 12/03/20)*
+### Changelog *(as of 08/04/21)*
 ****
 
+> `v1.5.0S080421` [( abcde )](https://github.com/NiceAesth/Sunny/commit/)
+> -   Add proper mute command (with task for unmute)
+> -   Rewrite large part of osu! code
+> -   Remove Enjuu, Akatsuki!RX
+> -   Create classes for custom exceptions
+> -   Handle exceptions properly
+> -   Remove try/catch spam
+> -   Add ensure_member function (ensures that a member object is obtained from cache or API)
+> -   Add required intents
+> -   Fixed image commands
+> -   Improve regex performance
+> -   Update music cog
+>
 > `v1.4.0S120320` [( ddcd60 )](https://github.com/NiceAesth/Sunny/commit/ddcd607e6c60b99f7719f1ea61bb263676d6f1f1)
 > -   Add beatmap listener
 > -   Rewrite large part of osu! code

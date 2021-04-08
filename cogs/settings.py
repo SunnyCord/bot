@@ -16,13 +16,13 @@ class Settings(commands.Cog):
     async def prefix(self, ctx, prefix: str):
         """Sets the server-wide prefix."""
         if prefix.lower() in disableKeywords:
-            await self.bot.mongoIO.setPrefix(ctx.message.guild, None)
+            await self.bot.mongoIO.setPrefix(ctx.guild, None)
             prefix="turned off"
         else:
             if len(prefix) > 6:
                 await ctx.send("Prefix longer than 6 characters. Shortening")
                 prefix = prefix[:6]
-            await self.bot.mongoIO.setPrefix(ctx.message.guild, prefix)
+            await self.bot.mongoIO.setPrefix(ctx.guild, prefix)
         embed=discord.Embed(title="Setting updated", description=f'Server-wide prefix is now {prefix}', color=self.bot.config.color, timestamp=datetime.utcnow())
         embed.set_author(name=ctx.message.author.name, icon_url=ctx.message.author.avatar_url)
         embed.set_thumbnail(url="https://i.imgur.com/ubhUTNH.gif")
