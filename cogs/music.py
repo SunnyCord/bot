@@ -1,6 +1,5 @@
 # This cog is based on https://github.com/Devoxin/Lavalink.py/blob/master/examples/music.py
 
-import math
 import discord
 import lavalink
 from discord.ext import commands

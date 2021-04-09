@@ -15,7 +15,7 @@
 ### Changelog *(as of 08/04/21)*
 ****
 
-> `v1.5.0S080421` [( abcde )](https://github.com/NiceAesth/Sunny/commit/)
+> `v1.5.0S080421` [( b89d2a )](https://github.com/NiceAesth/Sunny/commit/b89d2a76cbf6ba6f87007fdc54e51659dcf3107c)
 > -   Add proper mute command (with task for unmute)
 > -   Rewrite large part of osu! code
 > -   Remove Enjuu, Akatsuki!RX
