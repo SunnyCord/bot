@@ -54,10 +54,9 @@ class Settings(commands.Cog):
         """Blacklists a user from the bot. (Owner-only)"""
         if not await self.bot.mongoIO.userExists(user):
             await self.bot.mongoIO.addUser(user, True)
-            await ctx.send("User blacklisted.")
         else:
             await self.bot.mongoIO.blacklistUser(user)
-            await ctx.send("User blacklisted.")
+        await ctx.send("User blacklisted.")
 
     @commands.is_owner()
     @commands.command(hidden=True)

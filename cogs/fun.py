@@ -18,7 +18,7 @@ class Fun(commands.Cog):
         await ctx.message.delete()
         embed=discord.Embed(title="Poll:", description=args, color=self.bot.config.color)
         embed.set_author(name=ctx.message.author.name, icon_url=ctx.message.author.avatar_url)
-        embed.set_thumbnail(url=random_line('pollimages'))
+        embed.set_thumbnail(url=random_line('commons/pollimages'))
         message = await ctx.send(embed=embed)
         await message.add_reaction('👍')
         await message.add_reaction('👎')
