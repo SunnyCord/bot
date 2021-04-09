@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 import aiohttp
+from classes.enums.animals import Animal
+from commons import helpers
 
 class Image(commands.Cog):
     """Various image-related commands."""
@@ -8,98 +10,19 @@ class Image(commands.Cog):
         self.bot = bot
 
     @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.command()
-    async def cat(self, ctx):
-        """Sends a random cat image and fact."""
+    @commands.command(aliases=Animal.list())
+    @helpers.docstring_parameter(' '.join(Animal.list()))
+    async def animal(self, ctx):
+        """Sends a random animal image and fact.\nChoose one via the following aliases:\n``{0}``"""
+        if ctx.invoked_with == "animal":
+            return
+        currAnimal = Animal.from_name(ctx.invoked_with)
         async with aiohttp.ClientSession() as cs:
-            async with cs.get('https://some-random-api.ml/img/cat') as r:
+            async with cs.get(f'https://some-random-api.ml/animal/{currAnimal.name}') as r:
                 res = await r.json()
-                imgUrl = res['link']
-            async with cs.get('https://some-random-api.ml/facts/cat') as r:
-                res = await r.json()
+                imgUrl = res['image']
                 fact = res['fact']
-        embed = discord.Embed(title='🐈', description=f"**Cat Fact:**\n{fact}", color=self.bot.config.color).set_image(url=imgUrl)
-        await ctx.send(embed=embed)
-
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.command()
-    async def dog(self, ctx):
-        """Sends a random dog image and fact."""
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get('https://some-random-api.ml/img/dog') as r:
-                res = await r.json()
-                imgUrl = res['link']
-            async with cs.get('https://some-random-api.ml/facts/dog') as r:
-                res = await r.json()
-                fact = res['fact']
-        embed = discord.Embed(title='🐕', description=f"**Dog Fact:**\n{fact}", color=self.bot.config.color).set_image(url=imgUrl)
-        await ctx.send(embed=embed)
-
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.command()
-    async def fox(self, ctx):
-        """Sends a random fox image and fact."""
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get('https://some-random-api.ml/img/fox') as r:
-                res = await r.json()
-                imgUrl = res['link']
-            async with cs.get('https://some-random-api.ml/facts/fox') as r:
-                res = await r.json()
-                fact = res['fact']
-        embed = discord.Embed(title='🦊', description=f"**Fox Fact:**\n{fact}", color=self.bot.config.color).set_image(url=imgUrl)
-        await ctx.send(embed=embed)
-
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.command()
-    async def bird(self, ctx):
-        """Sends a random bird image and fact."""
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get('https://some-random-api.ml/img/birb') as r:
-                res = await r.json()
-                imgUrl = res['link']
-            async with cs.get('https://some-random-api.ml/facts/bird') as r:
-                res = await r.json()
-                fact = res['fact']
-        embed = discord.Embed(title='🐦', description=f"**Bird Fact:**\n{fact}", color=self.bot.config.color).set_image(url=imgUrl)
-        await ctx.send(embed=embed)
-
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.command()
-    async def duck(self, ctx):
-        """Sends a random duck image."""
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get('https://random-d.uk/api/v2/random') as r:
-                res = await r.json()
-                imgUrl = res['url']
-        embed = discord.Embed(title='🦆', color=self.bot.config.color).set_image(url=imgUrl)
-        await ctx.send(embed=embed)
-
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.command()
-    async def panda(self, ctx):
-        """Sends a random panda image and fact."""
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get('https://some-random-api.ml/img/panda') as r:
-                res = await r.json()
-                imgUrl = res['link']
-            async with cs.get('https://some-random-api.ml/facts/panda') as r:
-                res = await r.json()
-                fact = res['fact']
-        embed = discord.Embed(title='🐼', description=f"**Panda Fact:**\n{fact}", color=self.bot.config.color).set_image(url=imgUrl)
-        await ctx.send(embed=embed)
-
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.command()
-    async def koala(self, ctx):
-        """Sends a random koala image and fact."""
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get('https://some-random-api.ml/img/koala') as r:
-                res = await r.json()
-                imgUrl = res['link']
-            async with cs.get('https://some-random-api.ml/facts/koala') as r:
-                res = await r.json()
-                fact = res['fact']
-        embed = discord.Embed(title='🐨', description=f"**Koala Fact:**\n{fact}", color=self.bot.config.color).set_image(url=imgUrl)
+        embed = discord.Embed(title=currAnimal.icon, description=f"**{currAnimal.display_name} Fact:**\n{fact}", color=self.bot.config.color).set_image(url=imgUrl)
         await ctx.send(embed=embed)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
