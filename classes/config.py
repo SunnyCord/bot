@@ -5,7 +5,7 @@ from typing import List, Dict
 class Config():
 
     def __init__(
-        self, redis: bool, mongo: Dict, lavalink: Dict, sentry: str, command_prefixes: List, token: str,
+        self, redis: bool, mongo: Dict, lavalink: List[Dict], sentry: str, command_prefixes: List, token: str,
         osuAPI:str, ppAPI: Dict, owners:List[int], splashArt: str, color: int
     ):
         self.redis = redis
@@ -35,7 +35,7 @@ class Config():
             return self (
                 configDict['redis'],
                 selectedConfig["mongo"],
-                selectedConfig["lavalink"],
+                list(selectedConfig["lavalink"]),
                 selectedConfig["sentry"],
                 selectedConfig["command_prefixes"],
                 str(selectedConfig["token"]),

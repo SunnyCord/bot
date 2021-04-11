@@ -27,7 +27,7 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):
         elif isinstance(error, commands.CommandOnCooldown):
             return await ctx.send("Slow down! You are on a %.2fs cooldown." % error.retry_after)
 
-        if isinstance(error, commands.CommandInvokeError):
+        elif isinstance(error, commands.CommandInvokeError):
             await ctx.send(error.original)
 
         elif isinstance(error, Exceptions.OsuAPIError):
@@ -49,6 +49,9 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):
                 return await ctx.send("Please set your profile!")
             else:
                 return await ctx.send("Unknown database error.")
+
+        elif isinstance(error, Exceptions.MusicPlayerError):
+            return await ctx.send(error)
 
         exc = f'{type(error).__name__}'
         embed = discord.Embed(title="Oh no! An error has occured", color=discord.Color.red())

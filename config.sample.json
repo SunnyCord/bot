@@ -9,11 +9,15 @@
                 "database": "sunny",
                 "timeout": 10000
             },
-            "lavalink": {
-                "ip": "",
-                "password": "",
-                "port": 8080
-            },
+            "lavalink": [
+                {
+                    "ip": "127.0.0.1",
+                    "password": "",
+                    "port": 8080,
+                    "region": "eu",
+                    "name": "default-node"
+                }
+            ],
             "sentry": "",
             "command_prefixes": ["s."],
             "color": "0xd74613",
