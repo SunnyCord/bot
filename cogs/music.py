@@ -71,8 +71,7 @@ class Music(commands.Cog):
                 event.player.delete("currentTrackData")
                 return
 
-            if (cleanTitle := track_title_rx.findall(event.track.title)) == []:
-                cleanTitle = event.track.title
+            cleanTitle = track_title_rx.sub("", event.track.title)
 
             async with aiohttp.ClientSession() as cs:
                 async with cs.get('https://some-random-api.ml/lyrics', params={'title': cleanTitle}) as r:
@@ -190,6 +189,7 @@ class Music(commands.Cog):
 
         if (currentTrackData := player.fetch("currentTrackData")) != None:
             embed.set_thumbnail(url=currentTrackData["thumbnail"]["genius"])
+            embed.description += f"\n[LYRICS]({currentTrackData['links']['genius']}) | [ARTIST](https://genius.com/artists/{currentTrackData['author'].replace(' ', '%20')})"
 
         await ctx.send(embed=embed)
 
@@ -217,19 +217,19 @@ class Music(commands.Cog):
         embed.set_footer(text=f'Viewing page {page}/{pages}')
         await ctx.send(embed=embed)
 
-    @commands.command()
-    async def lyrics(self, ctx):
-        """ Shows the lyrics for the currently playing track. """
-        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
-
-        if (currentTrackData := player.fetch("currentTrackData")) is None:
-            return await ctx.send("Unable to retrieve information about the current track.")
-
-        embed = discord.Embed(colour=self.bot.config.color, title=f"{currentTrackData['author']} - {currentTrackData['title']}",
-                              description=currentTrackData["lyrics"], url=currentTrackData["links"]["genius"])
-        embed.set_thumbnail(url=currentTrackData["thumbnail"]["genius"])
-
-        await ctx.send(embed=embed)
+    #@commands.command()
+    #async def lyrics(self, ctx):
+    #    """ Shows the lyrics for the currently playing track. """
+    #    player = self.bot.lavalink.player_manager.get(ctx.guild.id)
+    #
+    #    if (currentTrackData := player.fetch("currentTrackData")) is None:
+    #        return await ctx.send("Unable to retrieve information about the current track.")
+    #
+    #    embed = discord.Embed(colour=self.bot.config.color, title=f"{currentTrackData['author']} - {currentTrackData['title']}",
+    #                          description=currentTrackData["lyrics"], url=currentTrackData["links"]["genius"])
+    #    embed.set_thumbnail(url=currentTrackData["thumbnail"]["genius"])
+    #
+    #    await ctx.send(embed=embed)
 
 
     @commands.command(aliases=['vol'])
