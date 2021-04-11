@@ -24,7 +24,7 @@ class BeatmapEmbed(discord.Embed):
         super().__init__(
             title=f"{beatmap.artist} - {beatmap.title}",
             color = color,
-            description=f"**Length:** {lengthHumanReadable} **BPM:** {str(beatmap.bpm).rstrip('0').rstrip('.')}\n**Download:** [map](https://osu.ppy.sh/d/{beatmap.beatmapset_id})([🚫📹](https://osu.ppy.sh/d/{beatmap.beatmapset_id}n)) [bloodcat](https://bloodcat.com/osu/s/{beatmap.beatmapset_id})\n**Discussion:** [mapset](https://osu.ppy.sh/beatmapsets/{beatmap.beatmapset_id}/discussion) [difficulty](https://osu.ppy.sh/beatmapsets/{beatmap.beatmapset_id}/discussion/{beatmap.beatmap_id}/general)\n**[Browser Preview](https://bloodcat.com/osu/preview.html#{beatmap.beatmap_id})**",
+            description=f"**Length:** {lengthHumanReadable} **BPM:** {str(beatmap.bpm).rstrip('0').rstrip('.')}\n**Download:** [map](https://osu.ppy.sh/d/{beatmap.beatmapset_id})([🚫📹](https://osu.ppy.sh/d/{beatmap.beatmapset_id}n)) [chimu.moe](https://api.chimu.moe/v1/download/{beatmap.beatmapset_id})\n**Discussion:** [mapset](https://osu.ppy.sh/beatmapsets/{beatmap.beatmapset_id}/discussion) [difficulty](https://osu.ppy.sh/beatmapsets/{beatmap.beatmapset_id}/discussion/{beatmap.beatmap_id}/general)",
             url=f"https://osu.ppy.sh/b/{beatmap.beatmap_id}",
             timestamp=datetimeObject
         )

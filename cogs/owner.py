@@ -28,7 +28,7 @@ class OwnerCog(commands.Cog, command_attrs=dict(hidden=True), name="Owner"):
     async def shutdown(self, ctx):
         """Shuts the bot down."""
         await ctx.send("Goodbye!")
-        await self.bot.logout()
+        await self.bot.close()
 
 def setup(bot):
     bot.add_cog(OwnerCog(bot))
