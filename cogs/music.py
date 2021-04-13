@@ -59,6 +59,7 @@ class Music(commands.Cog):
 
             player.store('channel', ctx.channel.id)
             await ctx.guild.change_voice_state(channel=ctx.author.voice.channel)
+            await player.set_volume(50)
         else:
             if int(player.channel_id) != ctx.author.voice.channel.id:
                 raise Exceptions.MusicPlayerError('You need to be in my voicechannel.')
@@ -238,11 +239,11 @@ class Music(commands.Cog):
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
         if not volume:
-            return await ctx.send(f'🔈 | {player.volume}%')
+            return await ctx.send(f'🔈 | {player.volume * 2}%')
         volume = max(1, min(volume, 100))
 
-        await player.set_volume(volume)
-        await ctx.send(f'🔈 | Set to {player.volume}%')
+        await player.set_volume(volume / 2)
+        await ctx.send(f'🔈 | Set to {player.volume * 2}%')
 
     @commands.command()
     async def shuffle(self, ctx):
