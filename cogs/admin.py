@@ -48,7 +48,7 @@ class Admin(commands.Cog):
         duration = datetime.timedelta(seconds=timeparse(time))
         ends = datetime.datetime.utcnow() + duration
         await self.bot.mongoIO.muteUser(user, ctx.guild, ends)
-        embed = discord.Embed(title=f'User {user.name} has been successfully muted for {duration}s.', color=0x00ff00)
+        embed = discord.Embed(title=f'User {user.name} has been successfully muted for {duration}', color=0x00ff00)
         embed.add_field(name="Shhh!", value=":zipper_mouth:")
         embed.set_thumbnail(url=user.avatar_url)
         await ctx.send(embed=embed)
