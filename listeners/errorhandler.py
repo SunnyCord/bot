@@ -18,6 +18,9 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):
         if isinstance(error, ignored):
             return
 
+        elif isinstance(error, discord.errors.Forbidden):
+            return await ctx.send(f"I do not have permissions to perform ``{ctx.command}``!")
+
         elif isinstance(error, commands.DisabledCommand):
             return await ctx.send(f"``{ctx.command}`` has been disabled.")
 
