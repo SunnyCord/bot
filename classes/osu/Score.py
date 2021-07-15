@@ -61,7 +61,7 @@ class Score:
         self.performance:osu.Performance = None
         self.date:datetime = datetime.strptime(json_response["date"], "%Y-%m-%d %H:%M:%S")
         self.pp = 0
-        if "pp" in json_response:
+        if "pp" in json_response and json_response["pp"]:
             self.pp = float(json_response["pp"])
 
     def accuracy(self):
@@ -116,7 +116,6 @@ class BeatmapScore(Score):
         super().__init__(json_response, server, mode)
         # self.username:str = json_response["username"]
         self.beatmap_id = beatmap_id
-        self.pp:float = float(json_response["pp"] or 0)
         self.score_id:int = int(json_response["score_id"])
         self.replay_available:bool = bool(json_response["replay_available"])
 
