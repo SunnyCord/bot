@@ -25,10 +25,12 @@ class Sunny(commands.AutoShardedBot):
         return member
 
     def __init__(self, **kwargs):
+        intents = discord.Intents.default()
+        intents.members=True
         super().__init__(
             description=kwargs.pop("description"),
             command_prefix=self.__get_prefix,
-            intents=discord.Intents.all(),
+            intents=intents, # To be reverted to discord.Intents.all() once verification complete
             activity=kwargs.pop("activity")
         )
         self.config=Config.fromJSON("config.json")
