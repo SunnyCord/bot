@@ -19,6 +19,9 @@ class mongoIO():
 			}
 		)
 
+	async def removeUser(self, member: discord.Member):
+		await self.db.users.delete_many({"id": member.id})
+
 	async def userExists(self, member:discord.Member):
 		return ( await self.db.users.find_one( {"id": {"$eq": member.id} } ) ) is not None
 
@@ -102,6 +105,10 @@ class mongoIO():
 	            "prefix": prefix
 			}
 		)
+
+	async def removeServer(self, guild: discord.Guild):
+		await self.db.settings.delete_many({"guildID": guild.id})
+		await self.db.mutes.delete_many({"guildID": guild.id})
 
 	async def serverExists(self, server: discord.Guild):
 		return ( await self.db.settings.find_one( {"id": {"$eq": server.id} } ) is not None )

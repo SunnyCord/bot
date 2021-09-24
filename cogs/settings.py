@@ -10,6 +10,12 @@ class Settings(commands.Cog):
     def __init__(self,bot):
         self.bot = bot
 
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.command()
+    async def forgetme(self, ctx, prefix: str):
+        await self.bot.mongoIO.removeUser(ctx.author)
+        await ctx.send("Your data has been successfully deleted. Sorry to see you go!")
+
     @checks.is_admin()
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command()
@@ -24,7 +30,7 @@ class Settings(commands.Cog):
                 prefix = prefix[:6]
             await self.bot.mongoIO.setPrefix(ctx.guild, prefix)
         embed=discord.Embed(title="Setting updated", description=f'Server-wide prefix is now {prefix}', color=self.bot.config.color, timestamp=datetime.utcnow())
-        embed.set_author(name=ctx.message.author.name, icon_url=ctx.message.author.avatar_url)
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
         embed.set_thumbnail(url="https://i.imgur.com/ubhUTNH.gif")
         embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
         await ctx.send(embed=embed)
@@ -67,6 +73,9 @@ class Settings(commands.Cog):
 
     async def on_guild_join(self, guild):
         await self.bot.mongoIO.addServer(guild)
+
+    async def on_guild_leave(self, guild):
+        await self.bot.mongoIO.removeServer(guild)
 
 def setup(bot):
     bot.add_cog(Settings(bot))

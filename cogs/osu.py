@@ -18,7 +18,7 @@ class osuCog(commands.Cog, name='osu!'):
         parsedArgs = self.bot.osuHelpers.parseArgsV2(args=args, customArgs=["user"])
         username = parsedArgs['user']
         profile:osuClasses.User = await self.bot.osuAPI.getuser(username, 'string', server=parsedArgs['server'])
-        await self.bot.mongoIO.setOsu(ctx.message.author, profile.user_id, parsedArgs['server'].id)
+        await self.bot.mongoIO.setOsu(ctx.author, profile.user_id, parsedArgs['server'].id)
         await ctx.send(f"osu! profile succesfully set to {profile.username}")
 
 
@@ -38,7 +38,7 @@ class osuCog(commands.Cog, name='osu!'):
 
         if not user:
             qtype = "id"
-            user, serverID = await self.bot.mongoIO.getOsu(ctx.message.author)
+            user, serverID = await self.bot.mongoIO.getOsu(ctx.author)
             server = osuClasses.Server.from_id(serverID)
 
         if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
@@ -78,7 +78,7 @@ class osuCog(commands.Cog, name='osu!'):
 
         if not user:
             qtype = "id"
-            user, serverID = await self.bot.mongoIO.getOsu(ctx.message.author)
+            user, serverID = await self.bot.mongoIO.getOsu(ctx.author)
             server = osuClasses.Server.from_id(serverID)
 
         if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
@@ -131,7 +131,7 @@ class osuCog(commands.Cog, name='osu!'):
 
         if not user:
             qtype = "id"
-            user, serverID = await self.bot.mongoIO.getOsu(ctx.message.author)
+            user, serverID = await self.bot.mongoIO.getOsu(ctx.author)
             server = osuClasses.Server.from_id(serverID)
 
         if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):
@@ -208,7 +208,7 @@ class osuCog(commands.Cog, name='osu!'):
 
         if not user:
             qtype = "id"
-            user, serverID = await self.bot.mongoIO.getOsu(ctx.message.author)
+            user, serverID = await self.bot.mongoIO.getOsu(ctx.author)
             server = osuClasses.Server.from_id(serverID)
 
         if user and isinstance(user, str) and user.startswith("<@") and user.endswith(">"):

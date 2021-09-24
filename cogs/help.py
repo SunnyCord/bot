@@ -18,11 +18,11 @@ class Help(commands.Cog):
                 cogs_desc += f'**{x}** - {self.bot.cogs[x].__doc__}\n'
             helpEmbed.add_field(name='\u200b', value=cogs_desc[0:len(cogs_desc)-1] if cogs_desc[0:len(cogs_desc)-1] else '\u200b',inline=False)
             await ctx.message.add_reaction(emoji='✉')
-            await ctx.message.author.send(embed=helpEmbed)
+            await ctx.author.send(embed=helpEmbed)
         else:
             if len(cog) > 1:
                 helpEmbed = discord.Embed(title='Error!',description='That is way too many cogs!',color=discord.Color.red())
-                await ctx.message.author.send(embed=helpEmbed)
+                await ctx.author.send(embed=helpEmbed)
             else:
                 found = False
                 for x in self.bot.cogs:
@@ -37,7 +37,7 @@ class Help(commands.Cog):
                     helpEmbed = discord.Embed(title='Error!',description=f'Cog "{cog[0]}" does not exist! Maybe check your spelling?',color=discord.Color.red())
                 else:
                     await ctx.message.add_reaction(emoji='✉')
-                await ctx.message.author.send(embed=helpEmbed)
+                await ctx.author.send(embed=helpEmbed)
 
 def setup(bot):
     bot.add_cog(Help(bot))
