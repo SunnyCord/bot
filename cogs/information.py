@@ -10,7 +10,7 @@ class Information(commands.Cog):
     @commands.command()
     async def userinfo(self, ctx, user: discord.Member = None):
         if user is None:
-            user = ctx.message.author
+            user = ctx.author
         if user.activity is not None:
             game = user.activity.name
         else:
