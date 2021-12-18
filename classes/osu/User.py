@@ -98,7 +98,7 @@ class User:
 
     @property
     def level_progress(self):
-        return round((float(self.level)%1*100), 2)
+        return float(self.level)%1*100
 
     def __repr__(self):
         return "<{0.__module__}.User username={0.username} user_id={0.user_id}>".format(self)

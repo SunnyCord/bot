@@ -43,19 +43,20 @@ class osuAPI():
             self,
             beatmap_id:int=None,
             beatmapset_id:int=None,
-            mode:osu.Mode=osu.Mode.STANDARD,
+            mode:osu.Mode=None,
             server:osu.Server=osu.Server.BANCHO,
             mods:osu.Mods=osu.Mods(0),
             limit:int=1) -> osu.Beatmap:
         async with aiohttp.ClientSession() as cs:
             params = {
                 'k': self.__token,
-                'm': mode.id,
                 'mods': int(mods),
                 'limit': limit,
                 'a': 1
             }
 
+            if mode:
+                params['m'] = mode.id
             if beatmap_id is None:
                 params['s'] = beatmapset_id
             else:

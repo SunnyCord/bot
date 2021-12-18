@@ -29,13 +29,13 @@ class OsuListEmbed(discord.Embed):
             if style == 0:
                 #index. artist - title (creator) [version] + modstring [sr]
                 field_title += '\u200b'
-                field_description += f"**{displayed_index}. [{beatmap.artist} - {beatmap.title} ({beatmap.creator}) [{beatmap.version}]]({beatmap.beatmap_url}) + {str(score.enabled_mods)} [{round(score.performance.star_rating, 2)}★]**"
+                field_description += f"**{displayed_index}. [{beatmap.artist} - {beatmap.title} ({beatmap.creator}) [{beatmap.version}]]({beatmap.beatmap_url}) + {str(score.enabled_mods)} [{score.performance.star_rating:.2f}★]**"
 
             if style == 1:
-                field_title += f"{displayed_index}. ``{str(score.enabled_mods)}`` [{round(score.performance.star_rating, 2)}★]"
+                field_title += f"{displayed_index}. ``{str(score.enabled_mods)}`` [{score.performance.star_rating:.2f}★]"
 
             field_description += f"""
-> {score.rank.icon} > **{round(score.performance.pp, 2)}PP""" + (f"({round(score.performance.pp_fc, 2)}PP for {round(score.performance.accuracy_fc, 2)}% FC)" if not score.perfect and score.mode != osu.Mode.MANIA else "") + f"""** > {round(score.performance.accuracy, 2)}%
+> {score.rank.icon} > **{score.performance.pp:.2f}PP""" + (f"({score.performance.pp_fc:.2f}PP for {score.performance.accuracy_fc:.2f}% FC)" if not score.perfect and score.mode != osu.Mode.MANIA else "") + f"""** > {score.performance.accuracy:.2f}%
 > {score.score} > x{score.maxcombo}/{beatmap.max_combo} > [{score.count300}/{score.count100}/{score.count50}/{score.countmiss}]
 > {score.date}"""
 

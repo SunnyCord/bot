@@ -48,10 +48,7 @@ class ppAPI():
 
         return osu.Performance(result['pp'], pp_fc, result['accuracy'], acc_fc, result['completion'], result['sr'], result['max_combo'])
 
-    async def calculateBeatmap(self, beatmapID, mods, mode: int = None):
-
-        if mode is None:
-            mode = beatmap.mode
+    async def calculateBeatmap(self, beatmapID, mods, mode: int = 0):
 
         payload = {
             "secret": self.__secret,

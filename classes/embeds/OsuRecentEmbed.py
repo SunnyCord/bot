@@ -8,12 +8,12 @@ class OsuRecentEmbed(discord.Embed):
             score.rank = osu.Rank.F #Weird non-bancho API behaviour
 
         description = f"""
-> {score.rank.icon} > **{round(score.performance.pp, 2)}PP""" + (f"({round(score.performance.pp_fc, 2)}PP for {round(score.performance.accuracy_fc, 2)}% FC)" if not score.perfect and score.mode != osu.Mode.MANIA else "") + f"""** > {round(score.performance.accuracy, 2)}%
+> {score.rank.icon} > **{score.performance.pp:.2f}PP""" + (f"({score.performance.pp_fc:.2f}PP for {score.performance.accuracy_fc:.2f}% FC)" if not score.perfect and score.mode != osu.Mode.MANIA else "") + f"""** > {score.performance.accuracy:.2f}%
 > {score.score} > x{score.maxcombo}/{beatmap.max_combo} > [{score.count300}/{score.count100}/{score.count50}/{score.countmiss}]"""
 
         if score.performance.completion != 100:
             description += f"""
-> **Completion:** {round(score.performance.completion, 2)}%"""
+> **Completion:** {score.performance.completion:.2f}%"""
 
         super().__init__(
             title=discord.Embed.Empty,
@@ -23,7 +23,7 @@ class OsuRecentEmbed(discord.Embed):
         )
 
         self.set_author(
-            name=f"{beatmap.title} [{beatmap.version}] ({beatmap.creator}) +{str(score.enabled_mods)} [{round(score.performance.star_rating, 2)}★]",
+            name=f"{beatmap.title} [{beatmap.version}] ({beatmap.creator}) +{str(score.enabled_mods)} [{score.performance.star_rating:.2f}★]",
             url=score.server.url_beatmap + str(beatmap.beatmap_id),
             icon_url=score.server.url_avatar + str(score.user_id))
         self.set_thumbnail(url=f"https://b.ppy.sh/thumb/{beatmap.beatmapset_id}.jpg")
