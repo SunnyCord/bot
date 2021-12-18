@@ -220,8 +220,12 @@ class osuCog(commands.Cog, name='osu!'):
 
         if 'c' == ctx.invoked_with or 'compare' == ctx.invoked_with and beatmap is None:
             if self.bot.config.redis is True:
-                mode = osuClasses.Mode.fromId(redisIO.getValue(f'{ctx.message.channel.id}.mode'))
-                beatmap = await self.bot.osuAPI.getbmap(redisIO.getValue(ctx.message.channel.id), mode=mode, server=server)
+                modeID = redisIO.getValue(f'{ctx.message.channel.id}.mode')
+                beatmapID = redisIO.getValue(ctx.message.channel.id)
+                if modeID is None or beatmapID is None:
+                    return
+                mode = osuClasses.Mode.fromId(modeID)
+                beatmap = await self.bot.osuAPI.getbmap(beatmapID, mode=mode, server=server)
             else:
                 return ctx.send("Redis is disabled in the config. Please contact the owner of this instance!")
 
