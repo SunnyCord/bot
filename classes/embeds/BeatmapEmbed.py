@@ -31,4 +31,4 @@ class BeatmapEmbed(discord.Embed):
         self.set_author(name=f"Mapped by {beatmap.creator}", icon_url=f"https://a.ppy.sh/{beatmap.creator_id}", url=f"https://osu.ppy.sh/users/{beatmap.creator_id}/modding")
         self.set_thumbnail(url=f"https://b.ppy.sh/thumb/{beatmap.beatmapset_id}.jpg")
         self.set_footer(text=f"{beatmap.status.name} | ❤️ {beatmap.favourite_count} | ▶️ {beatmap.playcount} | {footerDate}")
-        self.add_field(name=f"{getDiffEmoji(beatmap.difficultyrating, int(beatmap.mode)).value}__{beatmap.version}__", value=f"**▸** {round(beatmap.difficultyrating, 2)}⭐  **▸Max Combo:** x{beatmap.max_combo}\n**▸AR:** {beatmap.diff_approach}  **▸OD:** {beatmap.diff_overall}  **▸CS:** {beatmap.diff_size}  **▸HP:** {beatmap.diff_drain}")
+        self.add_field(name=f"{getDiffEmoji(beatmap.difficultyrating, int(beatmap.mode)).value}__{beatmap.version}__", value=f"**▸** {beatmap.difficultyrating:.2f}⭐  **▸Max Combo:** x{beatmap.max_combo}\n**▸AR:** {beatmap.diff_approach}  **▸OD:** {beatmap.diff_overall}  **▸CS:** {beatmap.diff_size}  **▸HP:** {beatmap.diff_drain}")

@@ -1,34 +1,40 @@
-from discord.ext import commands
+import os, time
 from git import Repo
-from datetime import datetime
-import os
+from discord.ext import commands
 
 class OwnerCog(commands.Cog, command_attrs=dict(hidden=True), name="Owner"):
     """Commands meant for the owner only."""
-    def __init__(self, bot):
+    def __init__(self, bot) -> None:
         self.bot = bot
-        self._last_result = None
-
-    @commands.command(name='pull')
-    @commands.is_owner()
-    async def git_update(self, ctx):
-        """Pulls the bot from GitHub."""
-        now = datetime.now()
-        message = ""
-        repo = Repo(path=os.getcwd())
-        o = repo.remotes.origin
-        for fetch_info in o.pull():
-            message += f"\n Updated '{fetch_info.ref}' To '{fetch_info.commit}'"
-        later = datetime.now()
-        difference = (later - now).total_seconds()
-        await ctx.send(f"Operation completed succesfully in {difference}s. Output: ```prolog\n{message}\n```")
 
     @commands.command()
     @commands.is_owner()
-    async def shutdown(self, ctx):
+    async def pull(self, ctx) -> None:
+        """Pulls the bot from GitHub."""
+        start_t = time.perf_counter()
+        message = ""
+        repo = Repo(path=os.getcwd())
+        for fetch_info in repo.remotes.origin.pull():
+            message += f"\n Updated base '{fetch_info.ref}' To '{fetch_info.commit}'"
+        for submodule in repo.submodules:
+            submodule.update(init=True)
+            message += f"\n Updated '{submodule}'"
+        end_t = time.perf_counter()
+        delta_t = end_t - start_t
+        await ctx.send(f"Operation completed succesfully in {delta_t:.2f}s. Output: ```prolog\n{message}\n```")
+
+    @commands.command()
+    @commands.is_owner()
+    async def shutdown(self, ctx) -> None:
         """Shuts the bot down."""
         await ctx.send("Goodbye!")
         await self.bot.close()
+    
+    @commands.command(aliases=['pr'])
+    @commands.is_owner()
+    async def pull_reload(self, ctx) -> None:
+        await ctx.invoke(self.pull)
+        await ctx.invoke(self.shutdown)
 
-def setup(bot):
+def setup(bot) -> None:
     bot.add_cog(OwnerCog(bot))

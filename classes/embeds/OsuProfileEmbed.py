@@ -24,8 +24,8 @@ class OsuProfileEmbed(discord.Embed):
             color=color,
             description=f"> **Rank:** #{user.pp_rank}\n\
 > **PP:** {user.pp_raw}\n\
-> **Accuracy:** {round(user.accuracy, 2)}%\n\
-> **Level:** {int(user.level)} ({user.level_progress}%)\n\
+> **Accuracy:** {user.accuracy:.2f}%\n\
+> **Level:** {int(user.level)} ({user.level_progress:.2f}%)\n\
 > **Playtime:** {self.__secondsToText(user.total_seconds_played)}\n\
 > **Playcount:** {user.playcount}\n\
 > **PP/hour:** {int(user.pp_raw/user.total_seconds_played*3600) if user.total_seconds_played > 0 else 0}",
