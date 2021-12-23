@@ -1,0 +1,24 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+"discord.py" = "*"
+dnspython = "*"
+motor = "*"
+lavalink = "*"
+aiohttp = "*"
+websockets = "*"
+pyttanko = "*"
+redis = "*"
+jishaku = "*"
+sentry-sdk = "*"
+pyfiglet = "*"
+pytimeparse = "*"
+GitPython = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"
