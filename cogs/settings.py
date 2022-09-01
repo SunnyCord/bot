@@ -12,7 +12,7 @@ class Settings(commands.Cog):
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command()
-    async def forgetme(self, ctx, prefix: str):
+    async def forgetme(self, ctx):
         await self.bot.mongoIO.removeUser(ctx.author)
         await ctx.send("Your data has been successfully deleted. Sorry to see you go!")
 
