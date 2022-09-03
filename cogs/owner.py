@@ -2,8 +2,10 @@ import os, time
 from git import Repo
 from discord.ext import commands
 
+
 class OwnerCog(commands.Cog, command_attrs=dict(hidden=True), name="Owner"):
     """Commands meant for the owner only."""
+
     def __init__(self, bot) -> None:
         self.bot = bot
 
@@ -21,7 +23,9 @@ class OwnerCog(commands.Cog, command_attrs=dict(hidden=True), name="Owner"):
             message += f"\n Updated '{submodule}'"
         end_t = time.perf_counter()
         delta_t = end_t - start_t
-        await ctx.send(f"Operation completed succesfully in {delta_t:.2f}s. Output: ```prolog\n{message}\n```")
+        await ctx.send(
+            f"Operation completed succesfully in {delta_t:.2f}s. Output: ```prolog\n{message}\n```"
+        )
 
     @commands.command()
     @commands.is_owner()
@@ -29,12 +33,13 @@ class OwnerCog(commands.Cog, command_attrs=dict(hidden=True), name="Owner"):
         """Shuts the bot down."""
         await ctx.send("Goodbye!")
         await self.bot.close()
-    
-    @commands.command(aliases=['pr'])
+
+    @commands.command(aliases=["pr"])
     @commands.is_owner()
     async def pull_reload(self, ctx) -> None:
         await ctx.invoke(self.pull)
         await ctx.invoke(self.shutdown)
 
-def setup(bot) -> None:
-    bot.add_cog(OwnerCog(bot))
+
+async def setup(bot) -> None:
+    await bot.add_cog(OwnerCog(bot))

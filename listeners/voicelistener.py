@@ -1,7 +1,10 @@
 import discord
 from discord.ext import commands
 
-class VoiceListener(commands.Cog, command_attrs=dict(hidden=True), name="Voice State Update Listener"):
+
+class VoiceListener(
+    commands.Cog, command_attrs=dict(hidden=True), name="Voice State Update Listener"
+):
     """Voice State Update Listener"""
 
     def __init__(self, bot):
@@ -22,5 +25,5 @@ class VoiceListener(commands.Cog, command_attrs=dict(hidden=True), name="Voice S
             await member.guild.change_voice_state(channel=None)
 
 
-def setup(bot):
-    bot.add_cog(VoiceListener(bot))
+async def setup(bot):
+    await bot.add_cog(VoiceListener(bot))

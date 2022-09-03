@@ -4,7 +4,10 @@ from io import BytesIO
 from discord.ext import commands
 from classes.embeds.BeatmapEmbed import BeatmapEmbed
 
-class OsuListeners(commands.Cog, command_attrs=dict(hidden=True), name="osu! Chat Listener"):
+
+class OsuListeners(
+    commands.Cog, command_attrs=dict(hidden=True), name="osu! Chat Listener"
+):
     """osu! Message Listeners"""
 
     def __init__(self, bot):
@@ -16,16 +19,21 @@ class OsuListeners(commands.Cog, command_attrs=dict(hidden=True), name="osu! Cha
         if beatmap is None:
             return
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"https://b.ppy.sh/preview/{beatmap.beatmapset_id}.mp3") as resp:
-                if resp.status==200:
-                    f=BytesIO(await resp.read())
+            async with session.get(
+                f"https://b.ppy.sh/preview/{beatmap.beatmapset_id}.mp3"
+            ) as resp:
+                if resp.status == 200:
+                    f = BytesIO(await resp.read())
 
         if self.bot.config.redis is True:
             redisIO.setValue(message.channel.id, beatmap.beatmap_id)
-            redisIO.setValue(f'{message.channel.id}.mode', beatmap.mode)
+            redisIO.setValue(f"{message.channel.id}.mode", beatmap.mode)
 
-        await message.channel.send(embed=BeatmapEmbed(beatmap, self.bot.config.color), file=discord.File(f, filename="Preview.mp3"))
+        await message.channel.send(
+            embed=BeatmapEmbed(beatmap, self.bot.config.color),
+            file=discord.File(f, filename="Preview.mp3"),
+        )
 
 
-def setup(bot):
-    bot.add_cog(OsuListeners(bot))
+async def setup(bot):
+    await bot.add_cog(OsuListeners(bot))

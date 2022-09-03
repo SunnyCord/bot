@@ -3,11 +3,14 @@ from discord.ext import commands
 from commons import checks
 from datetime import datetime
 import time
-disableKeywords = ['none','disable','off','disabled']
+
+disableKeywords = ["none", "disable", "off", "disabled"]
+
 
 class Settings(commands.Cog):
     """Commands user for changing server-based settings."""
-    def __init__(self,bot):
+
+    def __init__(self, bot):
         self.bot = bot
 
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -23,13 +26,18 @@ class Settings(commands.Cog):
         """Sets the server-wide prefix."""
         if prefix.lower() in disableKeywords:
             await self.bot.mongoIO.setPrefix(ctx.guild, None)
-            prefix="turned off"
+            prefix = "turned off"
         else:
             if len(prefix) > 6:
                 await ctx.send("Prefix longer than 6 characters. Shortening")
                 prefix = prefix[:6]
             await self.bot.mongoIO.setPrefix(ctx.guild, prefix)
-        embed=discord.Embed(title="Setting updated", description=f'Server-wide prefix is now {prefix}', color=self.bot.config.color, timestamp=datetime.utcnow())
+        embed = discord.Embed(
+            title="Setting updated",
+            description=f"Server-wide prefix is now {prefix}",
+            color=self.bot.config.color,
+            timestamp=datetime.utcnow(),
+        )
         embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
         embed.set_thumbnail(url="https://i.imgur.com/ubhUTNH.gif")
         embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
@@ -37,7 +45,7 @@ class Settings(commands.Cog):
 
     @commands.is_owner()
     @commands.command(hidden=True)
-    async def rebuild(self, ctx, *, args = "normal"):
+    async def rebuild(self, ctx, *, args="normal"):
         """Rebuilds the database. (Owner-only)"""
         start_time = time.time()
         await self.bot.mongoIO.wipe()
@@ -45,14 +53,14 @@ class Settings(commands.Cog):
         args = args.lower()
         for x in range(len(servers)):
             if args == "debug":
-                print (f'Adding server {servers[x-1].name}')
-            await self.bot.mongoIO.addServer(servers[x-1])
-            for member in servers[x-1].members:
+                print(f"Adding server {servers[x-1].name}")
+            await self.bot.mongoIO.addServer(servers[x - 1])
+            for member in servers[x - 1].members:
                 if not member.bot and not await self.bot.mongoIO.userExists(member):
                     if args == "debug":
-                        print (f'Adding member {member.name}')
+                        print(f"Adding member {member.name}")
                     await self.bot.mongoIO.addUser(member)
-        await ctx.send(f'Done rebuilding. {time.time() - start_time}s')
+        await ctx.send(f"Done rebuilding. {time.time() - start_time}s")
 
     @commands.is_owner()
     @commands.command(hidden=True)
@@ -77,5 +85,6 @@ class Settings(commands.Cog):
     async def on_guild_leave(self, guild):
         await self.bot.mongoIO.removeServer(guild)
 
-def setup(bot):
-    bot.add_cog(Settings(bot))
+
+async def setup(bot):
+    await bot.add_cog(Settings(bot))
