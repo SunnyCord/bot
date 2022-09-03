@@ -33,3 +33,9 @@ body:
       placeholder: Drag and drop the screenshots/videos into this box.
     validations:
       required: false
+  - type: input
+    attributes:
+      label: Server ID
+      description: The ID of the server you encountered this bug on. This can be obtained by enabling developer mode and right clicking on the server.
+    validations:
+      required: true
