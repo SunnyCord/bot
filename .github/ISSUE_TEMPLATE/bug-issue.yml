@@ -1,0 +1,35 @@
+name: Bug report
+description: Report a very clearly broken issue.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Sunny bug report
+
+        Important to note that your issue may have already been reported before. Please check:
+        - Pinned issues, at the top of https://github.com/NiceAesth/Sunny/issues.
+        - And most importantly, search for your issue both in the [issue listing](https://github.com/NiceAesth/Sunny/issues) and the [discussion listing](https://github.com/NiceAesth/Sunny/discussions/categories/q-a). If you find that it already exists, respond with a reaction or add any further information that may be helpful.
+
+  - type: dropdown
+    attributes:
+      label: Type
+      options:
+        - Command failure
+        - Command behaviour
+        - Cosmetic
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Bug description
+      description: How did you find the bug? Any additional details that might help?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Screenshots or videos
+      description: Add screenshots or videos that show the bug here.
+      placeholder: Drag and drop the screenshots/videos into this box.
+    validations:
+      required: false
