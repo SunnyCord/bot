@@ -11,11 +11,11 @@
             },
             "lavalink": [
                 {
-                    "ip": "127.0.0.1",
+                    "ip": "lavalink",
                     "port": 2333,
                     "password": "youshallnotpass",
                     "region": "eu",
-                    "name": "default-node"
+                    "name": "local"
                 }
             ],
             "sentry": "",
@@ -26,11 +26,12 @@
             "token": "",
             "osuAPI": "",
             "ppAPI": {
-                "URL": "https://pp.aesth.dev",
+                "URL": "https://oldpp.aesth.dev",
                 "secret": "potato"
             },
-            "owners": [],
-            "splashArt": "Sunny"
+            "owners": [
+                151670779782758400
+            ]
         }
     ]
 }
