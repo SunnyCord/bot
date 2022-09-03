@@ -4,7 +4,7 @@ services:
 
   lavalink:
     container_name: lavalink
-    image: freyacodes:lavalink
+    image: fredboat:lavalink
     restart: always
     volumes:
       - ./application.yml:/opt/Lavalink/application.yml
