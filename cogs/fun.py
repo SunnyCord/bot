@@ -9,7 +9,9 @@ def random_line(fname):
 
 
 class Fun(commands.Cog):
-    """Miscellaneous commands."""
+    """
+    Miscellaneous commands.
+    """
 
     def __init__(self, bot):
         self.bot = bot

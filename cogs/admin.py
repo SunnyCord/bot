@@ -5,7 +5,9 @@ from pytimeparse.timeparse import timeparse
 
 
 class Admin(commands.Cog):
-    """Commands for managing Discord servers."""
+    """
+    Commands for managing Discord servers.
+    """
 
     def __init__(self, bot):
         self.bot = bot

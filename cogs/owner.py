@@ -4,7 +4,9 @@ from discord.ext import commands
 
 
 class OwnerCog(commands.Cog, command_attrs=dict(hidden=True), name="Owner"):
-    """Commands meant for the owner only."""
+    """
+    Commands meant for the owner only.
+    """
 
     def __init__(self, bot) -> None:
         self.bot = bot

@@ -3,7 +3,9 @@ from discord.ext import commands
 
 
 class Information(commands.Cog):
-    """Retrieve information about various items."""
+    """
+    Retrieve information about various items.
+    """
 
     def __init__(self, bot):
         self.bot = bot

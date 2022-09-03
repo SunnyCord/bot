@@ -6,7 +6,9 @@ from commons import helpers
 
 
 class Image(commands.Cog):
-    """Various image-related commands."""
+    """
+    Various image-related commands.
+    """
 
     def __init__(self, bot):
         self.bot = bot

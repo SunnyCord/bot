@@ -8,7 +8,9 @@ disableKeywords = ["none", "disable", "off", "disabled"]
 
 
 class Settings(commands.Cog):
-    """Commands user for changing server-based settings."""
+    """
+    Commands user for changing server-based settings.
+    """
 
     def __init__(self, bot):
         self.bot = bot

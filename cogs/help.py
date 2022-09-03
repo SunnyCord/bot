@@ -3,7 +3,9 @@ from discord.ext import commands
 
 
 class Help(commands.Cog):
-    """Displays the message you are currently viewing!"""
+    """
+    Displays the message you are currently viewing!
+    """
 
     def __init__(self, bot):
         self.bot = bot
@@ -20,7 +22,7 @@ class Help(commands.Cog):
             )
             cogs_desc = ""
             for x in self.bot.cogs:
-                cogs_desc += f"**{x}** - {self.bot.cogs[x].__doc__}\n"
+                cogs_desc += f"**{x}** {self.bot.cogs[x].__doc__}\n"
             helpEmbed.add_field(
                 name="\u200b",
                 value=cogs_desc[0 : len(cogs_desc) - 1]
@@ -28,7 +30,7 @@ class Help(commands.Cog):
                 else "\u200b",
                 inline=False,
             )
-            await ctx.message.add_reaction(emoji="✉")
+            await ctx.message.add_reaction("✉")
             await ctx.author.send(embed=helpEmbed)
         else:
             if len(cog) > 1:
@@ -61,7 +63,7 @@ class Help(commands.Cog):
                         color=discord.Color.red(),
                     )
                 else:
-                    await ctx.message.add_reaction(emoji="✉")
+                    await ctx.message.add_reaction("✉")
                 await ctx.author.send(embed=helpEmbed)
 
 

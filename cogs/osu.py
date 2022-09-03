@@ -7,7 +7,9 @@ import classes.osu as osuClasses
 
 
 class osuCog(commands.Cog, name="osu!"):
-    """osu! related commands.\n*Valid Arguments:* ```fix\n-ripple, -akatsuki```"""
+    """
+    osu! related commands.\n*Valid Arguments:* ```fix\n-ripple, -akatsuki```
+    """
 
     def __init__(self, bot):
         self.bot = bot
