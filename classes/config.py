@@ -1,7 +1,11 @@
+from __future__ import annotations
+
 import logging
-from dataclasses import dataclass, field
-from dataclasses_json import dataclass_json
+from dataclasses import dataclass
+from dataclasses import field
 from typing import List
+
+from dataclasses_json import dataclass_json
 
 logger = logging.getLogger("discord")
 
@@ -54,7 +58,7 @@ class ConfigList:
         return self.configs[self.select]
 
     @classmethod
-    def get_config(cls) -> "Config":
+    def get_config(cls) -> Config:
         with open("config.json", "a+") as config_file:
             config_file.seek(0)
             data = config_file.read()
@@ -64,7 +68,7 @@ class ConfigList:
             fmt = cls().to_json(indent=4)
             config_file.write(fmt)
             logger.warn(
-                "A config file was not found! Please edit the newly created `config.json` and run again."
+                "A config file was not found! Please edit the newly created `config.json` and run again.",
             )
             config_file.close()
             exit()

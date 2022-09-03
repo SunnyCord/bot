@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import discord
 from discord.ext import commands
 
@@ -20,7 +22,8 @@ class Information(commands.Cog):
             game = None
         voice_state = None if not user.voice else user.voice.channel
         embed = discord.Embed(
-            timestamp=ctx.message.created_at, colour=self.bot.config.color
+            timestamp=ctx.message.created_at,
+            colour=self.bot.config.color,
         )
         embed_values = {
             "User ID": user.id,
@@ -49,10 +52,11 @@ class Information(commands.Cog):
                 x
                 for x in ctx.guild.channels
                 if isinstance(x, discord.channel.TextChannel)
-            ]
+            ],
         )
         embed = discord.Embed(
-            color=self.bot.config.color, timestamp=ctx.message.created_at
+            color=self.bot.config.color,
+            timestamp=ctx.message.created_at,
         )
         embed_values = {
             "Name (ID)": (f"{ctx.guild.name} ({ctx.guild.id})", False),

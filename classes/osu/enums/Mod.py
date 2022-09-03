@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from enum import Enum
+
 
 class Mod(Enum):
     """Bitwise Flags representing osu! mods.
@@ -14,6 +17,7 @@ class Mod(Enum):
         # Check if any of given flags are set.
         OsuMod.keyMod in flags
     """
+
     NoMod = (0, "")
     NoFail = (1, "NF")
     Easy = (2, "EZ")
@@ -37,7 +41,7 @@ class Mod(Enum):
     Key8 = (524288, "8K")
     FadeIn = (1048576, "FI")
     Random = (2097152, "RD")
-    LastMod = (4194304)
+    LastMod = 4194304
     Key9 = (16777216, "9K")
     Key10 = (33554432, "10K")
     Key1 = (67108864, "1K")

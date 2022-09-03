@@ -1,7 +1,12 @@
-import discord, datetime
+from __future__ import annotations
+
+import datetime
+
+import discord
 from discord.ext import commands
-from commons import checks
 from pytimeparse.timeparse import timeparse
+
+from commons import checks
 
 
 class Admin(commands.Cog):
@@ -20,7 +25,8 @@ class Admin(commands.Cog):
             return await ctx.send("You cannot kick yourself.")
         await user.kick()
         embed = discord.Embed(
-            title=f"User {user.name} has been kicked.", color=0x00FF00
+            title=f"User {user.name} has been kicked.",
+            color=0x00FF00,
         )
         embed.add_field(name="Goodbye!", value=":boot:")
         embed.set_thumbnail(url=user.avatar_url)
@@ -34,7 +40,8 @@ class Admin(commands.Cog):
             return await ctx.send("You cannot ban yourself.")
         await user.ban()
         embed = discord.Embed(
-            title=f"User {user.name} has been banned.", color=0x00FF00
+            title=f"User {user.name} has been banned.",
+            color=0x00FF00,
         )
         embed.add_field(name="Goodbye!", value=":hammer:")
         embed.set_thumbnail(url=user.avatar_url)
@@ -72,7 +79,8 @@ class Admin(commands.Cog):
         if rolem not in user.roles:
             return await ctx.send("User is not muted.")
         embed = discord.Embed(
-            title=f"User {user.name} has been unmuted.", color=0x00FF00
+            title=f"User {user.name} has been unmuted.",
+            color=0x00FF00,
         )
         embed.add_field(name="Welcome back!", value=":open_mouth:")
         embed.set_thumbnail(url=user.avatar_url)

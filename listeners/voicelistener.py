@@ -1,9 +1,13 @@
+from __future__ import annotations
+
 import discord
 from discord.ext import commands
 
 
 class VoiceListener(
-    commands.Cog, command_attrs=dict(hidden=True), name="Voice State Update Listener"
+    commands.Cog,
+    command_attrs=dict(hidden=True),
+    name="Voice State Update Listener",
 ):
     """Voice State Update Listener"""
 

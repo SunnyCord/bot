@@ -1,6 +1,10 @@
-import os, time
-from git import Repo
+from __future__ import annotations
+
+import os
+import time
+
 from discord.ext import commands
+from git import Repo
 
 
 class OwnerCog(commands.Cog, command_attrs=dict(hidden=True), name="Owner"):
@@ -26,7 +30,7 @@ class OwnerCog(commands.Cog, command_attrs=dict(hidden=True), name="Owner"):
         end_t = time.perf_counter()
         delta_t = end_t - start_t
         await ctx.send(
-            f"Operation completed succesfully in {delta_t:.2f}s. Output: ```prolog\n{message}\n```"
+            f"Operation completed succesfully in {delta_t:.2f}s. Output: ```prolog\n{message}\n```",
         )
 
     @commands.command()

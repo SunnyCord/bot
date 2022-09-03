@@ -1,7 +1,11 @@
+from __future__ import annotations
+
 import sys
-import discord
 import traceback
+
+import discord
 from discord.ext import commands
+
 import classes.exceptions as Exceptions
 
 
@@ -22,7 +26,7 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):
 
         elif isinstance(error, discord.errors.Forbidden):
             return await ctx.send(
-                f"I do not have permissions to perform ``{ctx.command}``!"
+                f"I do not have permissions to perform ``{ctx.command}``!",
             )
 
         elif isinstance(error, commands.DisabledCommand):
@@ -30,12 +34,12 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):
 
         elif isinstance(error, commands.CheckFailure):
             return await ctx.send(
-                f"You do not have the required permission for ``{ctx.command}``."
+                f"You do not have the required permission for ``{ctx.command}``.",
             )
 
         elif isinstance(error, commands.CommandOnCooldown):
             return await ctx.send(
-                "Slow down! You are on a %.2fs cooldown." % error.retry_after
+                "Slow down! You are on a %.2fs cooldown." % error.retry_after,
             )
 
         elif isinstance(error, commands.CommandInvokeError):
@@ -44,23 +48,23 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):
         elif isinstance(error, Exceptions.OsuAPIError):
             if error.queryType == "get_user":
                 return await ctx.send(
-                    f"User has not been found on {error.server.name_full} or has not played enough!"
+                    f"User has not been found on {error.server.name_full} or has not played enough!",
                 )
             elif error.queryType == "get_beatmap":
                 return await ctx.send(
-                    f"Beatmap was not found on {error.server.name_full}!"
+                    f"Beatmap was not found on {error.server.name_full}!",
                 )
             elif error.queryType == "get_recent":
                 return await ctx.send(
-                    f"User has no recent plays on {error.server.name_full}!"
+                    f"User has no recent plays on {error.server.name_full}!",
                 )
             elif error.queryType == "get_user_top":
                 return await ctx.send(
-                    f"User has no top plays on {error.server.name_full}!"
+                    f"User has no top plays on {error.server.name_full}!",
                 )
             elif error.queryType == "get_user_scores":
                 return await ctx.send(
-                    f"User has no scores on this beatmap on {error.server.name_full}!"
+                    f"User has no scores on this beatmap on {error.server.name_full}!",
                 )
             else:
                 return await ctx.send("Unknown API error.")
@@ -76,7 +80,8 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):
 
         exc = f"{type(error).__name__}"
         embed = discord.Embed(
-            title="Oh no! An error has occured", color=discord.Color.red()
+            title="Oh no! An error has occured",
+            color=discord.Color.red(),
         )
         embed.add_field(
             name="Error:",
@@ -86,7 +91,10 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):
         await ctx.send(embed=embed)
         print(f"Ignoring exception in command {ctx.command}:", file=sys.stderr)
         traceback.print_exception(
-            type(error), error, error.__traceback__, file=sys.stderr
+            type(error),
+            error,
+            error.__traceback__,
+            file=sys.stderr,
         )
 
 

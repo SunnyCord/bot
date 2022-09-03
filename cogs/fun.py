@@ -1,6 +1,10 @@
+from __future__ import annotations
+
+import random
+import time
+
 import discord
 from discord.ext import commands
-import random, time
 
 
 def random_line(fname):
@@ -25,7 +29,9 @@ class Fun(commands.Cog):
         except:
             pass
         embed = discord.Embed(
-            title="Poll:", description=args, color=self.bot.config.color
+            title="Poll:",
+            description=args,
+            color=self.bot.config.color,
         )
         embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
         embed.set_thumbnail(url=random_line("commons/pollimages"))

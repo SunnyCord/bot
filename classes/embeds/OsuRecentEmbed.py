@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import discord
+
 import classes.osu as osu
 
 
@@ -24,7 +27,10 @@ class OsuRecentEmbed(discord.Embed):
 > **Completion:** {score.performance.completion:.2f}%"""
 
         super().__init__(
-            title=None, color=color, description=description, timestamp=score.date
+            title=None,
+            color=color,
+            description=description,
+            timestamp=score.date,
         )
 
         self.set_author(

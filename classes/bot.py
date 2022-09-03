@@ -1,14 +1,18 @@
-import os
-import discord
+from __future__ import annotations
+
 import logging
+import os
+
+import discord
 from discord.ext import commands
 from motor import motor_asyncio
+
 from classes.config import ConfigList
-from commons.mongoIO import mongoIO
-from commons.osu.ppwrap import ppAPI
 from commons.helpers import list_module
+from commons.mongoIO import mongoIO
 from commons.osu.osuapiwrap import osuAPI
 from commons.osu.osuhelpers import osuHelper
+from commons.osu.ppwrap import ppAPI
 
 logger = logging.getLogger()
 

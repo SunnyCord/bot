@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from discord.ext import commands
+
 
 def check_permissions(ctx, perms):
     if is_owner_check(ctx):
@@ -8,6 +11,7 @@ def check_permissions(ctx, perms):
     author = ctx.author
     resolved = ch.permissions_for(author)
     return all(getattr(resolved, name, None) == value for name, value in perms.items())
+
 
 def is_gowner(**perms):
     def predicate(ctx):
@@ -19,8 +23,10 @@ def is_gowner(**perms):
         if ctx.author.id == owner.id:
             return True
 
-        return check_permissions(ctx,perms)
+        return check_permissions(ctx, perms)
+
     return commands.check(predicate)
+
 
 def can_mute(**perms):
     def predicate(ctx):
@@ -28,7 +34,9 @@ def can_mute(**perms):
             return True
         else:
             return False
+
     return commands.check(predicate)
+
 
 def can_kick(**perms):
     def predicate(ctx):
@@ -36,7 +44,9 @@ def can_kick(**perms):
             return True
         else:
             return False
+
     return commands.check(predicate)
+
 
 def can_ban(**perms):
     def predicate(ctx):
@@ -44,7 +54,9 @@ def can_ban(**perms):
             return True
         else:
             return False
+
     return commands.check(predicate)
+
 
 def can_managemsg(**perms):
     def predicate(ctx):
@@ -52,7 +64,9 @@ def can_managemsg(**perms):
             return True
         else:
             return False
+
     return commands.check(predicate)
+
 
 def can_manageguild(**perms):
     def predicate(ctx):
@@ -60,7 +74,9 @@ def can_manageguild(**perms):
             return True
         else:
             return False
+
     return commands.check(predicate)
+
 
 def is_admin(**perms):
     def predicate(ctx):
@@ -68,4 +84,5 @@ def is_admin(**perms):
             return True
         else:
             return False
+
     return commands.check(predicate)

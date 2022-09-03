@@ -1,6 +1,10 @@
-import discord
-import classes.osu as osu
+from __future__ import annotations
+
 from typing import List
+
+import discord
+
+import classes.osu as osu
 
 
 class OsuListEmbed(discord.Embed):

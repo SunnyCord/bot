@@ -1,11 +1,16 @@
+from __future__ import annotations
+
 import math
+
 import aiohttp
 import discord
 import lavalink
-import classes.exceptions as Exceptions
 from discord.ext import commands
 from lavalink.filters import LowPass
-from commons.regex import url_rx, track_title_rx
+
+import classes.exceptions as Exceptions
+from commons.regex import track_title_rx
+from commons.regex import url_rx
 
 
 class LavalinkVoiceClient(discord.VoiceClient):
@@ -61,7 +66,9 @@ class LavalinkVoiceClient(discord.VoiceClient):
         # ensure there is a player_manager when creating a new voice_client
         self.lavalink.player_manager.create(guild_id=self.channel.guild.id)
         await self.channel.guild.change_voice_state(
-            channel=self.channel, self_mute=self_mute, self_deaf=self_deaf
+            channel=self.channel,
+            self_mute=self_mute,
+            self_deaf=self_deaf,
         )
 
     async def disconnect(self, *, force: bool = False) -> None:
@@ -144,7 +151,7 @@ class Music(commands.Cog):
                 not permissions.connect or not permissions.speak
             ):  # Check user limit too?
                 raise Exceptions.MusicPlayerError(
-                    "I need the `CONNECT` and `SPEAK` permissions."
+                    "I need the `CONNECT` and `SPEAK` permissions.",
                 )
 
             player.store("channel", ctx.channel.id)
@@ -166,7 +173,8 @@ class Music(commands.Cog):
 
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(
-                    "https://some-random-api.ml/lyrics", params={"title": cleanTitle}
+                    "https://some-random-api.ml/lyrics",
+                    params={"title": cleanTitle},
                 ) as r:
                     rawData = await r.json()
                     if "error" in rawData:
@@ -251,7 +259,9 @@ class Music(commands.Cog):
         track = f"**[{player.current.title}]({player.current.uri})**\n({position}/{duration})"
 
         embed = discord.Embed(
-            color=self.bot.config.color, title="Now Playing", description=track
+            color=self.bot.config.color,
+            title="Now Playing",
+            description=track,
         )
 
         if (currentTrackData := player.fetch("currentTrackData")) != None:

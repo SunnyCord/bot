@@ -1,4 +1,8 @@
+from __future__ import annotations
+
 from enum import Enum
+
+
 class BeatmapStatus(Enum):
     GRAVEYARD = -2
     WIP = -1

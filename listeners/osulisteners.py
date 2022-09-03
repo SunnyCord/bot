@@ -1,12 +1,19 @@
-import aiohttp, discord
-import commons.redisIO as redisIO
+from __future__ import annotations
+
 from io import BytesIO
+
+import aiohttp
+import discord
 from discord.ext import commands
+
+import commons.redisIO as redisIO
 from classes.embeds.BeatmapEmbed import BeatmapEmbed
 
 
 class OsuListeners(
-    commands.Cog, command_attrs=dict(hidden=True), name="osu! Chat Listener"
+    commands.Cog,
+    command_attrs=dict(hidden=True),
+    name="osu! Chat Listener",
 ):
     """osu! Message Listeners"""
 
@@ -20,7 +27,7 @@ class OsuListeners(
             return
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                f"https://b.ppy.sh/preview/{beatmap.beatmapset_id}.mp3"
+                f"https://b.ppy.sh/preview/{beatmap.beatmapset_id}.mp3",
             ) as resp:
                 if resp.status == 200:
                     f = BytesIO(await resp.read())

@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import classes.osu as osu
+
 
 class Beatmap:
     """Class representing a beatmap
@@ -82,54 +85,63 @@ class Beatmap:
     ---------
     <https://osu.ppy.sh/wiki/Beatmaps>
     """
-    def __init__(self, json_response:dict, server:osu.Server):
-        self.status:osu.BeatmapStatus = osu.BeatmapStatus(int(json_response["approved"]))
-        self.approved_date:str = json_response["approved_date"]
-        self.submit_date:str = json_response["submit_date"]
-        self.last_update:str = json_response["last_update"]
-        self.artist:str = json_response["artist"]
-        self.beatmap_id:int = int(json_response["beatmap_id"])
-        self.beatmapset_id:int = int(json_response["beatmapset_id"])
-        self.bpm:float = float(json_response["bpm"])
-        self.creator:str = json_response["creator"]
-        self.creator_id:int = int(json_response["creator_id"])
-        self.difficultyrating:float = float(json_response["difficultyrating"])
+
+    def __init__(self, json_response: dict, server: osu.Server):
+        self.status: osu.BeatmapStatus = osu.BeatmapStatus(
+            int(json_response["approved"]),
+        )
+        self.approved_date: str = json_response["approved_date"]
+        self.submit_date: str = json_response["submit_date"]
+        self.last_update: str = json_response["last_update"]
+        self.artist: str = json_response["artist"]
+        self.beatmap_id: int = int(json_response["beatmap_id"])
+        self.beatmapset_id: int = int(json_response["beatmapset_id"])
+        self.bpm: float = float(json_response["bpm"])
+        self.creator: str = json_response["creator"]
+        self.creator_id: int = int(json_response["creator_id"])
+        self.difficultyrating: float = float(json_response["difficultyrating"])
         # self.diff_aim:float = float(jsonResponse["diff_aim"]) if jsonResponse["diff_aim"] is not None else None
         # self.diff_speed:float = float(jsonResponse["diff_speed"]) if jsonResponse["diff_speed"] is not None else None
-        self.diff_size:float = float(json_response["diff_size"])
-        self.diff_overall:float = float(json_response["diff_overall"])
-        self.diff_approach:float = float(json_response["diff_approach"])
-        self.diff_drain:float = float(json_response["diff_drain"])
-        self.hit_length:int = int(json_response["hit_length"])
-        self.source:str = json_response["source"]
-        self.genre_id:int = int(json_response["genre_id"])
-        self.language_id:int = int(json_response["language_id"])
-        self.title:str = json_response["title"]
-        self.total_length:int = int(json_response["total_length"])
-        self.version:str = json_response["version"]
-        self.file_md5:str = json_response["file_md5"]
-        self.mode:Mode = json_response["mode"]
-        self.tags:str = json_response["tags"]
-        self.favourite_count:int = int(json_response["favourite_count"])
-        self.rating:float = float(json_response["rating"])
-        self.playcount:int = int(json_response["playcount"])
-        self.passcount:int = int(json_response["passcount"])
-        self.count_normal:int = int(json_response["count_normal"])
-        self.count_slider:int = int(json_response["count_slider"])
-        self.count_spinner:int = int(json_response["count_spinner"])
-        self.max_combo:int = int(json_response["max_combo"]) if json_response["max_combo"] is not None else None # - no response from osu!API
-        self.download_unavailable:bool = bool(json_response["download_unavailable"])
-        self.audio_unavailable:bool = bool(json_response["audio_unavailable"])
+        self.diff_size: float = float(json_response["diff_size"])
+        self.diff_overall: float = float(json_response["diff_overall"])
+        self.diff_approach: float = float(json_response["diff_approach"])
+        self.diff_drain: float = float(json_response["diff_drain"])
+        self.hit_length: int = int(json_response["hit_length"])
+        self.source: str = json_response["source"]
+        self.genre_id: int = int(json_response["genre_id"])
+        self.language_id: int = int(json_response["language_id"])
+        self.title: str = json_response["title"]
+        self.total_length: int = int(json_response["total_length"])
+        self.version: str = json_response["version"]
+        self.file_md5: str = json_response["file_md5"]
+        self.mode: Mode = json_response["mode"]
+        self.tags: str = json_response["tags"]
+        self.favourite_count: int = int(json_response["favourite_count"])
+        self.rating: float = float(json_response["rating"])
+        self.playcount: int = int(json_response["playcount"])
+        self.passcount: int = int(json_response["passcount"])
+        self.count_normal: int = int(json_response["count_normal"])
+        self.count_slider: int = int(json_response["count_slider"])
+        self.count_spinner: int = int(json_response["count_spinner"])
+        self.max_combo: int = (
+            int(json_response["max_combo"])
+            if json_response["max_combo"] is not None
+            else None
+        )  # - no response from osu!API
+        self.download_unavailable: bool = bool(json_response["download_unavailable"])
+        self.audio_unavailable: bool = bool(json_response["audio_unavailable"])
 
         self.beatmap_url = server.url_beatmap + str(self.beatmap_id)
 
     def __repr__(self):
-        return "<{0.__module__}.Beatmap title={0.title} creator={0.creator} id={0.beatmap_id}>".format(self)
+        return "<{0.__module__}.Beatmap title={0.title} creator={0.creator} id={0.beatmap_id}>".format(
+            self,
+        )
 
     @property
     def url(self):
-        return "https://osu.ppy.sh/b/{0.beatmap_id}".format(self)
+        return f"https://osu.ppy.sh/b/{self.beatmap_id}"
 
     @property
     def set_url(self):
-        return "https://osu.ppy.sh/s/{0.beatmapset_id}".format(self)
+        return f"https://osu.ppy.sh/s/{self.beatmapset_id}"

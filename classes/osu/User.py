@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import classes.osu as osu
+
 
 class User:
     """Class representing a user.
@@ -50,47 +53,59 @@ class User:
     ---------
     <https://osu.ppy.sh/wiki/Score>
     """
-    def __init__(self, json_response:dict, server:osu.Server=osu.Server.BANCHO, mode:osu.Mode=osu.Mode.STANDARD):
-        self.user_id:int = int(json_response["user_id"])
-        self.username:int = json_response["username"]
-        self.count300:int = int(json_response["count300"] or 0)
-        self.count100:int = int(json_response["count100"] or 0)
-        self.count50:int = int(json_response["count50"] or 0)
-        self.playcount:int = int(json_response["playcount"] or 0)
-        self.ranked_score:int = int(json_response["ranked_score"] or 0)
-        self.total_score:int = int(json_response["total_score"] or 0)
-        self.pp_rank:int = int(json_response["pp_rank"] or 0)
-        self.level:float = float(json_response["level"] or 0)
-        self.pp_raw:float = float(json_response["pp_raw"] or 0)
-        self.total_seconds_played:int = int(json_response["total_seconds_played"] or 0)
-        self.accuracy:float = float(json_response["accuracy"] or 0)
-        self.count_rank_ss:int = int(json_response["count_rank_ss"] or 0)
-        self.count_rank_s:int = int(json_response["count_rank_s"] or 0)
-        self.count_rank_a:int = int(json_response["count_rank_a"] or 0)
-        self.country:str = json_response["country"]
-        self.pp_country_rank:int = int(json_response["pp_country_rank"] or 0)
-        #self.events = Attribute(JsonList(UserEvent))
+
+    def __init__(
+        self,
+        json_response: dict,
+        server: osu.Server = osu.Server.BANCHO,
+        mode: osu.Mode = osu.Mode.STANDARD,
+    ):
+        self.user_id: int = int(json_response["user_id"])
+        self.username: int = json_response["username"]
+        self.count300: int = int(json_response["count300"] or 0)
+        self.count100: int = int(json_response["count100"] or 0)
+        self.count50: int = int(json_response["count50"] or 0)
+        self.playcount: int = int(json_response["playcount"] or 0)
+        self.ranked_score: int = int(json_response["ranked_score"] or 0)
+        self.total_score: int = int(json_response["total_score"] or 0)
+        self.pp_rank: int = int(json_response["pp_rank"] or 0)
+        self.level: float = float(json_response["level"] or 0)
+        self.pp_raw: float = float(json_response["pp_raw"] or 0)
+        self.total_seconds_played: int = int(json_response["total_seconds_played"] or 0)
+        self.accuracy: float = float(json_response["accuracy"] or 0)
+        self.count_rank_ss: int = int(json_response["count_rank_ss"] or 0)
+        self.count_rank_s: int = int(json_response["count_rank_s"] or 0)
+        self.count_rank_a: int = int(json_response["count_rank_a"] or 0)
+        self.country: str = json_response["country"]
+        self.pp_country_rank: int = int(json_response["pp_country_rank"] or 0)
+        # self.events = Attribute(JsonList(UserEvent))
 
         # Fields that might not exist in the json
-        if "count_rank_ssh" in json_response and json_response["count_rank_ssh"] is not None:
-            self.count_rank_ssh:int = int(json_response["count_rank_ssh"])
+        if (
+            "count_rank_ssh" in json_response
+            and json_response["count_rank_ssh"] is not None
+        ):
+            self.count_rank_ssh: int = int(json_response["count_rank_ssh"])
         else:
-            self.count_rank_ssh:int = 0
+            self.count_rank_ssh: int = 0
 
-        if "count_rank_sh" in json_response and json_response["count_rank_sh"] is not None:
-            self.count_rank_sh:int = int(json_response["count_rank_sh"])
+        if (
+            "count_rank_sh" in json_response
+            and json_response["count_rank_sh"] is not None
+        ):
+            self.count_rank_sh: int = int(json_response["count_rank_sh"])
         else:
-            self.count_rank_sh:int = 0
+            self.count_rank_sh: int = 0
 
         if "join_date" in json_response and json_response["join_date"] is not None:
-            self.join_date:int = json_response["join_date"]
+            self.join_date: int = json_response["join_date"]
         else:
-            self.join_date:int = None
+            self.join_date: int = None
 
-        self.server:osu.Server = server
-        self.mode:osu.Mode = mode
-        self.avatar_url:str = server.url_avatar + str(self.user_id)
-        self.profile_url:str = server.url_profile + str(self.user_id)
+        self.server: osu.Server = server
+        self.mode: osu.Mode = mode
+        self.avatar_url: str = server.url_avatar + str(self.user_id)
+        self.profile_url: str = server.url_profile + str(self.user_id)
 
     @property
     def total_hits(self):
@@ -98,10 +113,12 @@ class User:
 
     @property
     def level_progress(self):
-        return float(self.level)%1*100
+        return float(self.level) % 1 * 100
 
     def __repr__(self):
-        return "<{0.__module__}.User username={0.username} user_id={0.user_id}>".format(self)
+        return "<{0.__module__}.User username={0.username} user_id={0.user_id}>".format(
+            self,
+        )
 
     def __str__(self):
         return self.username

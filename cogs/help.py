@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import discord
 from discord.ext import commands
 
@@ -53,7 +55,9 @@ class Help(commands.Cog):
                             for c in self.bot.get_cog(y).get_commands():
                                 if not c.hidden:
                                     helpEmbed.add_field(
-                                        name=c.name, value=c.help, inline=False
+                                        name=c.name,
+                                        value=c.help,
+                                        inline=False,
                                     )
                             found = True
                 if not found:

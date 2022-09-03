@@ -1,6 +1,9 @@
+from __future__ import annotations
+
+import aiohttp
 import discord
 from discord.ext import commands
-import aiohttp
+
 from classes.enums.animals import Animal
 from commons import helpers
 
@@ -23,7 +26,7 @@ class Image(commands.Cog):
         currAnimal = Animal.from_name(ctx.invoked_with)
         async with aiohttp.ClientSession() as cs:
             async with cs.get(
-                f"https://some-random-api.ml/animal/{currAnimal.name}"
+                f"https://some-random-api.ml/animal/{currAnimal.name}",
             ) as r:
                 res = await r.json()
                 imgUrl = res["image"]
@@ -44,7 +47,8 @@ class Image(commands.Cog):
                 res = await r.json()
                 imgUrl = res["link"]
         embed = discord.Embed(
-            title=f"{ctx.author.name} winks 😉", color=self.bot.config.color
+            title=f"{ctx.author.name} winks 😉",
+            color=self.bot.config.color,
         ).set_image(url=imgUrl)
         await ctx.send(embed=embed)
 

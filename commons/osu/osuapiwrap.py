@@ -1,7 +1,10 @@
-import aiohttp
-from io import StringIO
-import classes.osu as osu
+from __future__ import annotations
+
 from typing import List
+
+import aiohttp
+
+import classes.osu as osu
 from classes.exceptions import OsuAPIError
 
 
@@ -84,15 +87,19 @@ class osuAPI:
                         return list(
                             map(
                                 lambda recent: osu.RecentScore(
-                                    recent, user.server, user.mode
+                                    recent,
+                                    user.server,
+                                    user.mode,
                                 ),
                                 res,
-                            )
+                            ),
                         )
 
             except Exception:
                 raise OsuAPIError(
-                    user.server, "get_recent", "Invalid query or API down."
+                    user.server,
+                    "get_recent",
+                    "Invalid query or API down.",
                 )
 
     async def getusrtop(self, user: osu.User, limit: int = 1) -> List[osu.RecentScore]:
@@ -118,11 +125,16 @@ class osuAPI:
 
             except Exception:
                 raise OsuAPIError(
-                    user.server, "get_user_top", "Invalid query or API down."
+                    user.server,
+                    "get_user_top",
+                    "Invalid query or API down.",
                 )
 
     async def getusrscores(
-        self, user: osu.User, beatmap_id: int, limit: int = 1
+        self,
+        user: osu.User,
+        beatmap_id: int,
+        limit: int = 1,
     ) -> List[osu.BeatmapScore]:
 
         async with aiohttp.ClientSession() as cs:
@@ -151,10 +163,12 @@ class osuAPI:
                             map(
                                 lambda score: osu.BeatmapScore(score, beatmap_id),
                                 res[:limit],
-                            )
+                            ),
                         )
 
             except Exception:
                 raise OsuAPIError(
-                    user.server, "get_user_scores", "Invalid query or API down."
+                    user.server,
+                    "get_user_scores",
+                    "Invalid query or API down.",
                 )
