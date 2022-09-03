@@ -3,8 +3,8 @@ version: '3.8'
 services:
 
   lavalink:
+    image: fredboat/lavalink
     container_name: lavalink
-    image: freyacodes:lavalink
     restart: always
     volumes:
       - ./application.yml:/opt/Lavalink/application.yml
