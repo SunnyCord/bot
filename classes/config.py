@@ -2,11 +2,20 @@ import os
 import json
 from typing import List, Dict
 
-class Config():
 
+class Config:
     def __init__(
-        self, redis: bool, mongo: Dict, lavalink: List[Dict], sentry: str, command_prefixes: List, token: str,
-        osuAPI:str, ppAPI: Dict, owners:List[int], splashArt: str, color: int
+        self,
+        redis: bool,
+        mongo: Dict,
+        lavalink: List[Dict],
+        sentry: str,
+        command_prefixes: List,
+        token: str,
+        osuAPI: str,
+        ppAPI: Dict,
+        owners: List[int],
+        color: int,
     ):
         self.redis = redis
         self.mongo = mongo
@@ -17,7 +26,6 @@ class Config():
         self.osuAPI = osuAPI
         self.ppAPI = ppAPI
         self.owners = owners
-        self.splashArt = splashArt
         self.color = color
 
     @classmethod
@@ -32,8 +40,8 @@ class Config():
             configDict = json.loads(configData)
             selectedConfig = configDict["configs"][configDict["select"]]
             configJSON.close()
-            return self (
-                configDict['redis'],
+            return self(
+                configDict["redis"],
                 selectedConfig["mongo"],
                 list(selectedConfig["lavalink"]),
                 selectedConfig["sentry"],
@@ -42,6 +50,5 @@ class Config():
                 str(selectedConfig["osuAPI"]),
                 selectedConfig["ppAPI"],
                 list(selectedConfig["owners"]),
-                str(selectedConfig["splashArt"]),
-                int(selectedConfig["color"], 16)
+                int(selectedConfig["color"], 16),
             )
