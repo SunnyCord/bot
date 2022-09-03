@@ -12,14 +12,16 @@
             "lavalink": [
                 {
                     "ip": "127.0.0.1",
-                    "password": "",
-                    "port": 8080,
+                    "password": "youshallnotpass",
+                    "port": 2333,
                     "region": "eu",
                     "name": "default-node"
                 }
             ],
             "sentry": "",
-            "command_prefixes": ["s."],
+            "command_prefixes": [
+                "s."
+            ],
             "color": "0xd74613",
             "token": "",
             "osuAPI": "",
@@ -27,7 +29,7 @@
                 "URL": "https://pp.aesth.dev",
                 "secret": "potato"
             },
-            "owners": [ ],
+            "owners": [],
             "splashArt": "Sunny"
         }
     ]
