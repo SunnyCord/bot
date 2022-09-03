@@ -26,11 +26,11 @@ class LavalinkVoiceClient(discord.VoiceClient):
             self.client.lavalink = lavalink.Client(client.user.id)
             for node in client.config.lavalink:
                 self.client.lavalink.add_node(
-                    node["ip"],
-                    node["port"],
-                    node["password"],
-                    node["region"],
-                    node["name"],
+                    node.host,
+                    node.port,
+                    node.password,
+                    node.region,
+                    node.name,
                 )
             self.lavalink = self.client.lavalink
 
@@ -95,11 +95,11 @@ class Music(commands.Cog):
             bot.lavalink = lavalink.Client(bot.user.id)
             for node in bot.config.lavalink:
                 bot.lavalink.add_node(
-                    node["ip"],
-                    node["port"],
-                    node["password"],
-                    node["region"],
-                    node["name"],
+                    node.host,
+                    node.port,
+                    node.password,
+                    node.region,
+                    node.name,
                 )
 
         lavalink.add_event_hook(self.track_hook)

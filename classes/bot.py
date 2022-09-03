@@ -3,7 +3,7 @@ import discord
 import logging
 from discord.ext import commands
 from motor import motor_asyncio
-from classes.config import Config
+from classes.config import ConfigList
 from commons.mongoIO import mongoIO
 from commons.osu.ppwrap import ppAPI
 from commons.helpers import list_module
@@ -49,20 +49,18 @@ class Sunny(commands.AutoShardedBot):
             # activity=discord.Activity(),
             help_command=None,
         )
-        self.config = Config.fromJSON("config.json")
+        self.config = ConfigList.get_config()
         self.motorClient = motor_asyncio.AsyncIOMotorClient(
-            self.config.mongo["URI"],
-            serverSelectionTimeoutMS=self.config.mongo["timeout"],
+            self.config.mongo.host,
+            serverSelectionTimeoutMS=self.config.mongo.timeout,
         )
         self.mongoIO = mongoIO(self)
         self.osuAPI = osuAPI(self.config.osuAPI)
         self.osuHelpers = osuHelper(self)
-        self.ppAPI = ppAPI(self.config.ppAPI["URL"], self.config.ppAPI["secret"])
+        self.ppAPI = ppAPI(self.config.ppAPI.host, self.config.ppAPI.secret)
 
     def run(self, **kwargs) -> None:
-        super().run(
-            self.config.token, log_level="INFO", **kwargs
-        )  # self.config.log_level
+        super().run(self.config.token, log_level=self.config.log_level, **kwargs)
 
     async def ensure_guild(self, query):
         if (guild := self.get_guild(query)) is None:

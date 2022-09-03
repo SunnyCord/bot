@@ -6,7 +6,7 @@ class mongoIO():
 
 	def __init__(self, bot):
 		self.config = bot.config
-		self.db=bot.motorClient[self.config.mongo['database']]
+		self.db=bot.motorClient[self.config.mongo.database]
 
 	async def addUser(self, member: discord.Member, blacklist: bool = False, osuID: int = None, osuServer: int = 0):
 		await self.db.users.insert_one(
