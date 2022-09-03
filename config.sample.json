@@ -12,8 +12,8 @@
             "lavalink": [
                 {
                     "ip": "127.0.0.1",
-                    "port": 8080,
-                    "password": "",
+                    "port": 2333,
+                    "password": "youshallnotpass",
                     "region": "eu",
                     "name": "default-node"
                 }
