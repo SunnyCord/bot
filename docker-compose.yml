@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+
+  lavalink:
+    image: fredboat:lavalink
+    restart: always
+    ports:
+      - '2333:2333'
+
+  cache:
+    image: redis:alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning
+    volumes:
+      - cache:/data
+
+  db:
+    image: mongo:5.0
+    ports:
+      - '27017:27017'
+    volumes:
+      - db:/data/db
+
+  giuseppe:
+    build: ./
+    container_name: giuseppe
+    volumes:
+      - ./config.json:/home/appuser/config.json
+    depends_on:
+      - cache
+      - db
+
+volumes:
+  cache:
+    driver: local
+  db:
+    driver: local
