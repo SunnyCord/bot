@@ -10,6 +10,7 @@ from commons.mongoIO import mongoIO
 from commons.osu.osuapiwrap import osuAPI
 from commons.osu.osuhelpers import osuHelper
 from commons.osu.ppwrap import ppAPI
+from commons.redisIO import redisIO
 from discord.ext import commands
 from motor import motor_asyncio
 
@@ -57,6 +58,7 @@ class Sunny(commands.AutoShardedBot):
             self.config.mongo.host,
             serverSelectionTimeoutMS=self.config.mongo.timeout,
         )
+        self.redisIO = None if self.config.redis.enable else redisIO(self)
         self.mongoIO = mongoIO(self)
         self.osuAPI = osuAPI(self.config.osuAPI)
         self.osuHelpers = osuHelper(self)

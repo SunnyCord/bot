@@ -8,9 +8,12 @@ class ppAPI:
     def __init__(self, URL, secret):
         self.__secret = secret
         self.__URL = URL
-        self.__session = aiohttp.ClientSession()
+        self.__session = None
 
     async def calculateScore(self, score, mode: int = None):
+
+        if self.__session is None:
+            self.__session = aiohttp.ClientSession()
 
         if mode is None:
             mode = score.mode
@@ -59,6 +62,9 @@ class ppAPI:
         )
 
     async def calculateBeatmap(self, beatmapID, mods, mode: int = 0):
+
+        if self.__session is None:
+            self.__session = aiohttp.ClientSession()
 
         payload = {
             "secret": self.__secret,

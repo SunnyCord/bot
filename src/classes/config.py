@@ -11,6 +11,13 @@ logger = logging.getLogger("discord")
 
 
 @dataclass(frozen=True)
+class RedisConfig:
+    enable: bool = False
+    host: str = ""
+    port: int = 6379
+
+
+@dataclass(frozen=True)
 class MongoConfig:
     host: str = ""
     database: str = "sunny"
@@ -34,7 +41,6 @@ class LavalinkConfig:
 
 @dataclass(frozen=True)
 class Config:
-    redis: bool = True
     log_level: str = "WARNING"
     color: int = 0xD74613
     token: str = ""
@@ -42,6 +48,7 @@ class Config:
     sentry: str = ""
     owners: List[int] = field(default_factory=lambda: [151670779782758400])
     command_prefixes: List[str] = field(default_factory=lambda: ["s."])
+    redis: RedisConfig = field(default_factory=lambda: RedisConfig())
     mongo: MongoConfig = field(default_factory=lambda: MongoConfig())
     ppAPI: PPConfig = field(default_factory=lambda: PPConfig())
     lavalink: List[LavalinkConfig] = field(default_factory=lambda: [LavalinkConfig()])

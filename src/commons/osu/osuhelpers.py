@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import classes.osu as osu
-import commons.redisIO as redisIO
 from commons.regex import beatmap_id_rx
 from commons.regex import beatmap_link_rx
 
@@ -9,7 +8,6 @@ from commons.regex import beatmap_link_rx
 class osuHelper:
     def __init__(self, bot):
         self.bot = bot
-        self.osuAPI = self.bot.osuAPI
 
     @staticmethod
     def parseArgsV2(**kwargs):
@@ -212,20 +210,22 @@ class osuHelper:
                 beatmapId = int(resultLink.group("bmapid1"))
             else:
                 setId = int(resultLink.group("bmapset1"))
-            return await self.osuAPI.getbmap(beatmapId, setId)
+            return await self.bot.osuAPI.getbmap(beatmapId, setId)
 
         if not ignoreID:
             resultId = beatmap_id_rx.match(text)
             if resultId is not None:
                 beatmapId = int(resultId.group("bmapid"))
-                return await self.osuAPI.getbmap(beatmapId)
+                return await self.bot.osuAPI.getbmap(beatmapId)
 
         return None
 
     async def getBeatmapFromHistory(self, ctx) -> osu.Beatmap:
-        beatmap_id = redisIO.getValue(ctx.message.channel.id)
+        beatmap_id = self.bot.redisIO.getValue(ctx.message.channel.id)
         if beatmap_id is None:
             return None
 
-        mode = osu.Mode.fromId(redisIO.getValue(f"{ctx.message.channel.id}.mode"))
-        return await self.osuAPI.getbmap(beatmap_id, mode=mode)
+        mode = osu.Mode.fromId(
+            self.bot.redisIO.getValue(f"{ctx.message.channel.id}.mode"),
+        )
+        return await self.bot.osuAPI.getbmap(beatmap_id, mode=mode)

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import datetime
-
 import classes.exceptions as Exceptions
 import discord
 
@@ -76,21 +74,6 @@ class mongoIO:
                 },
             )
 
-    async def muteUser(self, member: discord.Member, guild: discord.Guild, ends):
-        await self.db.mutes.update_one(
-            {"memberID": member.id, "guildID": guild.id},
-            {"$set": {"memberID": member.id, "guildID": guild.id, "ends": ends}},
-            upsert=True,
-        )
-
-    async def unmuteUser(self, member: discord.Member, guild: discord.Guild):
-        await self.db.mutes.delete_many({"memberID": member.id, "guildID": guild.id})
-
-    async def getExpiredMutes(self):
-        return await self.db.mutes.find(
-            {"ends": {"$lt": datetime.datetime.utcnow()}},
-        ).to_list(None)
-
     async def isBlacklisted(self, member: discord.Member):
         if (
             databaseUser := await self.db.users.find_one({"id": {"$eq": member.id}})
@@ -103,7 +86,6 @@ class mongoIO:
 
     async def removeServer(self, guild: discord.Guild):
         await self.db.settings.delete_many({"guildID": guild.id})
-        await self.db.mutes.delete_many({"guildID": guild.id})
 
     async def serverExists(self, server: discord.Guild):
         return await self.db.settings.find_one({"id": {"$eq": server.id}}) is not None
@@ -126,5 +108,4 @@ class mongoIO:
 
     async def wipe(self):
         await self.db.users.delete_many({})
-        await self.db.mutes.delete_many({})
         await self.db.settings.delete_many({})

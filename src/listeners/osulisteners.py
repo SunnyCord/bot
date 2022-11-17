@@ -3,7 +3,6 @@ from __future__ import annotations
 from io import BytesIO
 
 import aiohttp
-import commons.redisIO as redisIO
 import discord
 from classes.embeds.BeatmapEmbed import BeatmapEmbed
 from discord.ext import commands
@@ -31,9 +30,9 @@ class OsuListeners(
                 if resp.status == 200:
                     f = BytesIO(await resp.read())
 
-        if self.bot.config.redis is True:
-            redisIO.setValue(message.channel.id, beatmap.beatmap_id)
-            redisIO.setValue(f"{message.channel.id}.mode", beatmap.mode)
+        if self.bot.redisIO is not None:
+            self.bot.redisIO.setValue(message.channel.id, beatmap.beatmap_id)
+            self.bot.redisIO.setValue(f"{message.channel.id}.mode", beatmap.mode)
 
         await message.channel.send(
             embed=BeatmapEmbed(beatmap, self.bot.config.color),

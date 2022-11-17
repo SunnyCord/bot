@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from discord.ext import commands
-from git import Repo
 
 
 class OwnerCog(commands.Cog, command_attrs=dict(hidden=True), name="Owner"):

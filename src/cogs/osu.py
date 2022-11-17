@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import List
 
 import classes.osu as osuClasses
-import commons.redisIO as redisIO
 from classes.embeds import *
 from commons.regex import id_rx
 from discord.ext import commands
@@ -129,9 +128,9 @@ class osuCog(commands.Cog, name="osu!"):
             await self.bot.osuAPI.getrecent(profile, limit)
         )[0]
 
-        if self.bot.config.redis is True:
-            redisIO.setValue(ctx.message.channel.id, recent_score.beatmap_id)
-            redisIO.setValue(f"{ctx.message.channel.id}.mode", mode.id)
+        if self.bot.redisIO is not None:
+            self.bot.redisIO.setValue(ctx.message.channel.id, recent_score.beatmap_id)
+            self.bot.redisIO.setValue(f"{ctx.message.channel.id}.mode", mode.id)
 
         beatmap: osuClasses.Beatmap = await self.bot.osuAPI.getbmap(
             recent_score.beatmap_id,
@@ -229,9 +228,9 @@ class osuCog(commands.Cog, name="osu!"):
             tops = tops[:5]
             positions = positions[:5]
 
-        if self.bot.config.redis is True:
-            redisIO.setValue(ctx.message.channel.id, tops[0].beatmap_id)
-            redisIO.setValue(f"{ctx.message.channel.id}.mode", mode.id)
+        if self.bot.redisIO is not None:
+            self.bot.redisIO.setValue(ctx.message.channel.id, tops[0].beatmap_id)
+            self.bot.redisIO.setValue(f"{ctx.message.channel.id}.mode", mode.id)
 
         beatmaps = []
 
@@ -291,9 +290,15 @@ class osuCog(commands.Cog, name="osu!"):
                     beatmap = await self.bot.osuHelpers.getBeatmapFromText(
                         parsedArgs["beatmap"],
                     )
-                    if self.bot.config.redis is True:
-                        redisIO.setValue(ctx.message.channel.id, beatmap.beatmap_id)
-                        redisIO.setValue(f"{ctx.message.channel.id}.mode", mode.id)
+                    if self.bot.redisIO is not None:
+                        self.bot.redisIO.setValue(
+                            ctx.message.channel.id,
+                            beatmap.beatmap_id,
+                        )
+                        self.bot.redisIO.setValue(
+                            f"{ctx.message.channel.id}.mode",
+                            mode.id,
+                        )
             user = parsedArgs["user"]
             qtype = parsedArgs["qtype"]
             server = parsedArgs["server"]
@@ -316,9 +321,9 @@ class osuCog(commands.Cog, name="osu!"):
             server = osuClasses.Server.from_id(serverID)
 
         if "c" == ctx.invoked_with or "compare" == ctx.invoked_with and beatmap is None:
-            if self.bot.config.redis is True:
-                modeID = redisIO.getValue(f"{ctx.message.channel.id}.mode")
-                beatmapID = redisIO.getValue(ctx.message.channel.id)
+            if self.bot.redisIO is not None:
+                modeID = self.bot.redisIO.getValue(f"{ctx.message.channel.id}.mode")
+                beatmapID = self.bot.redisIO.getValue(ctx.message.channel.id)
                 if modeID is None or beatmapID is None:
                     return
                 mode = osuClasses.Mode.fromId(modeID)
@@ -392,9 +397,9 @@ class osuCog(commands.Cog, name="osu!"):
             await ctx.send("Failed to find any maps")
             return
 
-        if self.bot.config.redis is True:
-            redisIO.setValue(ctx.message.channel.id, beatmap.beatmap_id)
-            redisIO.setValue(f"{ctx.message.channel.id}.mode", mode.id)
+        if self.bot.redisIO is not None:
+            self.bot.redisIO.setValue(ctx.message.channel.id, beatmap.beatmap_id)
+            self.bot.redisIO.setValue(f"{ctx.message.channel.id}.mode", mode.id)
 
         mods: osuClasses.Mods = osuClasses.Mods(args["mods"])
 

@@ -3,7 +3,11 @@
     "select": 0,
     "configs": [
         {
-            "redis": true,
+            "redis": {
+                "enable": true,
+                "host": "redis",
+                "port": 6379
+            },
             "log_level": "WARNING",
             "color": 14108179,
             "token": "",

@@ -9,6 +9,7 @@ services:
       - ./config.json:/home/appuser/config.json:ro
     extra_hosts:
       - "lavalink:127.0.0.1" # Expose lavalink to container
+      - "redis:127.0.0.1" # Expose redis to container
 
   watchtower:
     image: containrrr/watchtower
