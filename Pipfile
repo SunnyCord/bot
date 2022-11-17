@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-"discord.py" = {version = "==2.0.1", extras = ["speed", "voice"]}
+"discord.py" = {version = "==2.1.0", extras = ["speed", "voice"]}
 "motor" = {version = ">=3.0.0", extras = ["srv"]}
 lavalink = ">=3.1.4"
 redis = ">=4.3.4"
