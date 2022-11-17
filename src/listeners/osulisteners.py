@@ -3,11 +3,10 @@ from __future__ import annotations
 from io import BytesIO
 
 import aiohttp
-import discord
-from discord.ext import commands
-
 import commons.redisIO as redisIO
+import discord
 from classes.embeds.BeatmapEmbed import BeatmapEmbed
+from discord.ext import commands
 
 
 class OsuListeners(

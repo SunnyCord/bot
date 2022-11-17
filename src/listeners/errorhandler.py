@@ -3,10 +3,9 @@ from __future__ import annotations
 import sys
 import traceback
 
+import classes.exceptions as Exceptions
 import discord
 from discord.ext import commands
-
-import classes.exceptions as Exceptions
 
 
 class CommandErrorHandler(commands.Cog, name="Error Handler"):

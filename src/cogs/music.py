@@ -3,14 +3,13 @@ from __future__ import annotations
 import math
 
 import aiohttp
+import classes.exceptions as Exceptions
 import discord
 import lavalink
-from discord.ext import commands
-from lavalink.filters import LowPass
-
-import classes.exceptions as Exceptions
 from commons.regex import track_title_rx
 from commons.regex import url_rx
+from discord.ext import commands
+from lavalink.filters import LowPass
 
 
 class LavalinkVoiceClient(discord.VoiceClient):

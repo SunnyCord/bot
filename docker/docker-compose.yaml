@@ -8,5 +8,5 @@ services:
     volumes:
       - ./config.json:/home/appuser/config.json
 
-networks:
-  sunny:
+extra_hosts:
+  - "lavalink:127.0.0.1"

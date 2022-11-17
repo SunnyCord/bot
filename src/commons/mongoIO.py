@@ -2,9 +2,8 @@ from __future__ import annotations
 
 import datetime
 
-import discord
-
 import classes.exceptions as Exceptions
+import discord
 
 
 class mongoIO:

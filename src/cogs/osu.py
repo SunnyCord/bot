@@ -2,12 +2,11 @@ from __future__ import annotations
 
 from typing import List
 
-from discord.ext import commands
-
 import classes.osu as osuClasses
 import commons.redisIO as redisIO
 from classes.embeds import *
 from commons.regex import id_rx
+from discord.ext import commands
 
 
 class osuCog(commands.Cog, name="osu!"):

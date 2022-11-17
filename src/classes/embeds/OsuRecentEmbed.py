@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-import discord
-
 import classes.osu as osu
+import discord
 
 
 class OsuRecentEmbed(discord.Embed):

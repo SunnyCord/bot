@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import aiohttp
 import discord
-from discord.ext import commands
-
 from classes.enums.animals import Animal
 from commons import helpers
+from discord.ext import commands
 
 
 class Image(commands.Cog):
