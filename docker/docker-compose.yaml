@@ -3,10 +3,10 @@ version: '3.8'
 services:
 
   sunny:
-    build: ./
+    image: niceaesthetics/sunny:master
     container_name: sunny
     volumes:
       - ./config.json:/home/appuser/config.json
 
 extra_hosts:
-  - "lavalink:127.0.0.1"
+  - "lavalink:127.0.0.1" # Expose lavalink to container
