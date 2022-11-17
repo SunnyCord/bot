@@ -5,17 +5,16 @@ name = "pypi"
 
 [packages]
 "discord.py" = {version = "==2.1.0", extras = ["speed", "voice"]}
-"motor" = {version = ">=3.0.0", extras = ["srv"]}
-lavalink = ">=3.1.4"
+"motor" = {version = ">=3.1.1", extras = ["srv"]}
+lavalink = ">=4.0.4"
 redis = ">=4.3.4"
 jishaku = ">=2.5.1"
-sentry-sdk = ">=1.9.7"
+sentry-sdk = ">=1.11.0"
 pytimeparse = ">=1.1.8"
-GitPython = ">=3.1.27"
 dataclasses-json = ">=0.5.7"
 
 [dev-packages]
-black = ">=22.8.0"
+black = ">=22.10.0"
 
 [requires]
 python_version = "3.11"
