@@ -58,13 +58,8 @@ class ConfigList:
         return self.configs[self.select]
 
     @classmethod
-    def get_config(cls) -> Config:
+    def _create_config(cls) -> None:
         with open("config.json", "a+") as config_file:
-            config_file.seek(0)
-            data = config_file.read()
-            if data:
-                config_file.close()
-                return cls.from_json(data).__get_selected_config()
             fmt = cls().to_json(indent=4)
             config_file.write(fmt)
             logger.warn(
@@ -72,3 +67,13 @@ class ConfigList:
             )
             config_file.close()
             exit()
+
+    @classmethod
+    def get_config(cls) -> Config:
+        with open("config.json") as config_file:
+            config_file.seek(0)
+            data = config_file.read()
+            if data:
+                config_file.close()
+                return cls.from_json(data).__get_selected_config()
+            cls._create_config()

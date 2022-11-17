@@ -15,8 +15,6 @@ FROM base AS runtime
 # Copy virtual env from python-deps stage
 COPY --from=python-deps /.venv /.venv
 ENV PATH="/.venv/bin:$PATH"
-# Ensure permissions over config.json file
-RUN chmod 777 config.json
 # Create and switch to a new user
 RUN useradd --create-home appuser
 WORKDIR /home/appuser

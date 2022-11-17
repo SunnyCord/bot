@@ -6,7 +6,7 @@ services:
     image: niceaesthetics/sunny:master
     container_name: sunny
     volumes:
-      - ./config.json:/home/appuser/config.json
+      - ./config.json:/home/appuser/config.json:ro
     extra_hosts:
       - "lavalink:127.0.0.1" # Expose lavalink to container
 
