@@ -2,18 +2,9 @@ version: '3.8'
 
 services:
 
-  lavalink:
-    image: fredboat/lavalink
-    container_name: lavalink
-    restart: always
-    volumes:
-      - ./application.yml:/opt/Lavalink/application.yml
-
   sunny:
     build: ./
     container_name: sunny
+    restart: unless-stopped
     volumes:
       - ./config.json:/home/appuser/config.json
-
-networks:
-  sunny:
