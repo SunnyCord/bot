@@ -18,6 +18,7 @@ ENV PATH="/.venv/bin:$PATH"
 # Create and switch to a new user
 RUN useradd --create-home appuser
 WORKDIR /home/appuser
+RUN chmod 775 config.json
 USER appuser
 # Install application into container
 COPY . .

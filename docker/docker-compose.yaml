@@ -7,6 +7,12 @@ services:
     container_name: sunny
     volumes:
       - ./config.json:/home/appuser/config.json
+    extra_hosts:
+      - "lavalink:127.0.0.1" # Expose lavalink to container
 
-extra_hosts:
-  - "lavalink:127.0.0.1" # Expose lavalink to container
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: sunny
