@@ -1,0 +1,38 @@
+{
+    "_ConfigList__comment": "select -> index of config to use (starting from 0)",
+    "select": 0,
+    "configs": [
+        {
+            "redis": true,
+            "log_level": "WARNING",
+            "color": 14108179,
+            "token": "",
+            "osuAPI": "",
+            "sentry": "",
+            "owners": [
+                151670779782758400
+            ],
+            "command_prefixes": [
+                "s."
+            ],
+            "mongo": {
+                "host": "",
+                "database": "sunny",
+                "timeout": 10000
+            },
+            "ppAPI": {
+                "host": "https://oldpp.aesth.dev",
+                "secret": "potato"
+            },
+            "lavalink": [
+                {
+                    "host": "lavalink",
+                    "port": 2333,
+                    "password": "youshallnotpass",
+                    "region": "eu",
+                    "name": "local"
+                }
+            ]
+        }
+    ]
+}
