@@ -12,6 +12,16 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v3
+      - name: Docker Meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ secrets.DOCKER_IMAGE }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=ref,event=pr
+            type=sha,prefix=
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -30,4 +40,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: user/app:latest
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
