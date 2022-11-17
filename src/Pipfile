@@ -17,4 +17,4 @@ dataclasses-json = ">=0.5.7"
 black = ">=22.10.0"
 
 [requires]
-python_version = "3.11"
+python_version = "3.10"
