@@ -44,7 +44,7 @@ class Fun(commands.Cog):
     async def ping(self, ctx):
         """Ping command."""
         t1 = time.perf_counter()
-        await ctx.trigger_typing()
+        await ctx.typing()
         t2 = time.perf_counter()
         await ctx.send(f"🏓 Pong!: {round((t2-t1)*1000)}ms")
 
