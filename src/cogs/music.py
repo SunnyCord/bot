@@ -253,7 +253,6 @@ class Music(commands.GroupCog, name="music"):
         description="Shows the currently playing track",
     )
     async def playing_command(self, ctx: commands.Context) -> None:
-        """Shows the currently playing track."""
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
         if not player.current:
@@ -348,7 +347,6 @@ class Music(commands.GroupCog, name="music"):
         description="Seeks to a given position in a track",
     )
     async def seek_command(self, ctx: commands.Context, *, seconds: int) -> None:
-        """Seeks to a given position in a track."""
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
         track_time = player.position + (seconds * 1000)
@@ -375,7 +373,6 @@ class Music(commands.GroupCog, name="music"):
 
     @commands.hybrid_command()
     async def skip(self, ctx):
-        """Skips the current track."""
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
         await player.skip()

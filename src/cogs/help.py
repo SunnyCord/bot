@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 
 
-# TO-DO: REMOVE AND ADD TO WEBSITE
+# TO-DO: REMOVE AND ADD TO WEBSITE - this thing suuuuuucks
 
 
 class Help(commands.Cog):
