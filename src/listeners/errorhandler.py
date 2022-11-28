@@ -14,6 +14,11 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):
     def __init__(self, bot):
         self.bot = bot
 
+        @bot.tree.error
+        async def on_app_command_error(interaction: discord.Interaction, error):
+            # TODO handle slash command errors
+            print(error)
+
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         if hasattr(ctx.command, "on_error"):

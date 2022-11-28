@@ -4,7 +4,7 @@ from io import BytesIO
 
 import aiohttp
 import discord
-from classes.embeds.BeatmapEmbed import BeatmapEmbed
+from classes.embeds.osu import BeatmapEmbed
 from discord.ext import commands
 
 

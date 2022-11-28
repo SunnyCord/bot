@@ -10,6 +10,8 @@ class CronTask(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    # tasks.loop
+
 
 async def setup(bot):
     await bot.add_cog(CronTask(bot))

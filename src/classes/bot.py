@@ -33,11 +33,7 @@ class Sunny(commands.AutoShardedBot):
     @staticmethod
     async def __get_prefix(self, message):
         """A callable Prefix for our bot. This also has the ability to ignore certain messages by passing an empty string."""
-        guildPref = await self.mongoIO.getSetting(message.guild, "prefix")
-        result = self.config.command_prefixes.copy()
-        if guildPref is not None:
-            result += [guildPref]
-        return commands.when_mentioned_or(*result)(self, message)
+        return commands.when_mentioned_or(*self.config.command_prefixes)(self, message)
 
     @staticmethod
     async def ensure_member(query, guild: discord.Guild):
@@ -61,8 +57,8 @@ class Sunny(commands.AutoShardedBot):
         self.redisIO = None if self.config.redis.enable else redisIO(self)
         self.mongoIO = mongoIO(self)
         self.osuAPI = osuAPI(self.config.osuAPI)
-        self.osuHelpers = osuHelper(self)
         self.ppAPI = ppAPI(self.config.ppAPI.host, self.config.ppAPI.secret)
+        self.osuHelpers = osuHelper(self)
 
     def run(self, **kwargs) -> None:
         super().run(self.config.token, log_level=self.config.log_level, **kwargs)

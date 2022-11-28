@@ -4,6 +4,9 @@ import discord
 from discord.ext import commands
 
 
+# TO-DO: REMOVE AND ADD TO WEBSITE
+
+
 class Help(commands.Cog):
     """
     Displays the message you are currently viewing!
