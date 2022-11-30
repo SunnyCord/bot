@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import aiohttp
-import entities.osu as osu
+import classes.osu as osu
 
 
 class ppAPI:

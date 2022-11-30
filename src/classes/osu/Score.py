@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-import entities.osu as osu
+import classes.osu as osu
 
 
 class Score:

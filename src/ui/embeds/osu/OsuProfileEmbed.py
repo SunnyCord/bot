@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from datetime import datetime
 
+import classes.osu as osu
 import discord
-import entities.osu as osu
 
 
 class OsuProfileEmbed(discord.Embed):

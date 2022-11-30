@@ -4,8 +4,8 @@ import math
 from typing import Optional
 
 import aiohttp
+import classes.exceptions as Exceptions
 import discord
-import entities.exceptions as Exceptions
 import lavalink
 from commons.regex import track_title_rx
 from commons.regex import url_rx

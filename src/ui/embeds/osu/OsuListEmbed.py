@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import List
 
+import classes.osu as osu
 import discord
-import entities.osu as osu
 
 
 class OsuListEmbed(discord.Embed):

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import datetime
 
+import classes.osu as osu
 import discord
-import entities.osu as osu
 
 
 def getDiffEmoji(sr: float, mode: int):

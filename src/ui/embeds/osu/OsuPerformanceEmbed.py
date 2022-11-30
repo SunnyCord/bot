@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import classes.osu as osu
 import discord
-import entities.osu as osu
 
 
 class OsuPerformanceEmbed(discord.Embed):

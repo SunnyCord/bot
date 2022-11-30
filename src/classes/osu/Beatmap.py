@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import entities.osu as osu
+import classes.osu as osu
 
 
 class Beatmap:

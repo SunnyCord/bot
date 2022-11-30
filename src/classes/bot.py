@@ -4,6 +4,7 @@ import logging
 import os
 
 import discord
+from classes.config import ConfigList
 from commons.helpers import list_module
 from commons.mongoIO import mongoIO
 from commons.osu.osuapiwrap import osuAPI
@@ -11,7 +12,6 @@ from commons.osu.osuhelpers import osuHelper
 from commons.osu.ppwrap import ppAPI
 from commons.redisIO import redisIO
 from discord.ext import commands
-from entities.config import ConfigList
 from motor import motor_asyncio
 
 logger = logging.getLogger()

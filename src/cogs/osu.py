@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Optional
 
+import classes.osu as osuClasses
 import discord
-import entities.osu as osuClasses
 from commons.regex import id_rx
 from discord import app_commands
 from discord.ext import commands
@@ -13,7 +13,7 @@ from ui.embeds.osu import *
 class OsuUserConverter(commands.Converter):
     async def convert(self, ctx, *argument) -> osuClasses.User:
         """
-        Converts to a ``entities.osu.User`` (case-insensitive)
+        Converts to a ``classes.osu.User`` (case-insensitive)
 
         The lookup strategy is as follows (in order):
 

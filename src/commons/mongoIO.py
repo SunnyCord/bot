@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import classes.exceptions as Exceptions
 import discord
-import entities.exceptions as Exceptions
 
 
 class mongoIO:

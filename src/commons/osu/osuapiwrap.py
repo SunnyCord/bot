@@ -3,8 +3,8 @@ from __future__ import annotations
 from typing import List
 
 import aiohttp
-import entities.osu as osu
-from entities.exceptions import OsuAPIError
+import classes.osu as osu
+from classes.exceptions import OsuAPIError
 
 
 class osuAPI:
