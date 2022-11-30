@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import classes.osu as osu
+import entities.osu as osu
 from commons.regex import beatmap_id_rx
 from commons.regex import beatmap_link_rx
 

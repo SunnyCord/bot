@@ -4,8 +4,8 @@ from io import BytesIO
 
 import aiohttp
 import discord
-from classes.embeds.osu import BeatmapEmbed
 from discord.ext import commands
+from ui.embeds.osu import BeatmapEmbed
 
 
 class OsuListeners(

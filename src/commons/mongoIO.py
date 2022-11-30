@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import classes.exceptions as Exceptions
 import discord
+import entities.exceptions as Exceptions
 
 
 class mongoIO:
@@ -37,9 +37,9 @@ class mongoIO:
             databaseUser := await self.db.users.find_one({"id": {"$eq": member.id}})
         ) is None:
             raise Exceptions.DatabaseMissingError("osu")
-        if "preferredServer" not in databaseUser:
-            databaseUser["preferredServer"] = 0
-        return databaseUser["osu"], int(databaseUser["preferredServer"])
+        # if "preferredServer" not in databaseUser:
+        #    databaseUser["preferredServer"] = 0
+        return databaseUser["osu"]  # , int(databaseUser["preferredServer"])
 
     async def setOsu(self, member: discord.Member, osuID: int, osuServer: int = 0):
         if not await self.userExists(member):

@@ -4,9 +4,9 @@ from typing import Optional
 
 import aiohttp
 import discord
-from classes.enums.animals import Animal
 from discord import app_commands
 from discord.ext import commands
+from entities.enums.animals import Animal
 
 
 class Image(commands.Cog):

@@ -23,9 +23,9 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):
     async def on_command_error(self, ctx, error):
         if hasattr(ctx.command, "on_error"):
             return
-        ignored = (commands.CommandNotFound, commands.UserInputError)
+
         error = getattr(error, "original", error)
-        if isinstance(error, ignored):
+        if isinstance(error, commands.CommandNotFound):
             return
 
         elif isinstance(error, discord.errors.Forbidden):

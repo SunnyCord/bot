@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import discord
-from classes.embeds.information import BotInfoEmbed
-from classes.embeds.information import ServerInfoEmbed
 from discord import app_commands
 from discord.ext import commands
+from ui.embeds.information import BotInfoEmbed
+from ui.embeds.information import ServerInfoEmbed
 
 
 class Information(commands.Cog):
