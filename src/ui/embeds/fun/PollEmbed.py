@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import random
+from typing import TYPE_CHECKING
 
-import discord
+from ui.embeds.generic import InteractionAuthorEmbed
 
-from ..generic import InteractionAuthorEmbed
+if TYPE_CHECKING:
+    from typing import Any
+    from discord import Interaction
 
 poll_images = [
     "https://i.imgur.com/t1OssGQ.gif",
@@ -27,7 +30,7 @@ poll_images = [
 
 
 class PollEmbed(InteractionAuthorEmbed):
-    def __init__(self, interaction, text, **kwargs):
+    def __init__(self, interaction: Interaction, text: str, **kwargs: Any) -> None:
         super().__init__(
             interaction,
             title="Poll",

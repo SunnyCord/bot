@@ -2,25 +2,32 @@ from __future__ import annotations
 
 import sys
 import traceback
+from typing import TYPE_CHECKING
 
 import classes.exceptions as Exceptions
 import discord
 from discord.ext import commands
 
+if TYPE_CHECKING:
+    from classes.bot import Sunny
 
-class CommandErrorHandler(commands.Cog, name="Error Handler"):
+
+class CommandErrorHandler(commands.Cog, name="Error Handler"):  # type: ignore
     """Handles any errors that may occur."""
 
-    def __init__(self, bot):
+    def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
         @bot.tree.error
-        async def on_app_command_error(interaction: discord.Interaction, error):
+        async def on_app_command_error(
+            interaction: discord.Interaction,
+            error: Exception,
+        ) -> None:
             # TODO handle slash command errors
             print(error)
 
     @commands.Cog.listener()
-    async def on_command_error(self, ctx, error):
+    async def on_command_error(self, ctx: commands.Context, error: Exception) -> None:
         if hasattr(ctx.command, "on_error"):
             return
 
@@ -102,5 +109,5 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):
         )
 
 
-async def setup(bot):
+async def setup(bot: Sunny) -> None:
     await bot.add_cog(CommandErrorHandler(bot))

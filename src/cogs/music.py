@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import math
 from typing import Optional
+from typing import TYPE_CHECKING
 
 import aiohttp
 import classes.exceptions as Exceptions
@@ -13,6 +14,10 @@ from discord import app_commands
 from discord.ext import commands
 from lavalink.filters import LowPass
 
+if TYPE_CHECKING:
+    from typing import Any
+    from classes.bot import Sunny
+
 
 class LavalinkVoiceClient(discord.VoiceClient):
     """
@@ -22,7 +27,11 @@ class LavalinkVoiceClient(discord.VoiceClient):
     https://discordpy.readthedocs.io/en/latest/api.html#voiceprotocol
     """
 
-    def __init__(self, client: discord.Client, channel: discord.abc.Connectable):
+    def __init__(
+        self,
+        client: discord.Client,
+        channel: discord.abc.Connectable,
+    ) -> None:
         self.client = client
         self.channel = channel
         # ensure a client already exists
@@ -40,13 +49,13 @@ class LavalinkVoiceClient(discord.VoiceClient):
                 )
             self.lavalink = self.client.lavalink
 
-    async def on_voice_server_update(self, data):
+    async def on_voice_server_update(self, data: Any) -> None:
         # the data needs to be transformed before being handed down to
         # voice_update_handler
         lavalink_data = {"t": "VOICE_SERVER_UPDATE", "d": data}
         await self.lavalink.voice_update_handler(lavalink_data)
 
-    async def on_voice_state_update(self, data):
+    async def on_voice_state_update(self, data: Any) -> None:
         # the data needs to be transformed before being handed down to
         # voice_update_handler
         lavalink_data = {"t": "VOICE_STATE_UPDATE", "d": data}
@@ -93,12 +102,12 @@ class LavalinkVoiceClient(discord.VoiceClient):
         self.cleanup()
 
 
-class Music(commands.GroupCog, name="music"):
+class Music(commands.GroupCog, name="music"):  # type: ignore
     """
     Commands related to music playback.
     """
 
-    def __init__(self, bot):
+    def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
         # This ensures the client isn't overwritten during cog reloads.
@@ -116,16 +125,16 @@ class Music(commands.GroupCog, name="music"):
 
         lavalink.add_event_hook(self.track_hook)
 
-    def cog_unload(self):
+    def cog_unload(self) -> None:
         """Cog unload handler. This removes any event hooks that were registered."""
         self.bot.lavalink._event_hooks.clear()
 
-    async def cog_before_invoke(self, ctx):
+    async def cog_before_invoke(self, ctx: commands.Context) -> None:
         """Command before-invoke handler."""
         await self.ensure_voice(ctx)
         #  Ensure that the bot and command author share a mutual voicechannel.
 
-    async def ensure_voice(self, ctx):
+    async def ensure_voice(self, ctx: commands.Context) -> None:
         # TODO replace this with a suitable solution for slash commands
         """This check ensures that the bot and command author are in the same voicechannel."""
         player = self.bot.lavalink.player_manager.create(ctx.guild.id)
@@ -163,7 +172,7 @@ class Music(commands.GroupCog, name="music"):
             if v_client.channel.id != ctx.author.voice.channel.id:
                 raise Exceptions.MusicPlayerError("You need to be in my voicechannel.")
 
-    async def track_hook(self, event):
+    async def track_hook(self, event: lavalink.events.Event) -> None:
         if isinstance(event, lavalink.events.TrackStartEvent):
             # This indicates that a track has started, so we can get track data from genius
             if event.track.duration < 30:
@@ -371,7 +380,7 @@ class Music(commands.GroupCog, name="music"):
             await ctx.send("⏯ | Paused")
 
     @commands.hybrid_command()
-    async def skip(self, ctx):
+    async def skip(self, ctx: commands.Context) -> None:
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
         await player.skip()
@@ -430,5 +439,5 @@ class Music(commands.GroupCog, name="music"):
         await ctx.send("*⃣ | Disconnected.")
 
 
-async def setup(bot):
+async def setup(bot: Sunny) -> None:
     await bot.add_cog(Music(bot))

@@ -1,10 +1,15 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import discord
 from discord import app_commands
 from discord.ext import commands
 from ui.embeds.information import BotInfoEmbed
 from ui.embeds.information import ServerInfoEmbed
+
+if TYPE_CHECKING:
+    from classes.bot import Sunny
 
 
 class Information(commands.Cog):
@@ -12,7 +17,7 @@ class Information(commands.Cog):
     Retrieve information about various items.
     """
 
-    def __init__(self, bot):
+    def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
     @app_commands.command(
@@ -32,5 +37,5 @@ class Information(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
 
-async def setup(bot):
+async def setup(bot: Sunny) -> None:
     await bot.add_cog(Information(bot))

@@ -78,7 +78,7 @@ class Server(Enum):
         url_profile: str,
         url_beatmap: str,
         api_getusrscores: str,
-    ):
+    ) -> None:
         self.id = id
         self.name_full = name_full
         self.icon = icon
@@ -100,7 +100,7 @@ class Server(Enum):
         return Server[param.upper()]
 
     @classmethod
-    def from_id(cls, id):
+    def from_id(cls, id: int) -> Server:
         for item in cls:
             if item.value[0] == id:
                 return item

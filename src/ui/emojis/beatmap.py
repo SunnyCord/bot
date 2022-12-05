@@ -33,7 +33,7 @@ class BeatmapDifficultyIcon(Enum):
     EXPERT_2 = "<:expert_2:659557929070100502>"
     EXPERT_3 = "<:expert_3:659557929698983987>"
 
-    def __init__(self, icon):
+    def __init__(self, icon: str) -> None:
         self.icon: str = icon
 
     @classmethod

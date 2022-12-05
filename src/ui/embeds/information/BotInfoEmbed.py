@@ -1,11 +1,16 @@
 from __future__ import annotations
 
-import discord
+from typing import TYPE_CHECKING
+
 from ui.embeds.generic import InteractionEmbed
+
+if TYPE_CHECKING:
+    from typing import Any
+    from discord import Interaction
 
 
 class BotInfoEmbed(InteractionEmbed):
-    def __init__(self, interaction, **kwargs):
+    def __init__(self, interaction: Interaction, **kwargs: Any) -> None:
         super().__init__(interaction, timestamp=interaction.created_at, **kwargs)
         self.set_thumbnail(url=interaction.client.user.avatar)
         self.set_footer(text=interaction.client.user.name)

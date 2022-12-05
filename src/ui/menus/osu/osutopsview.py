@@ -1,17 +1,24 @@
 from __future__ import annotations
 
 from collections import deque
+from typing import TYPE_CHECKING
 
-from aiosu.classes import Score
 from discord import Embed
 from discord import Interaction
 from discord.ui import button
 from ui.embeds.osu import OsuTopsEmbed
 from ui.menus.generic import BaseView
 
+if TYPE_CHECKING:
+    from typing import Any
+    from aiosu.classes import User
+    from aiosu.classes import Score
+    from aiosu.classes import Gamemode
+    from discord.commands import Context
+
 
 def _split_tops_to_pages(
-    ctx,
+    ctx: Context,
     tops: list[Score],
     per_page: int = 3,
 ) -> list[OsuTopsEmbed]:
@@ -23,7 +30,15 @@ def _split_tops_to_pages(
 
 
 class OsuTopsView(BaseView):
-    def __init__(self, ctx, user, mode, tops: list[Score], recent: bool, **kwargs):
+    def __init__(
+        self,
+        ctx: Context,
+        user: User,
+        mode: Gamemode,
+        tops: list[Score],
+        recent: bool,
+        **kwargs: Any,
+    ):
         super().__init__(**kwargs)
 
         per_page = 3
@@ -41,14 +56,18 @@ class OsuTopsView(BaseView):
             embed.set_footer(text=f"Page {i+1}/{self._len}")
 
     @button(emoji="\N{LEFTWARDS BLACK ARROW}")
-    async def previous_embed(self, interaction: Interaction, _):
+    async def previous_embed(
+        self,
+        interaction: Interaction,
+        button: button.Button,
+    ) -> None:
         self._queue.rotate(1)
         embed = self._queue[0]
         await embed.prepare()
         await interaction.response.edit_message(embed=embed)
 
     @button(emoji="\N{BLACK RIGHTWARDS ARROW}")
-    async def next_embed(self, interaction: Interaction, _):
+    async def next_embed(self, interaction: Interaction, button: button.Button) -> None:
         self._queue.rotate(-1)
         embed = self._queue[0]
         await embed.prepare()

@@ -1,10 +1,16 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import redis
+
+if TYPE_CHECKING:
+    from typing import Any
+    from classes.bot import Sunny
 
 
 class redisIO:
-    def __init__(self, bot):
+    def __init__(self, bot: Sunny) -> None:
         self.config = bot.config
         self.db = redis.Redis(
             host=bot.config.redis.host,
@@ -13,8 +19,8 @@ class redisIO:
             decode_responses=True,
         )
 
-    def getValue(self, name):
+    def getValue(self, name: str) -> Any:
         return self.db.get(name)
 
-    def setValue(self, name, value):
+    def setValue(self, name: str, value: Any) -> None:
         self.db.set(name, value)

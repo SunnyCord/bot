@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Optional
+from typing import TYPE_CHECKING
 
 import aiohttp
 import discord
@@ -8,13 +9,16 @@ from classes.enums.animals import Animal
 from discord import app_commands
 from discord.ext import commands
 
+if TYPE_CHECKING:
+    from classes.bot import Sunny
+
 
 class Image(commands.Cog):
     """
     Various image-related commands.
     """
 
-    def __init__(self, bot):
+    def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -109,5 +113,5 @@ class Image(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
 
-async def setup(bot):
+async def setup(bot: Sunny) -> None:
     await bot.add_cog(Image(bot))

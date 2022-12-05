@@ -1,14 +1,14 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import discord
 from discord import app_commands
 from discord.ext import commands
 from ui.embeds.fun import PollEmbed
 
-
-def random_line(fname):
-    lines = open(fname).read().splitlines()
-    return random.choice(lines)
+if TYPE_CHECKING:
+    from classes.bot import Sunny
 
 
 class Fun(commands.Cog):
@@ -16,7 +16,7 @@ class Fun(commands.Cog):
     Miscellaneous commands.
     """
 
-    def __init__(self, bot) -> None:
+    def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -46,5 +46,5 @@ class Fun(commands.Cog):
         )
 
 
-async def setup(bot) -> None:
+async def setup(bot: Sunny) -> None:
     await bot.add_cog(Fun(bot))

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Optional
+from typing import TYPE_CHECKING
 
 import aiosu
 import discord
@@ -11,8 +12,12 @@ from ui.embeds.osu import OsuRecentEmbed
 from ui.embeds.osu import OsuTopsEmbed
 from ui.menus.osu import OsuTopsView
 
+if TYPE_CHECKING:
+    from typing import Any
+    from classes.bot import Sunny
 
-class OsuTopFlags(commands.FlagConverter, prefix="-"):
+
+class OsuTopFlags(commands.FlagConverter, prefix="-"):  # type: ignore
     recent: Optional[bool] = commands.Flag(
         aliases=["r"],
         description="Sort by date achieved",
@@ -28,7 +33,7 @@ class OsuRecentFlags(commands.FlagConverter):
 
 
 class OsuUserConverter(commands.Converter):
-    async def convert(self, ctx, *args) -> aiosu.classes.User:
+    async def convert(self, ctx: commands.Context, *args: Any) -> aiosu.classes.User:
         """
         Converts to an ``aiosu.classes.User`` (case-insensitive)
 
@@ -50,7 +55,7 @@ class OsuUserConverter(commands.Converter):
                 qtype = "id"
             except commands.MemberNotFound:
 
-                def check(member):
+                def check(member: discord.Member) -> bool:
                     return (
                         member.name.lower() == raw_user.lower()
                         or member.display_name.lower() == raw_user.lower()
@@ -71,7 +76,7 @@ class OsuUserConverter(commands.Converter):
         )
 
 
-class OsuProfileCog(commands.GroupCog, name="profile"):
+class OsuProfileCog(commands.GroupCog, name="profile"):  # type: ignore
     """
     osu! Profile Commands
     """
@@ -80,18 +85,18 @@ class OsuProfileCog(commands.GroupCog, name="profile"):
         "user": "Discord/osu! username or mention",
     }
 
-    def __init__(self, bot) -> None:
+    def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
     async def osu_profile_command(
         self,
         ctx: commands.Context,
-        user: str,
+        user: Optional[str],
         mode: aiosu.classes.Gamemode,
-    ):
+    ) -> None:
         await ctx.defer()
-        user = await OsuUserConverter().convert(ctx, user, mode)
-        return await ctx.send(embed=OsuProfileEmbed(ctx, user, mode))
+        profile = await OsuUserConverter().convert(ctx, user, mode)
+        return await ctx.send(embed=OsuProfileEmbed(ctx, profile, mode))
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
@@ -103,7 +108,7 @@ class OsuProfileCog(commands.GroupCog, name="profile"):
         self,
         ctx: commands.Context,
         user: Optional[str],
-    ):
+    ) -> None:
         await self.osu_profile_command(ctx, user, aiosu.classes.Gamemode.STANDARD)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
@@ -116,7 +121,7 @@ class OsuProfileCog(commands.GroupCog, name="profile"):
         self,
         ctx: commands.Context,
         user: Optional[str],
-    ):
+    ) -> None:
         await self.osu_profile_command(ctx, user, aiosu.classes.Gamemode.MANIA)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
@@ -129,7 +134,7 @@ class OsuProfileCog(commands.GroupCog, name="profile"):
         self,
         ctx: commands.Context,
         user: Optional[str],
-    ):
+    ) -> None:
         await self.osu_profile_command(ctx, user, aiosu.classes.Gamemode.TAIKO)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
@@ -142,11 +147,11 @@ class OsuProfileCog(commands.GroupCog, name="profile"):
         self,
         ctx: commands.Context,
         user: Optional[str],
-    ):
+    ) -> None:
         await self.osu_profile_command(ctx, user, aiosu.classes.Gamemode.CTB)
 
 
-class OsuTopsCog(commands.GroupCog, name="top"):
+class OsuTopsCog(commands.GroupCog, name="top"):  # type: ignore
     """
     osu! Tops Commands
     """
@@ -155,7 +160,7 @@ class OsuTopsCog(commands.GroupCog, name="top"):
         "user": "Discord/osu! username or mention",
     }
 
-    def __init__(self, bot) -> None:
+    def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
     async def osu_top_command(
@@ -164,11 +169,11 @@ class OsuTopsCog(commands.GroupCog, name="top"):
         user: Optional[str],
         mode: aiosu.classes.Gamemode,
         flags: OsuTopFlags,
-    ):
+    ) -> None:
         await ctx.defer()
-        user = await OsuUserConverter().convert(ctx, user, mode)
+        profile = await OsuUserConverter().convert(ctx, user, mode)
         tops = await self.bot.client_v1.get_user_bests(
-            user.id,
+            profile.id,
             qtype="id",
             include_beatmap=True,
         )
@@ -178,7 +183,7 @@ class OsuTopsCog(commands.GroupCog, name="top"):
 
         if flags.recent:
             tops.sort(key=lambda x: x.created_at, reverse=True)
-        await OsuTopsView.start(ctx, user, mode, tops, flags.recent, timeout=30)
+        await OsuTopsView.start(ctx, profile, mode, tops, flags.recent, timeout=30)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
@@ -189,7 +194,7 @@ class OsuTopsCog(commands.GroupCog, name="top"):
     @app_commands.describe(**args_description)
     async def osu_std_top_command(
         self, ctx: commands.Context, user: Optional[str], *, flags: OsuTopFlags
-    ):
+    ) -> None:
         await self.osu_top_command(ctx, user, aiosu.classes.Gamemode.STANDARD, flags)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
@@ -201,7 +206,7 @@ class OsuTopsCog(commands.GroupCog, name="top"):
     @app_commands.describe(**args_description)
     async def osu_mania_top_command(
         self, ctx: commands.Context, user: Optional[str], *, flags: OsuTopFlags
-    ):
+    ) -> None:
         await self.osu_top_command(ctx, user, aiosu.classes.Gamemode.MANIA, flags)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
@@ -213,7 +218,7 @@ class OsuTopsCog(commands.GroupCog, name="top"):
     @app_commands.describe(**args_description)
     async def osu_taiko_top_command(
         self, ctx: commands.Context, user: Optional[str], *, flags: OsuTopFlags
-    ):
+    ) -> None:
         await self.osu_top_command(ctx, user, aiosu.classes.Gamemode.TAIKO, flags)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
@@ -225,16 +230,16 @@ class OsuTopsCog(commands.GroupCog, name="top"):
     @app_commands.describe(**args_description)
     async def osu_ctb_top_command(
         self, ctx: commands.Context, user: Optional[str], *, flags: OsuTopFlags
-    ):
+    ) -> None:
         await self.osu_top_command(ctx, user, aiosu.classes.Gamemode.CTB, flags)
 
 
-class OsuCog(commands.Cog, name="osu!"):
+class OsuCog(commands.Cog, name="osu!"):  # type: ignore
     """
     osu! related commands.\n*Valid Arguments:* ```fix\n-ripple, -akatsuki```
     """
 
-    def __init__(self, bot) -> None:
+    def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -278,7 +283,7 @@ class OsuCog(commands.Cog, name="osu!"):
         username: Optional[str],
         *,
         flags: OsuRecentFlags,
-    ):
+    ) -> None:
         await ctx.defer()
         mode = flags.mode
         user = await OsuUserConverter().convert(ctx, username, mode)
@@ -625,7 +630,7 @@ class OsuCog(commands.Cog, name="osu!"):
 #
 
 
-async def setup(bot):
+async def setup(bot: Sunny) -> None:
     await bot.add_cog(OsuCog(bot))
     await bot.add_cog(OsuProfileCog(bot))
     await bot.add_cog(OsuTopsCog(bot))

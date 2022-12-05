@@ -21,7 +21,7 @@ class OsuTopsEmbed(ContextEmbed):
         self.prepared = False
         self.tops = tops
 
-    async def prepare(self):
+    async def prepare(self) -> None:
         if not self.prepared:
             for score in self.tops:
                 await score.request_beatmap(self.ctx.bot.client_v1)

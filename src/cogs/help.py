@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import discord
 from discord.ext import commands
 
+if TYPE_CHECKING:
+    from classes.bot import Sunny
 
 # TO-DO: REMOVE AND ADD TO WEBSITE - this thing suuuuuucks
 
@@ -12,12 +16,12 @@ class Help(commands.Cog):
     Displays the message you are currently viewing!
     """
 
-    def __init__(self, bot):
+    def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
     @commands.command()
     @commands.has_permissions(add_reactions=True, embed_links=True)
-    async def help(self, ctx, *cog):
+    async def help(self, ctx: commands.Context, *, cog: str) -> None:
         """Gets all cogs and commands of mine."""
         if not cog:
             helpEmbed = discord.Embed(
@@ -74,5 +78,5 @@ class Help(commands.Cog):
                 await ctx.author.send(embed=helpEmbed)
 
 
-async def setup(bot):
+async def setup(bot: Sunny) -> None:
     await bot.add_cog(Help(bot))

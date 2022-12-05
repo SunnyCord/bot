@@ -23,4 +23,4 @@ class Animal(Enum):
 
     @classmethod
     def list(cls) -> list[str]:
-        return list(map(lambda c: c.display_name.lower(), cls))
+        return [x.display_name.lower() for x in cls]

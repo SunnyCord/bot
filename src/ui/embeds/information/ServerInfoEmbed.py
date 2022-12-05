@@ -1,11 +1,16 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import discord
 from ui.embeds.generic import InteractionEmbed
 
+if TYPE_CHECKING:
+    from typing import Any
+
 
 class ServerInfoEmbed(InteractionEmbed):
-    def __init__(self, interaction, **kwargs):
+    def __init__(self, interaction: discord.Interaction, **kwargs: Any) -> None:
         super().__init__(interaction, timestamp=interaction.created_at, **kwargs)
         self.set_thumbnail(url=interaction.guild.icon)
         self.set_footer(

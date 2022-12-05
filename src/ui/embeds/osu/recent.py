@@ -6,5 +6,5 @@ from ui.embeds.generic import ContextEmbed
 
 
 class OsuRecentEmbed(ContextEmbed):
-    def __init__(self, ctx: commands.Context, score: aiosu.classes.Score):
+    def __init__(self, ctx: commands.Context, score: aiosu.classes.Score) -> None:
         super.__init__(ctx)

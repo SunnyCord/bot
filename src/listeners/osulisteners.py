@@ -1,22 +1,27 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import aiohttp
 import discord
 from discord.ext import commands
+
+if TYPE_CHECKING:
+    from classes.bot import Sunny
 
 
 class OsuListeners(
     commands.Cog,
     command_attrs=dict(hidden=True),
     name="osu! Chat Listener",
-):
+):  # type: ignore
     """osu! Message Listeners"""
 
-    def __init__(self, bot):
+    def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
     @commands.Cog.listener()
-    async def on_message(self, message):
+    async def on_message(self, message: discord.Message) -> None:
         """
         beatmap = await self.bot.osuHelpers.getBeatmapFromText(message.content, True)
         if beatmap is None:
@@ -39,5 +44,5 @@ class OsuListeners(
         """
 
 
-async def setup(bot):
+async def setup(bot: Sunny) -> None:
     await bot.add_cog(OsuListeners(bot))

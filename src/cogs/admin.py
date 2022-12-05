@@ -1,8 +1,13 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import discord
 from discord import app_commands
 from discord.ext import commands
+
+if TYPE_CHECKING:
+    from classes.bot import Sunny
 
 
 class Admin(commands.Cog):
@@ -10,7 +15,7 @@ class Admin(commands.Cog):
     Commands for managing Discord servers.
     """
 
-    def __init__(self, bot) -> None:
+    def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
     @app_commands.checks.has_permissions(manage_messages=True)
@@ -35,7 +40,7 @@ class Admin(commands.Cog):
         description="Cleans the chat of the bot's messages",
     )
     async def clean_command(self, interaction: discord.Interaction) -> None:
-        def is_me(m):
+        def is_me(m: discord.Member) -> bool:
             return m.author == self.bot.user
 
         await interaction.response.defer(ephemeral=True)
@@ -43,5 +48,5 @@ class Admin(commands.Cog):
         await interaction.followup.send(f"Deleted {len(resp)} messages")
 
 
-async def setup(bot):
+async def setup(bot: Sunny) -> None:
     await bot.add_cog(Admin(bot))

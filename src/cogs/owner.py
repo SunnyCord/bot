@@ -1,17 +1,21 @@
 from __future__ import annotations
 
 import time
+from typing import TYPE_CHECKING
 
 import discord
 from discord.ext import commands
 
+if TYPE_CHECKING:
+    from classes.bot import Sunny
 
-class OwnerCog(commands.Cog, command_attrs=dict(hidden=True), name="Owner"):
+
+class OwnerCog(commands.Cog, command_attrs=dict(hidden=True), name="Owner"):  # type: ignore
     """
     Commands used for managing the bot.
     """
 
-    def __init__(self, bot) -> None:
+    def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
     @commands.is_owner()
@@ -30,7 +34,9 @@ class OwnerCog(commands.Cog, command_attrs=dict(hidden=True), name="Owner"):
     # TODO rewrite with subcommands
     @commands.is_owner()
     @commands.command(name="rebuild", hidden=True)
-    async def rebuild_command(self, ctx: commands.Context, *, args="normal") -> None:
+    async def rebuild_command(
+        self, ctx: commands.Context, *, args: str = "normal"
+    ) -> None:
         """Rebuilds the database. (Owner-only)"""
         start_time = time.perf_counter()
         await self.bot.mongoIO.wipe()
@@ -53,7 +59,11 @@ class OwnerCog(commands.Cog, command_attrs=dict(hidden=True), name="Owner"):
         description="Blacklists a user from the bot",
         hidden=True,
     )
-    async def blacklist_command(self, ctx: commands.Context, user: discord.Member):
+    async def blacklist_command(
+        self,
+        ctx: commands.Context,
+        user: discord.Member,
+    ) -> None:
         if not await self.bot.mongoIO.userExists(user):
             await self.bot.mongoIO.addUser(user, True)
         else:
@@ -75,5 +85,5 @@ class OwnerCog(commands.Cog, command_attrs=dict(hidden=True), name="Owner"):
         await ctx.send("User unblacklisted.")
 
 
-async def setup(bot) -> None:
+async def setup(bot: Sunny) -> None:
     await bot.add_cog(OwnerCog(bot))

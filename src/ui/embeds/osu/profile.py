@@ -33,7 +33,7 @@ def seconds_to_text(secs: int) -> str:
 
 
 class OsuProfileEmbed(ContextEmbed):
-    def __init__(self, ctx: commands.Context, user: User, mode: Gamemode):
+    def __init__(self, ctx: commands.Context, user: User, mode: Gamemode) -> None:
         super().__init__(
             ctx,
             title=None,
