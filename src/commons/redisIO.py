@@ -13,8 +13,8 @@ class redisIO:
             decode_responses=True,
         )
 
-    def getValue(name):
-        return r.get(name)
+    def getValue(self, name):
+        return self.db.get(name)
 
-    def setValue(name, value):
-        r.set(name, value)
+    def setValue(self, name, value):
+        self.db.set(name, value)
