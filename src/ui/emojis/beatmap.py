@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 from enum import Enum
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import aiosu
 
 
-class BeatmapIcon(Enum):
+class BeatmapDifficultyIcon(Enum):
     EASY_0 = "<:easy_0:601433333565751299>"
     EASY_1 = "<:easy_1:601433689989185556>"
     EASY_2 = "<:easy_2:601433993337896979>"
@@ -31,3 +35,19 @@ class BeatmapIcon(Enum):
 
     def __init__(self, icon):
         self.icon: str = icon
+
+    @classmethod
+    def get_from_sr(
+        cls, sr: float, mode: aiosu.classes.Gamemode
+    ) -> BeatmapDifficultyIcon:
+        if sr < 2:
+            return cls[f"EASY_{mode.id}"]
+        if sr < 2.7:
+            return cls[f"NORMAL_{mode.id}"]
+        if sr < 4:
+            return cls[f"HARD_{mode.id}"]
+        if sr < 5.3:
+            return cls[f"INSANE_{mode.id}"]
+        if sr < 6.5:
+            return cls[f"EXTRA_{mode.id}"]
+        return cls[f"EXPERT_{mode.id}"]

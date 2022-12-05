@@ -7,8 +7,11 @@ class ContextEmbed(discord.Embed):
     def __init__(self, ctx: discord.ext.commands.Context, **kwargs):
         super().__init__(color=ctx.bot.config.color, **kwargs)
 
+    async def prepare(self):
+        ...
 
-class ContextAuthorEmbed(InteractionEmbed):
+
+class ContextAuthorEmbed(ContextEmbed):
     def __init__(self, ctx: discord.ext.commands.Context, **kwargs):
         super().__init__(ctx, **kwargs)
         self.set_author(name=ctx.author.name, icon_url=ctx.author.avatar)

@@ -3,13 +3,11 @@ from __future__ import annotations
 import logging
 import os
 
+import aiosu
 import discord
 from classes.config import ConfigList
 from commons.helpers import list_module
 from commons.mongoIO import mongoIO
-from commons.osu.osuapiwrap import osuAPI
-from commons.osu.osuhelpers import osuHelper
-from commons.osu.ppwrap import ppAPI
 from commons.redisIO import redisIO
 from discord.ext import commands
 from motor import motor_asyncio
@@ -25,10 +23,10 @@ class Sunny(commands.AutoShardedBot):
         for module in module_folders:
             for extension in list_module(module):
                 name = f"{module}.{os.path.splitext(extension)[0]}"
-                try:
-                    await self.load_extension(name)
-                except Exception as e:
-                    logging.error(f"Failed loading module {name} : {e}")
+                # try:
+                await self.load_extension(name)
+                # except Exception as e:
+                #    logging.error(f"Failed loading module {name} : {e}")
 
     @staticmethod
     async def __get_prefix(self, message):
@@ -50,9 +48,8 @@ class Sunny(commands.AutoShardedBot):
         )
         self.redisIO = None if self.config.redis.enable else redisIO(self)
         self.mongoIO = mongoIO(self)
-        self.osuAPI = osuAPI(self.config.osuAPI)
-        self.ppAPI = ppAPI(self.config.ppAPI.host, self.config.ppAPI.secret)
-        self.osuHelpers = osuHelper(self)
+        self.client_v1 = aiosu.v1.Client(self.config.osuAPI)
+        self.client_storage = aiosu.v2.ClientStorage()
 
     async def on_message(self, msg):
         ignore = not msg.guild

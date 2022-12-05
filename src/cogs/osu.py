@@ -1,26 +1,44 @@
 from __future__ import annotations
 
+import contextlib
+import io
 from typing import Optional
 
-import classes.osu as osuClasses
+import aiosu
 import discord
 from commons.regex import id_rx
 from discord import app_commands
 from discord.ext import commands
 from ui.embeds.osu import *
+from ui.menus.osu import *
+
+
+class OsuTopFlags(commands.FlagConverter, prefix="-"):
+    recent: Optional[bool] = commands.Flag(
+        aliases=["r"],
+        description="Sort by date achieved",
+        default=False,
+    )
+
+
+class OsuRecentFlags(commands.FlagConverter):
+    mode: Optional[aiosu.classes.Gamemode] = commands.Flag(
+        description="The osu! mode to search for",
+        default=aiosu.classes.Gamemode.STANDARD,
+    )
 
 
 class OsuUserConverter(commands.Converter):
-    async def convert(self, ctx, *argument) -> osuClasses.User:
+    async def convert(self, ctx, *args) -> aiosu.classes.User:
         """
-        Converts to a ``classes.osu.User`` (case-insensitive)
+        Converts to an ``aiosu.classes.User`` (case-insensitive)
 
         The lookup strategy is as follows (in order):
 
         1. Lookup by commands.MemberConverter()
         2. Lookup by string
         """
-        raw_user, server, mode = argument
+        raw_user, mode = args
         user, qtype = None, None
 
         if raw_user is None:
@@ -47,11 +65,10 @@ class OsuUserConverter(commands.Converter):
 
                 user, qtype = raw_user, "string"
 
-        return await ctx.bot.osuAPI.getuser(
-            usr=user,
+        return await ctx.bot.client_v1.get_user(
+            user,
             mode=mode,
             qtype=qtype,
-            server=server,
         )
 
 
@@ -62,7 +79,6 @@ class OsuProfileCog(commands.GroupCog, name="profile"):
 
     args_description = {
         "user": "Discord/osu! username or mention",
-        "server": "The osu! server to search on",
     }
 
     def __init__(self, bot) -> None:
@@ -72,11 +88,11 @@ class OsuProfileCog(commands.GroupCog, name="profile"):
         self,
         ctx: commands.Context,
         user: str,
-        server: osuClasses.Server,
-        mode: osuClasses.Mode,
+        mode: aiosu.classes.Gamemode,
     ):
-        user = await OsuUserConverter().convert(ctx, user, server, mode)
-        return await ctx.send(embed=OsuProfileEmbed(user, mode, self.bot.config.color))
+        await ctx.defer()
+        user = await OsuUserConverter().convert(ctx, user, mode)
+        return await ctx.send(embed=OsuProfileEmbed(ctx, user, mode))
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
@@ -87,15 +103,9 @@ class OsuProfileCog(commands.GroupCog, name="profile"):
     async def osu_std_profile_command(
         self,
         ctx: commands.Context,
-        user: Optional[str],  # TODO specify preferences
-        server: Optional[osuClasses.Server] = osuClasses.Server.BANCHO,
+        user: Optional[str],
     ):
-        await self.osu_profile_command(
-            ctx,
-            user,
-            server,
-            osuClasses.Mode.STANDARD,
-        )
+        await self.osu_profile_command(ctx, user, aiosu.classes.Gamemode.STANDARD)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
@@ -107,14 +117,8 @@ class OsuProfileCog(commands.GroupCog, name="profile"):
         self,
         ctx: commands.Context,
         user: Optional[str],
-        server: Optional[osuClasses.Server] = osuClasses.Server.BANCHO,
     ):
-        await self.osu_profile_command(
-            ctx,
-            user,
-            server,
-            osuClasses.Mode.MANIA,
-        )
+        await self.osu_profile_command(ctx, user, aiosu.classes.Gamemode.MANIA)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
@@ -126,14 +130,8 @@ class OsuProfileCog(commands.GroupCog, name="profile"):
         self,
         ctx: commands.Context,
         user: Optional[str],
-        server: Optional[osuClasses.Server] = osuClasses.Server.BANCHO,
     ):
-        await self.osu_profile_command(
-            ctx,
-            user,
-            server,
-            osuClasses.Mode.TAIKO,
-        )
+        await self.osu_profile_command(ctx, user, aiosu.classes.Gamemode.TAIKO)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
@@ -145,14 +143,8 @@ class OsuProfileCog(commands.GroupCog, name="profile"):
         self,
         ctx: commands.Context,
         user: Optional[str],
-        server: Optional[osuClasses.Server] = osuClasses.Server.BANCHO,
     ):
-        await self.osu_profile_command(
-            ctx,
-            user,
-            server,
-            osuClasses.Mode.CTB,
-        )
+        await self.osu_profile_command(ctx, user, aiosu.classes.Gamemode.CTB)
 
 
 class OsuTopsCog(commands.GroupCog, name="top"):
@@ -162,7 +154,6 @@ class OsuTopsCog(commands.GroupCog, name="top"):
 
     args_description = {
         "user": "Discord/osu! username or mention",
-        "server": "The osu! server to search on",
     }
 
     def __init__(self, bot) -> None:
@@ -171,13 +162,72 @@ class OsuTopsCog(commands.GroupCog, name="top"):
     async def osu_top_command(
         self,
         ctx: commands.Context,
-        user: str,
-        server: osuClasses.Server,
-        mode: osuClasses.Mode,
+        user: Optional[str],
+        mode: aiosu.classes.Gamemode,
+        flags: OsuTopFlags,
     ):
-        user = await OsuUserConverter().convert(ctx, user, server, mode)
-        tops: List[osuClasses.RecentScore] = await self.bot.osuAPI.getusrtop(user, 5)
-        return await ctx.send(embed=OsuProfileEmbed(user, mode, self.bot.config.color))
+        await ctx.defer()
+        user = await OsuUserConverter().convert(ctx, user, mode)
+        tops = await self.bot.client_v1.get_user_bests(
+            user.id,
+            qtype="id",
+            include_beatmap=True,
+        )
+        if not tops:
+            await ctx.send("No plays breh")
+            return
+
+        if flags.recent:
+            tops.sort(key=lambda x: x.created_at, reverse=True)
+        await OsuTopsView.start(ctx, user, mode, tops, flags.recent, timeout=30)
+
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    @commands.hybrid_command(
+        name="osutop",
+        aliases=["ot"],
+        description="Shows osu!std top plays for a user",
+    )
+    @app_commands.describe(**args_description)
+    async def osu_std_top_command(
+        self, ctx: commands.Context, user: Optional[str], *, flags: OsuTopFlags
+    ):
+        await self.osu_top_command(ctx, user, aiosu.classes.Gamemode.STANDARD, flags)
+
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    @commands.hybrid_command(
+        name="maniatop",
+        aliases=["mt"],
+        description="Shows osu!mania top plays for a user.",
+    )
+    @app_commands.describe(**args_description)
+    async def osu_mania_top_command(
+        self, ctx: commands.Context, user: Optional[str], *, flags: OsuTopFlags
+    ):
+        await self.osu_top_command(ctx, user, aiosu.classes.Gamemode.MANIA, flags)
+
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    @commands.hybrid_command(
+        name="taikotop",
+        aliases=["tt"],
+        description="Shows osu!taiko top plays for a user.",
+    )
+    @app_commands.describe(**args_description)
+    async def osu_taiko_top_command(
+        self, ctx: commands.Context, user: Optional[str], *, flags: OsuTopFlags
+    ):
+        await self.osu_top_command(ctx, user, aiosu.classes.Gamemode.TAIKO, flags)
+
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    @commands.hybrid_command(
+        name="ctbtop",
+        aliases=["ct"],
+        description="Shows osu!ctb top plays for a user.",
+    )
+    @app_commands.describe(**args_description)
+    async def osu_ctb_top_command(
+        self, ctx: commands.Context, user: Optional[str], *, flags: OsuTopFlags
+    ):
+        await self.osu_top_command(ctx, user, aiosu.classes.Gamemode.CTB, flags)
 
 
 class OsuCog(commands.Cog, name="osu!"):
@@ -195,27 +245,54 @@ class OsuCog(commands.Cog, name="osu!"):
     )
     @app_commands.describe(
         username="Your osu! username",
-        server="The osu! server to search on",
     )
     async def osu_set_command(
         self,
         ctx: commands.Context,
         username: str,
-        server: Optional[osuClasses.Server] = osuClasses.Server.BANCHO,
     ) -> None:
-        profile: osuClasses.User = await self.bot.osuAPI.getuser(
-            username,
-            "string",
-            server=server,
+        await ctx.defer()
+        profile: aiosu.classes.User = await self.bot.client_v1.get_user(
+            user_query=username,
+            qtype="string",
         )
         await self.bot.mongoIO.setOsu(
             ctx.author,
-            profile.user_id,
-            server.id,
+            profile.id,
         )
         await ctx.send(
-            f"osu! {server.name_full} profile succesfully set to {profile.username}",
+            f"osu! profile succesfully set to {profile.username}",
         )
+
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    @commands.hybrid_command(
+        name="recent",
+        aliases=["rs", "r"],
+        description="Shows recent osu! scores for a user",
+    )
+    @app_commands.describe(
+        username="Discord/osu! username or mention",
+    )
+    async def osu_recent_command(
+        self,
+        ctx: commands.Context,
+        username: Optional[str],
+        *,
+        flags: OsuRecentFlags,
+    ):
+        await ctx.defer()
+        mode = flags.mode
+        user = await OsuUserConverter().convert(ctx, username, mode)
+        recents = await self.bot.client_v1.get_user_recents(
+            user.id,
+            qtype="id",
+            mode=mode,
+            include_beatmap=True,
+        )
+        if not recents:
+            await ctx.send("No recents bruv")
+            return
+        await ctx.send(type(recents[0].beatmap))
 
 
 #

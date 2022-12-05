@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-from io import BytesIO
-
 import aiohttp
 import discord
 from discord.ext import commands
-from ui.embeds.osu import BeatmapEmbed
 
 
 class OsuListeners(
@@ -20,6 +17,7 @@ class OsuListeners(
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        """
         beatmap = await self.bot.osuHelpers.getBeatmapFromText(message.content, True)
         if beatmap is None:
             return
@@ -38,6 +36,7 @@ class OsuListeners(
             embed=BeatmapEmbed(beatmap, self.bot.config.color),
             file=discord.File(f, filename="Preview.mp3"),
         )
+        """
 
 
 async def setup(bot):

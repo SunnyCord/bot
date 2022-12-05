@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import time
+
 import discord
 from discord.ext import commands
 
@@ -30,7 +32,7 @@ class OwnerCog(commands.Cog, command_attrs=dict(hidden=True), name="Owner"):
     @commands.command(name="rebuild", hidden=True)
     async def rebuild_command(self, ctx: commands.Context, *, args="normal") -> None:
         """Rebuilds the database. (Owner-only)"""
-        start_time = time.time()
+        start_time = time.perf_counter()
         await self.bot.mongoIO.wipe()
         servers = list(self.bot.guilds)
         args = args.lower()
@@ -43,7 +45,7 @@ class OwnerCog(commands.Cog, command_attrs=dict(hidden=True), name="Owner"):
                     if args == "debug":
                         print(f"Adding member {member.name}")
                     await self.bot.mongoIO.addUser(member)
-        await ctx.send(f"Done rebuilding. {time.time() - start_time}s")
+        await ctx.send(f"Done rebuilding. {time.perf_counter() - start_time}s")
 
     @commands.is_owner()
     @commands.command(

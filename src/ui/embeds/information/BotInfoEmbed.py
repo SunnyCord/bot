@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import discord
-
-from ..generic import InteractionEmbed
+from ui.embeds.generic import InteractionEmbed
 
 
 class BotInfoEmbed(InteractionEmbed):

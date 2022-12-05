@@ -166,7 +166,6 @@ class Music(commands.GroupCog, name="music"):
     async def track_hook(self, event):
         if isinstance(event, lavalink.events.TrackStartEvent):
             # This indicates that a track has started, so we can get track data from genius
-            guild_id = int(event.player.guild_id)
             if event.track.duration < 30:
                 event.player.delete("currentTrackData")
                 return
@@ -409,7 +408,7 @@ class Music(commands.GroupCog, name="music"):
         name="disconnect",
         description="Disconnects the player from the voice channel and clears its queue",
     )
-    async def disconnect_command(self, ctx: commannds.Context) -> None:
+    async def disconnect_command(self, ctx: commands.Context) -> None:
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
         if not ctx.voice_client:
