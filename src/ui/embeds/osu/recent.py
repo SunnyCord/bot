@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import aiosu
 from discord.ext import commands
 from ui.embeds.generic import ContextEmbed

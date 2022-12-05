@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from datetime import datetime
-from discord.ext import commands
-from ui.embeds.generic import ContextEmbed
+
 from aiosu.classes import Gamemode
 from aiosu.classes import User
+from discord.ext import commands
+from ui.embeds.generic import ContextEmbed
 
 
 def seconds_to_text(secs: int) -> str:

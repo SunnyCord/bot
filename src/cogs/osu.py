@@ -1,16 +1,15 @@
 from __future__ import annotations
 
-import contextlib
-import io
 from typing import Optional
 
 import aiosu
 import discord
-from commons.regex import id_rx
 from discord import app_commands
 from discord.ext import commands
-from ui.embeds.osu import *
-from ui.menus.osu import *
+from ui.embeds.osu import OsuProfileEmbed
+from ui.embeds.osu import OsuRecentEmbed
+from ui.embeds.osu import OsuTopsEmbed
+from ui.menus.osu import OsuTopsView
 
 
 class OsuTopFlags(commands.FlagConverter, prefix="-"):
@@ -292,7 +291,7 @@ class OsuCog(commands.Cog, name="osu!"):
         if not recents:
             await ctx.send("No recents bruv")
             return
-        await ctx.send(type(recents[0].beatmap))
+        await ctx.send(embed=OsuRecentEmbed(ctx, recents[0]))
 
 
 #

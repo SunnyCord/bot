@@ -38,7 +38,9 @@ class BeatmapDifficultyIcon(Enum):
 
     @classmethod
     def get_from_sr(
-        cls, sr: float, mode: aiosu.classes.Gamemode
+        cls,
+        sr: float,
+        mode: aiosu.classes.Gamemode,
     ) -> BeatmapDifficultyIcon:
         if sr < 2:
             return cls[f"EASY_{mode.id}"]
