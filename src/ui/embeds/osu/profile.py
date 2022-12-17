@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from aiosu.classes import Gamemode
 from aiosu.classes import User
 from discord.ext import commands
 from ui.embeds.generic import ContextEmbed
+
+if TYPE_CHECKING:
+    from typing import Any
 
 
 def seconds_to_text(secs: int) -> str:
@@ -33,7 +37,14 @@ def seconds_to_text(secs: int) -> str:
 
 
 class OsuProfileEmbed(ContextEmbed):
-    def __init__(self, ctx: commands.Context, user: User, mode: Gamemode) -> None:
+    def __init__(
+        self,
+        ctx: commands.Context,
+        user: User,
+        mode: Gamemode,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         super().__init__(
             ctx,
             title=None,
@@ -47,6 +58,8 @@ class OsuProfileEmbed(ContextEmbed):
             > **PP/hour:** {int(user.statistics.pp / user.statistics.play_time * 3600)  if user.statistics.play_time > 0 else 0}
             """,
             timestamp=datetime.utcnow(),
+            *args,
+            **kwargs,
         )
         self.set_author(
             name=f"osu! {mode.name_full} stats for {user.username}",

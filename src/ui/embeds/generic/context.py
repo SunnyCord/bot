@@ -9,14 +9,14 @@ if TYPE_CHECKING:
 
 
 class ContextEmbed(discord.Embed):
-    def __init__(self, ctx: discord.ext.commands.Context, **kwargs: Any):
-        super().__init__(color=ctx.bot.config.color, **kwargs)
+    def __init__(self, ctx: discord.ext.commands.Context, *args: Any, **kwargs: Any):
+        super().__init__(color=ctx.bot.config.color, *args, **kwargs)
 
     async def prepare(self) -> None:
         ...
 
 
 class ContextAuthorEmbed(ContextEmbed):
-    def __init__(self, ctx: discord.ext.commands.Context, **kwargs: Any):
-        super().__init__(ctx, **kwargs)
+    def __init__(self, ctx: discord.ext.commands.Context, *args: Any, **kwargs: Any):
+        super().__init__(ctx, *args, **kwargs)
         self.set_author(name=ctx.author.name, icon_url=ctx.author.avatar)

@@ -30,12 +30,15 @@ poll_images = [
 
 
 class PollEmbed(InteractionAuthorEmbed):
-    def __init__(self, interaction: Interaction, text: str, **kwargs: Any) -> None:
+    def __init__(
+        self, interaction: Interaction, text: str, *args: Any, **kwargs: Any
+    ) -> None:
         super().__init__(
             interaction,
             title="Poll",
             description=text,
             timestamp=interaction.created_at,
+            *args,
             **kwargs,
         )
         self.set_thumbnail(url=random.choice(poll_images))

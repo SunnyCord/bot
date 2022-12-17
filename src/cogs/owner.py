@@ -45,12 +45,12 @@ class OwnerCog(commands.Cog, command_attrs=dict(hidden=True), name="Owner"):  # 
         for x in range(len(servers)):
             if args == "debug":
                 print(f"Adding server {servers[x-1].name}")
-            await self.bot.mongoIO.addServer(servers[x - 1])
+            await self.bot.mongoIO.add_guild(servers[x - 1])
             for member in servers[x - 1].members:
-                if not member.bot and not await self.bot.mongoIO.userExists(member):
+                if not member.bot and not await self.bot.mongoIO.user_exists(member):
                     if args == "debug":
                         print(f"Adding member {member.name}")
-                    await self.bot.mongoIO.addUser(member)
+                    await self.bot.mongoIO.add_user(member)
         await ctx.send(f"Done rebuilding. {time.perf_counter() - start_time}s")
 
     @commands.is_owner()
@@ -64,10 +64,10 @@ class OwnerCog(commands.Cog, command_attrs=dict(hidden=True), name="Owner"):  # 
         ctx: commands.Context,
         user: discord.Member,
     ) -> None:
-        if not await self.bot.mongoIO.userExists(user):
-            await self.bot.mongoIO.addUser(user, True)
+        if not await self.bot.mongoIO.user_exists(user):
+            await self.bot.mongoIO.add_user(user, True)
         else:
-            await self.bot.mongoIO.blacklistUser(user)
+            await self.bot.mongoIO.blacklist_user(user)
         await ctx.send("User blacklisted.")
 
     @commands.is_owner()
@@ -81,7 +81,7 @@ class OwnerCog(commands.Cog, command_attrs=dict(hidden=True), name="Owner"):  # 
         ctx: commands.Context,
         user: discord.Member,
     ) -> None:
-        await self.bot.mongoIO.unblacklistUser(user)
+        await self.bot.mongoIO.unblacklist_user(user)
         await ctx.send("User unblacklisted.")
 
 

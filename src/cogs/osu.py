@@ -5,12 +5,12 @@ from typing import TYPE_CHECKING
 
 import aiosu
 import discord
+from commons.helpers import get_beatmap_from_text
 from discord import app_commands
 from discord.ext import commands
 from ui.embeds.osu import OsuProfileEmbed
-from ui.embeds.osu import OsuRecentEmbed
-from ui.embeds.osu import OsuTopsEmbed
-from ui.menus.osu import OsuTopsView
+from ui.embeds.osu import OsuScoreSingleEmbed
+from ui.menus.osu import OsuScoresView
 
 if TYPE_CHECKING:
     from typing import Any
@@ -23,10 +23,29 @@ class OsuTopFlags(commands.FlagConverter, prefix="-"):  # type: ignore
         description="Sort by date achieved",
         default=False,
     )
+    position: Optional[int] = commands.Flag(
+        aliases=["p"],
+        description="The position of the score to show",
+        default=None,
+    )
 
 
 class OsuRecentFlags(commands.FlagConverter):
     mode: Optional[aiosu.classes.Gamemode] = commands.Flag(
+        aliases=["m"],
+        description="The osu! mode to search for",
+        default=aiosu.classes.Gamemode.STANDARD,
+    )
+    list: Optional[bool] = commands.Flag(
+        aliases=["l"],
+        description="Display a list of recent scores",
+        default=False,
+    )
+
+
+class OsuScoreFlags(commands.FlagConverter):
+    mode: Optional[aiosu.classes.Gamemode] = commands.Flag(
+        aliases=["m"],
         description="The osu! mode to search for",
         default=aiosu.classes.Gamemode.STANDARD,
     )
@@ -46,12 +65,12 @@ class OsuUserConverter(commands.Converter):
         user, qtype = None, None
 
         if raw_user is None:
-            user = await ctx.bot.mongoIO.getOsu(ctx.author)
+            user = await ctx.bot.mongoIO.get_osu(ctx.author)
             qtype = "id"
         else:
             try:
                 member = await commands.MemberConverter().convert(ctx, raw_user)
-                user = await ctx.bot.mongoIO.getOsu(member)
+                user = await ctx.bot.mongoIO.get_osu(member)
                 qtype = "id"
             except commands.MemberNotFound:
 
@@ -64,7 +83,7 @@ class OsuUserConverter(commands.Converter):
                     )
 
                 if found := discord.utils.find(check, ctx.guild.members):
-                    user = await ctx.bot.mongoIO.getOsu(found)
+                    user = await ctx.bot.mongoIO.get_osu(found)
                     qtype = "id"
 
                 user, qtype = raw_user, "string"
@@ -91,12 +110,12 @@ class OsuProfileCog(commands.GroupCog, name="profile"):  # type: ignore
     async def osu_profile_command(
         self,
         ctx: commands.Context,
-        user: Optional[str],
+        username: Optional[str],
         mode: aiosu.classes.Gamemode,
     ) -> None:
         await ctx.defer()
-        profile = await OsuUserConverter().convert(ctx, user, mode)
-        return await ctx.send(embed=OsuProfileEmbed(ctx, profile, mode))
+        user = await OsuUserConverter().convert(ctx, username, mode)
+        return await ctx.send(embed=OsuProfileEmbed(ctx, user, mode))
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
@@ -166,24 +185,38 @@ class OsuTopsCog(commands.GroupCog, name="top"):  # type: ignore
     async def osu_top_command(
         self,
         ctx: commands.Context,
-        user: Optional[str],
+        username: Optional[str],
         mode: aiosu.classes.Gamemode,
         flags: OsuTopFlags,
     ) -> None:
         await ctx.defer()
-        profile = await OsuUserConverter().convert(ctx, user, mode)
+        user = await OsuUserConverter().convert(ctx, username, mode)
         tops = await self.bot.client_v1.get_user_bests(
-            profile.id,
+            user.id,
             qtype="id",
             include_beatmap=True,
         )
         if not tops:
-            await ctx.send("No plays breh")
+            await ctx.send(f"User **{user.username}** has no top plays!")
             return
 
+        if self.bot.redisIO is not None:
+            self.bot.redisIO.set_value(ctx.message.channel.id, tops[0].beatmap_id)
+            self.bot.redisIO.set_value(f"{ctx.message.channel.id}.mode", mode.id)
+
+        recent_text = ""
         if flags.recent:
             tops.sort(key=lambda x: x.created_at, reverse=True)
-        await OsuTopsView.start(ctx, profile, mode, tops, flags.recent, timeout=30)
+            recent_text = "Recent "
+
+        if flags.position is None:
+            title = f"{recent_text}osu! {mode:f} top plays for {user.username}"
+            await OsuScoresView.start(ctx, user, mode, tops, title, timeout=30)
+        else:
+            title = f"**{flags.position}.** {recent_text}osu! {mode:f} top play for **{user.username}**"
+            embed = OsuScoreSingleEmbed(ctx, tops[flags.position - 1])
+            await embed.prepare()
+            await ctx.send(title, embed=embed)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
@@ -260,7 +293,7 @@ class OsuCog(commands.Cog, name="osu!"):  # type: ignore
             user_query=username,
             qtype="string",
         )
-        await self.bot.mongoIO.setOsu(
+        await self.bot.mongoIO.set_osu(
             ctx.author,
             profile.id,
         )
@@ -292,306 +325,119 @@ class OsuCog(commands.Cog, name="osu!"):  # type: ignore
             qtype="id",
             mode=mode,
             include_beatmap=True,
+            limit=1 if not flags.list else 50,
         )
         if not recents:
-            await ctx.send("No recents bruv")
+            await ctx.send(f"User **{user.username}** has no recent plays!")
             return
-        await ctx.send(embed=OsuRecentEmbed(ctx, recents[0]))
+        if self.bot.redisIO is not None:
+            self.bot.redisIO.set_value(ctx.message.channel.id, recents[0].beatmap_id)
+            self.bot.redisIO.set_value(f"{ctx.message.channel.id}.mode", mode.id)  # type: ignore
+
+        if flags.list:
+            title = f"Recent osu! {mode:f} plays for {user.username}"
+            await OsuScoresView.start(ctx, user, mode, recents, title, timeout=30)
+        else:
+            title = f"Most recent osu! {mode:f} play for **{user.username}**"
+            embed = OsuScoreSingleEmbed(ctx, recents[0])
+            await embed.prepare()
+            await ctx.send(title, embed=embed)
+
+    async def osu_beatmap_scores_command(
+        self,
+        ctx: commands.Context,
+        username: Optional[str],
+        mode: aiosu.classes.Gamemode,
+        beatmap_id: int,
+    ) -> None:
+        user = await OsuUserConverter().convert(ctx, username, mode)
+        scores = await self.bot.client_v1.get_beatmap_scores(
+            beatmap_id,
+            user_query=user.id,
+            qtype="id",
+            mode=mode,
+            include_beatmap=True,
+        )
+        if not scores:
+            await ctx.send(f"User **{user.username}** has no recent plays!")
+            return
+
+        title = f"osu! {mode:f} plays for {user.username}"
+        await OsuScoresView.start(ctx, user, mode, scores, title, True, timeout=30)
+
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    @commands.hybrid_command(
+        name="compare",
+        aliases=["c", "gap"],
+        description="Compares osu! scores for a user",
+    )
+    @app_commands.describe(
+        username="Discord/osu! username or mention",
+    )
+    async def osu_compare_command(
+        self,
+        ctx: commands.Context,
+        username: Optional[str],
+    ) -> None:
+        await ctx.defer()
+        if self.bot.redisIO is None:
+            await ctx.send(
+                "Redis is disabled in the config. Please contact the owner of this bot instance!",
+            )
+            return
+
+        mode_id = self.bot.redisIO.get_value(f"{ctx.message.channel.id}.mode")
+        beatmap_id = self.bot.redisIO.get_value(ctx.message.channel.id)
+        if mode_id is None or beatmap_id is None:
+            await ctx.send("No beatmap found to compare to.")
+            return
+
+        mode = aiosu.classes.Gamemode(int(mode_id))
+
+        await self.osu_beatmap_scores_command(
+            ctx,
+            username,
+            mode,
+            beatmap_id,
+        )
+
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    @commands.hybrid_command(
+        name="scores",
+        aliases=["s"],
+        description="Sends osu! scores for a user on a beatmap",
+    )
+    @app_commands.describe(
+        beatmap="URL or ID of the beatmap",
+        username="Discord/osu! username or mention",
+    )
+    async def osu_scores_command(
+        self,
+        ctx: commands.Context,
+        beatmap: str,
+        username: Optional[str],
+        *,
+        flags: OsuScoreFlags,
+    ) -> None:
+        await ctx.defer()
+        mode = flags.mode
+        beatmap_data = get_beatmap_from_text(beatmap)
+        if (beatmap_id := beatmap_data["beatmap_id"]) is None:
+            await ctx.send("Unknown beatmap ID specified.")
+            return
+
+        if self.bot.redisIO is not None:
+            self.bot.redisIO.set_value(ctx.message.channel.id, beatmap_id)
+            self.bot.redisIO.set_value(f"{ctx.message.channel.id}.mode", mode.id)  # type: ignore
+
+        await self.osu_beatmap_scores_command(
+            ctx,
+            username,
+            mode,
+            beatmap_id,
+        )
 
 
-#
-# @commands.cooldown(1, 1, commands.BucketType.user)
-# @commands.command(aliases=["rs", "r"])
-# async def recent(self, ctx, *, args=None):
-#    """Shows recent osu! plays for a user. Modes can be specified ``eg. recent -m 2``.\n*Valid Arguments:* ```fix\n-l, -m```"""
-#
-#    user = None
-#    server = osuClasses.Server.BANCHO
-#    mode = osuClasses.Mode.STANDARD
-#    limit = 1
-#
-#    if args is not None:
-#        parsedArgs = self.bot.osuHelpers.parseArgs(
-#            args=args,
-#            validArgs=["-l", "-m"],
-#        )
-#        user = parsedArgs["user"]
-#        qtype = parsedArgs["qtype"]
-#        server = osuClasses.Server.from_name(parsedArgs["server"])
-#        mode = osuClasses.Mode.fromId(parsedArgs["mode"])
-#        limit = 5 if parsedArgs["recentList"] is True else 1
-#
-#    if not user:
-#        qtype = "id"
-#        user, serverID = await self.bot.mongoIO.getOsu(ctx.author)
-#        server = osuClasses.Server.from_id(serverID)
-#
-#    if (
-#        user
-#        and isinstance(user, str)
-#        and user.startswith("<@")
-#        and user.endswith(">")
-#    ):
-#        qtype = "id"
-#        mentioned_id = int(id_rx.sub(r"", user))
-#        mentioned = await self.bot.ensure_member(mentioned_id, ctx.guild)
-#        user, serverID = await self.bot.mongoIO.getOsu(mentioned)
-#        server = osuClasses.Server.from_id(serverID)
-#
-#    profile: osuClasses.User = await self.bot.osuAPI.getuser(
-#        user,
-#        qtype,
-#        mode,
-#        server,
-#    )
-#    recent_score: osuClasses.RecentScore = (
-#        await self.bot.osuAPI.getrecent(profile, limit)
-#    )[0]
-#
-#    if self.bot.redisIO is not None:
-#        self.bot.redisIO.setValue(ctx.message.channel.id, recent_score.beatmap_id)
-#        self.bot.redisIO.setValue(f"{ctx.message.channel.id}.mode", mode.id)
-#
-#    beatmap: osuClasses.Beatmap = await self.bot.osuAPI.getbmap(
-#        recent_score.beatmap_id,
-#        mode=mode,
-#        server=server,
-#        mods=recent_score.enabled_mods,
-#    )
-#
-#    recent_score.performance = await self.bot.ppAPI.calculateScore(recent_score)
-#    recent_score.performance.pp = (
-#        recent_score.pp if recent_score.pp != 0 else recent_score.performance.pp
-#    )
-#    beatmap.max_combo = (
-#        beatmap.max_combo
-#        if beatmap.max_combo
-#        else recent_score.performance.max_combo
-#    )
-#
-#    result = OsuRecentEmbed(recent_score, beatmap, self.bot.config.color)
-#
-#    await ctx.send(
-#        f"**Most Recent osu! {mode.name_full} Play for {profile.username} on {server.name_full}:**",
-#        embed=result,
-#    )
-#
-# @commands.cooldown(1, 1, commands.BucketType.user)
-# @commands.command(
-#    aliases=["ot", "tt", "ct", "mt", "taikotop", "ctbtop", "maniatop"],
-# )
-# async def osutop(self, ctx, *, args=None):
-#    """Shows osu! top plays for a user. Modes can be specified ``eg. maniatop``.\n*Valid Arguments:* ```fix\n-r, -p```"""
-#
-#    user = None
-#    server = osuClasses.Server.BANCHO
-#    limit = 5
-#    mode = osuClasses.Mode.fromCommand(ctx.invoked_with)
-#    recent: bool = False
-#    positions: List[int] = range(1, 101)
-#    parsedArgs = None
-#
-#    if args is not None:
-#        parsedArgs = self.bot.osuHelpers.parseArgsV2(args=args, customArgs=["user"])
-#        user = parsedArgs["user"]
-#        qtype = parsedArgs["qtype"]
-#        server = parsedArgs["server"]
-#
-#        if parsedArgs["recent"] is True:
-#            limit = 100
-#        elif parsedArgs["position"] is not None:
-#            limit = min(parsedArgs["position"], 100)
-#
-#    if not user:
-#        qtype = "id"
-#        user, serverID = await self.bot.mongoIO.getOsu(ctx.author)
-#        server = osuClasses.Server.from_id(serverID)
-#
-#    if (
-#        user
-#        and isinstance(user, str)
-#        and user.startswith("<@")
-#        and user.endswith(">")
-#    ):
-#        qtype = "id"
-#        mentioned_id = int(id_rx.sub(r"", user))
-#        mentioned = await self.bot.ensure_member(mentioned_id, ctx.guild)
-#        user, serverID = await self.bot.mongoIO.getOsu(mentioned)
-#        server = osuClasses.Server.from_id(serverID)
-#
-#    profile: osuClasses.User = await self.bot.osuAPI.getuser(
-#        user,
-#        qtype,
-#        mode,
-#        server,
-#    )
-#    tops: List[osuClasses.RecentScore] = await self.bot.osuAPI.getusrtop(
-#        profile,
-#        limit,
-#    )
-#
-#    if parsedArgs:
-#        if parsedArgs["recent"]:
-#            sorted_tops = sorted(tops, key=lambda x: x.date, reverse=True)
-#            positions = list(map(lambda top: tops.index(top) + 1, sorted_tops))
-#            tops = sorted_tops
-#
-#        if parsedArgs["position"] is None:
-#            tops = tops[:5]
-#            positions = positions[:5]
-#        else:
-#            tops = tops[parsedArgs["position"] - 1 : parsedArgs["position"]]
-#            positions = positions[
-#                parsedArgs["position"] - 1 : parsedArgs["position"]
-#            ]
-#    else:
-#        tops = tops[:5]
-#        positions = positions[:5]
-#
-#    if self.bot.redisIO is not None:
-#        self.bot.redisIO.setValue(ctx.message.channel.id, tops[0].beatmap_id)
-#        self.bot.redisIO.setValue(f"{ctx.message.channel.id}.mode", mode.id)
-#
-#    beatmaps = []
-#
-#    index: int
-#    top: osuClasses.Score
-#    for index, top in enumerate(tops):
-#        beatmap: osuClasses.Beatmap = await self.bot.osuAPI.getbmap(
-#            top.beatmap_id,
-#            mode=mode,
-#            server=server,
-#            mods=top.enabled_mods,
-#        )
-#
-#        top.performance = await self.bot.ppAPI.calculateScore(top, mode)
-#        top.performance.pp = top.pp if top.pp else top.performance.pp
-#        beatmap.max_combo = (
-#            beatmap.max_combo if beatmap.max_combo else top.performance.max_combo
-#        )
-#
-#        beatmaps.append(beatmap)
-#
-#    title = f"Top plays on osu! {profile.mode.name_full} for {profile.username}"
-#    result = OsuListEmbed(
-#        title,
-#        self.bot.config.color,
-#        tops,
-#        beatmaps,
-#        profile,
-#        positions,
-#        0,
-#    )
-#    await ctx.send(embed=result)
-#
-# @commands.cooldown(1, 1, commands.BucketType.user)
-# @commands.command(aliases=["c", "s", "scores"])
-# async def compare(self, ctx: commands.Context, *, args=None):
-#    """Shows your best scores on the last linked map."""
-#
-#    user = None
-#    beatmap: osuClasses.Beatmap = None
-#    server = osuClasses.Server.BANCHO
-#    mode = osuClasses.Mode.STANDARD
-#    limit = 5
-#
-#    if args is not None:
-#        if "c" == ctx.invoked_with or "compare" == ctx.invoked_with:
-#            parsedArgs = self.bot.osuHelpers.parseArgsV2(
-#                args=args,
-#                customArgs=["user", "beatmap"],
-#            )
-#        elif "s" == ctx.invoked_with or "scores" == ctx.invoked_with:
-#            parsedArgs = self.bot.osuHelpers.parseArgsV2(
-#                args=args,
-#                customArgs=["beatmap", "user"],
-#            )
-#            if parsedArgs["beatmap"]:
-#                beatmap = await self.bot.osuHelpers.getBeatmapFromText(
-#                    parsedArgs["beatmap"],
-#                )
-#                if self.bot.redisIO is not None:
-#                    self.bot.redisIO.setValue(
-#                        ctx.message.channel.id,
-#                        beatmap.beatmap_id,
-#                    )
-#                    self.bot.redisIO.setValue(
-#                        f"{ctx.message.channel.id}.mode",
-#                        mode.id,
-#                    )
-#        user = parsedArgs["user"]
-#        qtype = parsedArgs["qtype"]
-#        server = parsedArgs["server"]
-#
-#    if not user:
-#        qtype = "id"
-#        user, serverID = await self.bot.mongoIO.getOsu(ctx.author)
-#        server = osuClasses.Server.from_id(serverID)
-#
-#    if (
-#        user
-#        and isinstance(user, str)
-#        and user.startswith("<@")
-#        and user.endswith(">")
-#    ):
-#        qtype = "id"
-#        mentioned_id = int(id_rx.sub(r"", user))
-#        mentioned = await self.bot.ensure_member(mentioned_id, ctx.guild)
-#        user, serverID = await self.bot.mongoIO.getOsu(mentioned)
-#        server = osuClasses.Server.from_id(serverID)
-#
-#    if "c" == ctx.invoked_with or "compare" == ctx.invoked_with and beatmap is None:
-#        if self.bot.redisIO is not None:
-#            modeID = self.bot.redisIO.getValue(f"{ctx.message.channel.id}.mode")
-#            beatmapID = self.bot.redisIO.getValue(ctx.message.channel.id)
-#            if modeID is None or beatmapID is None:
-#                return
-#            mode = osuClasses.Mode.fromId(modeID)
-#            beatmap = await self.bot.osuAPI.getbmap(
-#                beatmapID,
-#                mode=mode,
-#                server=server,
-#            )
-#        else:
-#            return ctx.send(
-#                "Redis is disabled in the config. Please contact the owner of this instance!",
-#            )
-#
-#    if beatmap is None:
-#        return
-#
-#    profile: osuClasses.User = await self.bot.osuAPI.getuser(
-#        user,
-#        qtype,
-#        mode,
-#        server,
-#    )
-#    tops: List[osuClasses.BeatmapScore] = await self.bot.osuAPI.getusrscores(
-#        profile,
-#        beatmap.beatmap_id,
-#        limit,
-#    )
-#
-#    top: osuClasses.Score
-#    for _, top in enumerate(tops):
-#        top.performance = await self.bot.ppAPI.calculateScore(top)
-#        top.performance.pp = top.pp if top.pp != 0 else top.performance.pp
-#        beatmap.max_combo = (
-#            beatmap.max_combo
-#            if beatmap.max_combo != 0
-#            else top.performance.max_combo
-#        )
-#
-#    title = f"Top osu! {mode.name_full} for {profile.username} on {beatmap.title}[{beatmap.version}]"
-#    result = OsuListEmbed(
-#        title,
-#        self.bot.config.color,
-#        tops,
-#        [beatmap] * len(tops),
-#        profile,
-#    )
-#
-#    await ctx.send(embed=result)
 #
 # @commands.cooldown(1, 1, commands.BucketType.user)
 # @commands.command(aliases=["pp"])
@@ -618,8 +464,8 @@ class OsuCog(commands.Cog, name="osu!"):  # type: ignore
 #        return
 #
 #    if self.bot.redisIO is not None:
-#        self.bot.redisIO.setValue(ctx.message.channel.id, beatmap.beatmap_id)
-#        self.bot.redisIO.setValue(f"{ctx.message.channel.id}.mode", mode.id)
+#        self.bot.redisIO.set_value(ctx.message.channel.id, beatmap.beatmap_id)
+#        self.bot.redisIO.set_value(f"{ctx.message.channel.id}.mode", mode.id)
 #
 #    mods: osuClasses.Mods = osuClasses.Mods(args["mods"])
 #

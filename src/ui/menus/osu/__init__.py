@@ -1,3 +1,3 @@
 from __future__ import annotations
 
-from .osutopsview import OsuTopsView
+from .osuscoresview import OsuScoresView

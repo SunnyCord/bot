@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger()
 
 
-async def __get_prefix(bot: Sunny, message: discord.Message) -> list[str]:
+async def _get_prefix(bot: Sunny, message: discord.Message) -> list[str]:
     """A callable Prefix for our bot. This also has the ability to ignore certain messages by passing an empty string."""
     return commands.when_mentioned_or(*bot.config.command_prefixes)(bot, message)
 
@@ -40,7 +40,7 @@ class Sunny(commands.AutoShardedBot):
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(
             description="Sunny Bot",
-            command_prefix=__get_prefix,
+            command_prefix=_get_prefix,
             intents=discord.Intents.all(),
             # activity=discord.Activity(),
             help_command=None,
@@ -50,7 +50,7 @@ class Sunny(commands.AutoShardedBot):
             self.config.mongo.host,
             serverSelectionTimeoutMS=self.config.mongo.timeout,
         )
-        self.redisIO = None if self.config.redis.enable else redisIO(self)
+        self.redisIO = redisIO(self) if self.config.redis.enable else None
         self.mongoIO = mongoIO(self)
         self.client_v1 = aiosu.v1.Client(self.config.osuAPI)
         self.client_storage = aiosu.v2.ClientStorage()
@@ -59,7 +59,7 @@ class Sunny(commands.AutoShardedBot):
         ignore = not message.guild
         ignore |= message.author.bot
         ignore |= not self.is_ready()
-        ignore |= await self.mongoIO.isBlacklisted(message.author)
+        ignore |= await self.mongoIO.is_blacklisted(message.author)
         if ignore:
             return
         await self.process_commands(message)

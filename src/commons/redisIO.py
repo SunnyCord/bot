@@ -19,8 +19,8 @@ class redisIO:
             decode_responses=True,
         )
 
-    def getValue(self, name: str) -> Any:
+    def get_value(self, name: str) -> Any:
         return self.db.get(name)
 
-    def setValue(self, name: str, value: Any) -> None:
+    def set_value(self, name: str, value: Any) -> None:
         self.db.set(name, value)

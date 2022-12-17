@@ -4,8 +4,9 @@ import sys
 import traceback
 from typing import TYPE_CHECKING
 
-import classes.exceptions as Exceptions
+import aiosu
 import discord
+from classes import exceptions
 from discord.ext import commands
 
 if TYPE_CHECKING:
@@ -24,6 +25,7 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):  # type: ignore
             error: Exception,
         ) -> None:
             # TODO handle slash command errors
+            error = getattr(error, "original", error)
             print(error)
 
     @commands.Cog.listener()
@@ -56,7 +58,7 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):  # type: ignore
         elif isinstance(error, commands.CommandInvokeError):
             await ctx.send(error.original)
 
-        elif isinstance(error, Exceptions.OsuAPIError):
+        elif isinstance(error, exceptions.OsuAPIError):
             if error.queryType == "get_user":
                 return await ctx.send(
                     f"User has not been found on {error.server.name_full} or has not played enough!",
@@ -80,13 +82,13 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):  # type: ignore
             else:
                 return await ctx.send("Unknown API error.")
 
-        elif isinstance(error, Exceptions.DatabaseMissingError):
+        elif isinstance(error, exceptions.DatabaseMissingError):
             if error.queryType == "osu":
                 return await ctx.send("Please set your profile!")
             else:
                 return await ctx.send("Unknown database error.")
 
-        elif isinstance(error, Exceptions.MusicPlayerError):
+        elif isinstance(error, exceptions.MusicPlayerError):
             return await ctx.send(error)
 
         exc = f"{type(error).__name__}"

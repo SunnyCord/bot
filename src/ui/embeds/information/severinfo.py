@@ -10,8 +10,10 @@ if TYPE_CHECKING:
 
 
 class ServerInfoEmbed(InteractionEmbed):
-    def __init__(self, interaction: discord.Interaction, **kwargs: Any) -> None:
-        super().__init__(interaction, timestamp=interaction.created_at, **kwargs)
+    def __init__(
+        self, interaction: discord.Interaction, *args: Any, **kwargs: Any
+    ) -> None:
+        super().__init__(interaction, timestamp=interaction.created_at, *args, **kwargs)
         self.set_thumbnail(url=interaction.guild.icon)
         self.set_footer(
             text=interaction.client.user.name,

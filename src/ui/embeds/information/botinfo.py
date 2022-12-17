@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 
 class BotInfoEmbed(InteractionEmbed):
-    def __init__(self, interaction: Interaction, **kwargs: Any) -> None:
-        super().__init__(interaction, timestamp=interaction.created_at, **kwargs)
+    def __init__(self, interaction: Interaction, *args: Any, **kwargs: Any) -> None:
+        super().__init__(interaction, timestamp=interaction.created_at, *args, **kwargs)
         self.set_thumbnail(url=interaction.client.user.avatar)
         self.set_footer(text=interaction.client.user.name)

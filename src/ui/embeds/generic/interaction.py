@@ -9,14 +9,14 @@ if TYPE_CHECKING:
 
 
 class InteractionEmbed(discord.Embed):
-    def __init__(self, interaction: discord.Interaction, **kwargs: Any):
-        super().__init__(color=interaction.client.config.color, **kwargs)
+    def __init__(self, interaction: discord.Interaction, *args: Any, **kwargs: Any):
+        super().__init__(color=interaction.client.config.color, *args, **kwargs)
 
     async def prepare(self) -> None:
         ...
 
 
 class InteractionAuthorEmbed(InteractionEmbed):
-    def __init__(self, interaction: discord.Interaction, **kwargs: Any):
-        super().__init__(interaction, **kwargs)
+    def __init__(self, interaction: discord.Interaction, *args: Any, **kwargs: Any):
+        super().__init__(interaction, *args, **kwargs)
         self.set_author(name=interaction.user.name, icon_url=interaction.user.avatar)

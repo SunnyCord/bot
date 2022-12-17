@@ -20,14 +20,14 @@ class Settings(commands.Cog):
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command()
     async def forgetme(self, ctx: commands.Context) -> None:
-        await self.bot.mongoIO.removeUser(ctx.author)
+        await self.bot.mongoIO.remove_user(ctx.author)
         await ctx.send("Your data has been successfully deleted. Sorry to see you go!")
 
     async def on_guild_join(self, guild: Guild) -> None:
-        await self.bot.mongoIO.addServer(guild)
+        await self.bot.mongoIO.add_guild(guild)
 
     async def on_guild_leave(self, guild: Guild) -> None:
-        await self.bot.mongoIO.removeServer(guild)
+        await self.bot.mongoIO.remove_guild(guild)
 
 
 async def setup(bot: Sunny) -> None:
