@@ -64,7 +64,6 @@ class Image(commands.Cog):
         async with aiohttp.ClientSession() as cs:
             async with cs.get("https://some-random-api.ml/animu/wink") as r:
                 res = await r.json()
-                imgUrl = res["link"]
 
         embed = discord.Embed(
             title=f"{interaction.user} winks 😉",

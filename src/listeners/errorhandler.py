@@ -58,29 +58,8 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):  # type: ignore
         elif isinstance(error, commands.CommandInvokeError):
             await ctx.send(error.original)
 
-        elif isinstance(error, exceptions.OsuAPIError):
-            if error.queryType == "get_user":
-                return await ctx.send(
-                    f"User has not been found on {error.server.name_full} or has not played enough!",
-                )
-            elif error.queryType == "get_beatmap":
-                return await ctx.send(
-                    f"Beatmap was not found on {error.server.name_full}!",
-                )
-            elif error.queryType == "get_recent":
-                return await ctx.send(
-                    f"User has no recent plays on {error.server.name_full}!",
-                )
-            elif error.queryType == "get_user_top":
-                return await ctx.send(
-                    f"User has no top plays on {error.server.name_full}!",
-                )
-            elif error.queryType == "get_user_scores":
-                return await ctx.send(
-                    f"User has no scores on this beatmap on {error.server.name_full}!",
-                )
-            else:
-                return await ctx.send("Unknown API error.")
+        elif isinstance(error, aiosu.classes.APIException):
+            return await ctx.send("An osu! API error has occured.")
 
         elif isinstance(error, exceptions.DatabaseMissingError):
             if error.queryType == "osu":
