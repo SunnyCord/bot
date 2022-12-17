@@ -25,7 +25,7 @@ def _split_tops_to_pages(
 ) -> list[OsuScoreMultipleEmbed]:
     top_count = len(tops)
     embeds: list[OsuScoreMultipleEmbed] = [
-        OsuScoreMultipleEmbed(ctx, tops[x : x + per_page], True)
+        OsuScoreMultipleEmbed(ctx, tops[x : x + per_page], same_beatmap)
         for x in range(0, top_count, per_page)
     ]
     return embeds

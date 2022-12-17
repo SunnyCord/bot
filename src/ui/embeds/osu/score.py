@@ -29,7 +29,7 @@ def _score_to_embed_strs(
     if include_user:
         score_text += f"[user](https://osu.ppy.sh/users/{score.user_id}) | "
 
-    value = f"""**{score.pp:.2f}pp**{weight}, accuracy: **{score.accuracy*100:.2f}%**, combo: **{score.max_combo}x/{beatmap.max_combo}**
+    value = f"""**{score.pp:.2f}pp**{weight}, accuracy: **{score.accuracy*100:.2f}%**, combo: **{score.max_combo}x/{beatmap.max_combo}x**
             score: **{score.score}** [**{score.statistics.count_300}**/**{score.statistics.count_100}**/**{score.statistics.count_50}**/**{score.statistics.count_miss}**]
             mods: {score.mods} | {ScoreRankIcon[score.rank]}
             <t:{score.created_at.timestamp():.0f}:R>
