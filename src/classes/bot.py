@@ -24,6 +24,13 @@ async def _get_prefix(bot: Sunny, message: discord.Message) -> list[str]:
     return commands.when_mentioned_or(*bot.config.command_prefixes)(bot, message)
 
 
+def _get_intents() -> discord.Intents:
+    return discord.Intents().default() | discord.Intents(
+        members=True,
+        message_content=True,
+    )
+
+
 class Sunny(commands.AutoShardedBot):
     async def setup_hook(self) -> None:
         await self.load_extension("jishaku")
@@ -41,7 +48,7 @@ class Sunny(commands.AutoShardedBot):
         super().__init__(
             description="Sunny Bot",
             command_prefix=_get_prefix,
-            intents=discord.Intents.all(),
+            intents=_get_intents(),
             # activity=discord.Activity(),
             help_command=None,
         )

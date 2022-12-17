@@ -359,7 +359,7 @@ class OsuCog(commands.Cog, name="osu!"):  # type: ignore
             include_beatmap=True,
         )
         if not scores:
-            await ctx.send(f"User **{user.username}** has no recent plays!")
+            await ctx.send(f"User **{user.username}** has no plays on the beatmap!")
             return
 
         title = f"osu! {mode:f} plays for {user.username}"
