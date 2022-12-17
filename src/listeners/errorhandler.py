@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 import aiosu
 import discord
 from classes import exceptions
+from discord import app_commands
 from discord.ext import commands
 
 if TYPE_CHECKING:
@@ -26,7 +27,6 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):  # type: ignore
         ) -> None:
             # TODO handle slash command errors
             error = getattr(error, "original", error)
-            print(error)
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error: Exception) -> None:
@@ -34,6 +34,12 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):  # type: ignore
             return
 
         error = getattr(error, "original", error)
+        if isinstance(
+            error,
+            (commands.CommandInvokeError, app_commands.errors.CommandInvokeError),
+        ):
+            error = error.original
+
         if isinstance(error, commands.CommandNotFound):
             return
 
@@ -54,9 +60,6 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):  # type: ignore
             return await ctx.send(
                 "Slow down! You are on a %.2fs cooldown." % error.retry_after,
             )
-
-        elif isinstance(error, commands.CommandInvokeError):
-            await ctx.send(error.original)
 
         elif isinstance(error, aiosu.classes.APIException):
             return await ctx.send("An osu! API error has occured.")
