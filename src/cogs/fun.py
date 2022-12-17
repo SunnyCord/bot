@@ -28,7 +28,7 @@ class Fun(commands.Cog):
 
         try:
             await interaction.message.delete()
-        except discord.Forbidden:
+        except:
             pass
 
         embed = PollEmbed(interaction, text)
