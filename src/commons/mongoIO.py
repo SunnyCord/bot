@@ -1,70 +1,82 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import classes.exceptions as Exceptions
 import discord
 
+if TYPE_CHECKING:
+    from typing import Optional
+    from typing import Any
+    from classes.bot import Sunny
+
 
 class mongoIO:
-    def __init__(self, bot):
+    def __init__(self, bot: Sunny) -> None:
         self.config = bot.config
         self.db = bot.motorClient[self.config.mongo.database]
 
-    async def addUser(
+    async def add_user(
         self,
         member: discord.Member,
         blacklist: bool = False,
-        osuID: int = None,
-        osuServer: int = 0,
-    ):
+        osu_id: Optional[int] = None,
+        osu_server: int = 0,
+    ) -> None:
         await self.db.users.insert_one(
             {
-                "blacklisted": blacklist,
                 "id": member.id,
                 "name": member.name,
-                "osu": osuID,
-                "preferredServer": osuServer,
+                "blacklisted": blacklist,
+                "osu": osu_id,
+                "preferredServer": osu_server,
             },
         )
 
-    async def removeUser(self, member: discord.Member):
+    async def remove_user(self, member: discord.Member) -> None:
         await self.db.users.delete_many({"id": member.id})
 
-    async def userExists(self, member: discord.Member):
+    async def user_exists(self, member: discord.Member) -> bool:
         return (await self.db.users.find_one({"id": {"$eq": member.id}})) is not None
 
-    async def getOsu(self, member: discord.Member):
+    async def get_osu(self, member: discord.Member) -> int:
         if (
             databaseUser := await self.db.users.find_one({"id": {"$eq": member.id}})
         ) is None:
             raise Exceptions.DatabaseMissingError("osu")
-        if "preferredServer" not in databaseUser:
-            databaseUser["preferredServer"] = 0
-        return databaseUser["osu"], int(databaseUser["preferredServer"])
+        # if "preferredServer" not in databaseUser:
+        #    databaseUser["preferredServer"] = 0
+        return databaseUser["osu"]  # , int(databaseUser["preferredServer"])
 
-    async def setOsu(self, member: discord.Member, osuID: int, osuServer: int = 0):
-        if not await self.userExists(member):
-            await self.addUser(member, False, osuID)
+    async def set_osu(
+        self,
+        member: discord.Member,
+        osu_id: int,
+        osu_server: int = 0,
+    ) -> None:
+        if not await self.user_exists(member):
+            await self.add_user(member, False, osu_id)
         else:
             await self.db.users.update_one(
                 {"id": member.id},
                 {
-                    "$set": {"osu": osuID, "preferredServer": osuServer},
+                    "$set": {"osu": osu_id, "preferredServer": osu_server},
                     "$currentDate": {"lastModified": True},
                 },
             )
 
-    async def blacklistUser(self, member: discord.Member):
-        if not await self.userExists(member):
-            await self.addUser(member, False, member.id)
+    async def blacklist_user(self, member: discord.Member) -> None:
+        if not await self.user_exists(member):
+            await self.add_user(member, False, member.id)
         else:
             await self.db.users.update_one(
                 {"id": member.id},
                 {"$set": {"blacklisted": True}, "$currentDate": {"lastModified": True}},
             )
 
-    async def unblacklistUser(self, member: discord.Member):
-        if not await self.userExists(member):
-            await self.addUser(member, False, member.id)
+    async def unblacklist_user(self, member: discord.Member) -> None:
+        if not await self.user_exists(member):
+            await self.add_user(member, False, member.id)
         else:
             await self.db.users.update_one(
                 {"id": member.id},
@@ -74,38 +86,42 @@ class mongoIO:
                 },
             )
 
-    async def isBlacklisted(self, member: discord.Member):
+    async def is_blacklisted(self, member: discord.Member) -> bool:
         if (
-            databaseUser := await self.db.users.find_one({"id": {"$eq": member.id}})
+            db_user := await self.db.users.find_one({"id": {"$eq": member.id}})
         ) is None:
             return False
-        return databaseUser["blacklisted"]
+        return db_user["blacklisted"]
 
-    async def addServer(self, server: discord.Guild, prefix: str = None):
-        await self.db.settings.insert_one({"id": server.id, "prefix": prefix})
+    async def add_guild(
+        self,
+        guild: discord.Guild,
+        prefix: Optional[str] = None,
+    ) -> None:
+        await self.db.settings.insert_one({"id": guild.id, "prefix": prefix})
 
-    async def removeServer(self, guild: discord.Guild):
+    async def remove_guild(self, guild: discord.Guild) -> None:
         await self.db.settings.delete_many({"guildID": guild.id})
 
-    async def serverExists(self, server: discord.Guild):
-        return await self.db.settings.find_one({"id": {"$eq": server.id}}) is not None
+    async def guild_exists(self, guild: discord.Guild) -> bool:
+        return await self.db.settings.find_one({"id": {"$eq": guild.id}}) is not None
 
-    async def getSetting(self, server: discord.Guild, setting: str):
+    async def get_setting(self, guild: discord.Guild, setting: str) -> Any:
         if (
-            databaseGuild := await self.db.settings.find_one({"id": {"$eq": server.id}})
+            db_guild := await self.db.settings.find_one({"id": {"$eq": guild.id}})
         ) is None:
             return None
-        return databaseGuild[setting]
+        return db_guild[setting]
 
-    async def setPrefix(self, server: discord.Guild, prefix: str):
-        if not await self.serverExists(server):
-            await self.addServer(server, prefix)
+    async def set_prefix(self, guild: discord.Guild, prefix: str) -> None:
+        if not await self.guild_exists(guild):
+            await self.add_guild(guild, prefix)
         else:
             await self.db.settings.update_one(
-                {"id": server.id},
+                {"id": guild.id},
                 {"$set": {"prefix": prefix}, "$currentDate": {"lastModified": True}},
             )
 
-    async def wipe(self):
+    async def wipe(self) -> None:
         await self.db.users.delete_many({})
         await self.db.settings.delete_many({})

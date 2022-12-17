@@ -2,23 +2,30 @@ from __future__ import annotations
 
 import logging
 import os
+from typing import TYPE_CHECKING
 
+import aiosu
 import discord
 from classes.config import ConfigList
 from commons.helpers import list_module
 from commons.mongoIO import mongoIO
-from commons.osu.osuapiwrap import osuAPI
-from commons.osu.osuhelpers import osuHelper
-from commons.osu.ppwrap import ppAPI
 from commons.redisIO import redisIO
 from discord.ext import commands
 from motor import motor_asyncio
 
+if TYPE_CHECKING:
+    from typing import Any
+
 logger = logging.getLogger()
 
 
+async def _get_prefix(bot: Sunny, message: discord.Message) -> list[str]:
+    """A callable Prefix for our bot. This also has the ability to ignore certain messages by passing an empty string."""
+    return commands.when_mentioned_or(*bot.config.command_prefixes)(bot, message)
+
+
 class Sunny(commands.AutoShardedBot):
-    async def setup_hook(self):
+    async def setup_hook(self) -> None:
         await self.load_extension("jishaku")
 
         module_folders = ["listeners", "cogs", "tasks"]
@@ -30,25 +37,10 @@ class Sunny(commands.AutoShardedBot):
                 except Exception as e:
                     logging.error(f"Failed loading module {name} : {e}")
 
-    @staticmethod
-    async def __get_prefix(self, message):
-        """A callable Prefix for our bot. This also has the ability to ignore certain messages by passing an empty string."""
-        guildPref = await self.mongoIO.getSetting(message.guild, "prefix")
-        result = self.config.command_prefixes.copy()
-        if guildPref is not None:
-            result += [guildPref]
-        return commands.when_mentioned_or(*result)(self, message)
-
-    @staticmethod
-    async def ensure_member(query, guild: discord.Guild):
-        if (member := guild.get_member(query)) is None:
-            member = await guild.fetch_member(query)
-        return member
-
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(
             description="Sunny Bot",
-            command_prefix=self.__get_prefix,
+            command_prefix=_get_prefix,
             intents=discord.Intents.all(),
             # activity=discord.Activity(),
             help_command=None,
@@ -58,31 +50,25 @@ class Sunny(commands.AutoShardedBot):
             self.config.mongo.host,
             serverSelectionTimeoutMS=self.config.mongo.timeout,
         )
-        self.redisIO = None if self.config.redis.enable else redisIO(self)
+        self.redisIO = redisIO(self) if self.config.redis.enable else None
         self.mongoIO = mongoIO(self)
-        self.osuAPI = osuAPI(self.config.osuAPI)
-        self.osuHelpers = osuHelper(self)
-        self.ppAPI = ppAPI(self.config.ppAPI.host, self.config.ppAPI.secret)
+        self.client_v1 = aiosu.v1.Client(self.config.osuAPI)
+        self.client_storage = aiosu.v2.ClientStorage()
 
-    def run(self, **kwargs) -> None:
-        super().run(self.config.token, log_level=self.config.log_level, **kwargs)
-
-    async def ensure_guild(self, query):
-        if (guild := self.get_guild(query)) is None:
-            guild = await self.fetch_guild(query)
-        return guild
-
-    async def on_message(self, msg):
-        ignore = not msg.guild
-        ignore |= msg.author.bot
+    async def on_message(self, message: discord.Message) -> None:
+        ignore = not message.guild
+        ignore |= message.author.bot
         ignore |= not self.is_ready()
-        ignore |= await self.mongoIO.isBlacklisted(msg.author)
+        ignore |= await self.mongoIO.is_blacklisted(message.author)
         if ignore:
             return
-        await self.process_commands(msg)
+        await self.process_commands(message)
 
-    async def is_owner(self, user: discord.User):
+    async def is_owner(self, user: discord.User) -> bool:
         if user.id in self.config.owners:
             return True
         # Else fall back to the original
         return await super().is_owner(user)
+
+    def run(self, **kwargs: Any) -> None:
+        super().run(self.config.token, log_level=self.config.log_level, **kwargs)

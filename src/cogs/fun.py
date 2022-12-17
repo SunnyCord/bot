@@ -1,15 +1,14 @@
 from __future__ import annotations
 
-import random
-import time
+from typing import TYPE_CHECKING
 
 import discord
+from discord import app_commands
 from discord.ext import commands
+from ui.embeds.fun import PollEmbed
 
-
-def random_line(fname):
-    lines = open(fname).read().splitlines()
-    return random.choice(lines)
+if TYPE_CHECKING:
+    from classes.bot import Sunny
 
 
 class Fun(commands.Cog):
@@ -17,37 +16,35 @@ class Fun(commands.Cog):
     Miscellaneous commands.
     """
 
-    def __init__(self, bot):
+    def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
     @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.command()
-    async def poll(self, ctx, *, args):
-        """Creates a poll. Takes the polltext as an argument."""
+    @app_commands.command(name="poll", description="Creates a reaction poll")
+    @app_commands.describe(text="Text for the poll")
+    async def poll_command(
+        self, interaction: discord.Interaction, *, text: str
+    ) -> None:
+
         try:
-            await ctx.message.delete()
+            await interaction.message.delete()
         except:
             pass
-        embed = discord.Embed(
-            title="Poll:",
-            description=args,
-            color=self.bot.config.color,
-        )
-        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
-        embed.set_thumbnail(url=random_line("commons/pollimages"))
-        message = await ctx.send(embed=embed)
+
+        embed = PollEmbed(interaction, text)
+
+        await interaction.response.send_message(embed=embed)
+        message = await interaction.original_response()
         await message.add_reaction("👍")
         await message.add_reaction("👎")
         await message.add_reaction("🤷")
 
-    @commands.command()
-    async def ping(self, ctx):
-        """Ping command."""
-        t1 = time.perf_counter()
-        await ctx.typing()
-        t2 = time.perf_counter()
-        await ctx.send(f"🏓 Pong!: {round((t2-t1)*1000)}ms")
+    @app_commands.command(name="ping", description="Pings the bot")
+    async def ping_command(self, interaction: discord.Interaction) -> None:
+        await interaction.response.send_message(
+            f"🏓 Pong!: {self.bot.latency*1000:.2f}ms",
+        )
 
 
-async def setup(bot):
+async def setup(bot: Sunny) -> None:
     await bot.add_cog(Fun(bot))

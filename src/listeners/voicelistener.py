@@ -1,21 +1,32 @@
 from __future__ import annotations
 
-import discord
+from typing import TYPE_CHECKING
+
 from discord.ext import commands
+
+if TYPE_CHECKING:
+    from discord import Member
+    from discord import VoiceState
+    from classes.bot import Sunny
 
 
 class VoiceListener(
     commands.Cog,
     command_attrs=dict(hidden=True),
     name="Voice State Update Listener",
-):
+):  # type: ignore
     """Voice State Update Listener"""
 
-    def __init__(self, bot):
+    def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
     @commands.Cog.listener()
-    async def on_voice_state_update(self, member, before, after):
+    async def on_voice_state_update(
+        self,
+        member: Member,
+        before: VoiceState,
+        after: VoiceState,
+    ) -> None:
         player = self.bot.lavalink.player_manager.get(member.guild.id)
 
         if player is None or not player.is_connected:
@@ -29,5 +40,5 @@ class VoiceListener(
             await member.guild.change_voice_state(channel=None)
 
 
-async def setup(bot):
+async def setup(bot: Sunny) -> None:
     await bot.add_cog(VoiceListener(bot))

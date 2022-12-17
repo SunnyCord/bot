@@ -2,25 +2,39 @@ from __future__ import annotations
 
 import sys
 import traceback
+from typing import TYPE_CHECKING
 
-import classes.exceptions as Exceptions
+import aiosu
 import discord
+from classes import exceptions
 from discord.ext import commands
 
+if TYPE_CHECKING:
+    from classes.bot import Sunny
 
-class CommandErrorHandler(commands.Cog, name="Error Handler"):
+
+class CommandErrorHandler(commands.Cog, name="Error Handler"):  # type: ignore
     """Handles any errors that may occur."""
 
-    def __init__(self, bot):
+    def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
+        @bot.tree.error
+        async def on_app_command_error(
+            interaction: discord.Interaction,
+            error: Exception,
+        ) -> None:
+            # TODO handle slash command errors
+            error = getattr(error, "original", error)
+            print(error)
+
     @commands.Cog.listener()
-    async def on_command_error(self, ctx, error):
+    async def on_command_error(self, ctx: commands.Context, error: Exception) -> None:
         if hasattr(ctx.command, "on_error"):
             return
-        ignored = (commands.CommandNotFound, commands.UserInputError)
+
         error = getattr(error, "original", error)
-        if isinstance(error, ignored):
+        if isinstance(error, commands.CommandNotFound):
             return
 
         elif isinstance(error, discord.errors.Forbidden):
@@ -44,37 +58,16 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):
         elif isinstance(error, commands.CommandInvokeError):
             await ctx.send(error.original)
 
-        elif isinstance(error, Exceptions.OsuAPIError):
-            if error.queryType == "get_user":
-                return await ctx.send(
-                    f"User has not been found on {error.server.name_full} or has not played enough!",
-                )
-            elif error.queryType == "get_beatmap":
-                return await ctx.send(
-                    f"Beatmap was not found on {error.server.name_full}!",
-                )
-            elif error.queryType == "get_recent":
-                return await ctx.send(
-                    f"User has no recent plays on {error.server.name_full}!",
-                )
-            elif error.queryType == "get_user_top":
-                return await ctx.send(
-                    f"User has no top plays on {error.server.name_full}!",
-                )
-            elif error.queryType == "get_user_scores":
-                return await ctx.send(
-                    f"User has no scores on this beatmap on {error.server.name_full}!",
-                )
-            else:
-                return await ctx.send("Unknown API error.")
+        elif isinstance(error, aiosu.classes.APIException):
+            return await ctx.send("An osu! API error has occured.")
 
-        elif isinstance(error, Exceptions.DatabaseMissingError):
+        elif isinstance(error, exceptions.DatabaseMissingError):
             if error.queryType == "osu":
                 return await ctx.send("Please set your profile!")
             else:
                 return await ctx.send("Unknown database error.")
 
-        elif isinstance(error, Exceptions.MusicPlayerError):
+        elif isinstance(error, exceptions.MusicPlayerError):
             return await ctx.send(error)
 
         exc = f"{type(error).__name__}"
@@ -97,5 +90,5 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):
         )
 
 
-async def setup(bot):
+async def setup(bot: Sunny) -> None:
     await bot.add_cog(CommandErrorHandler(bot))

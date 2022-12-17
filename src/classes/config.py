@@ -61,19 +61,18 @@ class ConfigList:
     select: int = 0
     configs: List[Config] = field(default_factory=lambda: [Config()])
 
-    def __get_selected_config(self):
+    def __get_selected_config(self) -> Config:
         return self.configs[self.select]
 
     @classmethod
     def _create_config(cls) -> None:
         with open("config.json", "a+") as config_file:
-            fmt = cls().to_json(indent=4)
+            fmt = cls().to_json(indent=4)  # type:ignore
             config_file.write(fmt)
             logger.warn(
                 "A config file was not found! Please edit the newly created `config.json` and run again.",
             )
             config_file.close()
-            exit()
 
     @classmethod
     def get_config(cls) -> Config:
@@ -82,5 +81,6 @@ class ConfigList:
             data = config_file.read()
             if data:
                 config_file.close()
-                return cls.from_json(data).__get_selected_config()
+                return cls.from_json(data).__get_selected_config()  # type: ignore
             cls._create_config()
+            exit()
