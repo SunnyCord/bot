@@ -379,7 +379,10 @@ class Music(commands.GroupCog, name="music"):  # type: ignore
             await player.set_pause(True)
             await ctx.send("⏯ | Paused")
 
-    @commands.hybrid_command()
+    @commands.hybrid_command(
+        name="skip",
+        description="Skips the currently playing track",
+    )
     async def skip(self, ctx: commands.Context) -> None:
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
