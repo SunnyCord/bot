@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import discord
 from discord.ext import commands
+from discord.ext import tasks
 
 if TYPE_CHECKING:
     from classes.bot import Sunny
@@ -14,8 +14,18 @@ class CronTask(commands.Cog):
 
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
+        self.update.start()
 
-    # tasks.loop
+    def cog_unload(self):
+        self.update.cancel()
+
+    @tasks.loop(minutes=720)
+    async def update(self) -> None:
+        ...
+
+    @update.before_loop
+    async def before_update(self):
+        await self.bot.wait_until_ready()
 
 
 async def setup(bot: Sunny) -> None:
