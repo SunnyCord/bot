@@ -16,7 +16,7 @@ class CronTask(commands.Cog):
         self.bot = bot
         self.update.start()
 
-    def cog_unload(self):
+    def cog_unload(self) -> None:
         self.update.cancel()
 
     @tasks.loop(minutes=720)
@@ -24,7 +24,7 @@ class CronTask(commands.Cog):
         ...
 
     @update.before_loop
-    async def before_update(self):
+    async def before_update(self) -> None:
         await self.bot.wait_until_ready()
 
 

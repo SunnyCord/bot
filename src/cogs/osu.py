@@ -464,7 +464,7 @@ class OsuCog(commands.Cog, name="osu!"):  # type: ignore
                 return
             if self.bot.redisIO is not None:
                 self.bot.redisIO.set_value(ctx.message.channel.id, beatmap_id)
-                self.bot.redisIO.set_value(f"{ctx.message.channel.id}.mode", mode.id)
+                self.bot.redisIO.set_value(f"{ctx.message.channel.id}.mode", mode.id)  # type: ignore
         elif self.bot.redisIO is not None:
             beatmap_id = self.bot.redisIO.get_value(ctx.message.channel.id)
             if beatmap_id is None:
