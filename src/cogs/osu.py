@@ -437,43 +437,46 @@ class OsuCog(commands.Cog, name="osu!"):  # type: ignore
             beatmap_id,
         )
 
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    @commands.hybrid_command(
+        name="pp",
+        description="Shows information about pp of a certain map",
+    )
+    @app_commands.describe(
+        beatmap="URL or ID of the beatmap",
+        username="Discord/osu! username or mention",
+    )
+    async def osu_perf_command(
+        self,
+        ctx: commands.Context,
+        beatmap: Optional[str],
+        username: Optional[str],
+        *,
+        flags: OsuScoreFlags,
+    ) -> None:
+        await ctx.defer()
+        mode = flags.mode
 
-#
-# @commands.cooldown(1, 1, commands.BucketType.user)
-# @commands.command(aliases=["pp"])
-# async def perf(self, ctx, *, args=None):
-#    """Shows information about pp of a certain map"""
-#
-#    args = self.bot.osuHelpers.parseArgsV2(
-#        args=args,
-#        customArgs=["mods", "beatmap"],
-#    )
-#    mode = args["mode"]
-#
-#    if args["beatmap"]:
-#        beatmap: osuClasses.Beatmap = await self.bot.osuHelpers.getBeatmapFromText(
-#            args["beatmap"],
-#        )
-#    else:
-#        beatmap: osuClasses.Beatmap = (
-#            await self.bot.osuHelpers.getBeatmapFromHistory(ctx)
-#        )
-#
-#    if beatmap is None:
-#        await ctx.send("Failed to find any maps")
-#        return
-#
-#    if self.bot.redisIO is not None:
-#        self.bot.redisIO.set_value(ctx.message.channel.id, beatmap.beatmap_id)
-#        self.bot.redisIO.set_value(f"{ctx.message.channel.id}.mode", mode.id)
-#
-#    mods: osuClasses.Mods = osuClasses.Mods(args["mods"])
-#
-#    perf = await self.bot.ppAPI.calculateBeatmap(beatmap.beatmap_id, mods, mode)
-#
-#    result = OsuPerformanceEmbed(beatmap, perf, self.bot.config.color)
-#    await ctx.send(embed=result)
-#
+        if beatmap:
+            beatmap_data = get_beatmap_from_text(beatmap)
+            if (beatmap_id := beatmap_data["beatmap_id"]) is None:
+                await ctx.send("Unknown beatmap ID specified.")
+                return
+            if self.bot.redisIO is not None:
+                self.bot.redisIO.set_value(ctx.message.channel.id, beatmap_id)
+                self.bot.redisIO.set_value(f"{ctx.message.channel.id}.mode", mode.id)
+        elif self.bot.redisIO is not None:
+            beatmap_id = self.bot.redisIO.get_value(ctx.message.channel.id)
+            if beatmap_id is None:
+                await ctx.send("No beatmap found in cache.")
+                return
+        else:
+            await ctx.send(
+                "Redis is disabled in the config. Please contact the owner of this bot instance!",
+            )
+            return
+
+        await ctx.send("This command is still WIP.")
 
 
 async def setup(bot: Sunny) -> None:
