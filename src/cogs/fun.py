@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import discord
+from classes.cog import MetadataCog
 from discord import app_commands
 from discord.ext import commands
 from ui.embeds.fun import PollEmbed
@@ -11,7 +12,7 @@ if TYPE_CHECKING:
     from classes.bot import Sunny
 
 
-class Fun(commands.Cog):
+class Fun(MetadataCog):
     """
     Miscellaneous commands.
     """

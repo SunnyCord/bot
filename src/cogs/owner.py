@@ -4,13 +4,14 @@ import time
 from typing import TYPE_CHECKING
 
 import discord
+from classes.cog import MetadataCog
 from discord.ext import commands
 
 if TYPE_CHECKING:
     from classes.bot import Sunny
 
 
-class OwnerCog(commands.Cog, command_attrs=dict(hidden=True), name="Owner"):  # type: ignore
+class OwnerCog(MetadataCog, name="Owner", hidden=True):  # type: ignore
     """
     Commands used for managing the bot.
     """
