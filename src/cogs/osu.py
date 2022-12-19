@@ -115,7 +115,7 @@ class OsuProfileCog(commands.GroupCog, name="profile"):  # type: ignore
     ) -> None:
         await ctx.defer()
         user = await OsuUserConverter().convert(ctx, username, mode)
-        return await ctx.send(embed=OsuProfileEmbed(ctx, user, mode))
+        await ctx.send(embed=OsuProfileEmbed(ctx, user, mode))
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
@@ -201,8 +201,8 @@ class OsuTopsCog(commands.GroupCog, name="top"):  # type: ignore
             return
 
         if self.bot.redisIO is not None:
-            self.bot.redisIO.set_value(ctx.message.channel.id, tops[0].beatmap_id)
-            self.bot.redisIO.set_value(f"{ctx.message.channel.id}.mode", mode.id)
+            await self.bot.redisIO.set(ctx.message.channel.id, tops[0].beatmap_id)
+            await self.bot.redisIO.set(f"{ctx.message.channel.id}.mode", mode.id)
 
         recent_text = ""
         if flags.recent:
@@ -331,8 +331,8 @@ class OsuCog(commands.Cog, name="osu!"):  # type: ignore
             await ctx.send(f"User **{user.username}** has no recent plays!")
             return
         if self.bot.redisIO is not None:
-            self.bot.redisIO.set_value(ctx.message.channel.id, recents[0].beatmap_id)
-            self.bot.redisIO.set_value(f"{ctx.message.channel.id}.mode", mode.id)  # type: ignore
+            await self.bot.redisIO.set(ctx.message.channel.id, recents[0].beatmap_id)
+            await self.bot.redisIO.set(f"{ctx.message.channel.id}.mode", mode.id)  # type: ignore
 
         if flags.list:
             title = f"Recent osu! {mode:f} plays for {user.username}"
@@ -386,8 +386,8 @@ class OsuCog(commands.Cog, name="osu!"):  # type: ignore
             )
             return
 
-        mode_id = self.bot.redisIO.get_value(f"{ctx.message.channel.id}.mode")
-        beatmap_id = self.bot.redisIO.get_value(ctx.message.channel.id)
+        mode_id = await self.bot.redisIO.get(f"{ctx.message.channel.id}.mode")
+        beatmap_id = await self.bot.redisIO.get(ctx.message.channel.id)
         if mode_id is None or beatmap_id is None:
             await ctx.send("No beatmap found to compare to.")
             return
@@ -427,8 +427,8 @@ class OsuCog(commands.Cog, name="osu!"):  # type: ignore
             return
 
         if self.bot.redisIO is not None:
-            self.bot.redisIO.set_value(ctx.message.channel.id, beatmap_id)
-            self.bot.redisIO.set_value(f"{ctx.message.channel.id}.mode", mode.id)  # type: ignore
+            await self.bot.redisIO.set(ctx.message.channel.id, beatmap_id)
+            await self.bot.redisIO.set(f"{ctx.message.channel.id}.mode", mode.id)  # type: ignore
 
         await self.osu_beatmap_scores_command(
             ctx,
@@ -463,10 +463,10 @@ class OsuCog(commands.Cog, name="osu!"):  # type: ignore
                 await ctx.send("Unknown beatmap ID specified.")
                 return
             if self.bot.redisIO is not None:
-                self.bot.redisIO.set_value(ctx.message.channel.id, beatmap_id)
-                self.bot.redisIO.set_value(f"{ctx.message.channel.id}.mode", mode.id)  # type: ignore
+                await self.bot.redisIO.set(ctx.message.channel.id, beatmap_id)
+                await self.bot.redisIO.set(f"{ctx.message.channel.id}.mode", mode.id)  # type: ignore
         elif self.bot.redisIO is not None:
-            beatmap_id = self.bot.redisIO.get_value(ctx.message.channel.id)
+            beatmap_id = await self.bot.redisIO.get(ctx.message.channel.id)
             if beatmap_id is None:
                 await ctx.send("No beatmap found in cache.")
                 return

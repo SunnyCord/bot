@@ -6,12 +6,13 @@ from typing import TYPE_CHECKING
 
 import aiosu
 import discord
+import orjson
 from classes.config import ConfigList
 from commons.helpers import list_module
 from commons.mongoIO import mongoIO
 from commons.redisIO import redisIO
 from discord.ext import commands
-from motor import motor_asyncio
+from motor.motor_asyncio import AsyncIOMotorClient
 
 if TYPE_CHECKING:
     from typing import Any
@@ -53,14 +54,24 @@ class Sunny(commands.AutoShardedBot):
             help_command=None,
         )
         self.config = ConfigList.get_config()
-        self.motorClient = motor_asyncio.AsyncIOMotorClient(
+        self.motorClient: AsyncIOMotorClient = AsyncIOMotorClient(
             self.config.mongo.host,
             serverSelectionTimeoutMS=self.config.mongo.timeout,
         )
-        self.redisIO = redisIO(self) if self.config.redis.enable else None
-        self.mongoIO = mongoIO(self)
+        self.redisIO: Optional[redisIO] = (
+            redisIO(self) if self.config.redis.enable else None
+        )
+        self.mongoIO: mongoIO = mongoIO(self)
         self.client_v1 = aiosu.v1.Client(self.config.osuAPI)
         self.client_storage = aiosu.v2.ClientStorage()
+
+    def get_command_dict(self) -> dict:
+        return {"Music": ["skip"]}
+
+    async def on_ready(self):
+        commands = self.get_command_dict()
+        commands_packed = orjson.dumps(commands)
+        await self.redisIO.set("sunny:commands", commands_packed)
 
     async def on_message(self, message: discord.Message) -> None:
         ignore = not message.guild
