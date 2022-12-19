@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 import async_timeout
 import orjson
+from aiosu.classes import OAuthToken
 from classes.cog import MetadataCog
 from discord.ext import commands
 from discord.ext import tasks
@@ -20,6 +21,7 @@ class CronTask(MetadataCog, hidden=True):
         self.redis = self.bot.redisIO
         self.pubsub = self.redis.pubsub(ignore_subscribe_messages=True)
         self.client_storage = self.bot.client_storage
+        self.client_storage.on_client_add(self.on_client_add)
         self.pubsub_task.start()
         self.update_task.start()
 
@@ -32,8 +34,17 @@ class CronTask(MetadataCog, hidden=True):
         self.pubsub_task.cancel()
         self.update_task.cancel()
 
+    async def on_client_add(self, event):
+        discord_id = event.client_id
+        client = event.client
+        token = client.token
+        print(token)
+
     async def process_token(self, data: bytes) -> None:
         unpacked_data = orjson.loads(data)
+        token = OAuthToken.parse_obj(unpacked_data["token"])
+        discord_id = unpacked_data["state"]
+        await self.client_storage.add_client(token, id=discord_id)
 
     async def update_stats(self, data: str) -> None:
         await self.redis.set("sunny:guild-count", len(self.bot.guilds))
