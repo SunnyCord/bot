@@ -47,11 +47,12 @@ class Sunny(commands.AutoShardedBot):
                     logging.error(f"Failed loading module {name} : {e}")
 
     def __init__(self, **kwargs: Any) -> None:
+        activity = discord.Activity(type=discord.ActivityType.watching, name="you.")
         super().__init__(
             description="Sunny Bot",
             command_prefix=_get_prefix,
             intents=_get_intents(),
-            # activity=discord.Activity(),
+            activity=activity,
             help_command=None,
         )
         self.config = ConfigList.get_config()
