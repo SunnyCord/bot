@@ -68,37 +68,33 @@ class Sunny(commands.AutoShardedBot):
     def get_cogs_dict(self) -> dict[str, Any]:
         """Gets a dict of all cogs and their commands."""
         cogs_dict = {}
-        for x in self.cogs:
-            cog = self.cogs[x]
-            if getattr(cog, "hidden", True):  # hide if not MetadataCog
+        for cog_name, cog in self.cogs.items():
+            if getattr(cog, "hidden", True):
                 continue
-            command_names = []
-            for c in cog.get_commands() + cog.get_app_commands():
-                if getattr(c, "hidden", False):  # app commands are always shown
+
+            commands_dict = {}
+            for cmd in cog.get_commands() + cog.get_app_commands():
+                if getattr(cmd, "hidden", False):
                     continue
-                c = getattr(c, "app_command", c)
-                parameters = [
-                    {
-                        "name": p.display_name,
-                        "description": p.description,
-                    }
-                    for p in c.parameters
-                ]
-                command_names.append(
-                    {
-                        "name": c.name,
-                        "description": c.description,
-                        "parameters": parameters,
-                    },
-                )
+                cmd = getattr(cmd, "app_command", cmd)
+
+                parameters = {p.display_name: p.description for p in cmd.parameters}
+                commands_dict[cmd.name] = {
+                    "name": cmd.name,
+                    "description": cmd.description,
+                    "parameters": parameters,
+                }
+
             if getattr(cog, "display_parent"):
                 parent = cogs_dict[cog.display_parent]
-                parent["commands"].extend(command_names)
+                parent["commands"].update(commands_dict)
                 continue
+
             cogs_dict[cog.qualified_name.lower()] = {
                 "description": cog.description,
-                "commands": command_names,
+                "commands": commands_dict,
             }
+
         return cogs_dict
 
     async def on_ready(self):
