@@ -41,10 +41,9 @@ class Sunny(commands.AutoShardedBot):
         for module in module_folders:
             for extension in list_module(module):
                 name = f"{module}.{os.path.splitext(extension)[0]}"
-                try:
-                    await self.load_extension(name)
-                except Exception as e:
-                    logging.error(f"Failed loading module {name} : {e}")
+                await self.load_extension(name)
+                # except Exception as e:
+                #    logging.error(f"Failed loading module {name} : {e}")
 
     def __init__(self, **kwargs: Any) -> None:
         activity = discord.Activity(type=discord.ActivityType.watching, name="you.")

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from discord.ext.commands import Cog
 from discord.ext.commands import GroupCog
-from typing_extensions import Self
 
 
 class MetadataCog(Cog):
