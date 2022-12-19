@@ -16,6 +16,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 if TYPE_CHECKING:
     from typing import Any
+    from typing import Optional
 
 logger = logging.getLogger()
 
