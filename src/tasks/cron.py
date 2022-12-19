@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 import async_timeout
 import orjson
+from classes.cog import MetadataCog
 from discord.ext import commands
 from discord.ext import tasks
 
@@ -11,7 +12,7 @@ if TYPE_CHECKING:
     from classes.bot import Sunny
 
 
-class CronTask(commands.Cog):
+class CronTask(MetadataCog, hidden=True):
     """Database maintenance task"""
 
     def __init__(self, bot: Sunny) -> None:
@@ -33,11 +34,11 @@ class CronTask(commands.Cog):
 
     async def process_token(self, data: bytes) -> None:
         unpacked_data = orjson.loads(data)
-        print(unpacked_data)
 
     async def update_stats(self, data: str) -> None:
         await self.redis.set("sunny:guild-count", len(self.bot.guilds))
-        await self.redis.set("sunny:command-count", len(self.bot.commands))
+        await self.redis.set("sunny:cog-count", len(self.bot.cogs))
+        await self.redis.set("sunny:command-count", len(self.bot.all_commands))
 
     async def handle_message(self, message: dict[str, str]) -> None:
         channel = message.get("channel")
