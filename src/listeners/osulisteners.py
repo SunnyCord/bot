@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 import aiohttp
 import discord
+from classes.cog import MetadataCog
 from commons.helpers import get_beatmap_from_text
 from discord.ext import commands
 from ui.embeds.osu import OsuBeatmapEmbed
@@ -14,9 +15,9 @@ if TYPE_CHECKING:
 
 
 class OsuListeners(
-    commands.Cog,
-    command_attrs=dict(hidden=True),
+    MetadataCog,
     name="osu! Chat Listener",
+    hidden=True,
 ):  # type: ignore
     """osu! Message Listeners"""
 

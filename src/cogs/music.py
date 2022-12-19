@@ -8,6 +8,7 @@ import aiohttp
 import classes.exceptions as Exceptions
 import discord
 import lavalink
+from classes.cog import MetadataGroupCog
 from commons.regex import track_title_rx
 from commons.regex import url_rx
 from discord import app_commands
@@ -102,7 +103,7 @@ class LavalinkVoiceClient(discord.VoiceClient):
         self.cleanup()
 
 
-class Music(commands.GroupCog, name="music"):  # type: ignore
+class Music(MetadataGroupCog, name="music"):  # type: ignore
     """
     Commands related to music playback.
     """
@@ -352,8 +353,9 @@ class Music(commands.GroupCog, name="music"):  # type: ignore
 
     @commands.hybrid_command(
         name="seek",
-        description="Seeks to a given position in a track",
+        description="Seeks the currently playing track",
     )
+    @app_commands.describe(seconds="Seconds to skip by")
     async def seek_command(self, ctx: commands.Context, *, seconds: int) -> None:
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 

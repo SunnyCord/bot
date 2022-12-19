@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from classes.cog import MetadataCog
 from discord.ext import commands
 
 if TYPE_CHECKING:
@@ -9,7 +10,7 @@ if TYPE_CHECKING:
     from classes.bot import Sunny
 
 
-class Settings(commands.Cog):
+class Settings(MetadataCog):
     """
     Commands user for changing server-based settings.
     """
@@ -17,9 +18,12 @@ class Settings(commands.Cog):
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
+    @commands.hybrid_command(
+        name="forgetme",
+        description="Deletes all of your data from the bot.",
+    )
     @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.command()
-    async def forgetme(self, ctx: commands.Context) -> None:
+    async def forget_command(self, ctx: commands.Context) -> None:
         await self.bot.mongoIO.remove_user(ctx.author)
         await ctx.send("Your data has been successfully deleted. Sorry to see you go!")
 

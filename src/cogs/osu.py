@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING
 
 import aiosu
 import discord
+from classes.cog import MetadataCog
+from classes.cog import MetadataGroupCog
 from commons.helpers import get_beatmap_from_text
 from discord import app_commands
 from discord.ext import commands
@@ -95,7 +97,7 @@ class OsuUserConverter(commands.Converter):
         )
 
 
-class OsuProfileCog(commands.GroupCog, name="profile"):  # type: ignore
+class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):  # type: ignore
     """
     osu! Profile Commands
     """
@@ -170,7 +172,7 @@ class OsuProfileCog(commands.GroupCog, name="profile"):  # type: ignore
         await self.osu_profile_command(ctx, user, aiosu.classes.Gamemode.CTB)
 
 
-class OsuTopsCog(commands.GroupCog, name="top"):  # type: ignore
+class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):  # type: ignore
     """
     osu! Tops Commands
     """
@@ -267,9 +269,9 @@ class OsuTopsCog(commands.GroupCog, name="top"):  # type: ignore
         await self.osu_top_command(ctx, user, aiosu.classes.Gamemode.CTB, flags)
 
 
-class OsuCog(commands.Cog, name="osu!"):  # type: ignore
+class OsuCog(MetadataCog, name="osu!"):  # type: ignore
     """
-    osu! related commands.\n*Valid Arguments:* ```fix\n-ripple, -akatsuki```
+    osu! related commands.
     """
 
     def __init__(self, bot: Sunny) -> None:

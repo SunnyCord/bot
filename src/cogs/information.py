@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import discord
+from classes.cog import MetadataCog
 from discord import app_commands
 from discord.ext import commands
 from ui.embeds.information import BotInfoEmbed
@@ -12,7 +13,7 @@ if TYPE_CHECKING:
     from classes.bot import Sunny
 
 
-class Information(commands.Cog):
+class Information(MetadataCog):
     """
     Retrieve information about various items.
     """

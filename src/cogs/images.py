@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 import aiohttp
 import discord
+from classes.cog import MetadataCog
 from classes.enums.animals import Animal
 from discord import app_commands
 from discord.ext import commands
@@ -13,7 +14,7 @@ if TYPE_CHECKING:
     from classes.bot import Sunny
 
 
-class Image(commands.Cog):
+class Image(MetadataCog):
     """
     Various image-related commands.
     """
@@ -59,7 +60,7 @@ class Image(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
-    @app_commands.command(name="wink", description="😉")
+    @app_commands.command(name="wink", description="Wink")
     async def wink_command(self, interaction: discord.Interaction) -> None:
         async with aiohttp.ClientSession() as cs:
             async with cs.get("https://some-random-api.ml/animu/wink") as r:
@@ -72,7 +73,8 @@ class Image(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
-    @app_commands.command(name="pat", description="Give someone (or yourself) a pat")
+    @app_commands.command(name="pat", description="Give someone a pat")
+    @app_commands.describe(user="User to pat")
     async def pat_command(
         self,
         interaction: discord.Interaction,
@@ -92,7 +94,8 @@ class Image(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
-    @app_commands.command(name="hug", description="Give someone (or yourself) a hug")
+    @app_commands.command(name="hug", description="Give someone a hug")
+    @app_commands.describe(user="User to hug")
     async def hug_command(
         self,
         interaction: discord.Interaction,
