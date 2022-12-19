@@ -109,8 +109,6 @@ application\.yml
 
 logs/
 
-Pipfile\.lock
-
 lavalink/
 
 Lavalink.jar
