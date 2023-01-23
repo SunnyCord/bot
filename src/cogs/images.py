@@ -5,13 +5,13 @@ from typing import TYPE_CHECKING
 
 import aiohttp
 import discord
-from classes.cog import MetadataCog
-from classes.enums.animals import Animal
 from discord import app_commands
 from discord.ext import commands
+from models.cog import MetadataCog
+from models.enums.animals import Animal
 
 if TYPE_CHECKING:
-    from classes.bot import Sunny
+    from models.bot import Sunny
 
 
 class Image(MetadataCog):

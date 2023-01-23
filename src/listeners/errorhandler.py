@@ -6,13 +6,13 @@ from typing import TYPE_CHECKING
 
 import aiosu
 import discord
-from classes import exceptions
-from classes.cog import MetadataCog
 from discord import app_commands
 from discord.ext import commands
+from models import exceptions
+from models.cog import MetadataCog
 
 if TYPE_CHECKING:
-    from classes.bot import Sunny
+    from models.bot import Sunny
 
 
 class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):  # type: ignore

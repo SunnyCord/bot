@@ -4,11 +4,11 @@ import time
 from typing import TYPE_CHECKING
 
 import discord
-from classes.cog import MetadataCog
 from discord.ext import commands
+from models.cog import MetadataCog
 
 if TYPE_CHECKING:
-    from classes.bot import Sunny
+    from models.bot import Sunny
 
 
 class OwnerCog(MetadataCog, name="Owner", hidden=True):  # type: ignore

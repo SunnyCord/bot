@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from aioredis import Redis
 
 if TYPE_CHECKING:
-    from classes.bot import Sunny
+    from models.bot import Sunny
 
 
 class redisIO(Redis):

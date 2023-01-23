@@ -5,18 +5,18 @@ from typing import TYPE_CHECKING
 
 import aiosu
 import discord
-from classes.cog import MetadataCog
-from classes.cog import MetadataGroupCog
 from commons.helpers import get_beatmap_from_text
 from discord import app_commands
 from discord.ext import commands
+from models.cog import MetadataCog
+from models.cog import MetadataGroupCog
 from ui.embeds.osu import OsuProfileEmbed
 from ui.embeds.osu import OsuScoreSingleEmbed
 from ui.menus.osu import OsuScoresView
 
 if TYPE_CHECKING:
     from typing import Any
-    from classes.bot import Sunny
+    from models.bot import Sunny
 
 
 class OsuTopFlags(commands.FlagConverter, prefix="-"):  # type: ignore

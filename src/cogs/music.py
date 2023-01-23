@@ -5,19 +5,19 @@ from typing import Optional
 from typing import TYPE_CHECKING
 
 import aiohttp
-import classes.exceptions as Exceptions
 import discord
 import lavalink
-from classes.cog import MetadataGroupCog
+import models.exceptions as Exceptions
 from commons.regex import track_title_rx
 from commons.regex import url_rx
 from discord import app_commands
 from discord.ext import commands
 from lavalink.filters import LowPass
+from models.cog import MetadataGroupCog
 
 if TYPE_CHECKING:
     from typing import Any
-    from classes.bot import Sunny
+    from models.bot import Sunny
 
 
 class LavalinkVoiceClient(discord.VoiceClient):
