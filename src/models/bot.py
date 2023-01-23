@@ -7,11 +7,11 @@ from typing import TYPE_CHECKING
 import aiosu
 import discord
 import orjson
-from classes.config import ConfigList
 from commons.helpers import list_module
 from commons.mongoIO import mongoIO
 from commons.redisIO import redisIO
 from discord.ext import commands
+from models.config import ConfigList
 from motor.motor_asyncio import AsyncIOMotorClient
 
 if TYPE_CHECKING:

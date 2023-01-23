@@ -5,12 +5,12 @@ from typing import TYPE_CHECKING
 import async_timeout
 import orjson
 from aiosu.classes import OAuthToken
-from classes.cog import MetadataCog
 from discord.ext import commands
 from discord.ext import tasks
+from models.cog import MetadataCog
 
 if TYPE_CHECKING:
-    from classes.bot import Sunny
+    from models.bot import Sunny
 
 
 class CronTask(MetadataCog, hidden=True):

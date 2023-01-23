@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import classes.exceptions as Exceptions
 import discord
+import models.exceptions as Exceptions
 
 if TYPE_CHECKING:
     from typing import Optional
     from typing import Any
-    from classes.bot import Sunny
+    from models.bot import Sunny
 
 
 class mongoIO:

@@ -3,14 +3,14 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import discord
-from classes.cog import MetadataCog
 from discord import app_commands
 from discord.ext import commands
+from models.cog import MetadataCog
 from ui.embeds.information import BotInfoEmbed
 from ui.embeds.information import ServerInfoEmbed
 
 if TYPE_CHECKING:
-    from classes.bot import Sunny
+    from models.bot import Sunny
 
 
 class Information(MetadataCog):

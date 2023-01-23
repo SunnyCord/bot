@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from classes.cog import MetadataCog
 from discord.ext import commands
+from models.cog import MetadataCog
 
 if TYPE_CHECKING:
     from discord import Guild
-    from classes.bot import Sunny
+    from models.bot import Sunny
 
 
 class Settings(MetadataCog):
