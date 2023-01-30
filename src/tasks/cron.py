@@ -4,8 +4,7 @@ from typing import TYPE_CHECKING
 
 import async_timeout
 import orjson
-from aiosu.classes import OAuthToken
-from discord.ext import commands
+from aiosu.models import OAuthToken
 from discord.ext import tasks
 from models.cog import MetadataCog
 
@@ -18,15 +17,12 @@ class CronTask(MetadataCog, hidden=True):
 
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
-        self.redis = self.bot.redisIO
-        self.pubsub = self.redis.pubsub(ignore_subscribe_messages=True)
         self.client_storage = self.bot.client_storage
         self.client_storage.on_client_add(self.on_client_add)
         self.pubsub_task.start()
         self.update_task.start()
 
         self.handlers = {
-            "sunny:stat-refresh": self.update_stats,
             "sunny:oauth-process": self.process_token,
         }
 
@@ -46,11 +42,6 @@ class CronTask(MetadataCog, hidden=True):
         discord_id = unpacked_data["state"]
         await self.client_storage.add_client(token, id=discord_id)
 
-    async def update_stats(self, data: str) -> None:
-        await self.redis.set("sunny:guild-count", len(self.bot.guilds))
-        await self.redis.set("sunny:cog-count", len(self.bot.cogs))
-        await self.redis.set("sunny:command-count", len(self.bot.all_commands))
-
     async def handle_message(self, message: dict[str, str]) -> None:
         channel = message.get("channel")
         data = message.get("data")
@@ -60,7 +51,7 @@ class CronTask(MetadataCog, hidden=True):
     @tasks.loop(seconds=0.5)
     async def pubsub_task(self) -> None:
         async with async_timeout.timeout(1):
-            message = await self.pubsub.get_message()
+            message = await self.bot.redis_pubsub.get_message()
             if message is not None:
                 await self.handle_message(message)
 
@@ -71,7 +62,7 @@ class CronTask(MetadataCog, hidden=True):
     @pubsub_task.before_loop
     async def before_pubsub_task(self) -> None:
         await self.bot.wait_until_ready()
-        await self.pubsub.psubscribe("sunny:*")
+        await self.bot.redis_pubsub.psubscribe("sunny:*")
 
     @update_task.before_loop
     async def before_update_task(self) -> None:

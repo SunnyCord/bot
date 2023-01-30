@@ -39,9 +39,7 @@ class OsuListeners(
                 f = BytesIO(await resp.read())
 
         beatmap = beatmapset.beatmaps[0]
-        if self.bot.redisIO is not None:
-            await self.bot.redisIO.set(message.channel.id, beatmap.id)
-            await self.bot.redisIO.set(f"{message.channel.id}.mode", beatmap.mode.id)
+        await self.bot.beatmap_service.add(beatmap)
 
         await message.channel.send(
             embed=OsuBeatmapEmbed(beatmapset, color=self.bot.config.color),

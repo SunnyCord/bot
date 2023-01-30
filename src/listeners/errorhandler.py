@@ -62,7 +62,7 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):  # ty
                 "Slow down! You are on a %.2fs cooldown." % error.retry_after,
             )
 
-        elif isinstance(error, aiosu.classes.APIException):
+        elif isinstance(error, aiosu.exceptions.APIException):
             return await ctx.send("An osu! API error has occured.")
 
         elif isinstance(error, exceptions.DatabaseMissingError):

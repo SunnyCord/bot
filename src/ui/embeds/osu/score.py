@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 def _score_to_embed_strs(
-    score: aiosu.classes.Score,
+    score: aiosu.models.Score,
     include_user: bool = False,
 ) -> dict[str, str]:
     beatmap, beatmapset = score.beatmap, score.beatmapset
@@ -42,7 +42,7 @@ class OsuScoreSingleEmbed(ContextEmbed):
     def __init__(
         self,
         ctx: commands.Context,
-        score: aiosu.classes.Score,
+        score: aiosu.models.Score,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -62,7 +62,7 @@ class OsuScoreMultipleEmbed(ContextEmbed):
     def __init__(
         self,
         ctx: commands.Context,
-        scores: list[aiosu.classes.Score],
+        scores: list[aiosu.models.Score],
         same_beatmap: Optional[bool] = False,
         *args: Any,
         **kwargs: Any,

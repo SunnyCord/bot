@@ -24,14 +24,14 @@ class Settings(MetadataCog):
     )
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def forget_command(self, ctx: commands.Context) -> None:
-        await self.bot.mongoIO.remove_user(ctx.author)
+        await self.bot.user_service.delete(ctx.author.id)
         await ctx.send("Your data has been successfully deleted. Sorry to see you go!")
 
-    async def on_guild_join(self, guild: Guild) -> None:
-        await self.bot.mongoIO.add_guild(guild)
+    # async def on_guild_join(self, guild: Guild) -> None:
+    #    await self.bot.mongoIO.add_guild(guild)
 
-    async def on_guild_leave(self, guild: Guild) -> None:
-        await self.bot.mongoIO.remove_guild(guild)
+    # async def on_guild_leave(self, guild: Guild) -> None:
+    #    await self.bot.mongoIO.remove_guild(guild)
 
 
 async def setup(bot: Sunny) -> None:

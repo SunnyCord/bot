@@ -204,6 +204,7 @@ class Music(MetadataGroupCog, name="music"):  # type: ignore
 
     @commands.hybrid_command(
         name="play",
+        aliases=["p"],
         description="Searches and plays a song from a given query",
     )
     @app_commands.describe(query="URL or keywords for searching")
@@ -259,6 +260,7 @@ class Music(MetadataGroupCog, name="music"):  # type: ignore
 
     @commands.hybrid_command(
         name="playing",
+        aliases=["np"],
         description="Shows the currently playing track",
     )
     async def playing_command(self, ctx: commands.Context) -> None:
@@ -286,7 +288,10 @@ class Music(MetadataGroupCog, name="music"):  # type: ignore
 
         await ctx.send(embed=embed)
 
-    @commands.hybrid_command(name="queue", description="Shows the player's queue")
+    @commands.hybrid_command(
+        name="queue",
+        description="Shows the player's queue",
+    )
     @app_commands.describe(
         page="Page number for the queue",
     )  # TODO replace this with pagination probably
@@ -314,7 +319,10 @@ class Music(MetadataGroupCog, name="music"):  # type: ignore
         embed.set_footer(text=f"Viewing page {page}/{pages}")
         await ctx.send(embed=embed)
 
-    @commands.hybrid_command(name="volume", description="Changes the bot volume")
+    @commands.hybrid_command(
+        name="volume",
+        description="Changes the bot volume",
+    )
     @app_commands.describe(volume="Volume percentage")
     async def volume_command(
         self,
@@ -329,7 +337,10 @@ class Music(MetadataGroupCog, name="music"):  # type: ignore
         await player.set_volume(volume / 2)
         await ctx.send(f"🔈 | Set to {player.volume * 2}%")
 
-    @commands.hybrid_command(name="shuffle", description="Shuffles the player's queue")
+    @commands.hybrid_command(
+        name="shuffle",
+        description="Shuffles the player's queue",
+    )
     async def shuffle_command(self, ctx: commands.Context) -> None:
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
         if not player.is_playing:
@@ -420,6 +431,7 @@ class Music(MetadataGroupCog, name="music"):  # type: ignore
 
     @commands.hybrid_command(
         name="disconnect",
+        aliases=["dc"],
         description="Disconnects the player from the voice channel and clears its queue",
     )
     async def disconnect_command(self, ctx: commands.Context) -> None:
