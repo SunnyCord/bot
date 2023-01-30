@@ -3,8 +3,8 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from aiosu.classes import Gamemode
-from aiosu.classes import User
+from aiosu.models import Gamemode
+from aiosu.models import User
 from discord.ext import commands
 from ui.embeds.generic import ContextEmbed
 

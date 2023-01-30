@@ -12,7 +12,6 @@ logger = logging.getLogger("discord")
 
 @dataclass(frozen=True)
 class RedisConfig:
-    enable: bool = False
     host: str = ""
     port: int = 6379
 

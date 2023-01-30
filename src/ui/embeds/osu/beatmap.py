@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import timedelta
 from typing import TYPE_CHECKING
 
-from aiosu.classes import Beatmapset
+from aiosu.models import Beatmapset
 from discord import Embed
 from ui.emojis.beatmap import BeatmapDifficultyIcon
 

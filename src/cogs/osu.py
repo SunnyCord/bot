@@ -33,10 +33,10 @@ class OsuTopFlags(commands.FlagConverter, prefix="-"):  # type: ignore
 
 
 class OsuRecentFlags(commands.FlagConverter):
-    mode: Optional[aiosu.classes.Gamemode] = commands.Flag(
+    mode: Optional[aiosu.models.Gamemode] = commands.Flag(
         aliases=["m"],
         description="The osu! mode to search for",
-        default=aiosu.classes.Gamemode.STANDARD,
+        default=aiosu.models.Gamemode.STANDARD,
     )
     list: Optional[bool] = commands.Flag(
         aliases=["l"],
@@ -46,17 +46,17 @@ class OsuRecentFlags(commands.FlagConverter):
 
 
 class OsuScoreFlags(commands.FlagConverter):
-    mode: Optional[aiosu.classes.Gamemode] = commands.Flag(
+    mode: Optional[aiosu.models.Gamemode] = commands.Flag(
         aliases=["m"],
         description="The osu! mode to search for",
-        default=aiosu.classes.Gamemode.STANDARD,
+        default=aiosu.models.Gamemode.STANDARD,
     )
 
 
 class OsuUserConverter(commands.Converter):
-    async def convert(self, ctx: commands.Context, *args: Any) -> aiosu.classes.User:
+    async def convert(self, ctx: commands.Context, *args: Any) -> aiosu.models.User:
         """
-        Converts to an ``aiosu.classes.User`` (case-insensitive)
+        Converts to an ``aiosu.models.User`` (case-insensitive)
 
         The lookup strategy is as follows (in order):
 
@@ -113,7 +113,7 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):  #
         self,
         ctx: commands.Context,
         username: Optional[str],
-        mode: aiosu.classes.Gamemode,
+        mode: aiosu.models.Gamemode,
     ) -> None:
         await ctx.defer()
         user = await OsuUserConverter().convert(ctx, username, mode)
@@ -130,7 +130,7 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):  #
         ctx: commands.Context,
         user: Optional[str],
     ) -> None:
-        await self.osu_profile_command(ctx, user, aiosu.classes.Gamemode.STANDARD)
+        await self.osu_profile_command(ctx, user, aiosu.models.Gamemode.STANDARD)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
@@ -143,7 +143,7 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):  #
         ctx: commands.Context,
         user: Optional[str],
     ) -> None:
-        await self.osu_profile_command(ctx, user, aiosu.classes.Gamemode.MANIA)
+        await self.osu_profile_command(ctx, user, aiosu.models.Gamemode.MANIA)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
@@ -156,7 +156,7 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):  #
         ctx: commands.Context,
         user: Optional[str],
     ) -> None:
-        await self.osu_profile_command(ctx, user, aiosu.classes.Gamemode.TAIKO)
+        await self.osu_profile_command(ctx, user, aiosu.models.Gamemode.TAIKO)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
@@ -169,7 +169,7 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):  #
         ctx: commands.Context,
         user: Optional[str],
     ) -> None:
-        await self.osu_profile_command(ctx, user, aiosu.classes.Gamemode.CTB)
+        await self.osu_profile_command(ctx, user, aiosu.models.Gamemode.CTB)
 
 
 class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):  # type: ignore
@@ -188,7 +188,7 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):  # type: 
         self,
         ctx: commands.Context,
         username: Optional[str],
-        mode: aiosu.classes.Gamemode,
+        mode: aiosu.models.Gamemode,
         flags: OsuTopFlags,
     ) -> None:
         await ctx.defer()
@@ -202,9 +202,7 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):  # type: 
             await ctx.send(f"User **{user.username}** has no top plays!")
             return
 
-        if self.bot.redisIO is not None:
-            await self.bot.redisIO.set(ctx.message.channel.id, tops[0].beatmap_id)
-            await self.bot.redisIO.set(f"{ctx.message.channel.id}.mode", mode.id)
+        await self.bot.beatmap_service.add(ctx.channel.id, tops[0])
 
         recent_text = ""
         if flags.recent:
@@ -230,7 +228,7 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):  # type: 
     async def osu_std_top_command(
         self, ctx: commands.Context, user: Optional[str], *, flags: OsuTopFlags
     ) -> None:
-        await self.osu_top_command(ctx, user, aiosu.classes.Gamemode.STANDARD, flags)
+        await self.osu_top_command(ctx, user, aiosu.models.Gamemode.STANDARD, flags)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
@@ -242,7 +240,7 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):  # type: 
     async def osu_mania_top_command(
         self, ctx: commands.Context, user: Optional[str], *, flags: OsuTopFlags
     ) -> None:
-        await self.osu_top_command(ctx, user, aiosu.classes.Gamemode.MANIA, flags)
+        await self.osu_top_command(ctx, user, aiosu.models.Gamemode.MANIA, flags)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
@@ -254,7 +252,7 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):  # type: 
     async def osu_taiko_top_command(
         self, ctx: commands.Context, user: Optional[str], *, flags: OsuTopFlags
     ) -> None:
-        await self.osu_top_command(ctx, user, aiosu.classes.Gamemode.TAIKO, flags)
+        await self.osu_top_command(ctx, user, aiosu.models.Gamemode.TAIKO, flags)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
@@ -266,7 +264,7 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):  # type: 
     async def osu_ctb_top_command(
         self, ctx: commands.Context, user: Optional[str], *, flags: OsuTopFlags
     ) -> None:
-        await self.osu_top_command(ctx, user, aiosu.classes.Gamemode.CTB, flags)
+        await self.osu_top_command(ctx, user, aiosu.models.Gamemode.CTB, flags)
 
 
 class OsuCog(MetadataCog, name="osu!"):  # type: ignore
@@ -291,17 +289,17 @@ class OsuCog(MetadataCog, name="osu!"):  # type: ignore
         username: str,
     ) -> None:
         await ctx.defer()
-        profile: aiosu.classes.User = await self.bot.client_v1.get_user(
+        profile: aiosu.models.User = await self.bot.client_v1.get_user(
             user_query=username,
             qtype="string",
         )
-        await self.bot.mongoIO.set_osu(
-            ctx.author,
-            profile.id,
-        )
-        await ctx.send(
-            f"osu! profile succesfully set to {profile.username}",
-        )
+        # await self.bot.mongoIO.set_osu(
+        #     ctx.author,
+        #     profile.id,
+        # )
+        # await ctx.send(
+        #     f"osu! profile succesfully set to {profile.username}",
+        # )
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
@@ -332,9 +330,8 @@ class OsuCog(MetadataCog, name="osu!"):  # type: ignore
         if not recents:
             await ctx.send(f"User **{user.username}** has no recent plays!")
             return
-        if self.bot.redisIO is not None:
-            await self.bot.redisIO.set(ctx.message.channel.id, recents[0].beatmap_id)
-            await self.bot.redisIO.set(f"{ctx.message.channel.id}.mode", mode.id)  # type: ignore
+
+        await self.bot.beatmap_service.add(ctx.channel.id, recents[0])
 
         if flags.list:
             title = f"Recent osu! {mode:f} plays for {user.username}"
@@ -349,12 +346,12 @@ class OsuCog(MetadataCog, name="osu!"):  # type: ignore
         self,
         ctx: commands.Context,
         username: Optional[str],
-        mode: aiosu.classes.Gamemode,
-        beatmap_id: int,
+        mode: aiosu.models.Gamemode,
+        beatmap: aiosu.models.Beatmap,
     ) -> None:
         user = await OsuUserConverter().convert(ctx, username, mode)
         scores = await self.bot.client_v1.get_beatmap_scores(
-            beatmap_id,
+            beatmap.id,
             user_query=user.id,
             qtype="id",
             mode=mode,
@@ -364,8 +361,16 @@ class OsuCog(MetadataCog, name="osu!"):  # type: ignore
             await ctx.send(f"User **{user.username}** has no plays on the beatmap!")
             return
 
-        title = f"osu! {mode:f} plays for {user.username}"
-        await OsuScoresView.start(ctx, user, mode, scores, title, True, timeout=30)
+        title = f"osu! {beatmap.mode:f} plays for {user.username}"
+        await OsuScoresView.start(
+            ctx,
+            user,
+            mode,
+            scores,
+            title,
+            True,
+            timeout=30,
+        )
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
@@ -382,25 +387,18 @@ class OsuCog(MetadataCog, name="osu!"):  # type: ignore
         username: Optional[str],
     ) -> None:
         await ctx.defer()
-        if self.bot.redisIO is None:
-            await ctx.send(
-                "Redis is disabled in the config. Please contact the owner of this bot instance!",
-            )
-            return
 
-        mode_id = await self.bot.redisIO.get(f"{ctx.message.channel.id}.mode")
-        beatmap_id = await self.bot.redisIO.get(ctx.message.channel.id)
-        if mode_id is None or beatmap_id is None:
+        try:
+            beatmap = await self.bot.beatmap_service.get_one(ctx.channel.id)
+        except ValueError:
             await ctx.send("No beatmap found to compare to.")
             return
-
-        mode = aiosu.classes.Gamemode(int(mode_id))
 
         await self.osu_beatmap_scores_command(
             ctx,
             username,
-            mode,
-            beatmap_id,
+            beatmap.mode,
+            beatmap,
         )
 
     @commands.cooldown(1, 1, commands.BucketType.user)
@@ -428,15 +426,14 @@ class OsuCog(MetadataCog, name="osu!"):  # type: ignore
             await ctx.send("Unknown beatmap ID specified.")
             return
 
-        if self.bot.redisIO is not None:
-            await self.bot.redisIO.set(ctx.message.channel.id, beatmap_id)
-            await self.bot.redisIO.set(f"{ctx.message.channel.id}.mode", mode.id)  # type: ignore
+        beatmap = await self.bot.client_v1.get_beatmap(beatmap_id=beatmap_id, mode=mode)
+        await self.bot.beatmap_service.add(ctx.channel.id, beatmap)
 
         await self.osu_beatmap_scores_command(
             ctx,
             username,
             mode,
-            beatmap_id,
+            beatmap,
         )
 
     @commands.cooldown(1, 1, commands.BucketType.user)
@@ -446,13 +443,11 @@ class OsuCog(MetadataCog, name="osu!"):  # type: ignore
     )
     @app_commands.describe(
         beatmap="URL or ID of the beatmap",
-        username="Discord/osu! username or mention",
     )
     async def osu_perf_command(
         self,
         ctx: commands.Context,
         beatmap: Optional[str],
-        username: Optional[str],
         *,
         flags: OsuScoreFlags,
     ) -> None:
@@ -464,19 +459,16 @@ class OsuCog(MetadataCog, name="osu!"):  # type: ignore
             if (beatmap_id := beatmap_data["beatmap_id"]) is None:
                 await ctx.send("Unknown beatmap ID specified.")
                 return
-            if self.bot.redisIO is not None:
-                await self.bot.redisIO.set(ctx.message.channel.id, beatmap_id)
-                await self.bot.redisIO.set(f"{ctx.message.channel.id}.mode", mode.id)  # type: ignore
-        elif self.bot.redisIO is not None:
-            beatmap_id = await self.bot.redisIO.get(ctx.message.channel.id)
-            if beatmap_id is None:
+            beatmap = await self.bot.client_v1.get_beatmap(
+                beatmap_id=beatmap_id,
+                mode=mode,
+            )
+            await self.bot.beatmap_service.add(ctx.channel.id, beatmap)
+        else:
+            beatmap = await self.bot.beatmap_service.get_one(ctx.channel.id)
+            if beatmap is None:
                 await ctx.send("No beatmap found in cache.")
                 return
-        else:
-            await ctx.send(
-                "Redis is disabled in the config. Please contact the owner of this bot instance!",
-            )
-            return
 
         await ctx.send("This command is still WIP.")
 

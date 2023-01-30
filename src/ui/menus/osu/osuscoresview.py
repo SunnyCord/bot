@@ -11,9 +11,9 @@ from ui.menus.generic import BaseView
 
 if TYPE_CHECKING:
     from typing import Any
-    from aiosu.classes import User
-    from aiosu.classes import Score
-    from aiosu.classes import Gamemode
+    from aiosu.models import User
+    from aiosu.models import Score
+    from aiosu.models import Gamemode
     from discord.commands import Context
 
 
