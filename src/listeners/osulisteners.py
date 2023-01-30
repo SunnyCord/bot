@@ -5,20 +5,20 @@ from typing import TYPE_CHECKING
 
 import aiohttp
 import discord
+from classes.cog import MetadataCog
 from commons.helpers import get_beatmap_from_text
 from discord.ext import commands
-from models.cog import MetadataCog
 from ui.embeds.osu import OsuBeatmapEmbed
 
 if TYPE_CHECKING:
-    from models.bot import Sunny
+    from classes.bot import Sunny
 
 
 class OsuListeners(
     MetadataCog,
     name="osu! Chat Listener",
     hidden=True,
-):  # type: ignore
+):
     """osu! Message Listeners"""
 
     def __init__(self, bot: Sunny) -> None:
@@ -39,7 +39,7 @@ class OsuListeners(
                 f = BytesIO(await resp.read())
 
         beatmap = beatmapset.beatmaps[0]
-        await self.bot.beatmap_service.add(beatmap)
+        await self.bot.beatmap_service.add(message.channel.id, beatmap)
 
         await message.channel.send(
             embed=OsuBeatmapEmbed(beatmapset, color=self.bot.config.color),

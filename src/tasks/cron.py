@@ -4,12 +4,13 @@ from typing import TYPE_CHECKING
 
 import async_timeout
 import orjson
+from aiosu.events import ClientAddEvent
 from aiosu.models import OAuthToken
+from classes.cog import MetadataCog
 from discord.ext import tasks
-from models.cog import MetadataCog
 
 if TYPE_CHECKING:
-    from models.bot import Sunny
+    from classes.bot import Sunny
 
 
 class CronTask(MetadataCog, hidden=True):
@@ -30,21 +31,21 @@ class CronTask(MetadataCog, hidden=True):
         self.pubsub_task.cancel()
         self.update_task.cancel()
 
-    async def on_client_add(self, event):
+    async def on_client_add(self, event: ClientAddEvent) -> None:
         discord_id = event.client_id
         client = event.client
         token = client.token
         print(token)
 
-    async def process_token(self, data: bytes) -> None:
+    async def process_token(self, data: str) -> None:
         unpacked_data = orjson.loads(data)
         token = OAuthToken.parse_obj(unpacked_data["token"])
         discord_id = unpacked_data["state"]
         await self.client_storage.add_client(token, id=discord_id)
 
     async def handle_message(self, message: dict[str, str]) -> None:
-        channel = message.get("channel")
-        data = message.get("data")
+        channel = message["channel"]
+        data = message["data"]
         if handler := self.handlers.get(channel):
             await handler(data)
 

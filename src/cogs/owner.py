@@ -3,14 +3,14 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import discord
+from classes.cog import MetadataCog
 from discord.ext import commands
-from models.cog import MetadataCog
 
 if TYPE_CHECKING:
-    from models.bot import Sunny
+    from classes.bot import Sunny
 
 
-class OwnerCog(MetadataCog, name="Owner", hidden=True):  # type: ignore
+class OwnerCog(MetadataCog, name="Owner", hidden=True):
     """
     Commands used for managing the bot.
     """

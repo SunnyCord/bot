@@ -3,11 +3,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import discord
+from classes.cog import MetadataCog
 from discord import app_commands
-from models.cog import MetadataCog
 
 if TYPE_CHECKING:
-    from models.bot import Sunny
+    from classes.bot import Sunny
 
 
 class Admin(MetadataCog):

@@ -3,13 +3,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import discord
+from classes.cog import MetadataCog
 from discord import app_commands
 from discord.ext import commands
-from models.cog import MetadataCog
 from ui.embeds.fun import PollEmbed
 
 if TYPE_CHECKING:
-    from models.bot import Sunny
+    from classes.bot import Sunny
 
 
 class Fun(MetadataCog):

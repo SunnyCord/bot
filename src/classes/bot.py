@@ -84,7 +84,7 @@ class Sunny(commands.AutoShardedBot):
 
     def get_cogs_dict(self) -> dict[str, Any]:
         """Gets a dict of all cogs and their commands."""
-        cogs_dict = {}
+        cogs_dict: dict[str, Any] = {}
         for cog_name, cog in self.cogs.items():
             if getattr(cog, "hidden", True):
                 continue

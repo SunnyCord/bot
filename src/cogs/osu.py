@@ -1,31 +1,30 @@
 from __future__ import annotations
 
-from typing import Optional
 from typing import TYPE_CHECKING
 
 import aiosu
 import discord
+from classes.cog import MetadataCog
+from classes.cog import MetadataGroupCog
 from commons.helpers import get_beatmap_from_text
 from discord import app_commands
 from discord.ext import commands
-from models.cog import MetadataCog
-from models.cog import MetadataGroupCog
 from ui.embeds.osu import OsuProfileEmbed
 from ui.embeds.osu import OsuScoreSingleEmbed
 from ui.menus.osu import OsuScoresView
 
 if TYPE_CHECKING:
     from typing import Any
-    from models.bot import Sunny
+    from classes.bot import Sunny
 
 
 class OsuTopFlags(commands.FlagConverter, prefix="-"):  # type: ignore
-    recent: Optional[bool] = commands.Flag(
+    recent: bool | None = commands.Flag(
         aliases=["r"],
         description="Sort by date achieved",
         default=False,
     )
-    position: Optional[int] = commands.Flag(
+    position: int | None = commands.Flag(
         aliases=["p"],
         description="The position of the score to show",
         default=None,
@@ -33,12 +32,12 @@ class OsuTopFlags(commands.FlagConverter, prefix="-"):  # type: ignore
 
 
 class OsuRecentFlags(commands.FlagConverter):
-    mode: Optional[aiosu.models.Gamemode] = commands.Flag(
+    mode: aiosu.models.Gamemode | None = commands.Flag(
         aliases=["m"],
         description="The osu! mode to search for",
         default=aiosu.models.Gamemode.STANDARD,
     )
-    list: Optional[bool] = commands.Flag(
+    list: bool | None = commands.Flag(
         aliases=["l"],
         description="Display a list of recent scores",
         default=False,
@@ -46,7 +45,7 @@ class OsuRecentFlags(commands.FlagConverter):
 
 
 class OsuScoreFlags(commands.FlagConverter):
-    mode: Optional[aiosu.models.Gamemode] = commands.Flag(
+    mode: aiosu.models.Gamemode | None = commands.Flag(
         aliases=["m"],
         description="The osu! mode to search for",
         default=aiosu.models.Gamemode.STANDARD,
@@ -97,7 +96,7 @@ class OsuUserConverter(commands.Converter):
         )
 
 
-class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):  # type: ignore
+class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):
     """
     osu! Profile Commands
     """
@@ -112,7 +111,7 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):  #
     async def osu_profile_command(
         self,
         ctx: commands.Context,
-        username: Optional[str],
+        username: str | None,
         mode: aiosu.models.Gamemode,
     ) -> None:
         await ctx.defer()
@@ -128,7 +127,7 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):  #
     async def osu_std_profile_command(
         self,
         ctx: commands.Context,
-        user: Optional[str],
+        user: str | None,
     ) -> None:
         await self.osu_profile_command(ctx, user, aiosu.models.Gamemode.STANDARD)
 
@@ -141,7 +140,7 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):  #
     async def osu_mania_profile_command(
         self,
         ctx: commands.Context,
-        user: Optional[str],
+        user: str | None,
     ) -> None:
         await self.osu_profile_command(ctx, user, aiosu.models.Gamemode.MANIA)
 
@@ -154,7 +153,7 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):  #
     async def osu_taiko_profile_command(
         self,
         ctx: commands.Context,
-        user: Optional[str],
+        user: str | None,
     ) -> None:
         await self.osu_profile_command(ctx, user, aiosu.models.Gamemode.TAIKO)
 
@@ -167,12 +166,12 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):  #
     async def osu_ctb_profile_command(
         self,
         ctx: commands.Context,
-        user: Optional[str],
+        user: str | None,
     ) -> None:
         await self.osu_profile_command(ctx, user, aiosu.models.Gamemode.CTB)
 
 
-class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):  # type: ignore
+class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):
     """
     osu! Tops Commands
     """
@@ -187,7 +186,7 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):  # type: 
     async def osu_top_command(
         self,
         ctx: commands.Context,
-        username: Optional[str],
+        username: str | None,
         mode: aiosu.models.Gamemode,
         flags: OsuTopFlags,
     ) -> None:
@@ -226,7 +225,7 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):  # type: 
     )
     @app_commands.describe(**args_description)
     async def osu_std_top_command(
-        self, ctx: commands.Context, user: Optional[str], *, flags: OsuTopFlags
+        self, ctx: commands.Context, user: str | None, *, flags: OsuTopFlags
     ) -> None:
         await self.osu_top_command(ctx, user, aiosu.models.Gamemode.STANDARD, flags)
 
@@ -238,7 +237,7 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):  # type: 
     )
     @app_commands.describe(**args_description)
     async def osu_mania_top_command(
-        self, ctx: commands.Context, user: Optional[str], *, flags: OsuTopFlags
+        self, ctx: commands.Context, user: str | None, *, flags: OsuTopFlags
     ) -> None:
         await self.osu_top_command(ctx, user, aiosu.models.Gamemode.MANIA, flags)
 
@@ -250,7 +249,7 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):  # type: 
     )
     @app_commands.describe(**args_description)
     async def osu_taiko_top_command(
-        self, ctx: commands.Context, user: Optional[str], *, flags: OsuTopFlags
+        self, ctx: commands.Context, user: str | None, *, flags: OsuTopFlags
     ) -> None:
         await self.osu_top_command(ctx, user, aiosu.models.Gamemode.TAIKO, flags)
 
@@ -262,12 +261,12 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):  # type: 
     )
     @app_commands.describe(**args_description)
     async def osu_ctb_top_command(
-        self, ctx: commands.Context, user: Optional[str], *, flags: OsuTopFlags
+        self, ctx: commands.Context, user: str | None, *, flags: OsuTopFlags
     ) -> None:
         await self.osu_top_command(ctx, user, aiosu.models.Gamemode.CTB, flags)
 
 
-class OsuCog(MetadataCog, name="osu!"):  # type: ignore
+class OsuCog(MetadataCog, name="osu!"):
     """
     osu! related commands.
     """
@@ -313,7 +312,7 @@ class OsuCog(MetadataCog, name="osu!"):  # type: ignore
     async def osu_recent_command(
         self,
         ctx: commands.Context,
-        username: Optional[str],
+        username: str | None,
         *,
         flags: OsuRecentFlags,
     ) -> None:
@@ -345,7 +344,7 @@ class OsuCog(MetadataCog, name="osu!"):  # type: ignore
     async def osu_beatmap_scores_command(
         self,
         ctx: commands.Context,
-        username: Optional[str],
+        username: str | None,
         mode: aiosu.models.Gamemode,
         beatmap: aiosu.models.Beatmap,
     ) -> None:
@@ -384,7 +383,7 @@ class OsuCog(MetadataCog, name="osu!"):  # type: ignore
     async def osu_compare_command(
         self,
         ctx: commands.Context,
-        username: Optional[str],
+        username: str | None,
     ) -> None:
         await ctx.defer()
 
@@ -415,7 +414,7 @@ class OsuCog(MetadataCog, name="osu!"):  # type: ignore
         self,
         ctx: commands.Context,
         beatmap: str,
-        username: Optional[str],
+        username: str | None,
         *,
         flags: OsuScoreFlags,
     ) -> None:
@@ -447,7 +446,7 @@ class OsuCog(MetadataCog, name="osu!"):  # type: ignore
     async def osu_perf_command(
         self,
         ctx: commands.Context,
-        beatmap: Optional[str],
+        beatmap: str | None,
         *,
         flags: OsuScoreFlags,
     ) -> None:
