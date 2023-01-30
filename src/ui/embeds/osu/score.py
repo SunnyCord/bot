@@ -7,7 +7,6 @@ from ui.emojis.score import ScoreRankIcon
 
 if TYPE_CHECKING:
     from typing import Any
-    from typing import Optional
     import aiosu
     from discord import commands
 
@@ -63,7 +62,7 @@ class OsuScoreMultipleEmbed(ContextEmbed):
         self,
         ctx: commands.Context,
         scores: list[aiosu.models.Score],
-        same_beatmap: Optional[bool] = False,
+        same_beatmap: bool = False,
         *args: Any,
         **kwargs: Any,
     ) -> None:

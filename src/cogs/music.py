@@ -1,23 +1,22 @@
 from __future__ import annotations
 
 import math
-from typing import Optional
 from typing import TYPE_CHECKING
 
 import aiohttp
+import classes.exceptions as Exceptions
 import discord
 import lavalink
-import models.exceptions as Exceptions
+from classes.cog import MetadataGroupCog
 from commons.regex import track_title_rx
 from commons.regex import url_rx
 from discord import app_commands
 from discord.ext import commands
 from lavalink.filters import LowPass
-from models.cog import MetadataGroupCog
 
 if TYPE_CHECKING:
     from typing import Any
-    from models.bot import Sunny
+    from classes.bot import Sunny
 
 
 class LavalinkVoiceClient(discord.VoiceClient):
@@ -103,7 +102,7 @@ class LavalinkVoiceClient(discord.VoiceClient):
         self.cleanup()
 
 
-class Music(MetadataGroupCog, name="music"):  # type: ignore
+class Music(MetadataGroupCog, name="music"):
     """
     Commands related to music playback.
     """
@@ -327,7 +326,7 @@ class Music(MetadataGroupCog, name="music"):  # type: ignore
     async def volume_command(
         self,
         ctx: commands.Context,
-        volume: Optional[commands.Range[int, 1, 100]],
+        volume: commands.Range[int, 1, 100] | None,
     ) -> None:
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 

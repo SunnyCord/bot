@@ -6,16 +6,16 @@ from typing import TYPE_CHECKING
 
 import aiosu
 import discord
+from classes import exceptions
+from classes.cog import MetadataCog
 from discord import app_commands
 from discord.ext import commands
-from models import exceptions
-from models.cog import MetadataCog
 
 if TYPE_CHECKING:
-    from models.bot import Sunny
+    from classes.bot import Sunny
 
 
-class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):  # type: ignore
+class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
     """Handles any errors that may occur."""
 
     def __init__(self, bot: Sunny) -> None:
@@ -65,11 +65,11 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):  # ty
         elif isinstance(error, aiosu.exceptions.APIException):
             return await ctx.send("An osu! API error has occured.")
 
-        elif isinstance(error, exceptions.DatabaseMissingError):
-            if error.queryType == "osu":
-                return await ctx.send("Please set your profile!")
-            else:
-                return await ctx.send("Unknown database error.")
+        # elif isinstance(error, exceptions.DatabaseMissingError):
+        #    if error.queryType == "osu":
+        #        return await ctx.send("Please set your profile!")
+        #    else:
+        #        return await ctx.send("Unknown database error.")
 
         elif isinstance(error, exceptions.MusicPlayerError):
             return await ctx.send(error)

@@ -7,7 +7,6 @@ from commons.regex import beatmap_id_rx
 from commons.regex import beatmap_link_rx
 
 if TYPE_CHECKING:
-    from typing import Optional
     from typing import Generator
 
 
@@ -18,8 +17,8 @@ def list_module(directory: str) -> Generator[str, None, None]:
 def get_beatmap_from_text(
     text: str,
     disallow_plain_id: bool = False,
-) -> dict[str, Optional[int]]:
-    ids: dict[str, Optional[int]] = {
+) -> dict[str, int | None]:
+    ids: dict[str, int | None] = {
         "beatmap_id": None,
         "beatmapset_id": None,
     }

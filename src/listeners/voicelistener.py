@@ -2,20 +2,20 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from classes.cog import MetadataCog
 from discord.ext import commands
-from models.cog import MetadataCog
 
 if TYPE_CHECKING:
     from discord import Member
     from discord import VoiceState
-    from models.bot import Sunny
+    from classes.bot import Sunny
 
 
 class VoiceListener(
     MetadataCog,
     name="Voice State Update Listener",
     hidden="True",
-):  # type: ignore
+):
     """Voice State Update Listener"""
 
     def __init__(self, bot: Sunny) -> None:
