@@ -32,7 +32,6 @@ repos:
     rev: v1.12.1
     hooks:
     -   id: blacken-docs
-        additional_dependencies: [black==21.11b1]
 -   repo: https://github.com/hadialqattan/pycln
     rev: v2.1.2
     hooks:
