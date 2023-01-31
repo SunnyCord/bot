@@ -65,10 +65,12 @@ class Sunny(commands.AutoShardedBot):
         stats_repo = StatsRepository(redis_client)
         user_repo = UserRepository(motor_database)
         osu_repo = OsuRepository(motor_database)
+        settings_repo = SettingsRepository(motor_database)
         self.beatmap_service = BeatmapService(beatmap_repo)
         self.user_service = UserService(user_repo)
         self.osu_service = OsuService(osu_repo)
         self.stats_service = StatsService(stats_repo)
+        self.settings_service = SettingsService(settings_repo)
         self.redis_pubsub = redis_client.pubsub(ignore_subscribe_messages=True)
 
     async def setup_hook(self) -> None:
@@ -121,9 +123,11 @@ class Sunny(commands.AutoShardedBot):
 
     async def on_guild_join(self, guild: discord.Guild) -> None:
         await self.stats_service.set_guild_count(len(self.guilds))
+        await self.settings_service.create(guild.id)
 
     async def on_guild_remove(self, guild: discord.Guild) -> None:
         await self.stats_service.set_guild_count(len(self.guilds))
+        await self.settings_service.delete(guild.id)
 
     async def on_message(self, message: discord.Message) -> None:
         ignore = not message.guild
