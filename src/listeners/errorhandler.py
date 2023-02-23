@@ -13,6 +13,7 @@ from discord.ext import commands
 
 if TYPE_CHECKING:
     from classes.bot import Sunny
+    from typing import Callable
 
 
 class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
@@ -26,12 +27,25 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
             interaction: discord.Interaction,
             error: Exception,
         ) -> None:
-            # TODO handle slash command errors
-            error = getattr(error, "original", error)
+            await self.error_handler(
+                interaction.response.send_message,
+                interaction.command,
+                error,
+                True,
+            )
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error: Exception) -> None:
-        if hasattr(ctx.command, "on_error"):
+        await self.error_handler(ctx.send, ctx.command, error)
+
+    async def error_handler(
+        self,
+        send_message: Callable,
+        command: commands.Command,
+        error: Exception,
+        is_slash: bool = False,
+    ) -> None:
+        if hasattr(command, "on_error") and not is_slash:
             return
 
         error = getattr(error, "original", error)
@@ -45,33 +59,33 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
             return
 
         elif isinstance(error, discord.errors.Forbidden):
-            return await ctx.send(
-                f"I do not have permissions to perform ``{ctx.command}``!",
+            return await send_message(
+                f"I do not have permissions to perform ``{command}``!",
             )
 
         elif isinstance(error, commands.DisabledCommand):
-            return await ctx.send(f"``{ctx.command}`` has been disabled.")
+            return await send_message(f"``{command}`` has been disabled.")
 
         elif isinstance(error, commands.CheckFailure):
-            return await ctx.send(
-                f"You do not have the required permission for ``{ctx.command}``.",
+            return await send_message(
+                f"You do not have the required permission for ``{command}``.",
             )
 
         elif isinstance(error, commands.CommandOnCooldown):
-            return await ctx.send(
+            return await send_message(
                 "Slow down! You are on a %.2fs cooldown." % error.retry_after,
             )
 
         elif isinstance(error, aiosu.exceptions.APIException):
-            return await ctx.send("An osu! API error has occured.")
+            return await send_message("An osu! API error has occured.")
 
         elif isinstance(error, aiosu.exceptions.InvalidClientRequestedError):
-            return await ctx.send(
+            return await send_message(
                 "Please set your profile! Use the ``osuset`` command.",
             )
 
         elif isinstance(error, exceptions.MusicPlayerError):
-            return await ctx.send(error)
+            return await send_message(error)
 
         exc = f"{type(error).__name__}"
         embed = discord.Embed(
@@ -83,8 +97,8 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
             value=f"{exc}\nIf you can, please open an issue: https://github.com/NiceAesth/Sunny/issues",
         )
         embed.set_thumbnail(url="https://i.imgur.com/szL6ReL.png")
-        await ctx.send(embed=embed)
-        print(f"Ignoring exception in command {ctx.command}:", file=sys.stderr)
+        await send_message(embed=embed)
+        print(f"Ignoring exception in command {command}:", file=sys.stderr)
         traceback.print_exception(
             type(error),
             error,
