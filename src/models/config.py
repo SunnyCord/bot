@@ -39,11 +39,19 @@ class LavalinkConfig:
 
 
 @dataclass(frozen=True)
+class OsuAPIv2Config:
+    client_id: str = 1
+    client_secret: str = "secret_here"
+    redirect_uri: str = "http://localhost:5000/callback"
+
+
+@dataclass(frozen=True)
 class Config:
     log_level: str = "WARNING"
     color: int = 0xD74613
     token: str = ""
     osuAPI: str = ""
+    osuAPIv2: OsuAPIv2Config = field(default_factory=lambda: OsuAPIv2Config())
     sentry: str = ""
     owners: List[int] = field(default_factory=lambda: [151670779782758400])
     command_prefixes: List[str] = field(default_factory=lambda: ["s."])
@@ -56,7 +64,7 @@ class Config:
 @dataclass_json
 @dataclass(frozen=True)
 class ConfigList:
-    __comment: str = "select -> index of config to use (starting from 0)"
+    _comment: str = "select -> index of config to use (starting from 0)"
     select: int = 0
     configs: List[Config] = field(default_factory=lambda: [Config()])
 

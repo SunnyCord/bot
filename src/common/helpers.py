@@ -3,8 +3,8 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING
 
-from commons.regex import beatmap_id_rx
-from commons.regex import beatmap_link_rx
+from common.regex import beatmap_id_rx
+from common.regex import beatmap_link_rx
 
 if TYPE_CHECKING:
     from typing import Generator

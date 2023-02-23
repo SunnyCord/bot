@@ -8,7 +8,9 @@ import aiosu
 import discord
 import orjson
 from aioredis import Redis
-from commons.helpers import list_module
+from common.crypto import check_aes
+from common.helpers import list_module
+from cryptography.fernet import Fernet
 from discord.ext import commands
 from models.config import ConfigList
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -19,6 +21,8 @@ if TYPE_CHECKING:
     from typing import Any
 
 logger = logging.getLogger()
+
+MODULE_FOLDERS = ["listeners", "cogs", "tasks"]
 
 
 async def _get_prefix(bot: Sunny, message: discord.Message) -> list[str]:
@@ -31,6 +35,52 @@ def _get_intents() -> discord.Intents:
         members=True,
         message_content=True,
     )
+
+
+def _get_cogs_dict(bot: Sunny) -> dict[str, Any]:
+    """Gets a dict of all cogs and their commands."""
+    cogs_dict: dict[str, Any] = {}
+    for cog in bot.cogs.values():
+        if getattr(cog, "hidden", True):
+            continue
+
+        commands_dict = {}
+        for cmd in cog.get_commands() + cog.get_app_commands():
+            if getattr(cmd, "hidden", False):
+                continue
+            cmd = getattr(cmd, "app_command", cmd)
+
+            parameters = {p.display_name: p.description for p in cmd.parameters}
+            commands_dict[cmd.name] = {
+                "name": cmd.name,
+                "description": cmd.description,
+                "parameters": parameters,
+            }
+
+        if getattr(cog, "display_parent"):
+            parent = cogs_dict[cog.display_parent]
+            parent["commands"].update(commands_dict)
+            continue
+
+        cogs_dict[cog.qualified_name.lower()] = {
+            "description": cog.description,
+            "commands": commands_dict,
+        }
+
+    return cogs_dict
+
+
+def _get_modules(folder: str):
+    for file in os.listdir(f"./{folder}"):
+        if file.endswith(".py"):
+            yield file
+
+
+async def _load_extensions(bot: Sunny):
+    for folder in MODULE_FOLDERS:
+        for extension in _get_modules(folder):
+            name = f"{folder}.{os.path.splitext(extension)[0]}"
+            await bot.load_extension(name)
 
 
 class Sunny(commands.AutoShardedBot):
@@ -47,74 +97,43 @@ class Sunny(commands.AutoShardedBot):
             **kwargs,
         )
         self.config = ConfigList.get_config()
-        self.client_v1 = aiosu.v1.Client(self.config.osuAPI)
-        self.client_storage = aiosu.v2.ClientStorage()
+        self.setup_db()
         self.setup_services()
 
-    def setup_services(self) -> None:
+    def setup_db(self) -> None:
         motor_client = AsyncIOMotorClient(
             self.config.mongo.host,
             serverSelectionTimeoutMS=self.config.mongo.timeout,
         )
-        motor_database = motor_client[self.config.mongo.database]
-        redis_client = Redis(
+        self.database = motor_client[self.config.mongo.database]
+        self.redis_client = Redis(
             host=self.config.redis.host,
             port=self.config.redis.port,
         )
-        beatmap_repo = BeatmapRepository(redis_client)
-        stats_repo = StatsRepository(redis_client)
-        user_repo = UserRepository(motor_database)
-        osu_repo = OsuRepository(motor_database)
-        settings_repo = SettingsRepository(motor_database)
+        self.redis_pubsub = self.redis_client.pubsub(ignore_subscribe_messages=True)
+
+    def setup_services(self) -> None:
+        beatmap_repo = BeatmapRepository(self.redis_client)
+        stats_repo = StatsRepository(self.redis_client)
+        user_repo = UserRepository(self.database)
+        settings_repo = SettingsRepository(self.database)
+        osu_repo = OsuRepository(self.database)
         self.beatmap_service = BeatmapService(beatmap_repo)
         self.user_service = UserService(user_repo)
-        self.osu_service = OsuService(osu_repo)
         self.stats_service = StatsService(stats_repo)
         self.settings_service = SettingsService(settings_repo)
-        self.redis_pubsub = redis_client.pubsub(ignore_subscribe_messages=True)
+        self.client_v1 = aiosu.v1.Client(self.config.osuAPI)
+        self.client_storage = aiosu.v2.ClientStorage(
+            token_repository=osu_repo,
+            client_secret=self.config.osuAPIv2.client_secret,
+            client_id=self.config.osuAPIv2.client_id,
+        )
+        self.aes = Fernet(check_aes())
 
     async def setup_hook(self) -> None:
         await self.load_extension("jishaku")
-
-        module_folders = ["listeners", "cogs", "tasks"]
-        for module in module_folders:
-            for extension in list_module(module):
-                name = f"{module}.{os.path.splitext(extension)[0]}"
-                await self.load_extension(name)
-
-        await self.stats_service.set_commands(self.get_cogs_dict())
-
-    def get_cogs_dict(self) -> dict[str, Any]:
-        """Gets a dict of all cogs and their commands."""
-        cogs_dict: dict[str, Any] = {}
-        for cog_name, cog in self.cogs.items():
-            if getattr(cog, "hidden", True):
-                continue
-
-            commands_dict = {}
-            for cmd in cog.get_commands() + cog.get_app_commands():
-                if getattr(cmd, "hidden", False):
-                    continue
-                cmd = getattr(cmd, "app_command", cmd)
-
-                parameters = {p.display_name: p.description for p in cmd.parameters}
-                commands_dict[cmd.name] = {
-                    "name": cmd.name,
-                    "description": cmd.description,
-                    "parameters": parameters,
-                }
-
-            if getattr(cog, "display_parent"):
-                parent = cogs_dict[cog.display_parent]
-                parent["commands"].update(commands_dict)
-                continue
-
-            cogs_dict[cog.qualified_name.lower()] = {
-                "description": cog.description,
-                "commands": commands_dict,
-            }
-
-        return cogs_dict
+        await _load_extensions(self)
+        await self.stats_service.set_commands(_get_cogs_dict(self))
 
     async def on_ready(self) -> None:
         await self.stats_service.set_cog_count(len(self.cogs))
@@ -141,7 +160,6 @@ class Sunny(commands.AutoShardedBot):
     async def is_owner(self, user: discord.User) -> bool:
         if user.id in self.config.owners:
             return True
-        # Else fall back to the original
         return await super().is_owner(user)
 
     def run(self, **kwargs: Any) -> None:

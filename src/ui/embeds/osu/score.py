@@ -51,7 +51,6 @@ class OsuScoreSingleEmbed(ContextEmbed):
         self.score = score
 
     async def prepare(self) -> None:
-        await self.score.request_beatmap(self.ctx.bot.client_v1)
         self.set_thumbnail(url=self.score.beatmapset.covers.list)
 
         self.add_field(inline=False, **_score_to_embed_strs(self.score, True))
@@ -75,17 +74,10 @@ class OsuScoreMultipleEmbed(ContextEmbed):
     async def prepare(self) -> None:
         if not self.prepared:
             if self.same_beatmap:
-                await self.scores[0].request_beatmap(self.ctx.bot.client_v1)
                 beatmapset = self.scores[0].beatmapset
                 self.set_thumbnail(url=beatmapset.covers.list)
 
             for score in self.scores:
-                if self.same_beatmap:
-                    score.beatmap = self.scores[0].beatmap
-                    score.beatmapset = self.scores[0].beatmapset
-                else:
-                    await score.request_beatmap(self.ctx.bot.client_v1)
-
                 data = _score_to_embed_strs(score, False)
                 if self.same_beatmap:
                     data["name"] = "_ _"

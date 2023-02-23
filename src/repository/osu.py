@@ -1,17 +1,30 @@
 from __future__ import annotations
 
 from aiosu.models import OAuthToken
+from aiosu.v2.repository import BaseTokenRepository
 from models.user import TokenDTO
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 
-class OsuRepository:
+class OsuRepository(BaseTokenRepository):
     """Repository for osu! tokens."""
 
-    def __init__(self, database: AsyncIOMotorDatabase):
+    def __init__(self, database: AsyncIOMotorDatabase) -> None:
         self.database = database
 
-    async def get_one(self, discord_id: int) -> OAuthToken:
+    async def exists(self, discord_id: int) -> bool:
+        """Check if token exists in database.
+
+        Args:
+            discord_id (int): Discord ID.
+        Returns:
+            bool: True if token exists, False otherwise.
+        """
+        return (
+            await self.database.tokens.count_documents({"discord_id": discord_id}) > 0
+        )
+
+    async def get(self, discord_id: int) -> OAuthToken:
         """Get osu! token from database.
 
         Args:
@@ -26,35 +39,26 @@ class OsuRepository:
             raise ValueError("Token not found.")
         return OAuthToken(**token["token"])
 
-    async def get_many(self) -> list[OAuthToken]:
-        """Get all tokens from database.
-
-        Returns:
-            list[OAuthToken]: List of tokens.
-        """
-        tokens = await self.database.tokens.find().to_list(None)
-        return [OAuthToken(**token["token"]) for token in tokens]
-
-    async def add(self, token: TokenDTO) -> None:
+    async def add(self, discord_id: int, token: OAuthToken) -> None:
         """Add new token to database.
 
         Args:
             discord_id (int): Discord ID.
             token (OAuthToken): osu! token.
         """
-        await self.database.tokens.insert_one(**token.dict())
+        token_dto = TokenDTO(discord_id=discord_id, token=token)
+        await self.database.tokens.insert_one(token_dto.dict())
 
-    async def update(self, token: TokenDTO) -> None:
-        """Update token data.
+    async def update(self, session_id: int, token: OAuthToken) -> None:
+        """Update token in database.
 
         Args:
-            discord_id (int): Discord ID.
+            session_id (int): Session ID.
             token (OAuthToken): osu! token.
         """
         await self.database.tokens.update_one(
-            {"discord_id": token.discord_id},
-            {"$set": token.dict(exclude={"discord_id"})},
-            upsert=True,
+            {"discord_id": session_id},
+            {"$set": {"token": token.dict()}},
         )
 
     async def delete(self, discord_id: int) -> None:

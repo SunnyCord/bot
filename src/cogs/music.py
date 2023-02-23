@@ -8,8 +8,8 @@ import classes.exceptions as Exceptions
 import discord
 import lavalink
 from classes.cog import MetadataGroupCog
-from commons.regex import track_title_rx
-from commons.regex import url_rx
+from common.regex import track_title_rx
+from common.regex import url_rx
 from discord import app_commands
 from discord.ext import commands
 from lavalink.filters import LowPass
@@ -112,7 +112,6 @@ class Music(MetadataGroupCog, name="music"):
 
         # This ensures the client isn't overwritten during cog reloads.
         if not hasattr(bot, "lavalink"):
-
             bot.lavalink = lavalink.Client(bot.user.id)
             for node in bot.config.lavalink:
                 bot.lavalink.add_node(
@@ -208,6 +207,7 @@ class Music(MetadataGroupCog, name="music"):
     )
     @app_commands.describe(query="URL or keywords for searching")
     async def play_command(self, ctx: commands.Context, *, query: str) -> None:
+        await ctx.defer()
         # Get the player for this guild from cache.
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
         # Remove leading and trailing <>. <> may be used to suppress embedding links in Discord.

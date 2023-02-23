@@ -6,9 +6,11 @@ import aiosu
 import discord
 from classes.cog import MetadataCog
 from classes.cog import MetadataGroupCog
-from commons.helpers import get_beatmap_from_text
+from common.crypto import encode_discord_id
+from common.helpers import get_beatmap_from_text
 from discord import app_commands
 from discord.ext import commands
+from ui.embeds.osu import OsuLinkEmbed
 from ui.embeds.osu import OsuProfileEmbed
 from ui.embeds.osu import OsuScoreSingleEmbed
 from ui.menus.osu import OsuScoresView
@@ -53,7 +55,9 @@ class OsuScoreFlags(commands.FlagConverter):
 
 
 class OsuUserConverter(commands.Converter):
-    async def convert(self, ctx: commands.Context, *args: Any) -> aiosu.models.User:
+    async def convert(
+        self, ctx: commands.Context, *args: Any
+    ) -> tuple[aiosu.v2.Client, aiosu.models.User]:
         """
         Converts to an ``aiosu.models.User`` (case-insensitive)
 
@@ -63,37 +67,33 @@ class OsuUserConverter(commands.Converter):
         2. Lookup by string
         """
         raw_user, mode = args
-        user, qtype = None, None
 
         if raw_user is None:
-            user = await ctx.bot.mongoIO.get_osu(ctx.author)
-            qtype = "id"
-        else:
-            try:
-                member = await commands.MemberConverter().convert(ctx, raw_user)
-                user = await ctx.bot.mongoIO.get_osu(member)
-                qtype = "id"
-            except commands.MemberNotFound:
+            client = await ctx.bot.client_storage.get_client(id=ctx.author.id)
+            return (client, await client.get_me(mode=mode))
 
-                def check(member: discord.Member) -> bool:
-                    return (
-                        member.name.lower() == raw_user.lower()
-                        or member.display_name.lower() == raw_user.lower()
-                        or str(member).lower() == raw_user.lower()
-                        or str(member.id) == raw_user
-                    )
+        member = None
+        try:
+            member = await commands.MemberConverter().convert(ctx, raw_user)
+        except commands.MemberNotFound:
 
-                if found := discord.utils.find(check, ctx.guild.members):
-                    user = await ctx.bot.mongoIO.get_osu(found)
-                    qtype = "id"
+            def check(member: discord.Member) -> bool:
+                return (
+                    member.name.lower() == raw_user.lower()
+                    or member.display_name.lower() == raw_user.lower()
+                    or str(member).lower() == raw_user.lower()
+                    or str(member.id) == raw_user
+                )
 
-                user, qtype = raw_user, "string"
+            if found := discord.utils.find(check, ctx.guild.members):
+                member = found
 
-        return await ctx.bot.client_v1.get_user(
-            user,
-            mode=mode,
-            qtype=qtype,
-        )
+        if member is None:
+            client = await ctx.bot.client_storage.app_client
+            return (client, await client.get_user(raw_user, mode=mode))
+
+        client = await ctx.bot.client_storage.get_client(id=ctx.author.id)
+        return (client, await client.get_me(mode=mode))
 
 
 class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):
@@ -115,7 +115,7 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):
         mode: aiosu.models.Gamemode,
     ) -> None:
         await ctx.defer()
-        user = await OsuUserConverter().convert(ctx, username, mode)
+        _, user = await OsuUserConverter().convert(ctx, username, mode)
         await ctx.send(embed=OsuProfileEmbed(ctx, user, mode))
 
     @commands.cooldown(1, 1, commands.BucketType.user)
@@ -191,12 +191,8 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):
         flags: OsuTopFlags,
     ) -> None:
         await ctx.defer()
-        user = await OsuUserConverter().convert(ctx, username, mode)
-        tops = await self.bot.client_v1.get_user_bests(
-            user.id,
-            qtype="id",
-            include_beatmap=True,
-        )
+        client, user = await OsuUserConverter().convert(ctx, username, mode)
+        tops = await client.get_user_bests(user.id, mode=mode, limit=100)
         if not tops:
             await ctx.send(f"User **{user.username}** has no top plays!")
             return
@@ -273,32 +269,30 @@ class OsuCog(MetadataCog, name="osu!"):
 
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
+        self.config_v2 = self.bot.config.osuAPIv2
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.hybrid_command(
         name="osuset",
         description="Sets the osu! profile for the message author",
     )
-    @app_commands.describe(
-        username="Your osu! username",
-    )
     async def osu_set_command(
         self,
         ctx: commands.Context,
-        username: str,
     ) -> None:
-        await ctx.defer()
-        profile: aiosu.models.User = await self.bot.client_v1.get_user(
-            user_query=username,
-            qtype="string",
+        await ctx.send("Please access the thread to link your osu! account.")
+        thread = await ctx.channel.create_thread(
+            name=f"osu! Profile Link",
+            auto_archive_duration=60,
+            invitable=False,
         )
-        # await self.bot.mongoIO.set_osu(
-        #     ctx.author,
-        #     profile.id,
-        # )
-        # await ctx.send(
-        #     f"osu! profile succesfully set to {profile.username}",
-        # )
+        url = aiosu.utils.auth.generate_url(
+            client_id=self.config_v2.client_id,
+            redirect_uri=self.config_v2.redirect_uri,
+            state=encode_discord_id(ctx.author.id, self.bot.aes),
+        )
+        await thread.add_user(ctx.author)
+        await thread.send(embed=OsuLinkEmbed(ctx, url))
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
@@ -318,12 +312,10 @@ class OsuCog(MetadataCog, name="osu!"):
     ) -> None:
         await ctx.defer()
         mode = flags.mode
-        user = await OsuUserConverter().convert(ctx, username, mode)
-        recents = await self.bot.client_v1.get_user_recents(
+        client, user = await OsuUserConverter().convert(ctx, username, mode)
+        recents = await client.get_user_recents(
             user.id,
-            qtype="id",
             mode=mode,
-            include_beatmap=True,
             limit=1 if not flags.list else 50,
         )
         if not recents:
@@ -335,11 +327,12 @@ class OsuCog(MetadataCog, name="osu!"):
         if flags.list:
             title = f"Recent osu! {mode:f} plays for {user.username}"
             await OsuScoresView.start(ctx, user, mode, recents, title, timeout=30)
-        else:
-            title = f"Most recent osu! {mode:f} play for **{user.username}**"
-            embed = OsuScoreSingleEmbed(ctx, recents[0])
-            await embed.prepare()
-            await ctx.send(title, embed=embed)
+            return
+
+        title = f"Most recent osu! {mode:f} play for **{user.username}**"
+        embed = OsuScoreSingleEmbed(ctx, recents[0])
+        await embed.prepare()
+        await ctx.send(title, embed=embed)
 
     async def osu_beatmap_scores_command(
         self,
@@ -348,13 +341,11 @@ class OsuCog(MetadataCog, name="osu!"):
         mode: aiosu.models.Gamemode,
         beatmap: aiosu.models.Beatmap,
     ) -> None:
-        user = await OsuUserConverter().convert(ctx, username, mode)
-        scores = await self.bot.client_v1.get_beatmap_scores(
+        client, user = await OsuUserConverter().convert(ctx, username, mode)
+        scores = await client.get_user_beatmap_scores(
+            user.id,
             beatmap.id,
-            user_query=user.id,
-            qtype="id",
             mode=mode,
-            include_beatmap=True,
         )
         if not scores:
             await ctx.send(f"User **{user.username}** has no plays on the beatmap!")
@@ -425,7 +416,8 @@ class OsuCog(MetadataCog, name="osu!"):
             await ctx.send("Unknown beatmap ID specified.")
             return
 
-        beatmap = await self.bot.client_v1.get_beatmap(beatmap_id=beatmap_id, mode=mode)
+        client = await self.bot.client_storage.app_client
+        beatmap = await client.get_beatmap(beatmap_id)
         await self.bot.beatmap_service.add(ctx.channel.id, beatmap)
 
         await self.osu_beatmap_scores_command(
@@ -458,10 +450,9 @@ class OsuCog(MetadataCog, name="osu!"):
             if (beatmap_id := beatmap_data["beatmap_id"]) is None:
                 await ctx.send("Unknown beatmap ID specified.")
                 return
-            beatmap = await self.bot.client_v1.get_beatmap(
-                beatmap_id=beatmap_id,
-                mode=mode,
-            )
+
+            client = await self.bot.client_storage.app_client
+            beatmap = await client.get_beatmap(beatmap_id)
             await self.bot.beatmap_service.add(ctx.channel.id, beatmap)
         else:
             beatmap = await self.bot.beatmap_service.get_one(ctx.channel.id)

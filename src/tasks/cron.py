@@ -3,14 +3,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import async_timeout
-import orjson
-from aiosu.events import ClientAddEvent
-from aiosu.models import OAuthToken
 from classes.cog import MetadataCog
 from discord.ext import tasks
 
 if TYPE_CHECKING:
     from classes.bot import Sunny
+    from typing import Callable
 
 
 class CronTask(MetadataCog, hidden=True):
@@ -18,30 +16,12 @@ class CronTask(MetadataCog, hidden=True):
 
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
-        self.client_storage = self.bot.client_storage
-        self.client_storage.on_client_add(self.on_client_add)
         self.pubsub_task.start()
-        self.update_task.start()
 
-        self.handlers = {
-            "sunny:oauth-process": self.process_token,
-        }
+        self.handlers: dict[str, Callable] = {}
 
     def cog_unload(self) -> None:
         self.pubsub_task.cancel()
-        self.update_task.cancel()
-
-    async def on_client_add(self, event: ClientAddEvent) -> None:
-        discord_id = event.client_id
-        client = event.client
-        token = client.token
-        print(token)
-
-    async def process_token(self, data: str) -> None:
-        unpacked_data = orjson.loads(data)
-        token = OAuthToken.parse_obj(unpacked_data["token"])
-        discord_id = unpacked_data["state"]
-        await self.client_storage.add_client(token, id=discord_id)
 
     async def handle_message(self, message: dict[str, str]) -> None:
         channel = message["channel"]
@@ -56,19 +36,12 @@ class CronTask(MetadataCog, hidden=True):
             if message is not None:
                 await self.handle_message(message)
 
-    @tasks.loop(minutes=720)
-    async def update_task(self) -> None:
-        ...
-
     @pubsub_task.before_loop
     async def before_pubsub_task(self) -> None:
         await self.bot.wait_until_ready()
         await self.bot.redis_pubsub.psubscribe("sunny:*")
 
-    @update_task.before_loop
-    async def before_update_task(self) -> None:
-        await self.bot.wait_until_ready()
-
 
 async def setup(bot: Sunny) -> None:
+    return  # Disabled for now
     await bot.add_cog(CronTask(bot))

@@ -44,7 +44,7 @@ class BeatmapRepository:
         """
         await self.redis.set(
             f"sunny:{channel_id}:beatmap",
-            orjson.dumps(beatmap.dict()),
+            orjson.dumps(beatmap.json()),
         )
 
     async def update(self, channel_id: int, beatmap: Beatmap) -> None:
@@ -56,7 +56,7 @@ class BeatmapRepository:
         """
         await self.redis.set(
             f"sunny:{channel_id}:beatmap",
-            orjson.dumps(beatmap.dict()),
+            orjson.dumps(beatmap.json()),
         )
 
     async def delete(self, channel_id: int) -> None:

@@ -11,5 +11,4 @@ class User(BaseModel):
 
 class TokenDTO(BaseModel):
     discord_id: int
-    osu_id: int
     token: OAuthToken

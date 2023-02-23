@@ -65,18 +65,17 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
         elif isinstance(error, aiosu.exceptions.APIException):
             return await ctx.send("An osu! API error has occured.")
 
-        # elif isinstance(error, exceptions.DatabaseMissingError):
-        #    if error.queryType == "osu":
-        #        return await ctx.send("Please set your profile!")
-        #    else:
-        #        return await ctx.send("Unknown database error.")
+        elif isinstance(error, aiosu.exceptions.InvalidClientRequestedError):
+            return await ctx.send(
+                "Please set your profile! Use the ``osuset`` command.",
+            )
 
         elif isinstance(error, exceptions.MusicPlayerError):
             return await ctx.send(error)
 
         exc = f"{type(error).__name__}"
         embed = discord.Embed(
-            title="Oh no! An error has occured",
+            title="Oh no! An unexpected error has occured",
             color=discord.Color.red(),
         )
         embed.add_field(
