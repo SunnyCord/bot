@@ -32,6 +32,13 @@ class StatsService:
         """
         await self.stats_repository.set_guild_count(count)
 
+    async def set_user_count(self, count: int) -> None:
+        """Set user count.
+        Args:
+            count (int): User count.
+        """
+        await self.stats_repository.set_user_count(count)
+
     async def set_commands(self, commands: dict[str, Any]) -> None:
         """Set commands.
         Args:

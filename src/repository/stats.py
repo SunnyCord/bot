@@ -33,6 +33,13 @@ class StatsRepository:
         """
         await self.redis.set("sunny:guild-count", count)
 
+    async def set_user_count(self, count: int) -> None:
+        """Set user count.
+        Args:
+            count (int): User count.
+        """
+        await self.redis.set("sunny:user-count", count)
+
     async def set_commands(self, commands: dict[str, Any]) -> None:
         """Set commands.
         Args:

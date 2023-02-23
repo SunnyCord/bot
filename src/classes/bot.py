@@ -6,10 +6,8 @@ from typing import TYPE_CHECKING
 
 import aiosu
 import discord
-import orjson
 from aioredis import Redis
 from common.crypto import check_aes
-from common.helpers import list_module
 from cryptography.fernet import Fernet
 from discord.ext import commands
 from models.config import ConfigList
@@ -139,6 +137,7 @@ class Sunny(commands.AutoShardedBot):
         await self.stats_service.set_cog_count(len(self.cogs))
         await self.stats_service.set_command_count(len(self.all_commands))
         await self.stats_service.set_guild_count(len(self.guilds))
+        await self.stats_service.set_user_count(len(self.users))
 
     async def on_guild_join(self, guild: discord.Guild) -> None:
         await self.stats_service.set_guild_count(len(self.guilds))
