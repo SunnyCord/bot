@@ -6,12 +6,12 @@ from typing import TYPE_CHECKING
 
 import aiosu
 import discord
-from aioredis import Redis
 from common.crypto import check_aes
 from cryptography.fernet import Fernet
 from discord.ext import commands
 from models.config import ConfigList
 from motor.motor_asyncio import AsyncIOMotorClient
+from redis.asyncio import Redis
 from repository import *
 from service import *
 

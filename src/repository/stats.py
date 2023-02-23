@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 import orjson
-from aioredis import Redis
+from redis.asyncio import Redis
 
 
 class StatsRepository:
