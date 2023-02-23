@@ -8,11 +8,11 @@ if TYPE_CHECKING:
     from discord import commands
 
 
-class OsuLinkEmbed(ContextEmbed):
-    def __init__(self, ctx: commands.Context, link_url: str):
+class HelpEmbed(ContextEmbed):
+    def __init__(self, ctx: commands.Context):
         super().__init__(
             ctx,
-            title="osu! Profile Link",
-            description=f"Click [here]({link_url}) to link your osu! profile.",
+            title="Sunny Help",
+            description=f"Click [here](https://github.com/SunnyCord/bot/wiki/Commands) to view the help page!",
         )
         self.set_thumbnail(url=ctx.bot.user.avatar)

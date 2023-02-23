@@ -7,6 +7,7 @@ from classes.cog import MetadataCog
 from discord import app_commands
 from discord.ext import commands
 from ui.embeds.information import BotInfoEmbed
+from ui.embeds.information import HelpEmbed
 from ui.embeds.information import ServerInfoEmbed
 
 if TYPE_CHECKING:
@@ -36,6 +37,14 @@ class Information(MetadataCog):
     async def info_server_command(self, interaction: discord.Interaction) -> None:
         embed = ServerInfoEmbed(interaction)
         await interaction.response.send_message(embed=embed)
+
+    @commands.hybrid_command(
+        name="help",
+        description="Get help with the commands.",
+    )
+    async def help_command(self, ctx: commands.Context) -> None:
+        embed = HelpEmbed(ctx)
+        await ctx.send(embed=embed)
 
 
 async def setup(bot: Sunny) -> None:

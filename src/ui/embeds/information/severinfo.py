@@ -46,5 +46,5 @@ class ServerInfoEmbed(InteractionEmbed):
         self.add_field(name="Emotes", value=len(interaction.guild.emojis))
         self.add_field(
             name="Created On:",
-            value=interaction.guild.created_at.__format__("%A, %d. %B %Y @ %H:%M:%S"),
+            value=f"<t:{interaction.guild.created_at.timestamp():.0f}:R>",
         )
