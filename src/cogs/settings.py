@@ -27,12 +27,6 @@ class Settings(MetadataCog):
         await self.bot.user_service.delete(ctx.author.id)
         await ctx.send("Your data has been successfully deleted. Sorry to see you go!")
 
-    # async def on_guild_join(self, guild: Guild) -> None:
-    #    await self.bot.mongoIO.add_guild(guild)
-
-    # async def on_guild_leave(self, guild: Guild) -> None:
-    #    await self.bot.mongoIO.remove_guild(guild)
-
 
 async def setup(bot: Sunny) -> None:
     await bot.add_cog(Settings(bot))

@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-import sys
-import traceback
 from typing import TYPE_CHECKING
 
 import aiosu
 import discord
 from classes import exceptions
 from classes.cog import MetadataCog
+from common.logging import logger
 from discord import app_commands
 from discord.ext import commands
 
@@ -98,12 +97,9 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
         )
         embed.set_thumbnail(url="https://i.imgur.com/szL6ReL.png")
         await send_message(embed=embed)
-        print(f"Ignoring exception in command {command}:", file=sys.stderr)
-        traceback.print_exception(
-            type(error),
-            error,
-            error.__traceback__,
-            file=sys.stderr,
+
+        logger.warning(
+            f"Ignoring exception in command {command}: {type(error)} {error} {error.__traceback__}",
         )
 
 

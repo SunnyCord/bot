@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-import logging
 import os
 from typing import TYPE_CHECKING
 
 import aiosu
 import discord
 from common.crypto import check_aes
+from common.logging import init_logging
+from common.logging import logger
 from cryptography.fernet import Fernet
 from discord.ext import commands
 from models.config import ConfigList
@@ -18,7 +19,6 @@ from service import *
 if TYPE_CHECKING:
     from typing import Any
 
-logger = logging.getLogger()
 
 MODULE_FOLDERS = ["listeners", "cogs", "tasks"]
 
@@ -95,10 +95,12 @@ class Sunny(commands.AutoShardedBot):
             **kwargs,
         )
         self.config = ConfigList.get_config()
+        init_logging(self.config.log_level)
         self.setup_db()
         self.setup_services()
 
     def setup_db(self) -> None:
+        logger.info("Setting up database connections...")
         motor_client = AsyncIOMotorClient(
             self.config.mongo.host,
             serverSelectionTimeoutMS=self.config.mongo.timeout,
@@ -111,6 +113,7 @@ class Sunny(commands.AutoShardedBot):
         self.redis_pubsub = self.redis_client.pubsub(ignore_subscribe_messages=True)
 
     def setup_services(self) -> None:
+        logger.info("Setting up services...")
         beatmap_repo = BeatmapRepository(self.redis_client)
         stats_repo = StatsRepository(self.redis_client)
         user_repo = UserRepository(self.database)
@@ -129,21 +132,25 @@ class Sunny(commands.AutoShardedBot):
         self.aes = Fernet(check_aes())
 
     async def setup_hook(self) -> None:
+        logger.info("Setting up modules...")
         await self.load_extension("jishaku")
         await _load_extensions(self)
         await self.stats_service.set_commands(_get_cogs_dict(self))
 
     async def on_ready(self) -> None:
+        logger.info(f"Logged in as {self.user} (ID: {self.user.id})")
         await self.stats_service.set_cog_count(len(self.cogs))
         await self.stats_service.set_command_count(len(self.all_commands))
         await self.stats_service.set_guild_count(len(self.guilds))
         await self.stats_service.set_user_count(len(self.users))
 
     async def on_guild_join(self, guild: discord.Guild) -> None:
+        logger.info(f"Joined guild {guild.name} (ID: {guild.id})")
         await self.stats_service.set_guild_count(len(self.guilds))
         await self.settings_service.create(guild.id)
 
     async def on_guild_remove(self, guild: discord.Guild) -> None:
+        logger.info(f"Left guild {guild.name} (ID: {guild.id})")
         await self.stats_service.set_guild_count(len(self.guilds))
         await self.settings_service.delete(guild.id)
 
@@ -162,4 +169,4 @@ class Sunny(commands.AutoShardedBot):
         return await super().is_owner(user)
 
     def run(self, **kwargs: Any) -> None:
-        super().run(self.config.token, log_level=self.config.log_level, **kwargs)
+        super().run(self.config.token, log_handler=None, **kwargs)

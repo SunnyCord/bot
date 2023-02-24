@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass
 from dataclasses import field
 from typing import List
 
+from common.logging import logger
 from dataclasses_json import dataclass_json
-
-logger = logging.getLogger("discord")
 
 
 @dataclass(frozen=True)
@@ -76,7 +74,7 @@ class ConfigList:
         with open("config.json", "a+") as config_file:
             fmt = cls().to_json(indent=4)  # type:ignore
             config_file.write(fmt)
-            logger.warn(
+            logger.warning(
                 "A config file was not found! Please edit the newly created `config.json` and run again.",
             )
             config_file.close()

@@ -12,6 +12,11 @@
             "color": 14108179,
             "token": "",
             "osuAPI": "",
+            "osuAPIv2": {
+                "client_id": 1,
+                "client_secret": "verysecret",
+                "redirect_uri": "http://localhost:8000/callback"
+            },
             "sentry": "",
             "owners": [
                 151670779782758400
