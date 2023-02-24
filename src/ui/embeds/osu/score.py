@@ -6,6 +6,7 @@ from __future__ import annotations
 from inspect import cleandoc
 from typing import TYPE_CHECKING
 
+from aiosu.models import LazerScore
 from aiosu.utils.performance import get_calculator
 from ui.embeds.generic import ContextEmbed
 from ui.icons.score import ScoreRankIcon
@@ -35,6 +36,16 @@ def _score_to_embed_strs(
 
     weight = ""
     score_text = ""
+    mods_text = score.mods
+    mods_settings_text = ""
+    if isinstance(score, LazerScore):
+        mods_text = score.mods_str
+        mods_settings_text = "\n"
+        for mod in score.mods:
+            if mod.settings:
+                for key, value in mod.settings.items():
+                    mods_settings_text += f"{key.replace('_', ' ')}: {value}\n"
+        mods_settings_text = mods_settings_text.rstrip("\n")
 
     if score.weight:
         weight += f" (weight {score.weight.percentage/100:.2f})"
@@ -50,7 +61,7 @@ def _score_to_embed_strs(
     value = cleandoc(
         f"""**{pp:.2f}pp**{weight}, accuracy: **{score.accuracy*100:.2f}%**, combo: **{score.max_combo}x/{max_combo}x**
             score: **{score.score}** [**{score.statistics.count_300}**/**{score.statistics.count_100}**/**{score.statistics.count_50}**/**{score.statistics.count_miss}**]
-            mods: {score.mods} | {ScoreRankIcon[score.rank]}{fail_text}
+            mods: {mods_text} | {ScoreRankIcon[score.rank]}{fail_text}{mods_settings_text}
             <t:{score.created_at.timestamp():.0f}:R>
             {score_text}[map]({beatmap.url})
         """,

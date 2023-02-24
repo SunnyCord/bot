@@ -101,8 +101,9 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
         embed.set_thumbnail(url="https://i.imgur.com/szL6ReL.png")
         await send_message(embed=embed)
 
-        logger.warning(
-            f"Ignoring exception in command {command}: {type(error)} {error} {error.__traceback__}",
+        logger.exception(
+            f"Ignoring exception in command {command}: ",
+            exc_info=error,
         )
 
 

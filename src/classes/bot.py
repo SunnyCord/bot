@@ -138,6 +138,7 @@ class Sunny(commands.AutoShardedBot):
             token_repository=osu_repo,
             client_secret=self.config.osuAPIv2.client_secret,
             client_id=self.config.osuAPIv2.client_id,
+            base_url="https://lazer.ppy.sh",
         )
         self.aes = Fernet(check_aes())
 

@@ -207,7 +207,12 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):
     ) -> None:
         await ctx.defer()
         client, user = await OsuUserConverter().convert(ctx, username, mode)
-        tops = await client.get_user_bests(user.id, mode=mode, limit=100)
+        tops = await client.get_user_bests(
+            user.id,
+            mode=mode,
+            limit=100,
+            new_format=True,
+        )
         if not tops:
             await ctx.send(f"User **{user.username}** has no top plays!")
             return
@@ -335,6 +340,7 @@ class OsuCog(MetadataCog, name="osu!"):
             mode=mode,
             limit=1 if not flags.list else 50,
             include_fails=flags.include_failed,
+            new_format=True,
         )
         if not recents:
             await ctx.send(f"User **{user.username}** has no recent plays!")
