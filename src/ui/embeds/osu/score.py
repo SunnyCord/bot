@@ -42,10 +42,9 @@ def _score_to_embed_strs(
         mods_text = score.mods_str
         mods_settings_text = "\n"
         for mod in score.mods:
-            if mod.settings:
-                for key, value in mod.settings.items():
-                    mods_settings_text += f"{key.replace('_', ' ')}: {value}\n"
-        mods_settings_text = mods_settings_text.rstrip("\n")
+            for key, value in mod.settings.items():
+                mods_settings_text += f"{key.replace('_', ' ')}: {value}\n"
+        mods_settings_text = mods_settings_text.rstrip()
 
     if score.weight:
         weight += f" (weight {score.weight.percentage/100:.2f})"
