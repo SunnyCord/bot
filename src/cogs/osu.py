@@ -207,7 +207,7 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):
             await ctx.send(f"User **{user.username}** has no top plays!")
             return
 
-        await self.bot.beatmap_service.add(ctx.channel.id, tops[0])
+        await self.bot.beatmap_service.add(ctx.channel.id, tops[0].beatmap)
 
         recent_text = ""
         if flags.recent:
@@ -335,7 +335,7 @@ class OsuCog(MetadataCog, name="osu!"):
             await ctx.send(f"User **{user.username}** has no recent plays!")
             return
 
-        await self.bot.beatmap_service.add(ctx.channel.id, recents[0])
+        await self.bot.beatmap_service.add(ctx.channel.id, recents[0].beatmap)
 
         if flags.list:
             title = f"Recent osu! {mode:f} plays for {user.username}"
@@ -363,6 +363,9 @@ class OsuCog(MetadataCog, name="osu!"):
         if not scores:
             await ctx.send(f"User **{user.username}** has no plays on the beatmap!")
             return
+
+        for score in scores:
+            score.beatmap = beatmap
 
         title = f"osu! {beatmap.mode:f} plays for {user.username}"
         await OsuScoresView.start(
@@ -393,6 +396,10 @@ class OsuCog(MetadataCog, name="osu!"):
     ) -> None:
         await ctx.defer()
         mode = flags.mode
+
+        if ctx.message.reference:
+            await ctx.send("yep i notice this, still WIP tho")
+            return
 
         try:
             beatmap = await self.bot.beatmap_service.get_one(ctx.channel.id)

@@ -3,6 +3,7 @@ from __future__ import annotations
 from inspect import cleandoc
 from typing import TYPE_CHECKING
 
+from aiosu.models.beatmap import BeatmapCovers
 from aiosu.utils.performance import get_calculator
 from ui.embeds.generic import ContextEmbed
 from ui.icons.score import ScoreRankIcon
@@ -117,8 +118,14 @@ class OsuScoreMultipleEmbed(ContextEmbed):
         client = await self.ctx.bot.client_storage.app_client
 
         if self.same_beatmap:
-            beatmapset = self.scores[0].beatmapset
-            self.set_thumbnail(url=beatmapset.covers.list)
+            score = self.scores[0]
+            if not score.beatmapset:
+                beatmapset = await client.get_beatmapset(score.beatmap.beatmapset_id)
+                for score in self.scores:
+                    score.beatmapset = beatmapset
+
+            self.set_thumbnail(url=score.beatmapset.covers.list)
+
             self.difficulty_attrs = [
                 await client.get_beatmap_attributes(
                     score.beatmap.id,
