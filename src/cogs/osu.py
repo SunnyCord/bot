@@ -8,6 +8,7 @@ from classes.cog import MetadataCog
 from classes.cog import MetadataGroupCog
 from common import humanizer
 from common.crypto import encode_discord_id
+from common.helpers import get_beatmap_from_reference
 from common.helpers import get_beatmap_from_text
 from discord import app_commands
 from discord.ext import commands
@@ -397,15 +398,21 @@ class OsuCog(MetadataCog, name="osu!"):
         await ctx.defer()
         mode = flags.mode
 
-        if ctx.message.reference:
-            await ctx.send("yep i notice this, still WIP tho")
-            return
+        client = await self.bot.client_storage.app_client
 
-        try:
-            beatmap = await self.bot.beatmap_service.get_one(ctx.channel.id)
-        except ValueError:
-            await ctx.send("No beatmap found to compare to.")
-            return
+        if ctx.message.reference:
+            beatmap_data = get_beatmap_from_reference(ctx.message.reference)
+            beatmap_id = beatmap_data.get("beatmap_id")
+            if beatmap_id is None:
+                await ctx.send("No beatmap found to compare to.")
+                return
+            beatmap = await client.get_beatmap(beatmap_id)
+        else:
+            try:
+                beatmap = await self.bot.beatmap_service.get_one(ctx.channel.id)
+            except ValueError:
+                await ctx.send("No beatmap found to compare to.")
+                return
 
         if mode is None:
             mode = beatmap.mode
@@ -424,20 +431,20 @@ class OsuCog(MetadataCog, name="osu!"):
         description="Sends osu! scores for a user on a beatmap",
     )
     @app_commands.describe(
-        beatmap="URL or ID of the beatmap",
+        beatmap_query="URL or ID of the beatmap",
         username="Discord/osu! username or mention",
     )
     async def osu_scores_command(
         self,
         ctx: commands.Context,
-        beatmap: str,
+        beatmap_query: str,
         username: str | None,
         *,
         flags: OsuScoreFlags,
     ) -> None:
         await ctx.defer()
         mode = flags.mode
-        beatmap_data = get_beatmap_from_text(beatmap)
+        beatmap_data = get_beatmap_from_text(beatmap_query)
         if (beatmap_id := beatmap_data["beatmap_id"]) is None:
             await ctx.send("Unknown beatmap ID specified.")
             return
@@ -462,34 +469,53 @@ class OsuCog(MetadataCog, name="osu!"):
         description="Shows information about pp of a certain map",
     )
     @app_commands.describe(
-        beatmap="URL or ID of the beatmap",
+        beatmap_query="URL or ID of the beatmap",
+        mods="Mods to calculate pp with",
     )
     async def osu_perf_command(
         self,
         ctx: commands.Context,
-        beatmap: str | None,
+        beatmap_query: str | None,
+        mods: str = "",
         *,
         flags: OsuScoreFlags,
     ) -> None:
         await ctx.defer()
+
         mode = flags.mode
+        mods = aiosu.models.Mods(mods)
+        client = await self.bot.client_storage.app_client
 
-        if beatmap:
-            beatmap_data = get_beatmap_from_text(beatmap)
-            if (beatmap_id := beatmap_data["beatmap_id"]) is None:
-                await ctx.send("Unknown beatmap ID specified.")
-                return
+        beatmap_data = None
+        if ctx.message.reference:
+            beatmap_data = get_beatmap_from_reference(ctx.message.reference)
+        elif beatmap_query:
+            beatmap_data = get_beatmap_from_text(beatmap_query)
 
-            client = await self.bot.client_storage.app_client
-            beatmap = await client.get_beatmap(beatmap_id)
-            await self.bot.beatmap_service.add(ctx.channel.id, beatmap)
-        else:
+        if not beatmap_data:
             beatmap = await self.bot.beatmap_service.get_one(ctx.channel.id)
             if beatmap is None:
                 await ctx.send("No beatmap found in cache.")
                 return
+        else:
+            beatmap_id = beatmap_data.get("beatmap_id")
+            if beatmap_id is None:
+                await ctx.send("Unknown beatmap ID specified.")
+                return
 
-        await ctx.send("This command is still WIP.")
+            beatmap = await client.get_beatmap(beatmap_id)
+            await self.bot.beatmap_service.add(ctx.channel.id, beatmap)
+
+        if mode is None:
+            mode = beatmap.mode
+
+        difficulty_attributes = await client.get_beatmap_attributes(
+            beatmap.id,
+            mode=mode,
+            mods=mods,
+        )
+
+        await ctx.send(difficulty_attributes.json(exclude_unset=True))
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
