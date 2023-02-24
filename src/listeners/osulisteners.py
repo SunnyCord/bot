@@ -8,7 +8,7 @@ import discord
 from classes.cog import MetadataCog
 from common.helpers import get_beatmap_from_text
 from discord.ext import commands
-from ui.embeds.osu import OsuBeatmapEmbed
+from ui.menus.osu import OsuBeatmapView
 
 if TYPE_CHECKING:
     from classes.bot import Sunny
@@ -26,24 +26,38 @@ class OsuListeners(
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
+        await self.beatmap_listener(message)
+
+    async def beatmap_listener(self, message: discord.Message) -> None:
         beatmap_data = get_beatmap_from_text(message.content, True)
-        filtered_data = {k: v for k, v in beatmap_data.items() if v is not None}
-        if not filtered_data:
+        beatmapset_id = beatmap_data.get("beatmapset_id")
+        beatmap_id = beatmap_data.get("beatmap_id")
+        if beatmapset_id is None and beatmap_id is None:
             return
 
-        beatmapset = (await self.bot.client_v1.get_beatmap(**filtered_data))[0]
+        client = await self.bot.client_storage.app_client
+
+        if beatmapset_id is None:
+            beatmap = await client.get_beatmap(beatmap_id)
+            if beatmap is None:
+                return
+            beatmapset_id = beatmap.beatmapset_id
+
+        beatmapset = await client.get_beatmapset(beatmapset_id)
+        if beatmapset is None:
+            return
+
         async with aiohttp.ClientSession() as session:
-            async with session.get(beatmapset.preview_url) as resp:
+            async with session.get(f"https:{beatmapset.preview_url}") as resp:
                 if resp.status != 200:
                     return
-                f = BytesIO(await resp.read())
+                audio_file = BytesIO(await resp.read())
 
-        beatmap = beatmapset.beatmaps[0]
-        await self.bot.beatmap_service.add(message.channel.id, beatmap)
-
-        await message.channel.send(
-            embed=OsuBeatmapEmbed(beatmapset, color=self.bot.config.color),
-            file=discord.File(f, filename="Preview.mp3"),
+        await OsuBeatmapView.start(
+            message,
+            self.bot,
+            beatmapset,
+            file=discord.File(audio_file, filename="Preview.mp3"),
         )
 
 

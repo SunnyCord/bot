@@ -9,8 +9,9 @@ class GamemodeIcon(Enum):
     CTB = "https://i.imgur.com/DGg9KDE.png"
     MANIA = "https://i.imgur.com/KZggy59.png"
 
-    def __init__(self, icon: str) -> None:
-        self.icon: str = icon
-
     def __str__(self) -> str:
-        return self.icon
+        return self.value
+
+    @property
+    def icon(self) -> str:
+        return self.value

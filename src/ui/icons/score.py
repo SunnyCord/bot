@@ -19,8 +19,9 @@ class ScoreRankIcon(Enum):
     SSH = "<:rankingXH:1078459105297051648>"
     SSHD = "<:rankingXH:1078459105297051648>"
 
-    def __init__(self, icon: str) -> None:
-        self.icon: str = icon
-
     def __str__(self) -> str:
         return self.icon
+
+    @property
+    def icon(self) -> str:
+        return self.value
