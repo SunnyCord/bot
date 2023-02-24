@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from inspect import cleandoc
 from typing import TYPE_CHECKING
 
+from aiosu.utils.performance import get_calculator
 from ui.embeds.generic import ContextEmbed
-from ui.emojis.score import ScoreRankIcon
+from ui.icons.score import ScoreRankIcon
 
 if TYPE_CHECKING:
     from typing import Any
@@ -14,9 +16,19 @@ if TYPE_CHECKING:
 def _score_to_embed_strs(
     score: aiosu.models.Score,
     include_user: bool = False,
+    difficulty_attrs: aiosu.models.BeatmapDifficultyAttributes = None,
 ) -> dict[str, str]:
     beatmap, beatmapset = score.beatmap, score.beatmapset
     name = f"{beatmapset.artist} - {beatmapset.title} [{beatmap.version}]"
+    max_combo = beatmap.max_combo
+    pp = score.pp
+
+    if difficulty_attrs:
+        name += f" ({difficulty_attrs.star_rating:.2f}★)"
+        max_combo = difficulty_attrs.max_combo
+        if not pp:
+            calculator_type = get_calculator(score.mode)
+            pp = calculator_type(difficulty_attrs).calculate(score).total
 
     weight = ""
     score_text = ""
@@ -28,12 +40,18 @@ def _score_to_embed_strs(
     if include_user:
         score_text += f"[user](https://osu.ppy.sh/users/{score.user_id}) | "
 
-    value = f"""**{score.pp:.2f}pp**{weight}, accuracy: **{score.accuracy*100:.2f}%**, combo: **{score.max_combo}x/{beatmap.max_combo}x**
+    fail_text = ""
+    if score.rank == "F":
+        fail_text = f" ({score.completion:.2f}%)"
+
+    value = cleandoc(
+        f"""**{pp:.2f}pp**{weight}, accuracy: **{score.accuracy*100:.2f}%**, combo: **{score.max_combo}x/{max_combo}x**
             score: **{score.score}** [**{score.statistics.count_300}**/**{score.statistics.count_100}**/**{score.statistics.count_50}**/**{score.statistics.count_miss}**]
-            mods: {score.mods} | {ScoreRankIcon[score.rank]}
+            mods: {score.mods} | {ScoreRankIcon[score.rank]}{fail_text}
             <t:{score.created_at.timestamp():.0f}:R>
             {score_text}[map]({beatmap.url})
-    """
+        """,
+    )
     return {"name": name, "value": value}
 
 
@@ -42,6 +60,7 @@ class OsuScoreSingleEmbed(ContextEmbed):
         self,
         ctx: commands.Context,
         score: aiosu.models.Score,
+        title: str = None,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -50,10 +69,29 @@ class OsuScoreSingleEmbed(ContextEmbed):
         self.prepared = False
         self.score = score
 
-    async def prepare(self) -> None:
         self.set_thumbnail(url=self.score.beatmapset.covers.list)
+        self.set_author(
+            name=title or self.score.user.username,
+            icon_url=self.score.user.avatar_url,
+        )
 
-        self.add_field(inline=False, **_score_to_embed_strs(self.score, True))
+    async def prepare(self) -> None:
+        if self.prepared:
+            return
+
+        client = await self.ctx.bot.client_storage.app_client
+
+        difficulty_attrs = await client.get_beatmap_attributes(
+            self.score.beatmap.id,
+            mods=self.score.mods,
+            mode=self.score.mode,
+        )
+
+        self.add_field(
+            inline=False, **_score_to_embed_strs(self.score, True, difficulty_attrs)
+        )
+
+        self.prepared = True
 
 
 class OsuScoreMultipleEmbed(ContextEmbed):
@@ -69,18 +107,40 @@ class OsuScoreMultipleEmbed(ContextEmbed):
         self.ctx = ctx
         self.prepared = False
         self.scores = scores
+        self.difficulty_attrs = []
         self.same_beatmap = same_beatmap
 
     async def prepare(self) -> None:
-        if not self.prepared:
-            if self.same_beatmap:
-                beatmapset = self.scores[0].beatmapset
-                self.set_thumbnail(url=beatmapset.covers.list)
+        if self.prepared:
+            return
 
+        client = await self.ctx.bot.client_storage.app_client
+
+        if self.same_beatmap:
+            beatmapset = self.scores[0].beatmapset
+            self.set_thumbnail(url=beatmapset.covers.list)
+            self.difficulty_attrs = [
+                await client.get_beatmap_attributes(
+                    score.beatmap.id,
+                    mods=score.mods,
+                    mode=score.mode,
+                ),
+            ] * len(self.scores)
+
+        if len(self.difficulty_attrs) != len(self.scores):
             for score in self.scores:
-                data = _score_to_embed_strs(score, False)
-                if self.same_beatmap:
-                    data["name"] = "_ _"
+                self.difficulty_attrs.append(
+                    await client.get_beatmap_attributes(
+                        score.beatmap.id,
+                        mods=score.mods,
+                        mode=score.mode,
+                    ),
+                )
 
-                self.add_field(inline=False, **data)
-            self.prepared = True
+        for idx, score in enumerate(self.scores):
+            data = _score_to_embed_strs(score, False, self.difficulty_attrs[idx])
+            if self.same_beatmap:
+                data["name"] = "_ _"
+
+            self.add_field(inline=False, **data)
+        self.prepared = True

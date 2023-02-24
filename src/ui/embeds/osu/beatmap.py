@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from aiosu.models import Beatmapset
 from discord import Embed
-from ui.emojis.beatmap import BeatmapDifficultyIcon
+from ui.icons.beatmap import BeatmapDifficultyIcon
 
 if TYPE_CHECKING:
     from typing import Any

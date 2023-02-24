@@ -6,6 +6,7 @@ import aiosu
 import discord
 from classes.cog import MetadataCog
 from classes.cog import MetadataGroupCog
+from common import humanizer
 from common.crypto import encode_discord_id
 from common.helpers import get_beatmap_from_text
 from discord import app_commands
@@ -37,12 +38,17 @@ class OsuRecentFlags(commands.FlagConverter):
     mode: aiosu.models.Gamemode | None = commands.Flag(
         aliases=["m"],
         description="The osu! mode to search for",
-        default=aiosu.models.Gamemode.STANDARD,
+        default=None,
     )
     list: bool | None = commands.Flag(
         aliases=["l"],
         description="Display a list of recent scores",
         default=False,
+    )
+    include_failed: bool | None = commands.Flag(
+        aliases=["f"],
+        description="Include failed scores",
+        default=True,
     )
 
 
@@ -50,7 +56,7 @@ class OsuScoreFlags(commands.FlagConverter):
     mode: aiosu.models.Gamemode | None = commands.Flag(
         aliases=["m"],
         description="The osu! mode to search for",
-        default=aiosu.models.Gamemode.STANDARD,
+        default=None,
     )
 
 
@@ -68,9 +74,13 @@ class OsuUserConverter(commands.Converter):
         """
         raw_user, mode = args
 
+        params = {}
+        if mode is not None:
+            params = {"mode": mode}
+
         if raw_user is None:
             client = await ctx.bot.client_storage.get_client(id=ctx.author.id)
-            return (client, await client.get_me(mode=mode))
+            return (client, await client.get_me(**params))
 
         member = None
         try:
@@ -90,10 +100,10 @@ class OsuUserConverter(commands.Converter):
 
         if member is None:
             client = await ctx.bot.client_storage.app_client
-            return (client, await client.get_user(raw_user, mode=mode))
+            return (client, await client.get_user(raw_user, **params))
 
         client = await ctx.bot.client_storage.get_client(id=ctx.author.id)
-        return (client, await client.get_me(mode=mode))
+        return (client, await client.get_me(**params))
 
 
 class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):
@@ -208,10 +218,10 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):
             title = f"{recent_text}osu! {mode:f} top plays for {user.username}"
             await OsuScoresView.start(ctx, user, mode, tops, title, timeout=30)
         else:
-            title = f"**{flags.position}.** {recent_text}osu! {mode:f} top play for **{user.username}**"
-            embed = OsuScoreSingleEmbed(ctx, tops[flags.position - 1])
+            title = f"{humanizer.ordinal(flags.position)} {recent_text}osu! {mode:f} top play for {user.username}"
+            embed = OsuScoreSingleEmbed(ctx, tops[flags.position - 1], title)
             await embed.prepare()
-            await ctx.send(title, embed=embed)
+            await ctx.send(embed=embed)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
@@ -313,10 +323,13 @@ class OsuCog(MetadataCog, name="osu!"):
         await ctx.defer()
         mode = flags.mode
         client, user = await OsuUserConverter().convert(ctx, username, mode)
+        if mode is None:
+            mode = user.playmode
         recents = await client.get_user_recents(
             user.id,
             mode=mode,
             limit=1 if not flags.list else 50,
+            include_fails=flags.include_failed,
         )
         if not recents:
             await ctx.send(f"User **{user.username}** has no recent plays!")
@@ -329,8 +342,8 @@ class OsuCog(MetadataCog, name="osu!"):
             await OsuScoresView.start(ctx, user, mode, recents, title, timeout=30)
             return
 
-        title = f"Most recent osu! {mode:f} play for **{user.username}**"
-        embed = OsuScoreSingleEmbed(ctx, recents[0])
+        title = f"Most recent osu! {mode:f} play for {user.username}"
+        embed = OsuScoreSingleEmbed(ctx, recents[0], title)
         await embed.prepare()
         await ctx.send(title, embed=embed)
 
@@ -375,8 +388,11 @@ class OsuCog(MetadataCog, name="osu!"):
         self,
         ctx: commands.Context,
         username: str | None,
+        *,
+        flags: OsuScoreFlags,
     ) -> None:
         await ctx.defer()
+        mode = flags.mode
 
         try:
             beatmap = await self.bot.beatmap_service.get_one(ctx.channel.id)
@@ -384,10 +400,13 @@ class OsuCog(MetadataCog, name="osu!"):
             await ctx.send("No beatmap found to compare to.")
             return
 
+        if mode is None:
+            mode = beatmap.mode
+
         await self.osu_beatmap_scores_command(
             ctx,
             username,
-            beatmap.mode,
+            mode,
             beatmap,
         )
 
@@ -419,6 +438,9 @@ class OsuCog(MetadataCog, name="osu!"):
         client = await self.bot.client_storage.app_client
         beatmap = await client.get_beatmap(beatmap_id)
         await self.bot.beatmap_service.add(ctx.channel.id, beatmap)
+
+        if mode is None:
+            mode = beatmap.mode
 
         await self.osu_beatmap_scores_command(
             ctx,
@@ -461,6 +483,144 @@ class OsuCog(MetadataCog, name="osu!"):
                 return
 
         await ctx.send("This command is still WIP.")
+
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    @commands.hybrid_command(
+        name="whatif",
+        description="Shows potential pp gain for a given score",
+    )
+    @app_commands.describe(
+        username="Discord/osu! username or mention",
+        pp="Amount of pp to simulate",
+    )
+    async def osu_whatif_command(
+        self,
+        ctx: commands.Context,
+        pp: float,
+        username: str | None,
+        *,
+        flags: OsuScoreFlags,
+    ) -> None:
+        await ctx.defer()
+        mode = flags.mode
+
+        client, user = await OsuUserConverter().convert(ctx, username, mode)
+
+        total_pp_with_bonus = user.statistics.pp
+
+        if mode is None:
+            mode = user.playmode
+
+        tops = await client.get_user_bests(user.id, mode=mode, limit=100)
+
+        if pp < tops[-1].pp:
+            await ctx.send(
+                f"{user.username} would **not** gain any pp if they got a **{pp:.2f}pp** score.",
+            )
+            return
+
+        pps_list = [top.pp for top in tops]
+        weights = [top.weight.percentage for top in tops]
+
+        initial_weighted_pps = [
+            pp * weight / 100 for pp, weight in zip(pps_list, weights)
+        ]
+        initial = sum(initial_weighted_pps)
+
+        bonus = total_pp_with_bonus - initial
+
+        pps_list.append(pp)
+        pps_list.sort(reverse=True)
+        final_weighted_pps = [
+            pp * weight / 100 for pp, weight in zip(pps_list, weights)
+        ]
+        final = sum(final_weighted_pps[:100])
+
+        await ctx.send(
+            f"{user.username} would gain **{final - initial:.2f}pp** if they got a **{pp:.2f}pp** score, bringing them up to **{final + bonus:.2f}pp**.",
+        )
+
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    @commands.hybrid_command(
+        name="bonus",
+        description="Shows bonus pp for a user",
+    )
+    @app_commands.describe(
+        username="Discord/osu! username or mention",
+    )
+    async def osu_bonus_command(
+        self,
+        ctx: commands.Context,
+        username: str | None,
+        *,
+        flags: OsuScoreFlags,
+    ) -> None:
+        await ctx.defer()
+        mode = flags.mode
+
+        client, user = await OsuUserConverter().convert(ctx, username, mode)
+
+        if user.is_restricted:
+            await ctx.send(
+                f"{user.username} is restricted, therefore we cannot calculate their bonus pp.",
+            )
+            return
+
+        total_pp_with_bonus = user.statistics.pp
+
+        if mode is None:
+            mode = user.playmode
+
+        tops = await client.get_user_bests(user.id, mode=mode, limit=100)
+
+        pps_list = [top.pp for top in tops]
+        weights = [top.weight.percentage for top in tops]
+
+        initial_weighted_pps = [
+            pp * weight / 100 for pp, weight in zip(pps_list, weights)
+        ]
+        initial = sum(initial_weighted_pps)
+
+        bonus = total_pp_with_bonus - initial
+
+        await ctx.send(
+            f"{user.username} has a bonus of **{bonus:.2f}pp** from playcount.",
+        )
+
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    @commands.hybrid_command(
+        name="recalcpp",
+        description="Recalculates pp for a user (without bonus pp)",
+    )
+    @app_commands.describe(
+        username="Discord/osu! username or mention",
+    )
+    async def osu_recalculate_pp_command(
+        self,
+        ctx: commands.Context,
+        username: str | None,
+        *,
+        flags: OsuScoreFlags,
+    ) -> None:
+        await ctx.defer()
+        mode = flags.mode
+
+        client, user = await OsuUserConverter().convert(ctx, username, mode)
+
+        if mode is None:
+            mode = user.playmode
+
+        tops = await client.get_user_bests(user.id, mode=mode, limit=100)
+
+        pps_list = [top.pp for top in tops]
+        weights = [top.weight.percentage for top in tops]
+
+        initial_weighted_pps = [
+            pp * weight / 100 for pp, weight in zip(pps_list, weights)
+        ]
+        initial = sum(initial_weighted_pps)
+
+        await ctx.send(f"{user.username} has **{initial:.2f}pp** (without bonus pp).")
 
 
 async def setup(bot: Sunny) -> None:

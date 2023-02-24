@@ -7,6 +7,7 @@ from discord import Embed
 from discord import Interaction
 from discord.ui import button
 from ui.embeds.osu import OsuScoreMultipleEmbed
+from ui.icons import GamemodeIcon
 from ui.menus.generic import BaseView
 
 if TYPE_CHECKING:
@@ -53,7 +54,11 @@ class OsuScoresView(BaseView):
         self._len = len(embeds)
         for i, embed in enumerate(embeds):
             embed.set_thumbnail(url=user.avatar_url)
-            embed.set_author(name=title, url=user.url)
+            embed.set_author(
+                name=title,
+                url=user.url,
+                icon_url=GamemodeIcon[mode.name].icon,
+            )
             embed.set_footer(text=f"Page {i+1}/{self._len}")
 
     @button(emoji="\N{LEFTWARDS BLACK ARROW}")
