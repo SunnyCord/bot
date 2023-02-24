@@ -7,15 +7,18 @@ from typing import TYPE_CHECKING
 from aiosu.models import Beatmap
 from aiosu.models import Beatmapset
 from discord import Embed
+from ui.embeds.generic import ContextEmbed
 from ui.icons.beatmap import BeatmapDifficultyIcon
 
 if TYPE_CHECKING:
     from typing import Any
+    from discord.ext.commands import Context
 
 
-class OsuBeatmapEmbed(Embed):
+class OsuBeatmapEmbed(ContextEmbed):
     def __init__(
         self,
+        ctx: Context,
         beatmapset: Beatmapset,
         beatmap: Beatmap,
         *args: Any,
@@ -39,6 +42,7 @@ class OsuBeatmapEmbed(Embed):
         )
 
         super().__init__(
+            ctx,
             title=title,
             description=description,
             url=beatmap.url,

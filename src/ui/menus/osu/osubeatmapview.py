@@ -8,42 +8,41 @@ from discord import Interaction
 from discord import Message
 from discord.ui import button
 from ui.embeds.osu import OsuBeatmapEmbed
-from ui.menus.generic import BaseMessageView
+from ui.menus.generic import BaseView
 
 if TYPE_CHECKING:
     from typing import Any
     from classes.bot import Sunny
     from aiosu.models import Beatmapset
+    from discord.ext.commands import Context
 
 
 def _split_beatmapset_to_pages(
-    bot: Sunny,
+    ctx: Context,
     beatmapset: Beatmapset,
 ) -> list[OsuBeatmapEmbed]:
-    color = bot.config.color
     embeds: list[OsuBeatmapEmbed] = [
-        OsuBeatmapEmbed(beatmapset, beatmap, color=color)
-        for beatmap in beatmapset.beatmaps
+        OsuBeatmapEmbed(ctx, beatmapset, beatmap) for beatmap in beatmapset.beatmaps
     ]
 
     return embeds
 
 
-class OsuBeatmapView(BaseMessageView):
+class OsuBeatmapView(BaseView):
     def __init__(
         self,
-        message: Message,
-        bot: Sunny,
+        ctx: Context,
         beatmapset: Beatmapset,
         *args: Any,
         **kwargs: Any,
     ):
-        self.message = message
-        self.bot = bot
+        self.ctx = ctx
+        self.message = ctx.message
+        self.bot = ctx.bot
 
         super().__init__(*args, **kwargs)
 
-        embeds = _split_beatmapset_to_pages(bot, beatmapset)
+        embeds = _split_beatmapset_to_pages(self.ctx, beatmapset)
         self._embeds = embeds
         self._queue = deque(embeds)
         self._initial = embeds[0]
@@ -61,6 +60,7 @@ class OsuBeatmapView(BaseMessageView):
         self._queue.rotate(1)
         embed = self._queue[0]
         await self.bot.beatmap_service.add(self.message.channel.id, embed.beatmap)
+        await embed.prepare()
         await interaction.response.edit_message(embed=embed)
 
     @button(emoji="\N{BLACK RIGHTWARDS ARROW}")
@@ -68,6 +68,7 @@ class OsuBeatmapView(BaseMessageView):
         self._queue.rotate(-1)
         embed = self._queue[0]
         await self.bot.beatmap_service.add(self.message.channel.id, embed.beatmap)
+        await embed.prepare()
         await interaction.response.edit_message(embed=embed)
 
     @property

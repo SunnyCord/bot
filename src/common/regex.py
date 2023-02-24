@@ -8,4 +8,5 @@ beatmap_id_rx = re.compile(r"^(?P<bmapid>[0-9]+)$")
 beatmap_link_rx = re.compile(
     r"(https?):\/\/([-\w._]+)(\/[-\w._]\?(.+)?)?(\/b(eatmaps)?\/(?P<bmapid1>[0-9]+)|\/s\/(?P<bmapsetid1>[0-9]+)|\/beatmapsets\/(?P<bmapsetid2>[0-9]+)(#(?P<mode>[a-z]+)\/(?P<bmapid2>[0-9]+))?)",
 )
+user_link_rx = re.compile(r"(https?):\/\/osu.ppy.sh\/u(sers)?\/(?P<userid>[0-9]+)")
 track_title_rx = re.compile(r"\([^()]*\)")

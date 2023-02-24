@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from aiosu.models import User
     from aiosu.models import Score
     from aiosu.models import Gamemode
-    from discord.commands import Context
+    from discord.ext.commands import Context
 
 
 def _split_tops_to_pages(

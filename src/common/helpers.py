@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from common.regex import beatmap_id_rx
 from common.regex import beatmap_link_rx
-from common.regex import url_rx
+from common.regex import user_link_rx
 
 if TYPE_CHECKING:
     from discord import MessageReference
@@ -56,3 +56,8 @@ def get_beatmap_from_reference(reference: MessageReference) -> dict[str, int | N
         )
 
     return get_beatmap_from_text(beatmap_query)
+
+
+def get_user_from_text(text):
+    if match := user_link_rx.match(text):
+        return match.group("userid")

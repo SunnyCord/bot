@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 from datetime import datetime
+from inspect import cleandoc
 from typing import TYPE_CHECKING
 
 from aiosu.models import Gamemode
 from aiosu.models import User
 from discord.ext import commands
 from ui.embeds.generic import ContextEmbed
+from ui.icons import GamemodeIcon
 
 if TYPE_CHECKING:
     from typing import Any
@@ -45,10 +47,8 @@ class OsuProfileEmbed(ContextEmbed):
         *args: Any,
         **kwargs: Any,
     ) -> None:
-        super().__init__(
-            ctx,
-            title=None,
-            description=f"""
+        content = cleandoc(
+            f"""
             > **Rank:** #{user.statistics.global_rank}
             > **PP:** {user.statistics.pp}
             > **Accuracy:** {user.statistics.hit_accuracy:.2f}%
@@ -57,6 +57,12 @@ class OsuProfileEmbed(ContextEmbed):
             > **Playcount:** {user.statistics.play_count}
             > **PP/hour:** {int(user.statistics.pp / user.statistics.play_time * 3600)  if user.statistics.play_time > 0 else 0}
             """,
+        )
+
+        super().__init__(
+            ctx,
+            title=None,
+            description=content,
             timestamp=datetime.utcnow(),
             *args,
             **kwargs,
@@ -64,7 +70,7 @@ class OsuProfileEmbed(ContextEmbed):
         self.set_author(
             name=f"osu! {mode.name_full} stats for {user.username}",
             url=user.url,
-            icon_url=mode.icon,
+            icon_url=GamemodeIcon[mode.name].icon,
         )
         self.set_thumbnail(url=user.avatar_url)
         self.set_footer(
