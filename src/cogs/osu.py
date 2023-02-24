@@ -12,6 +12,7 @@ from common.helpers import get_beatmap_from_reference
 from common.helpers import get_beatmap_from_text
 from discord import app_commands
 from discord.ext import commands
+from ui.embeds.osu import OsuDifficultyEmbed
 from ui.embeds.osu import OsuLinkEmbed
 from ui.embeds.osu import OsuProfileEmbed
 from ui.embeds.osu import OsuScoreSingleEmbed
@@ -509,13 +510,23 @@ class OsuCog(MetadataCog, name="osu!"):
         if mode is None:
             mode = beatmap.mode
 
+        if beatmap.beatmapset is None:
+            beatmap.beatmapset = await client.get_beatmapset(beatmap.beatmapset_id)
+
         difficulty_attributes = await client.get_beatmap_attributes(
             beatmap.id,
             mode=mode,
             mods=mods,
         )
 
-        await ctx.send(difficulty_attributes.json(exclude_unset=True))
+        await ctx.send(
+            embed=OsuDifficultyEmbed(
+                ctx,
+                beatmap,
+                difficulty_attributes,
+                mods,
+            ),
+        )
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(

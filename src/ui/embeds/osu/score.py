@@ -3,7 +3,6 @@ from __future__ import annotations
 from inspect import cleandoc
 from typing import TYPE_CHECKING
 
-from aiosu.models.beatmap import BeatmapCovers
 from aiosu.utils.performance import get_calculator
 from ui.embeds.generic import ContextEmbed
 from ui.icons.score import ScoreRankIcon
