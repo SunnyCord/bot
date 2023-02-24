@@ -7,6 +7,7 @@ from datetime import timedelta
 from inspect import cleandoc
 from typing import TYPE_CHECKING
 
+from discord.utils import escape_markdown
 from ui.embeds.generic import ContextEmbed
 
 if TYPE_CHECKING:
@@ -30,8 +31,12 @@ class OsuDifficultyEmbed(ContextEmbed):
             ctx,
         )
 
+        title = escape_markdown(
+            f"{beatmapset.artist} - {beatmapset.title} [{beatmap.version}]{mods_text}",
+        )
+
         self.set_author(
-            name=f"{beatmapset.artist} - {beatmapset.title} [{beatmap.version}]{mods_text}",
+            name=title,
             url=beatmap.url,
         )
 

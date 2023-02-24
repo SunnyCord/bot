@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 
 from aiosu.models import Beatmap
 from aiosu.models import Beatmapset
+from discord.utils import escape_markdown
 from ui.embeds.generic import ContextEmbed
 from ui.icons.beatmap import BeatmapDifficultyIcon
 
@@ -35,7 +36,7 @@ class OsuBeatmapEmbed(ContextEmbed):
             footer_date_prefix = "Approved "
             date = beatmapset.ranked_date
 
-        title = f"{beatmapset.artist} - {beatmapset.title}"
+        title = escape_markdown(f"{beatmapset.artist} - {beatmapset.title}")
         description = cleandoc(
             f"""**Length**: {timedelta(seconds=beatmap.total_length)} **BPM:** {beatmap.bpm}\n**Download:** [map](https://osu.ppy.sh/d/{beatmapset.id})([🚫📹](https://osu.ppy.sh/d/{beatmapset.id}n)) [chimu.moe](https://api.chimu.moe/v1/download/{beatmapset.id})
                 **Discussion:** [mapset]({beatmapset.discussion_url}) [difficulty]({beatmap.discussion_url})
@@ -52,8 +53,10 @@ class OsuBeatmapEmbed(ContextEmbed):
             **kwargs,
         )
 
+        safe_creator = escape_markdown(beatmapset.creator)
+
         self.set_author(
-            name=f"Mapped by {beatmapset.creator}",
+            name=f"Mapped by {safe_creator}",
             icon_url=f"https://a.ppy.sh/{beatmapset.user_id}",
             url=f"https://osu.ppy.sh/users/{beatmapset.user_id}/modding",
         )

@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 
 from aiosu.models import LazerScore
 from aiosu.utils.performance import get_calculator
+from discord.utils import escape_markdown
 from ui.embeds.generic import ContextEmbed
 from ui.icons.score import ScoreRankIcon
 
@@ -23,7 +24,9 @@ def _score_to_embed_strs(
     difficulty_attrs: aiosu.models.BeatmapDifficultyAttributes = None,
 ) -> dict[str, str]:
     beatmap, beatmapset = score.beatmap, score.beatmapset
-    name = f"{beatmapset.artist} - {beatmapset.title} [{beatmap.version}]"
+    name = escape_markdown(
+        f"{beatmapset.artist} - {beatmapset.title} [{beatmap.version}]",
+    )
     max_combo = beatmap.max_combo
     pp = score.pp
 
@@ -82,9 +85,11 @@ class OsuScoreSingleEmbed(ContextEmbed):
         self.prepared = False
         self.score = score
 
+        safe_username = escape_markdown(score.user.username)
+
         self.set_thumbnail(url=self.score.beatmapset.covers.list)
         self.set_author(
-            name=title or self.score.user.username,
+            name=title or safe_username,
             icon_url=self.score.user.avatar_url,
         )
 

@@ -15,6 +15,7 @@ from common.helpers import get_beatmap_from_reference
 from common.helpers import get_beatmap_from_text
 from discord import app_commands
 from discord.ext import commands
+from discord.utils import escape_markdown
 from ui.embeds.osu import OsuDifficultyEmbed
 from ui.embeds.osu import OsuLinkEmbed
 from ui.embeds.osu import OsuProfileEmbed
@@ -207,6 +208,9 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):
     ) -> None:
         await ctx.defer()
         client, user = await OsuUserConverter().convert(ctx, username, mode)
+
+        safe_username = escape_markdown(user.username)
+
         tops = await client.get_user_bests(
             user.id,
             mode=mode,
@@ -214,7 +218,7 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):
             new_format=True,
         )
         if not tops:
-            await ctx.send(f"User **{user.username}** has no top plays!")
+            await ctx.send(f"User **{safe_username}** has no top plays!")
             return
 
         await self.bot.beatmap_service.add(ctx.channel.id, tops[0].beatmap)
@@ -225,10 +229,10 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):
             recent_text = "Recent "
 
         if flags.position is None:
-            title = f"{recent_text}osu! {mode:f} top plays for {user.username}"
+            title = f"{recent_text}osu! {mode:f} top plays for {safe_username}"
             await OsuScoresView.start(ctx, user, mode, tops, title, timeout=30)
         else:
-            title = f"{humanizer.ordinal(flags.position)} {recent_text}osu! {mode:f} top play for {user.username}"
+            title = f"{humanizer.ordinal(flags.position)} {recent_text}osu! {mode:f} top play for {safe_username}"
             embed = OsuScoreSingleEmbed(ctx, tops[flags.position - 1], title)
             await embed.prepare()
             await ctx.send(embed=embed)
@@ -333,6 +337,9 @@ class OsuCog(MetadataCog, name="osu!"):
         await ctx.defer()
         mode = flags.mode
         client, user = await OsuUserConverter().convert(ctx, username, mode)
+
+        safe_username = escape_markdown(user.username)
+
         if mode is None:
             mode = user.playmode
         recents = await client.get_user_recents(
@@ -343,20 +350,20 @@ class OsuCog(MetadataCog, name="osu!"):
             new_format=True,
         )
         if not recents:
-            await ctx.send(f"User **{user.username}** has no recent plays!")
+            await ctx.send(f"User **{safe_username}** has no recent plays!")
             return
 
         await self.bot.beatmap_service.add(ctx.channel.id, recents[0].beatmap)
 
         if flags.list:
-            title = f"Recent osu! {mode:f} plays for {user.username}"
+            title = f"Recent osu! {mode:f} plays for {safe_username}"
             await OsuScoresView.start(ctx, user, mode, recents, title, timeout=30)
             return
 
-        title = f"Most recent osu! {mode:f} play for {user.username}"
+        title = f"Most recent osu! {mode:f} play for {safe_username}"
         embed = OsuScoreSingleEmbed(ctx, recents[0], title)
         await embed.prepare()
-        await ctx.send(title, embed=embed)
+        await ctx.send(embed=embed)
 
     async def osu_beatmap_scores_command(
         self,
@@ -366,19 +373,22 @@ class OsuCog(MetadataCog, name="osu!"):
         beatmap: aiosu.models.Beatmap,
     ) -> None:
         client, user = await OsuUserConverter().convert(ctx, username, mode)
+
+        safe_username = escape_markdown(user.username)
+
         scores = await client.get_user_beatmap_scores(
             user.id,
             beatmap.id,
             mode=mode,
         )
         if not scores:
-            await ctx.send(f"User **{user.username}** has no plays on the beatmap!")
+            await ctx.send(f"User **{safe_username}** has no plays on the beatmap!")
             return
 
         for score in scores:
             score.beatmap = beatmap
 
-        title = f"osu! {beatmap.mode:f} plays for {user.username}"
+        title = f"osu! {beatmap.mode:f} plays for {safe_username}"
         await OsuScoresView.start(
             ctx,
             user,
@@ -566,9 +576,11 @@ class OsuCog(MetadataCog, name="osu!"):
 
         tops = await client.get_user_bests(user.id, mode=mode, limit=100)
 
+        safe_username = escape_markdown(user.username)
+
         if pp < tops[-1].pp:
             await ctx.send(
-                f"{user.username} would **not** gain any pp if they got a **{pp:.2f}pp** score.",
+                f"{safe_username} would **not** gain any pp if they got a **{pp:.2f}pp** score.",
             )
             return
 
@@ -590,7 +602,7 @@ class OsuCog(MetadataCog, name="osu!"):
         final = sum(final_weighted_pps[:100])
 
         await ctx.send(
-            f"{user.username} would gain **{final - initial:.2f}pp** if they got a **{pp:.2f}pp** score, bringing them up to **{final + bonus:.2f}pp**.",
+            f"{safe_username} would gain **{final - initial:.2f}pp** if they got a **{pp:.2f}pp** score, bringing them up to **{final + bonus:.2f}pp**.",
         )
 
     @commands.cooldown(1, 1, commands.BucketType.user)
@@ -613,9 +625,11 @@ class OsuCog(MetadataCog, name="osu!"):
 
         client, user = await OsuUserConverter().convert(ctx, username, mode)
 
+        safe_username = escape_markdown(user.username)
+
         if user.is_restricted:
             await ctx.send(
-                f"{user.username} is restricted, therefore we cannot calculate their bonus pp.",
+                f"{safe_username} is restricted, therefore we cannot calculate their bonus pp.",
             )
             return
 
@@ -637,7 +651,7 @@ class OsuCog(MetadataCog, name="osu!"):
         bonus = total_pp_with_bonus - initial
 
         await ctx.send(
-            f"{user.username} has a bonus of **{bonus:.2f}pp** from playcount.",
+            f"{safe_username} has a bonus of **{bonus:.2f}pp** from playcount.",
         )
 
     @commands.cooldown(1, 1, commands.BucketType.user)
@@ -660,6 +674,8 @@ class OsuCog(MetadataCog, name="osu!"):
 
         client, user = await OsuUserConverter().convert(ctx, username, mode)
 
+        safe_username = escape_markdown(user.username)
+
         if mode is None:
             mode = user.playmode
 
@@ -673,7 +689,7 @@ class OsuCog(MetadataCog, name="osu!"):
         ]
         initial = sum(initial_weighted_pps)
 
-        await ctx.send(f"{user.username} has **{initial:.2f}pp** (without bonus pp).")
+        await ctx.send(f"{safe_username} has **{initial:.2f}pp** (without bonus pp).")
 
 
 async def setup(bot: Sunny) -> None:

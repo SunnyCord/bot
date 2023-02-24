@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING
 from aiosu.models import Gamemode
 from aiosu.models import User
 from discord.ext import commands
+from discord.utils import escape_markdown
 from ui.embeds.generic import ContextEmbed
 from ui.icons import GamemodeIcon
 
@@ -62,6 +63,8 @@ class OsuProfileEmbed(ContextEmbed):
             """,
         )
 
+        safe_username = escape_markdown(user.username)
+
         super().__init__(
             ctx,
             title=None,
@@ -71,7 +74,7 @@ class OsuProfileEmbed(ContextEmbed):
             **kwargs,
         )
         self.set_author(
-            name=f"osu! {mode.name_full} stats for {user.username}",
+            name=f"osu! {mode.name_full} stats for {safe_username}",
             url=user.url,
             icon_url=GamemodeIcon[mode.name].icon,
         )
