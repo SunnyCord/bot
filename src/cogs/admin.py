@@ -1,3 +1,6 @@
+###
+# Copyright (c) 2023 NiceAesth. All rights reserved.
+###
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -29,7 +32,6 @@ class Admin(MetadataCog):
         interaction: discord.Interaction,
         count: app_commands.Range[int, 1, 100],
     ) -> None:
-
         await interaction.response.defer(ephemeral=True)
         resp = await interaction.channel.purge(limit=count, bulk=True)
         await interaction.followup.send(f"Deleted {len(resp)} messages")

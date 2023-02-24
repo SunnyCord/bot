@@ -1,3 +1,6 @@
+###
+# Copyright (c) 2023 NiceAesth. All rights reserved.
+###
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -26,7 +29,6 @@ class Fun(MetadataCog):
     async def poll_command(
         self, interaction: discord.Interaction, *, text: str
     ) -> None:
-
         try:
             await interaction.message.delete()
         except:
