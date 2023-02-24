@@ -49,13 +49,13 @@ class Config:
     color: int = 0xD74613
     token: str = ""
     osuAPI: str = ""
-    osuAPIv2: OsuAPIv2Config = field(default_factory=lambda: OsuAPIv2Config())
+    osuAPIv2: OsuAPIv2Config = field(default_factory=OsuAPIv2Config)
     sentry: str = ""
     owners: List[int] = field(default_factory=lambda: [151670779782758400])
     command_prefixes: List[str] = field(default_factory=lambda: ["s."])
-    redis: RedisConfig = field(default_factory=lambda: RedisConfig())
-    mongo: MongoConfig = field(default_factory=lambda: MongoConfig())
-    ppAPI: PPConfig = field(default_factory=lambda: PPConfig())
+    redis: RedisConfig = field(default_factory=RedisConfig)
+    mongo: MongoConfig = field(default_factory=MongoConfig)
+    ppAPI: PPConfig = field(default_factory=PPConfig)
     lavalink: List[LavalinkConfig] = field(default_factory=lambda: [LavalinkConfig()])
 
 

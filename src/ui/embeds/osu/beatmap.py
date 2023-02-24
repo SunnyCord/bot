@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 
 from aiosu.models import Beatmap
 from aiosu.models import Beatmapset
-from discord import Embed
 from ui.embeds.generic import ContextEmbed
 from ui.icons.beatmap import BeatmapDifficultyIcon
 

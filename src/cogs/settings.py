@@ -6,7 +6,6 @@ from classes.cog import MetadataCog
 from discord.ext import commands
 
 if TYPE_CHECKING:
-    from discord import Guild
     from classes.bot import Sunny
 
 

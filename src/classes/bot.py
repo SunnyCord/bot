@@ -13,8 +13,15 @@ from discord.ext import commands
 from models.config import ConfigList
 from motor.motor_asyncio import AsyncIOMotorClient
 from redis.asyncio import Redis
-from repository import *
-from service import *
+from repository import BeatmapRepository
+from repository import OsuRepository
+from repository import SettingsRepository
+from repository import StatsRepository
+from repository import UserRepository
+from service import BeatmapService
+from service import SettingsService
+from service import StatsService
+from service import UserService
 
 if TYPE_CHECKING:
     from typing import Any

@@ -294,7 +294,7 @@ class OsuCog(MetadataCog, name="osu!"):
     ) -> None:
         await ctx.send("Please access the thread to link your osu! account.")
         thread = await ctx.channel.create_thread(
-            name=f"osu! Profile Link",
+            name="osu! Profile Link",
             auto_archive_duration=60,
             invitable=False,
         )

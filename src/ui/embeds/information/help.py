@@ -13,6 +13,6 @@ class HelpEmbed(ContextEmbed):
         super().__init__(
             ctx,
             title="Sunny Help",
-            description=f"Click [here](https://github.com/SunnyCord/bot/wiki/Commands) to view the help page!",
+            description="Click [here](https://github.com/SunnyCord/bot/wiki/Commands) to view the help page!",
         )
         self.set_thumbnail(url=ctx.bot.user.avatar)

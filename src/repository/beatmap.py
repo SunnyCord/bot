@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import orjson
 from aiosu.models import Beatmap
 from redis.asyncio import Redis
 

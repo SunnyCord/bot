@@ -5,14 +5,12 @@ from typing import TYPE_CHECKING
 
 from discord import Embed
 from discord import Interaction
-from discord import Message
 from discord.ui import button
 from ui.embeds.osu import OsuBeatmapEmbed
 from ui.menus.generic import BaseView
 
 if TYPE_CHECKING:
     from typing import Any
-    from classes.bot import Sunny
     from aiosu.models import Beatmapset
     from discord.ext.commands import Context
 
