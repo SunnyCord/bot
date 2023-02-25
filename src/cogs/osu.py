@@ -131,7 +131,7 @@ class OsuUserConverter(commands.Converter):
 
         if raw_user is None:
             client = await client_storage.get_client(id=ctx.author.id)
-            return (client, await client.get_me(**params))
+            return (client, await client.get_me(**params), lazer)
 
         member = None
         try:
@@ -151,10 +151,10 @@ class OsuUserConverter(commands.Converter):
 
         if member is None:
             client = await client_storage.app_client
-            return (client, await client.get_user(raw_user, **params))
+            return (client, await client.get_user(raw_user, **params), lazer)
 
         client = await client_storage.get_client(id=member.id)
-        return (client, await client.get_me(**params))
+        return (client, await client.get_me(**params), lazer)
 
 
 class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):
@@ -169,12 +169,12 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
-    async def get_graph(self, user: aiosu.models.User):
+    async def get_graph(self, user: aiosu.models.User, lazer: bool):
         try:
-            graph = await self.bot.graph_service.get_one(user.id)
+            graph = await self.bot.graph_service.get_one(user.id, lazer)
         except ValueError:
             graph = await self.bot.run_blocking(graphing.plot_rank_graph, user)
-            await self.bot.graph_service.add(user.id, graph)
+            await self.bot.graph_service.add(user.id, graph, lazer)
         return graph
 
     async def osu_profile_command(
@@ -185,13 +185,17 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):
         flags: OsuProfileFlags,
     ) -> None:
         await ctx.defer()
-        lazer = flags.lazer
-        _, user = await OsuUserConverter().convert(ctx, username, mode, lazer)
+        _, user, lazer = await OsuUserConverter().convert(
+            ctx,
+            username,
+            mode,
+            flags.lazer,
+        )
         if flags.extended:
             embed = OsuProfileExtendedEmbed(ctx, user, mode, lazer)
         else:
             embed = OsuProfileCompactEmbed(ctx, user, mode, lazer)
-        graph = await self.get_graph(user)
+        graph = await self.get_graph(user, lazer)
         embed.set_image(url="attachment://rank_graph.png")
         await ctx.send(embed=embed, file=discord.File(graph, "rank_graph.png"))
 
@@ -276,7 +280,7 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):
         flags: OsuTopFlags,
     ) -> None:
         await ctx.defer()
-        client, user = await OsuUserConverter().convert(
+        client, user, _ = await OsuUserConverter().convert(
             ctx,
             username,
             mode,
@@ -395,14 +399,15 @@ class OsuCog(MetadataCog, name="osu!"):
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
         name="lazertoggle",
-        description="Toggles whether osu! commands use lazer stats or not",
+        description="Toggles whether osu! commands use lazer stats by default or not",
     )
     async def lazer_toggle_command(
         self,
         ctx: commands.Context,
     ) -> None:
         lazer = await self.bot.user_prefs_service.toggle_lazer(ctx.author.id)
-        await ctx.send(f"{'Enabled' if lazer else 'Disabled'} lazer stats.")
+        default = "lazer" if lazer else "stable"
+        await ctx.send(f"Defaulting to {default} stats for osu! commands.")
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
@@ -422,7 +427,7 @@ class OsuCog(MetadataCog, name="osu!"):
     ) -> None:
         await ctx.defer()
         mode = flags.mode
-        client, user = await OsuUserConverter().convert(ctx, username, mode, True)
+        client, user, _ = await OsuUserConverter().convert(ctx, username, mode, True)
 
         safe_username = escape_markdown(user.username)
 
@@ -459,7 +464,12 @@ class OsuCog(MetadataCog, name="osu!"):
         beatmap: aiosu.models.Beatmap,
         lazer: bool,
     ) -> None:
-        client, user = await OsuUserConverter().convert(ctx, username, mode, lazer)
+        client, user, lazer = await OsuUserConverter().convert(
+            ctx,
+            username,
+            mode,
+            lazer,
+        )
 
         safe_username = escape_markdown(user.username)
 
@@ -657,7 +667,7 @@ class OsuCog(MetadataCog, name="osu!"):
         await ctx.defer()
         mode = flags.mode
 
-        client, user = await OsuUserConverter().convert(
+        client, user, _ = await OsuUserConverter().convert(
             ctx,
             username,
             mode,
@@ -718,7 +728,7 @@ class OsuCog(MetadataCog, name="osu!"):
         await ctx.defer()
         mode = flags.mode
 
-        client, user = await OsuUserConverter().convert(
+        client, user, _ = await OsuUserConverter().convert(
             ctx,
             username,
             mode,
@@ -772,7 +782,7 @@ class OsuCog(MetadataCog, name="osu!"):
         await ctx.defer()
         mode = flags.mode
 
-        client, user = await OsuUserConverter().convert(
+        client, user, _ = await OsuUserConverter().convert(
             ctx,
             username,
             mode,

@@ -30,10 +30,10 @@ class OsuProfileCompactEmbed(ContextEmbed):
     ) -> None:
         peak_str = ""
         if user.rank_highest:
-            peak_str = f"\n(peaked #{user.rank_highest.rank} <t:{user.rank_highest.updated_at.timestamp():.0f}:R>)\n"
+            peak_str = f"(peaked #{user.rank_highest.rank} <t:{user.rank_highest.updated_at.timestamp():.0f}:R>)\n"
 
         content = (
-            f"{user.statistics.pp}pp (#{user.statistics.global_rank} | {user.country.flag_emoji}#{user.statistics.country_rank})"
+            f"{user.statistics.pp}pp (#{user.statistics.global_rank} | {user.country.flag_emoji}#{user.statistics.country_rank})\n"
             + peak_str
             + cleandoc(
                 f"""
@@ -75,10 +75,10 @@ class OsuProfileExtendedEmbed(ContextEmbed):
     ) -> None:
         peak_str = ""
         if user.rank_highest:
-            peak_str = f"\npeak: **#{user.rank_highest.rank}** <t:{user.rank_highest.updated_at.timestamp():.0f}:R>\n"
+            peak_str = f"peak: **#{user.rank_highest.rank}** <t:{user.rank_highest.updated_at.timestamp():.0f}:R>\n"
 
         rank_content = (
-            f"rank: **#{user.statistics.global_rank}**"
+            f"rank: **#{user.statistics.global_rank}**\n"
             + peak_str
             + cleandoc(
                 f"""
