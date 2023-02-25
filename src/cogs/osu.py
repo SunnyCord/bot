@@ -308,12 +308,19 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):
 
         if flags.position is None:
             title = f"{recent_text}osu! {mode:f} top plays for {safe_username}"
-            await OsuScoresView.start(ctx, user, mode, tops, title, timeout=30)
-        else:
-            title = f"{humanizer.ordinal(flags.position)} {recent_text}osu! {mode:f} top play for {safe_username}"
-            embed = OsuScoreSingleEmbed(ctx, tops[flags.position - 1], title)
-            await embed.prepare()
-            await ctx.send(embed=embed)
+            await OsuScoresView.start(ctx, user, mode, tops, title)
+            return
+
+        if flags.position > len(tops):
+            await ctx.send(
+                f"User **{safe_username}** has no top play at position {flags.position}!",
+            )
+            return
+
+        title = f"{humanizer.ordinal(flags.position)} {recent_text}osu! {mode:f} top play for {safe_username}"
+        embed = OsuScoreSingleEmbed(ctx, tops[flags.position - 1], title)
+        await embed.prepare()
+        await ctx.send(embed=embed)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
@@ -448,7 +455,7 @@ class OsuCog(MetadataCog, name="osu!"):
 
         if flags.list:
             title = f"Recent osu! {mode:f} plays for {safe_username}"
-            await OsuScoresView.start(ctx, user, mode, recents, title, timeout=30)
+            await OsuScoresView.start(ctx, user, mode, recents, title)
             return
 
         title = f"Most recent osu! {mode:f} play for {safe_username}"
@@ -493,7 +500,6 @@ class OsuCog(MetadataCog, name="osu!"):
             scores,
             title,
             True,
-            timeout=30,
         )
 
     @commands.cooldown(1, 1, commands.BucketType.user)
