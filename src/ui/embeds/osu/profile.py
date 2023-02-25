@@ -48,6 +48,7 @@ class OsuProfileEmbed(ContextEmbed):
         ctx: commands.Context,
         user: User,
         mode: Gamemode,
+        lazer: bool = False,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -69,6 +70,8 @@ class OsuProfileEmbed(ContextEmbed):
 
         safe_username = escape_markdown(user.username)
 
+        lazer_str = " (lazer)" if lazer else ""
+
         super().__init__(
             ctx,
             title=None,
@@ -78,7 +81,7 @@ class OsuProfileEmbed(ContextEmbed):
             **kwargs,
         )
         self.set_author(
-            name=f"osu! {mode.name_full} stats for {safe_username}",
+            name=f"osu!{lazer_str} {mode.name_full} stats for {safe_username}",
             url=user.url,
             icon_url=GamemodeIcon[mode.name].icon,
         )

@@ -90,6 +90,11 @@ class OsuPPFlags(commands.FlagConverter):
         description="The osu! mode to search for",
         default=None,
     )
+    lazer: bool | None = commands.Flag(
+        aliases=["l"],
+        description="Whether to use the lazer client",
+        default=None,
+    )
 
 
 class OsuUserConverter(commands.Converter):
@@ -167,7 +172,7 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):
     ) -> None:
         await ctx.defer()
         _, user = await OsuUserConverter().convert(ctx, username, mode, lazer)
-        await ctx.send(embed=OsuProfileEmbed(ctx, user, mode))
+        await ctx.send(embed=OsuProfileEmbed(ctx, user, mode, lazer))
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
@@ -635,7 +640,12 @@ class OsuCog(MetadataCog, name="osu!"):
         await ctx.defer()
         mode = flags.mode
 
-        client, user = await OsuUserConverter().convert(ctx, username, mode)
+        client, user = await OsuUserConverter().convert(
+            ctx,
+            username,
+            mode,
+            flags.lazer,
+        )
 
         total_pp_with_bonus = user.statistics.pp
 
@@ -691,7 +701,12 @@ class OsuCog(MetadataCog, name="osu!"):
         await ctx.defer()
         mode = flags.mode
 
-        client, user = await OsuUserConverter().convert(ctx, username, mode)
+        client, user = await OsuUserConverter().convert(
+            ctx,
+            username,
+            mode,
+            flags.lazer,
+        )
 
         safe_username = escape_markdown(user.username)
 
@@ -740,7 +755,12 @@ class OsuCog(MetadataCog, name="osu!"):
         await ctx.defer()
         mode = flags.mode
 
-        client, user = await OsuUserConverter().convert(ctx, username, mode)
+        client, user = await OsuUserConverter().convert(
+            ctx,
+            username,
+            mode,
+            flags.lazer,
+        )
 
         safe_username = escape_markdown(user.username)
 
