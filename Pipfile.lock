@@ -134,11 +134,11 @@
         },
         "aiosu": {
             "hashes": [
-                "sha256:a524a3047ec2ac6c694081ee6c0773e59af08c213d6c5c00a0bc2a2242f9a478",
-                "sha256:a889170dd49ea3001ce708214bfd3556b0d5534606d9620b6db7ffaafbba58e2"
+                "sha256:572cc74006b30e8bcee43cf791d1967601e4f4251aa14761e54604f3d0cedb00",
+                "sha256:d2c50dccef709c157533849144359054792a7e042e516ffa64f0e4e9ca250a7f"
             ],
             "index": "pypi",
-            "version": "==1.2.4"
+            "version": "==1.3.0"
         },
         "astunparse": {
             "hashes": [
