@@ -15,14 +15,15 @@ if TYPE_CHECKING:
 
 class BaseView(View, abc.ABC):
     async def on_timeout(self) -> None:
-        for child in self.children:
-            child.disabled = True
+        self.clear_items()
+        self.stop()
         await self.message.edit(view=self)
 
     @classmethod
     async def start(cls, ctx: commands.Context, *args: Any, **kwargs: Any) -> View:
         _file = kwargs.pop("file", None)
-        view = cls(ctx, *args, **kwargs)
+        timeout = kwargs.pop("timeout", 300)
+        view = cls(ctx, *args, timeout=timeout, **kwargs)
         await view.initial.prepare()
         view.message = await ctx.send(
             embed=view.initial,

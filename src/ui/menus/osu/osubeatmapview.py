@@ -3,7 +3,6 @@
 ###
 from __future__ import annotations
 
-from collections import deque
 from typing import TYPE_CHECKING
 
 from discord import Embed
@@ -43,39 +42,89 @@ class OsuBeatmapView(BaseView):
 
         super().__init__(*args, **kwargs)
 
-        embeds = _split_beatmapset_to_pages(self.ctx, beatmapset)
-        self._embeds = embeds
-        self._queue = deque(embeds)
-        self._initial = embeds[0]
-        self._len = len(embeds)
+        self._embeds = _split_beatmapset_to_pages(self.ctx, beatmapset)
+        self._current = 0
 
-        for i, embed in enumerate(embeds):
+        for i, embed in enumerate(self._embeds):
             embed.set_footer(text=f"Difficulty {i+1}/{self._len}")
 
         if self._len <= 1:
-            for button in self.children:
-                self.remove_item(button)
+            self._stop()
 
-    @button(emoji="\N{LEFTWARDS BLACK ARROW}")
-    async def previous_embed(
+    @property
+    def initial(self) -> OsuBeatmapEmbed:
+        return self._embeds[0]
+
+    @property
+    def _len(self) -> int:
+        return len(self._embeds)
+
+    def _get_embed(self) -> OsuBeatmapEmbed:
+        return self._embeds[self._current]
+
+    def _previous_embed(self) -> None:
+        self._current = (self._current - 1) % self._len
+
+    def _next_embed(self) -> None:
+        self._current = (self._current + 1) % self._len
+
+    def _stop(self) -> None:
+        self.clear_items()
+        self.stop()
+
+    @button(emoji="\N{BLACK LEFT-POINTING DOUBLE TRIANGLE}")
+    async def first_embed_button(
         self,
         interaction: Interaction,
         button: button.Button,
     ) -> None:
-        self._queue.rotate(1)
-        embed = self._queue[0]
-        await self.bot.beatmap_service.add(self.message.channel.id, embed.beatmap)
+        self._current = 0
+        embed = self._get_embed()
         await embed.prepare()
         await interaction.response.edit_message(embed=embed)
+        await self.bot.beatmap_service.add(self.message.channel.id, embed.beatmap)
+
+    @button(emoji="\N{LEFTWARDS BLACK ARROW}")
+    async def previous_embed_button(
+        self,
+        interaction: Interaction,
+        button: button.Button,
+    ) -> None:
+        self._previous_embed()
+        embed = self._get_embed()
+        await embed.prepare()
+        await interaction.response.edit_message(embed=embed)
+        await self.bot.beatmap_service.add(self.message.channel.id, embed.beatmap)
+
+    @button(emoji="\N{BLACK SQUARE FOR STOP}")
+    async def stop_button(
+        self,
+        interaction: Interaction,
+        button: button.Button,
+    ) -> None:
+        self._stop()
+        await interaction.response.edit_message(view=self)
 
     @button(emoji="\N{BLACK RIGHTWARDS ARROW}")
-    async def next_embed(self, interaction: Interaction, button: button.Button) -> None:
-        self._queue.rotate(-1)
-        embed = self._queue[0]
-        await self.bot.beatmap_service.add(self.message.channel.id, embed.beatmap)
+    async def next_embed_button(
+        self,
+        interaction: Interaction,
+        button: button.Button,
+    ) -> None:
+        self._next_embed()
+        embed = self._get_embed()
         await embed.prepare()
         await interaction.response.edit_message(embed=embed)
+        await self.bot.beatmap_service.add(self.message.channel.id, embed.beatmap)
 
-    @property
-    def initial(self) -> Embed:
-        return self._initial
+    @button(emoji="\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}")
+    async def last_embed_button(
+        self,
+        interaction: Interaction,
+        button: button.Button,
+    ) -> None:
+        self._current = self._len - 1
+        embed = self._get_embed()
+        await embed.prepare()
+        await interaction.response.edit_message(embed=embed)
+        await self.bot.beatmap_service.add(self.message.channel.id, embed.beatmap)
