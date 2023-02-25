@@ -12,7 +12,7 @@ from classes.cog import MetadataCog
 from common.helpers import get_beatmap_from_text
 from common.helpers import get_user_from_text
 from discord.ext import commands
-from ui.embeds.osu import OsuProfileEmbed
+from ui.embeds.osu import OsuProfileCompactEmbed
 from ui.menus.osu import OsuBeatmapView
 
 if TYPE_CHECKING:
@@ -74,7 +74,9 @@ class OsuListeners(
         client = await self.bot.stable_storage.app_client
         user = await client.get_user(user_id)
 
-        await message.channel.send(embed=OsuProfileEmbed(ctx, user, user.playmode))
+        await message.channel.send(
+            embed=OsuProfileCompactEmbed(ctx, user, user.playmode),
+        )
 
 
 async def setup(bot: Sunny) -> None:

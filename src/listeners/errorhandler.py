@@ -79,6 +79,10 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
             )
 
         elif isinstance(error, aiosu.exceptions.APIException):
+            logger.exception(
+                f"An osu! API error has occured in command {command}: ",
+                exc_info=error,
+            )
             return await send_message("An osu! API error has occured.")
 
         elif isinstance(error, aiosu.exceptions.InvalidClientRequestedError):

@@ -34,28 +34,6 @@ class OwnerCog(MetadataCog, name="Owner", hidden=True):
         await ctx.send("Goodbye!")
         await self.bot.close()
 
-    # TODO rewrite with subcommands
-    # @commands.is_owner()
-    # @commands.command(name="rebuild", hidden=True)
-    # async def rebuild_command(
-    #     self, ctx: commands.Context, *, args: str = "normal"
-    # ) -> None:
-    #     """Rebuilds the database. (Owner-only)"""
-    #     start_time = time.perf_counter()
-    #     await self.bot.mongoIO.wipe()
-    #     servers = list(self.bot.guilds)
-    #     args = args.lower()
-    #     for x in range(len(servers)):
-    #         if args == "debug":
-    #             print(f"Adding server {servers[x-1].name}")
-    #         await self.bot.mongoIO.add_guild(servers[x - 1])
-    #         for member in servers[x - 1].members:
-    #             if not member.bot and not await self.bot.mongoIO.user_exists(member):
-    #                 if args == "debug":
-    #                     print(f"Adding member {member.name}")
-    #                 await self.bot.mongoIO.add_user(member)
-    #     await ctx.send(f"Done rebuilding. {time.perf_counter() - start_time}s")
-
     @commands.is_owner()
     @commands.command(
         name="blacklist",

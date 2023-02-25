@@ -10,8 +10,8 @@ from repository.user import UserRepository
 class UserService:
     """Service for user data."""
 
-    def __init__(self, user_repository: UserRepository):
-        self.user_repository = user_repository
+    def __init__(self, repository: UserRepository):
+        self.repository = repository
 
     async def get_one(self, user_id: int) -> User:
         """Get user data from database.
@@ -22,35 +22,35 @@ class UserService:
         Returns:
             User: User data.
         """
-        return await self.user_repository.get_one(user_id)
+        return await self.repository.get_one(user_id)
 
     async def get_many(self) -> list[User]:
         """Get all users from database.
         Returns:
             list[User]: List of users.
         """
-        return await self.user_repository.get_many()
+        return await self.repository.get_many()
 
     async def add(self, user: User) -> None:
         """Add new user to database.
         Args:
             user (User): User data.
         """
-        await self.user_repository.add(user)
+        await self.repository.add(user)
 
     async def update(self, user: User) -> None:
         """Update user data.
         Args:
             user (User): User data.
         """
-        await self.user_repository.update(user)
+        await self.repository.update(user)
 
     async def delete(self, user_id: int) -> None:
         """Delete user data.
         Args:
             user_id (int): User ID.
         """
-        await self.user_repository.delete(user_id)
+        await self.repository.delete(user_id)
 
     async def blacklist(self, user_id: int) -> None:
         """Blacklist user.

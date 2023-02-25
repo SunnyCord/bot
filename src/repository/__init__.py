@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from .beatmap import BeatmapRepository
+from .graph import GraphRepository
 from .guild_settings import GuildSettingsRepository
 from .osu import OsuRepository
 from .stats import StatsRepository

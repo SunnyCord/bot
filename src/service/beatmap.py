@@ -10,8 +10,8 @@ from repository.beatmap import BeatmapRepository
 class BeatmapService:
     """Service for channel beatmap data."""
 
-    def __init__(self, beatmap_repository: BeatmapRepository):
-        self.beatmap_repository = beatmap_repository
+    def __init__(self, repository: BeatmapRepository):
+        self.repository = repository
 
     async def get_one(self, channel_id: int) -> Beatmap:
         """Get beatmap data from database.
@@ -22,14 +22,14 @@ class BeatmapService:
         Returns:
             Beatmap: Beatmap data.
         """
-        return await self.beatmap_repository.get_one(channel_id)
+        return await self.repository.get_one(channel_id)
 
     async def get_many(self) -> list[Beatmap]:
         """Get all beatmaps from database.
         Returns:
             list[Beatmap]: List of beatmaps.
         """
-        return await self.beatmap_repository.get_many()
+        return await self.repository.get_many()
 
     async def add(self, channel_id: int, beatmap: Beatmap) -> None:
         """Add new beatmap to database.
@@ -37,7 +37,7 @@ class BeatmapService:
             channel_id (int): Channel ID.
             beatmap (Beatmap): Beatmap data.
         """
-        await self.beatmap_repository.add(channel_id, beatmap)
+        await self.repository.add(channel_id, beatmap)
 
     async def update(self, channel_id: int, beatmap: Beatmap) -> None:
         """Update beatmap data.
@@ -45,11 +45,11 @@ class BeatmapService:
             channel_id (int): Channel ID.
             beatmap (Beatmap): Beatmap data.
         """
-        await self.beatmap_repository.update(channel_id, beatmap)
+        await self.repository.update(channel_id, beatmap)
 
     async def delete(self, channel_id: int) -> None:
         """Delete beatmap data.
         Args:
             channel_id (int): Channel ID.
         """
-        await self.beatmap_repository.delete(channel_id)
+        await self.repository.delete(channel_id)

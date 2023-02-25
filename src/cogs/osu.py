@@ -9,6 +9,7 @@ import aiosu
 import discord
 from classes.cog import MetadataCog
 from classes.cog import MetadataGroupCog
+from common import graphing
 from common import humanizer
 from common.crypto import encode_discord_id
 from common.helpers import get_beatmap_from_reference
@@ -18,7 +19,8 @@ from discord.ext import commands
 from discord.utils import escape_markdown
 from ui.embeds.osu import OsuDifficultyEmbed
 from ui.embeds.osu import OsuLinkEmbed
-from ui.embeds.osu import OsuProfileEmbed
+from ui.embeds.osu import OsuProfileCompactEmbed
+from ui.embeds.osu import OsuProfileExtendedEmbed
 from ui.embeds.osu import OsuScoreSingleEmbed
 from ui.menus.osu import OsuScoresView
 
@@ -32,6 +34,11 @@ class OsuProfileFlags(commands.FlagConverter, prefix="-"):  # type: ignore
         aliases=["l"],
         description="Whether to use the lazer client",
         default=None,
+    )
+    extended: bool = commands.Flag(
+        aliases=["e"],
+        description="Show extended stats",
+        default=False,
     )
 
 
@@ -146,7 +153,7 @@ class OsuUserConverter(commands.Converter):
             client = await client_storage.app_client
             return (client, await client.get_user(raw_user, **params))
 
-        client = await client_storage.get_client(id=ctx.author.id)
+        client = await client_storage.get_client(id=member.id)
         return (client, await client.get_me(**params))
 
 
@@ -157,22 +164,36 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):
 
     args_description = {
         "user": "Discord/osu! username or mention",
-        "lazer": "Whether to use the lazer client",
     }
 
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
+
+    async def get_graph(self, user: aiosu.models.User):
+        try:
+            graph = await self.bot.graph_service.get_one(user.id)
+        except ValueError:
+            graph = await self.bot.run_blocking(graphing.plot_rank_graph, user)
+            await self.bot.graph_service.add(user.id, graph)
+        return graph
 
     async def osu_profile_command(
         self,
         ctx: commands.Context,
         username: str | None,
         mode: aiosu.models.Gamemode,
-        lazer: bool,
+        flags: OsuProfileFlags,
     ) -> None:
         await ctx.defer()
+        lazer = flags.lazer
         _, user = await OsuUserConverter().convert(ctx, username, mode, lazer)
-        await ctx.send(embed=OsuProfileEmbed(ctx, user, mode, lazer))
+        if flags.extended:
+            embed = OsuProfileExtendedEmbed(ctx, user, mode, lazer)
+        else:
+            embed = OsuProfileCompactEmbed(ctx, user, mode, lazer)
+        graph = await self.get_graph(user)
+        embed.set_image(url="attachment://rank_graph.png")
+        await ctx.send(embed=embed, file=discord.File(graph, "rank_graph.png"))
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
@@ -187,8 +208,7 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):
         *,
         flags: OsuProfileFlags,
     ) -> None:
-        lazer = flags.lazer
-        await self.osu_profile_command(ctx, user, aiosu.models.Gamemode.STANDARD, lazer)
+        await self.osu_profile_command(ctx, user, aiosu.models.Gamemode.STANDARD, flags)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
@@ -203,8 +223,7 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):
         *,
         flags: OsuProfileFlags,
     ) -> None:
-        lazer = flags.lazer
-        await self.osu_profile_command(ctx, user, aiosu.models.Gamemode.MANIA, lazer)
+        await self.osu_profile_command(ctx, user, aiosu.models.Gamemode.MANIA, flags)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
@@ -219,8 +238,7 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):
         *,
         flags: OsuProfileFlags,
     ) -> None:
-        lazer = flags.lazer
-        await self.osu_profile_command(ctx, user, aiosu.models.Gamemode.TAIKO, lazer)
+        await self.osu_profile_command(ctx, user, aiosu.models.Gamemode.TAIKO, flags)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
@@ -235,8 +253,7 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):
         *,
         flags: OsuProfileFlags,
     ) -> None:
-        lazer = flags.lazer
-        await self.osu_profile_command(ctx, user, aiosu.models.Gamemode.CTB, lazer)
+        await self.osu_profile_command(ctx, user, aiosu.models.Gamemode.CTB, flags)
 
 
 class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):
@@ -405,7 +422,7 @@ class OsuCog(MetadataCog, name="osu!"):
     ) -> None:
         await ctx.defer()
         mode = flags.mode
-        client, user = await OsuUserConverter().convert(ctx, username, mode, lazer=True)
+        client, user = await OsuUserConverter().convert(ctx, username, mode, True)
 
         safe_username = escape_markdown(user.username)
 

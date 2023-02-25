@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import os
+from functools import partial
 from typing import TYPE_CHECKING
 
 import aiosu
@@ -17,12 +18,14 @@ from models.config import ConfigList
 from motor.motor_asyncio import AsyncIOMotorClient
 from redis.asyncio import Redis
 from repository import BeatmapRepository
+from repository import GraphRepository
 from repository import GuildSettingsRepository
 from repository import OsuRepository
 from repository import StatsRepository
 from repository import UserPreferencesRepository
 from repository import UserRepository
 from service import BeatmapService
+from service import GraphService
 from service import GuildSettingsService
 from service import StatsService
 from service import UserPreferencesService
@@ -30,6 +33,7 @@ from service import UserService
 
 if TYPE_CHECKING:
     from typing import Any
+    from typing import Callable
 
 
 MODULE_FOLDERS = ["listeners", "cogs", "tasks"]
@@ -136,18 +140,24 @@ class Sunny(commands.AutoShardedBot):
         self.redis_pubsub = self.redis_client.pubsub(ignore_subscribe_messages=True)
 
     def setup_services(self) -> None:
-        logger.info("Setting up services...")
+        logger.info("Setting up repositories...")
+
         beatmap_repo = BeatmapRepository(self.redis_client)
         stats_repo = StatsRepository(self.redis_client)
+        graph_repo = GraphRepository(self.redis_client)
         user_repo = UserRepository(self.database)
         settings_repo = GuildSettingsRepository(self.database)
         osu_repo = OsuRepository(self.database)
         user_prefs_repo = UserPreferencesRepository(self.database)
+
+        logger.info("Setting up services...")
+
         self.beatmap_service = BeatmapService(beatmap_repo)
         self.user_service = UserService(user_repo)
         self.stats_service = StatsService(stats_repo)
         self.guild_settings_service = GuildSettingsService(settings_repo)
         self.user_prefs_service = UserPreferencesService(user_prefs_repo)
+        self.graph_service = GraphService(graph_repo)
         self.client_v1 = aiosu.v1.Client(self.config.osuAPI)
         self.stable_storage = aiosu.v2.ClientStorage(
             token_repository=osu_repo,
@@ -198,6 +208,9 @@ class Sunny(commands.AutoShardedBot):
         if user.id in self.config.owners:
             return True
         return await super().is_owner(user)
+
+    async def run_blocking(self, func: Callable, *args: Any, **kwargs: Any) -> Any:
+        return await self.loop.run_in_executor(None, partial(func, *args, **kwargs))
 
     def run(self, **kwargs: Any) -> None:
         super().run(self.config.token, log_handler=None, **kwargs)

@@ -10,8 +10,8 @@ from repository.guild_settings import GuildSettingsRepository
 class GuildSettingsService:
     """Guild Settings Service"""
 
-    def __init__(self, guild_settings_repository: GuildSettingsRepository) -> None:
-        self.guild_settings_repository = guild_settings_repository
+    def __init__(self, repository: GuildSettingsRepository) -> None:
+        self.repository = repository
 
     async def get_one(self, guild_id: int) -> GuildSettings:
         """Get guild settings from database.
@@ -25,7 +25,7 @@ class GuildSettingsService:
         Returns:
             GuildSettings: Guild settings.
         """
-        return await self.guild_settings_repository.get_one(guild_id)
+        return await self.repository.get_one(guild_id)
 
     async def get_many(self) -> list[GuildSettings]:
         """Get all guild settings from database.
@@ -33,7 +33,7 @@ class GuildSettingsService:
         Returns:
             list[GuildSettings]: List of guild settings.
         """
-        return await self.guild_settings_repository.get_many()
+        return await self.repository.get_many()
 
     async def add(self, guild_settings: GuildSettings) -> None:
         """Add new guild settings to database.
@@ -41,7 +41,7 @@ class GuildSettingsService:
         Args:
             guild_settings (GuildSettings): Guild settings.
         """
-        await self.guild_settings_repository.add(guild_settings)
+        await self.repository.add(guild_settings)
 
     async def update(self, guild_settings: GuildSettings) -> None:
         """Update guild settings.
@@ -49,7 +49,7 @@ class GuildSettingsService:
         Args:
             guild_settings (GuildSettings): Guild settings.
         """
-        await self.guild_settings_repository.update(guild_settings)
+        await self.repository.update(guild_settings)
 
     async def delete(self, guild_id: int) -> None:
         """Delete guild settings.
@@ -57,7 +57,7 @@ class GuildSettingsService:
         Args:
             guild_id (int): Guild ID.
         """
-        await self.guild_settings_repository.delete(guild_id)
+        await self.repository.delete(guild_id)
 
     async def create(self, guild_id: int) -> GuildSettings:
         """Create default settings for guild.
