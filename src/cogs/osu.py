@@ -761,7 +761,7 @@ class OsuCog(MetadataCog, name="osu!"):
         bonus = total_pp_with_bonus - initial
 
         await ctx.send(
-            f"{safe_username} has a bonus of **{bonus:.2f}pp** from playcount.",
+            f"{safe_username} has a bonus of **{bonus:.2f}pp** from submitted scores.",
         )
 
     @commands.cooldown(1, 1, commands.BucketType.user)
