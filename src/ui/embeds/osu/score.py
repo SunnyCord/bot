@@ -7,6 +7,8 @@ from inspect import cleandoc
 from typing import TYPE_CHECKING
 
 from aiosu.models import LazerScore
+from aiosu.models import Mod
+from aiosu.models import Score
 from aiosu.utils.performance import get_calculator
 from discord.utils import escape_markdown
 from ui.embeds.generic import ContextEmbed
@@ -18,15 +20,46 @@ if TYPE_CHECKING:
     from discord import commands
 
 
+def _get_lazer_speed_modifier(mod):
+    speed_change = mod.settings.get("speed_change")
+    if speed_change:
+        return float(speed_change)
+    elif mod.acronym in ["DT", "NC"]:
+        return 1.5
+    elif mod.acronym in ["HT", "DC"]:
+        return 0.75
+    else:
+        return 1.0
+
+
+def _get_score_bpm(score: aiosu.models.Score) -> str:
+    speed_modifier = 1.0
+
+    if isinstance(score, LazerScore):
+        for mod in score.mods:
+            speed_modifier = _get_lazer_speed_modifier(mod)
+            if speed_modifier != 1.0:
+                break
+    else:
+        if score.mods & (Mod.DoubleTime | Mod.Nightcore):
+            speed_modifier = 1.5
+        elif score.mods & Mod.HalfTime:
+            speed_modifier = 0.75
+
+    return f"{score.beatmap.bpm * speed_modifier:.0f}" if score.beatmap.bpm else "?"
+
+
 def _score_to_embed_strs(
-    score: aiosu.models.Score,
+    score: Score,
     include_user: bool = False,
     difficulty_attrs: aiosu.models.BeatmapDifficultyAttributes = None,
 ) -> dict[str, str]:
     beatmap, beatmapset = score.beatmap, score.beatmapset
+
     name = escape_markdown(
         f"{beatmapset.artist} - {beatmapset.title} [{beatmap.version}]",
     )
+    statistics = score.statistics
     max_combo = beatmap.max_combo
     pp = score.pp
 
@@ -37,8 +70,13 @@ def _score_to_embed_strs(
             calculator_type = get_calculator(score.mode)
             pp = calculator_type(difficulty_attrs).calculate(score).total
 
-    weight = ""
-    score_text = ""
+    weight = "" if not score.weight else f" (weight {score.weight.percentage/100:.2f})"
+    score_text = f"[score]({score.score_url}) | " if score.score_url else ""
+    user_text = f"[user]({score.user.url}) | " if include_user else ""
+
+    fail_text = "" if score.rank != "F" else f" ({score.completion:.2f}%)"
+    bpm_text = _get_score_bpm(score)
+
     mods_text = score.mods
     mods_settings_text = ""
     if isinstance(score, LazerScore):
@@ -49,23 +87,12 @@ def _score_to_embed_strs(
                 mods_settings_text += f"{key.replace('_', ' ')}: {value}\n"
         mods_settings_text = mods_settings_text.rstrip()
 
-    if score.weight:
-        weight += f" (weight {score.weight.percentage/100:.2f})"
-    if score_url := score.score_url:
-        score_text += f"[score]({score_url}) | "
-    if include_user:
-        score_text += f"[user](https://osu.ppy.sh/users/{score.user_id}) | "
-
-    fail_text = ""
-    if score.rank == "F":
-        fail_text = f" ({score.completion:.2f}%)"
-
     value = cleandoc(
         f"""**{pp:.2f}pp**{weight}, accuracy: **{score.accuracy*100:.2f}%**, combo: **{score.max_combo}x/{max_combo}x**
-            score: **{score.score}** [**{score.statistics.count_300}**/**{score.statistics.count_100}**/**{score.statistics.count_50}**/**{score.statistics.count_miss}**]
-            mods: {mods_text} | {ScoreRankIcon[score.rank]}{fail_text}{mods_settings_text}
+            score: **{score.score}** [**{statistics.count_300}**/**{statistics.count_100}**/**{statistics.count_50}**/**{statistics.count_miss}**]
+            bpm: {bpm_text} | mods: {mods_text} | {ScoreRankIcon[score.rank]}{fail_text}{mods_settings_text}
             <t:{score.created_at.timestamp():.0f}:R>
-            {score_text}[map]({beatmap.url})
+            {score_text}{user_text}[map]({beatmap.url})
         """,
     )
     return {"name": name, "value": value}
@@ -75,7 +102,7 @@ class OsuScoreSingleEmbed(ContextEmbed):
     def __init__(
         self,
         ctx: commands.Context,
-        score: aiosu.models.Score,
+        score: Score,
         title: str = None,
         *args: Any,
         **kwargs: Any,
@@ -116,7 +143,7 @@ class OsuScoreMultipleEmbed(ContextEmbed):
     def __init__(
         self,
         ctx: commands.Context,
-        scores: list[aiosu.models.Score],
+        scores: list[Score],
         same_beatmap: bool = False,
         *args: Any,
         **kwargs: Any,
