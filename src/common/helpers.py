@@ -63,4 +63,6 @@ def get_beatmap_from_reference(reference: MessageReference) -> dict[str, int | N
 
 def get_user_from_text(text):
     if match := user_link_rx.match(text):
-        return match.group("userid")
+        lazer = match.group("domain") == "lazer"
+        return match.group("userid"), lazer
+    return None, None
