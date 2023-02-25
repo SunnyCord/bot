@@ -31,6 +31,13 @@ class OsuListeners(
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
+        if (
+            message.guild
+            and not await self.bot.guild_settings_service.get_listener_status(
+                message.guild.id,
+            )
+        ):
+            return
         await self.beatmap_listener(message)
         await self.user_listener(message)
 

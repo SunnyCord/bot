@@ -9,3 +9,4 @@ from pydantic import BaseModel
 class GuildSettings(BaseModel):
     guild_id: int
     prefix: str = ""
+    use_listeners: bool = True

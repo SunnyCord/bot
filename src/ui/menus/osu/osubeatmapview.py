@@ -52,6 +52,10 @@ class OsuBeatmapView(BaseView):
         for i, embed in enumerate(embeds):
             embed.set_footer(text=f"Difficulty {i+1}/{self._len}")
 
+        if self._len <= 1:
+            for button in self.children:
+                self.remove_item(button)
+
     @button(emoji="\N{LEFTWARDS BLACK ARROW}")
     async def previous_embed(
         self,

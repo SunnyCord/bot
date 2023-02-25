@@ -46,6 +46,18 @@ class Settings(MetadataCog):
         await self.bot.guild_settings_service.set_prefix(ctx.guild.id, prefix)
         await ctx.send(f"Prefix has been set to `{prefix}`.")
 
+    @commands.hybrid_command(
+        name="togglelisteners",
+        description="Toggles message listeners for the server.",
+    )
+    @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def toggle_listeners_command(self, ctx: commands.Context) -> None:
+        listener = await self.bot.guild_settings_service.toggle_listener(ctx.guild.id)
+        await ctx.send(
+            f"Message listeners have been {'enabled' if listener else 'disabled'}.",
+        )
+
 
 async def setup(bot: Sunny) -> None:
     await bot.add_cog(Settings(bot))

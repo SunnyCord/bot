@@ -115,3 +115,36 @@ class GuildSettingsService:
 
         settings.prefix = ""
         await self.update(settings)
+
+    async def get_listener_status(self, guild_id: int) -> bool:
+        """Get listener status.
+
+        Args:
+            guild_id (int): Guild ID.
+
+        Returns:
+            bool: Listener status.
+        """
+        try:
+            settings = await self.get_one(guild_id)
+            return settings.use_listeners
+        except ValueError:
+            return True
+
+    async def toggle_listener(self, guild_id: int) -> bool:
+        """Toggle listener status.
+
+        Args:
+            guild_id (int): Guild ID.
+
+        Returns:
+            bool: Listener status.
+        """
+        try:
+            settings = await self.get_one(guild_id)
+        except ValueError:
+            settings = await self.create(guild_id)
+
+        settings.use_listeners = not settings.use_listeners
+        await self.update(settings)
+        return settings.use_listeners

@@ -55,6 +55,7 @@ class OsuScoresView(BaseView):
         self._queue = deque(embeds)
         self._initial = embeds[0]
         self._len = len(embeds)
+
         for i, embed in enumerate(embeds):
             embed.set_thumbnail(url=user.avatar_url)
             embed.set_author(
@@ -63,6 +64,10 @@ class OsuScoresView(BaseView):
                 icon_url=GamemodeIcon[mode.name].icon,
             )
             embed.set_footer(text=f"Page {i+1}/{self._len}")
+
+        if self._len <= 1:
+            for button in self.children:
+                self.remove_item(button)
 
     @button(emoji="\N{LEFTWARDS BLACK ARROW}")
     async def previous_embed(
