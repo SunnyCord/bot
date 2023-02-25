@@ -28,10 +28,10 @@ if TYPE_CHECKING:
 
 
 class OsuProfileFlags(commands.FlagConverter, prefix="-"):  # type: ignore
-    lazer: bool = commands.Flag(
+    lazer: bool | None = commands.Flag(
         aliases=["l"],
         description="Whether to use the lazer client",
-        default=False,
+        default=None,
     )
 
 
@@ -46,10 +46,10 @@ class OsuTopFlags(commands.FlagConverter, prefix="-"):  # type: ignore
         description="The position of the score to show",
         default=None,
     )
-    lazer: bool = commands.Flag(
+    lazer: bool | None = commands.Flag(
         aliases=["l"],
         description="Whether to use the lazer client",
-        default=False,
+        default=None,
     )
 
 
@@ -77,10 +77,10 @@ class OsuScoreFlags(commands.FlagConverter):
         description="The osu! mode to search for",
         default=None,
     )
-    lazer: bool = commands.Flag(
+    lazer: bool | None = commands.Flag(
         aliases=["l"],
         description="Whether to use the lazer client",
-        default=False,
+        default=None,
     )
 
 
@@ -105,6 +105,9 @@ class OsuUserConverter(commands.Converter):
         2. Lookup by string
         """
         raw_user, mode, lazer = args
+
+        if lazer is None:
+            lazer = await ctx.bot.user_prefs_service.get_lazer(ctx.author.id)
 
         client_storage = ctx.bot.stable_storage
         if lazer:
@@ -366,6 +369,18 @@ class OsuCog(MetadataCog, name="osu!"):
         )
         await thread.add_user(ctx.author)
         await thread.send(embed=OsuLinkEmbed(ctx, url))
+
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    @commands.hybrid_command(
+        name="lazertoggle",
+        description="Toggles whether osu! commands use lazer stats or not",
+    )
+    async def lazer_toggle_command(
+        self,
+        ctx: commands.Context,
+    ) -> None:
+        lazer = await self.bot.user_prefs_service.toggle_lazer(ctx.author.id)
+        await ctx.send(f"{'Enabled' if lazer else 'Disabled'} lazer stats.")
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(

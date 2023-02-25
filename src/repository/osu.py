@@ -49,7 +49,7 @@ class OsuRepository(BaseTokenRepository):
             discord_id (int): Discord ID.
             token (OAuthToken): osu! token.
         """
-        token_dto = TokenDTO(discord_id=discord_id, token=token)
+        token_dto = TokenDTO(discord_id=discord_id, token=token, osu_id=token.owner_id)
         await self.database.tokens.insert_one(token_dto.dict())
 
     async def update(self, session_id: int, token: OAuthToken) -> None:

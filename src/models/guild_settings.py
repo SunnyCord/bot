@@ -6,6 +6,6 @@ from __future__ import annotations
 from pydantic import BaseModel
 
 
-class GuildSetting(BaseModel):
+class GuildSettings(BaseModel):
     guild_id: int
-    prefix: str | None
+    prefix: str = ""

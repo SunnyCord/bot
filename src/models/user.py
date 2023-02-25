@@ -13,5 +13,6 @@ class User(BaseModel):
 
 
 class TokenDTO(BaseModel):
+    osu_id: int
     discord_id: int
     token: OAuthToken

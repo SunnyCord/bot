@@ -17,13 +17,15 @@ from models.config import ConfigList
 from motor.motor_asyncio import AsyncIOMotorClient
 from redis.asyncio import Redis
 from repository import BeatmapRepository
+from repository import GuildSettingsRepository
 from repository import OsuRepository
-from repository import SettingsRepository
 from repository import StatsRepository
+from repository import UserPreferencesRepository
 from repository import UserRepository
 from service import BeatmapService
-from service import SettingsService
+from service import GuildSettingsService
 from service import StatsService
+from service import UserPreferencesService
 from service import UserService
 
 if TYPE_CHECKING:
@@ -35,7 +37,18 @@ MODULE_FOLDERS = ["listeners", "cogs", "tasks"]
 
 async def _get_prefix(bot: Sunny, message: discord.Message) -> list[str]:
     """A callable Prefix for our bot. This also has the ability to ignore certain messages by passing an empty string."""
-    return commands.when_mentioned_or(*bot.config.command_prefixes)(bot, message)
+    if not message.guild:
+        return bot.config.command_prefixes
+
+    prefix = await bot.guild_settings_service.get_prefix(message.guild.id)
+
+    if not prefix:
+        return commands.when_mentioned_or(*bot.config.command_prefixes)(bot, message)
+
+    return commands.when_mentioned_or(prefix, *bot.config.command_prefixes)(
+        bot,
+        message,
+    )
 
 
 def _get_intents() -> discord.Intents:
@@ -127,12 +140,14 @@ class Sunny(commands.AutoShardedBot):
         beatmap_repo = BeatmapRepository(self.redis_client)
         stats_repo = StatsRepository(self.redis_client)
         user_repo = UserRepository(self.database)
-        settings_repo = SettingsRepository(self.database)
+        settings_repo = GuildSettingsRepository(self.database)
         osu_repo = OsuRepository(self.database)
+        user_prefs_repo = UserPreferencesRepository(self.database)
         self.beatmap_service = BeatmapService(beatmap_repo)
         self.user_service = UserService(user_repo)
         self.stats_service = StatsService(stats_repo)
-        self.settings_service = SettingsService(settings_repo)
+        self.guild_settings_service = GuildSettingsService(settings_repo)
+        self.user_prefs_service = UserPreferencesService(user_prefs_repo)
         self.client_v1 = aiosu.v1.Client(self.config.osuAPI)
         self.stable_storage = aiosu.v2.ClientStorage(
             token_repository=osu_repo,
@@ -163,12 +178,12 @@ class Sunny(commands.AutoShardedBot):
     async def on_guild_join(self, guild: discord.Guild) -> None:
         logger.info(f"Joined guild {guild.name} (ID: {guild.id})")
         await self.stats_service.set_guild_count(len(self.guilds))
-        await self.settings_service.create(guild.id)
+        await self.guild_settings_service.create(guild.id)
 
     async def on_guild_remove(self, guild: discord.Guild) -> None:
         logger.info(f"Left guild {guild.name} (ID: {guild.id})")
         await self.stats_service.set_guild_count(len(self.guilds))
-        await self.settings_service.delete(guild.id)
+        await self.guild_settings_service.delete(guild.id)
 
     async def on_message(self, message: discord.Message) -> None:
         ignore = not message.guild
