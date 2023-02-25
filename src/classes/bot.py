@@ -134,7 +134,12 @@ class Sunny(commands.AutoShardedBot):
         self.stats_service = StatsService(stats_repo)
         self.settings_service = SettingsService(settings_repo)
         self.client_v1 = aiosu.v1.Client(self.config.osuAPI)
-        self.client_storage = aiosu.v2.ClientStorage(
+        self.stable_storage = aiosu.v2.ClientStorage(
+            token_repository=osu_repo,
+            client_secret=self.config.osuAPIv2.client_secret,
+            client_id=self.config.osuAPIv2.client_id,
+        )
+        self.lazer_storage = aiosu.v2.ClientStorage(
             token_repository=osu_repo,
             client_secret=self.config.osuAPIv2.client_secret,
             client_id=self.config.osuAPIv2.client_id,

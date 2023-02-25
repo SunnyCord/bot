@@ -51,15 +51,19 @@ class OsuProfileEmbed(ContextEmbed):
         *args: Any,
         **kwargs: Any,
     ) -> None:
+        peak_str = ""
+        if user.rank_highest:
+            peak_str = f" (peaked #{user.rank_highest.rank} <t:{user.rank_highest.updated_at.timestamp():.0f}:R>)"
         content = cleandoc(
             f"""
-            > **Rank:** #{user.statistics.global_rank}
+            > **Rank:** #{user.statistics.global_rank}{peak_str}
             > **PP:** {user.statistics.pp}
             > **Accuracy:** {user.statistics.hit_accuracy:.2f}%
             > **Level:** {user.statistics.level.current} ({user.statistics.level.progress:.2f}%)
             > **Playtime:** {seconds_to_text(user.statistics.play_time)}
             > **Playcount:** {user.statistics.play_count}
             > **PP/hour:** {int(user.statistics.pp / user.statistics.play_time * 3600)  if user.statistics.play_time > 0 else 0}
+            > **Average Rank Gain:** {user.rank_history.average_gain:.2f}
             """,
         )
 

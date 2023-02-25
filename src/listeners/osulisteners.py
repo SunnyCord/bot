@@ -42,7 +42,7 @@ class OsuListeners(
             return
 
         ctx = await self.bot.get_context(message)
-        client = await self.bot.client_storage.app_client
+        client = await self.bot.stable_storage.app_client
 
         if beatmapset_id is None:
             beatmap = await client.get_beatmap(beatmap_id)
@@ -71,7 +71,7 @@ class OsuListeners(
 
         ctx = await self.bot.get_context(message)
 
-        client = await self.bot.client_storage.app_client
+        client = await self.bot.stable_storage.app_client
         user = await client.get_user(user_id)
 
         await message.channel.send(embed=OsuProfileEmbed(ctx, user, user.playmode))
