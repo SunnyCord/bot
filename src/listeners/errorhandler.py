@@ -78,6 +78,11 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
                 "Slow down! You are on a %.2fs cooldown." % error.retry_after,
             )
 
+        elif isinstance(error, commands.RangeError):
+            return await send_message(
+                f"Value must be between **{error.minimum}** and **{error.maximum}**.",
+            )
+
         elif isinstance(error, aiosu.exceptions.APIException):
             logger.exception(
                 f"An osu! API error has occured in command {command}: ",
@@ -100,8 +105,9 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
         )
         embed.add_field(
             name="Error:",
-            value=f"{exc}\nIf you can, please open an issue: https://github.com/NiceAesth/Sunny/issues",
+            value=f"{exc}\nIf you can, please open an issue: https://github.com/SunnyCord/bot/issues",
         )
+        # TODO: Error ID, so we can track errors and remove traceback from embed
         embed.set_thumbnail(url="https://i.imgur.com/szL6ReL.png")
         await send_message(embed=embed)
 

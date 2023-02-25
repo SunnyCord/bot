@@ -659,7 +659,7 @@ class OsuCog(MetadataCog, name="osu!"):
     async def osu_whatif_command(
         self,
         ctx: commands.Context,
-        pp: float,
+        pp: commands.Range[float, 0, 10000],
         username: str | None,
         *,
         flags: OsuPPFlags,
