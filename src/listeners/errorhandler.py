@@ -50,15 +50,21 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
         if hasattr(command, "on_error") and not is_slash:
             return
 
-        error = getattr(error, "original", error)
-        if isinstance(
-            error,
-            (commands.CommandInvokeError, app_commands.errors.CommandInvokeError),
-        ):
+        while hasattr(error, "original"):
             error = error.original
 
         if isinstance(error, commands.CommandNotFound):
             return
+
+        elif isinstance(error, commands.BotMissingPermissions):
+            return await send_message(
+                f"I am missing the following permissions: ``{', '.join(error.missing_permissions)}`` for ``{command}``.",
+            )
+
+        elif isinstance(error, commands.MissingPermissions):
+            return await send_message(
+                f"You are missing the following permissions: ``{', '.join(error.missing_permissions)}`` for ``{command}``.",
+            )
 
         elif isinstance(error, discord.errors.Forbidden):
             return await send_message(
@@ -67,11 +73,6 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
 
         elif isinstance(error, commands.DisabledCommand):
             return await send_message(f"``{command}`` has been disabled.")
-
-        elif isinstance(error, commands.CheckFailure):
-            return await send_message(
-                f"You do not have the required permission for ``{command}``.",
-            )
 
         elif isinstance(error, commands.CommandOnCooldown):
             return await send_message(
