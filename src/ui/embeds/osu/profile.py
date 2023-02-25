@@ -115,7 +115,6 @@ class OsuProfileExtendedEmbed(ContextEmbed):
         self.add_field(name="", value=play_content)
 
         playstyle_str = " ".join(user.playstyle)
-        padding = " " * 100 + "\n"
         playstyle_content = cleandoc(
             f"""
             playstyle: **{playstyle_str}**

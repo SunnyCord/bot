@@ -10,7 +10,6 @@ import discord
 from classes import exceptions
 from classes.cog import MetadataCog
 from common.logging import logger
-from discord import app_commands
 from discord.ext import commands
 
 if TYPE_CHECKING:

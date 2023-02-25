@@ -5,7 +5,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from discord import Embed
 from discord import Interaction
 from discord.ui import button
 from ui.embeds.osu import OsuScoreMultipleEmbed
