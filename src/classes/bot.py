@@ -170,6 +170,10 @@ class Sunny(commands.AutoShardedBot):
             client_id=self.config.osuAPIv2.client_id,
             base_url="https://lazer.ppy.sh",
         )
+        self.ordr_client = aiosu.utils.ordr.ordrClient(
+            verification_key=self.config.ordrKey,
+            limiter=(10, 60),
+        )
         self.aes = Fernet(check_aes())
 
     async def setup_hook(self) -> None:

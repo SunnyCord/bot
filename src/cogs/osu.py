@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 import aiosu
 import discord
+from aiosu.utils import ordr
 from classes.cog import MetadataCog
 from classes.cog import MetadataGroupCog
 from common import graphing
@@ -21,6 +22,7 @@ from ui.embeds.osu import OsuDifficultyEmbed
 from ui.embeds.osu import OsuLinkEmbed
 from ui.embeds.osu import OsuProfileCompactEmbed
 from ui.embeds.osu import OsuProfileExtendedEmbed
+from ui.embeds.osu import OsuRenderEmbed
 from ui.embeds.osu import OsuScoreSingleEmbed
 from ui.menus.osu import OsuScoresView
 
@@ -92,6 +94,29 @@ class OsuScoreFlags(commands.FlagConverter):
 
 
 class OsuPPFlags(commands.FlagConverter):
+    mode: aiosu.models.Gamemode | None = commands.Flag(
+        aliases=["m"],
+        description="The osu! mode to search for",
+        default=None,
+    )
+    lazer: bool | None = commands.Flag(
+        aliases=["l"],
+        description="Whether to use the lazer client",
+        default=None,
+    )
+
+
+class OsuRecordFlags(commands.FlagConverter):
+    beatmap_query: str | None = commands.Flag(
+        aliases=["b"],
+        description="URL or ID of the beatmap",
+        default=None,
+    )
+    username: str | None = commands.Flag(
+        aliases=["u"],
+        description="Discord/osu! username or mention",
+        default=None,
+    )
     mode: aiosu.models.Gamemode | None = commands.Flag(
         aliases=["m"],
         description="The osu! mode to search for",
@@ -811,6 +836,115 @@ class OsuCog(MetadataCog, name="osu!"):
         initial = sum(initial_weighted_pps)
 
         await ctx.send(f"{safe_username} has **{initial:.2f}pp** (without bonus pp).")
+
+    async def record_from_file(
+        self,
+        ctx: commands.Context,
+        replay_file: discord.Attachment,
+    ) -> ordr.models.RenderCreateResponse:
+        return await self.bot.ordr_client.create_render(
+            username=ctx.author.name,
+            skin="YUGEN",
+            replay_url=replay_file.url,
+        )
+
+    async def record_from_flags(
+        self,
+        ctx: commands.Context,
+        flags: OsuRecordFlags,
+    ) -> ordr.models.RenderCreateResponse:
+        beatmap_ids = get_beatmap_from_text(flags.beatmap_query)
+
+        beatmap_id = beatmap_ids.get("beatmap_id")
+        if beatmap_id is None:
+            await ctx.send(
+                "You must specify a valid beatmap ID or a beatmap link.",
+            )
+            return
+
+        client, user, _ = await OsuUserConverter().convert(
+            ctx,
+            flags.username,
+            flags.mode,
+            flags.lazer,
+        )
+
+        mode = flags.mode or user.playmode
+
+        scores = await client.get_user_beatmap_scores(
+            user.id,
+            beatmap_id,
+            mode=mode,
+        )
+
+        if not scores:
+            await ctx.send("No scores found on this beatmap.")
+            return
+
+        score = scores[0]
+
+        replay_file = await client.get_score_replay(score.id)
+
+        return await self.bot.ordr_client.create_render(
+            username=ctx.author.name,
+            skin="YUGEN",
+            replay_file=replay_file.read(),
+        )
+
+    @commands.cooldown(1, 30, commands.BucketType.user)
+    @commands.hybrid_command(
+        name="record",
+        description="Records a score",
+    )
+    @app_commands.describe(
+        replay_file="Replay file, if provided other arguments will be ignored",
+    )
+    async def osu_record_command(
+        self,
+        ctx: commands.Context,
+        replay_file: discord.Attachment | None,
+        *,
+        flags: OsuRecordFlags,
+    ) -> None:
+        await ctx.defer()
+
+        client = self.bot.ordr_client
+
+        if replay_file is not None:
+            render = await self.record_from_file(ctx, replay_file)
+        else:
+            render = await self.record_from_flags(ctx, flags)
+
+        message = await ctx.send("Starting render...")
+
+        @client.on_render_added
+        async def render_added(data: dict) -> None:
+            if data["renderID"] == render.render_id:
+                await message.edit(
+                    content=None,
+                    embed=OsuRenderEmbed(ctx, "Rendering...", ""),
+                )
+
+        @client.on_render_progress
+        async def render_progress(data: dict) -> None:
+            if data["renderID"] == render.render_id:
+                await message.edit(
+                    content=None,
+                    embed=OsuRenderEmbed(ctx, data["description"], data["progress"]),
+                )
+
+        @client.on_render_finish
+        async def render_finish(data: dict) -> None:
+            if data["renderID"] == render.render_id:
+                await message.edit(
+                    content=f"Render finished! {data['videoUrl']}",
+                    embed=None,
+                )
+
+        @client.on_render_fail
+        async def render_fail(data: dict) -> None:
+            if data["renderID"] == render.render_id:
+                await message.edit(content=f"Render failed!", embed=None)
 
 
 async def setup(bot: Sunny) -> None:

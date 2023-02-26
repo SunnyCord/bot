@@ -53,6 +53,7 @@ class Config:
     token: str = ""
     osuAPI: str = ""
     osuAPIv2: OsuAPIv2Config = field(default_factory=OsuAPIv2Config)
+    ordrKey: str = ""
     sentry: str = ""
     owners: List[int] = field(default_factory=lambda: [151670779782758400])
     command_prefixes: List[str] = field(default_factory=lambda: ["s."])

@@ -17,6 +17,7 @@
                 "client_secret": "verysecret",
                 "redirect_uri": "http://localhost:8000/callback"
             },
+            "ordrKey": "",
             "sentry": "",
             "owners": [
                 151670779782758400
