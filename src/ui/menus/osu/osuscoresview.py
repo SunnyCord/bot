@@ -48,6 +48,7 @@ class OsuScoresView(BaseView):
         self.ctx = ctx
         self.message = ctx.message
         self.bot = ctx.bot
+        self.author = ctx.author
 
         super().__init__(*args, **kwargs)
 
@@ -66,6 +67,8 @@ class OsuScoresView(BaseView):
 
         if self._len <= 1:
             self._stop()
+        else:
+            self._check_buttons()
 
     @property
     def initial(self) -> OsuScoreMultipleEmbed:
@@ -78,11 +81,23 @@ class OsuScoresView(BaseView):
     def _get_embed(self) -> OsuScoreMultipleEmbed:
         return self._embeds[self._current]
 
+    def _check_buttons(self) -> None:
+        if self._current == 0:
+            self.first_embed_button.disabled = True
+        else:
+            self.first_embed_button.disabled = False
+        if self._current == self._len - 1:
+            self.last_embed_button.disabled = True
+        else:
+            self.last_embed_button.disabled = False
+
     def _previous_embed(self) -> None:
         self._current = (self._current - 1) % self._len
+        self._check_buttons()
 
     def _next_embed(self) -> None:
         self._current = (self._current + 1) % self._len
+        self._check_buttons()
 
     def _stop(self) -> None:
         self.clear_items()
@@ -94,10 +109,16 @@ class OsuScoresView(BaseView):
         interaction: Interaction,
         button: button.Button,
     ) -> None:
+        if interaction.user != self.author:
+            await interaction.response.send_message(
+                "You are not the author of this message.",
+                ephemeral=True,
+            )
+            return
         self._current = 0
         embed = self._get_embed()
         await embed.prepare()
-        await interaction.response.edit_message(embed=embed)
+        await interaction.response.edit_message(embed=embed, view=self)
         await self.bot.beatmap_service.add(
             self.message.channel.id,
             embed.scores[0].beatmap,
@@ -109,10 +130,16 @@ class OsuScoresView(BaseView):
         interaction: Interaction,
         button: button.Button,
     ) -> None:
+        if interaction.user != self.author:
+            await interaction.response.send_message(
+                "You are not the author of this message.",
+                ephemeral=True,
+            )
+            return
         self._previous_embed()
         embed = self._get_embed()
         await embed.prepare()
-        await interaction.response.edit_message(embed=embed)
+        await interaction.response.edit_message(embed=embed, view=self)
         await self.bot.beatmap_service.add(
             self.message.channel.id,
             embed.scores[0].beatmap,
@@ -124,6 +151,12 @@ class OsuScoresView(BaseView):
         interaction: Interaction,
         button: button.Button,
     ) -> None:
+        if interaction.user != self.author:
+            await interaction.response.send_message(
+                "You are not the author of this message.",
+                ephemeral=True,
+            )
+            return
         self._stop()
         await interaction.response.edit_message(view=self)
 
@@ -133,10 +166,16 @@ class OsuScoresView(BaseView):
         interaction: Interaction,
         button: button.Button,
     ) -> None:
+        if interaction.user != self.author:
+            await interaction.response.send_message(
+                "You are not the author of this message.",
+                ephemeral=True,
+            )
+            return
         self._next_embed()
         embed = self._get_embed()
         await embed.prepare()
-        await interaction.response.edit_message(embed=embed)
+        await interaction.response.edit_message(embed=embed, view=self)
         await self.bot.beatmap_service.add(
             self.message.channel.id,
             embed.scores[0].beatmap,
@@ -148,10 +187,16 @@ class OsuScoresView(BaseView):
         interaction: Interaction,
         button: button.Button,
     ) -> None:
+        if interaction.user != self.author:
+            await interaction.response.send_message(
+                "You are not the author of this message.",
+                ephemeral=True,
+            )
+            return
         self._current = self._len - 1
         embed = self._get_embed()
         await embed.prepare()
-        await interaction.response.edit_message(embed=embed)
+        await interaction.response.edit_message(embed=embed, view=self)
         await self.bot.beatmap_service.add(
             self.message.channel.id,
             embed.scores[0].beatmap,

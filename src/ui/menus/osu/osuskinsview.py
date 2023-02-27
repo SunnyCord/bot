@@ -34,8 +34,8 @@ class OsuSkinsView(BaseInteractionView):
         **kwargs: Any,
     ):
         self.interaction = interaction
+        self.author = interaction.user
         self.bot: Sunny = interaction.client
-        self.message = interaction.message
 
         super().__init__(*args, **kwargs)
 
@@ -50,6 +50,8 @@ class OsuSkinsView(BaseInteractionView):
             self.remove_item(self.previous_embed_button)
             self.remove_item(self.next_embed_button)
             self.remove_item(self.last_embed_button)
+        else:
+            self._check_buttons()
 
     @property
     def initial(self) -> OsuSkinEmbed:
@@ -62,11 +64,23 @@ class OsuSkinsView(BaseInteractionView):
     def _get_embed(self) -> OsuSkinEmbed:
         return self._embeds[self._current]
 
+    def _check_buttons(self) -> None:
+        if self._current == 0:
+            self.first_embed_button.disabled = True
+        else:
+            self.first_embed_button.disabled = False
+        if self._current == self._len - 1:
+            self.last_embed_button.disabled = True
+        else:
+            self.last_embed_button.disabled = False
+
     def _previous_embed(self) -> None:
         self._current = (self._current - 1) % self._len
+        self._check_buttons()
 
     def _next_embed(self) -> None:
         self._current = (self._current + 1) % self._len
+        self._check_buttons()
 
     def _stop(self) -> None:
         self.clear_items()
@@ -78,10 +92,16 @@ class OsuSkinsView(BaseInteractionView):
         interaction: Interaction,
         button: button.Button,
     ) -> None:
+        if interaction.user != self.author:
+            await interaction.response.send_message(
+                "You are not the author of this message.",
+                ephemeral=True,
+            )
+            return
         self._current = 0
         embed = self._get_embed()
         await embed.prepare()
-        await interaction.response.edit_message(embed=embed)
+        await interaction.response.edit_message(embed=embed, view=self)
 
     @button(emoji="\N{LEFTWARDS BLACK ARROW}")
     async def previous_embed_button(
@@ -89,10 +109,16 @@ class OsuSkinsView(BaseInteractionView):
         interaction: Interaction,
         button: button.Button,
     ) -> None:
+        if interaction.user != self.author:
+            await interaction.response.send_message(
+                "You are not the author of this message.",
+                ephemeral=True,
+            )
+            return
         self._previous_embed()
         embed = self._get_embed()
         await embed.prepare()
-        await interaction.response.edit_message(embed=embed)
+        await interaction.response.edit_message(embed=embed, view=self)
 
     @button(emoji="\N{WHITE HEAVY CHECK MARK}")
     async def select_skin(
@@ -100,6 +126,12 @@ class OsuSkinsView(BaseInteractionView):
         interaction: Interaction,
         button: button.Button,
     ) -> None:
+        if interaction.user != self.author:
+            await interaction.response.send_message(
+                "You are not the author of this message.",
+                ephemeral=True,
+            )
+            return
         embed = self._get_embed()
         await interaction.response.edit_message(
             content=f"Skin **{embed.skin.presentation_name}** selected!",
@@ -117,10 +149,16 @@ class OsuSkinsView(BaseInteractionView):
         interaction: Interaction,
         button: button.Button,
     ) -> None:
+        if interaction.user != self.author:
+            await interaction.response.send_message(
+                "You are not the author of this message.",
+                ephemeral=True,
+            )
+            return
         self._next_embed()
         embed = self._get_embed()
         await embed.prepare()
-        await interaction.response.edit_message(embed=embed)
+        await interaction.response.edit_message(embed=embed, view=self)
 
     @button(emoji="\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}")
     async def last_embed_button(
@@ -128,7 +166,13 @@ class OsuSkinsView(BaseInteractionView):
         interaction: Interaction,
         button: button.Button,
     ) -> None:
+        if interaction.user != self.author:
+            await interaction.response.send_message(
+                "You are not the author of this message.",
+                ephemeral=True,
+            )
+            return
         self._current = self._len - 1
         embed = self._get_embed()
         await embed.prepare()
-        await interaction.response.edit_message(embed=embed)
+        await interaction.response.edit_message(embed=embed, view=self)

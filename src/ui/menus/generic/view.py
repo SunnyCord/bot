@@ -41,7 +41,7 @@ class BaseInteractionView(View, abc.ABC):
     async def on_timeout(self) -> None:
         self.clear_items()
         self.stop()
-        await self.message.edit(view=self)
+        await self.interaction.edit_original_response(view=self)
 
     @classmethod
     async def start(
