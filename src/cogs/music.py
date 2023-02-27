@@ -132,6 +132,7 @@ class Music(MetadataGroupCog, name="music"):
 
     @commands.hybrid_command(
         name="playing",
+        aliases=["np"],
         description="Shows the current track",
     )
     async def playing_command(self, ctx: commands.Context) -> None:
