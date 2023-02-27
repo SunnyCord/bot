@@ -1,23 +1,17 @@
 {
-    "_ConfigList__comment": "select -> index of config to use (starting from 0)",
     "select": 0,
     "configs": [
         {
-            "redis": {
-                "enable": true,
-                "host": "redis",
-                "port": 6379
-            },
             "log_level": "WARNING",
             "color": 14108179,
             "token": "",
-            "osuAPI": "",
-            "osuAPIv2": {
+            "osu_api": {
+                "api_key": "key_here",
                 "client_id": 1,
-                "client_secret": "verysecret",
-                "redirect_uri": "http://localhost:8000/callback"
+                "client_secret": "secret_here",
+                "redirect_uri": "http://localhost:5000/callback"
             },
-            "ordrKey": "",
+            "ordr_key": "",
             "sentry": "",
             "support_invite": "https://discord.gg/ufHV3T3UPD",
             "owners": [
@@ -26,22 +20,22 @@
             "command_prefixes": [
                 "s."
             ],
+            "redis": {
+                "host": "",
+                "port": 6379
+            },
             "mongo": {
                 "host": "",
                 "database": "sunny",
                 "timeout": 10000
             },
-            "ppAPI": {
-                "host": "https://oldpp.aesth.dev",
-                "secret": "potato"
-            },
             "lavalink": [
                 {
+                    "name": "local",
                     "host": "lavalink",
                     "port": 2333,
                     "password": "youshallnotpass",
-                    "region": "eu",
-                    "name": "local"
+                    "ssl_enabled": false
                 }
             ]
         }

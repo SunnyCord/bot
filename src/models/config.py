@@ -3,73 +3,58 @@
 ###
 from __future__ import annotations
 
-from dataclasses import dataclass
-from dataclasses import field
 from typing import List
 
+import orjson
+from aiosu.models import FrozenModel
 from common.logging import logger
-from dataclasses_json import dataclass_json
+from pydantic import Field
 
 
-@dataclass(frozen=True)
-class RedisConfig:
+class RedisConfig(FrozenModel):
     host: str = ""
     port: int = 6379
 
 
-@dataclass(frozen=True)
-class MongoConfig:
+class MongoConfig(FrozenModel):
     host: str = ""
     database: str = "sunny"
     timeout: int = 10000
 
 
-@dataclass(frozen=True)
-class PPConfig:
-    host: str = "https://oldpp.aesth.dev"
-    secret: str = "potato"
-
-
-@dataclass(frozen=True)
-class LavalinkConfig:
+class LavalinkConfig(FrozenModel):
+    name: str = "local"
     host: str = "lavalink"
     port: int = 2333
     password: str = "youshallnotpass"
     ssl_enabled: bool = False
-    name: str = "local"
 
 
-@dataclass(frozen=True)
-class OsuAPIv2Config:
+class OsuAPIConfig(FrozenModel):
+    api_key: str = "key_here"
     client_id: str = 1
     client_secret: str = "secret_here"
     redirect_uri: str = "http://localhost:5000/callback"
 
 
-@dataclass(frozen=True)
-class Config:
+class Config(FrozenModel):
     log_level: str = "WARNING"
     color: int = 0xD74613
     token: str = ""
-    osuAPI: str = ""
-    osuAPIv2: OsuAPIv2Config = field(default_factory=OsuAPIv2Config)
-    ordrKey: str = ""
+    osu_api: OsuAPIConfig = Field(default_factory=OsuAPIConfig)
+    ordr_key: str = ""
     sentry: str = ""
     support_invite: str = "https://discord.gg/ufHV3T3UPD"
-    owners: List[int] = field(default_factory=lambda: [151670779782758400])
-    command_prefixes: List[str] = field(default_factory=lambda: ["s."])
-    redis: RedisConfig = field(default_factory=RedisConfig)
-    mongo: MongoConfig = field(default_factory=MongoConfig)
-    ppAPI: PPConfig = field(default_factory=PPConfig)
-    lavalink: List[LavalinkConfig] = field(default_factory=lambda: [LavalinkConfig()])
+    owners: List[int] = Field(default_factory=lambda: [151670779782758400])
+    command_prefixes: List[str] = Field(default_factory=lambda: ["s."])
+    redis: RedisConfig = Field(default_factory=RedisConfig)
+    mongo: MongoConfig = Field(default_factory=MongoConfig)
+    lavalink: List[LavalinkConfig] = Field(default_factory=lambda: [LavalinkConfig()])
 
 
-@dataclass_json
-@dataclass(frozen=True)
-class ConfigList:
-    _comment: str = "select -> index of config to use (starting from 0)"
+class ConfigList(FrozenModel):
     select: int = 0
-    configs: List[Config] = field(default_factory=lambda: [Config()])
+    configs: List[Config] = Field(default_factory=lambda: [Config()])
 
     def __get_selected_config(self) -> Config:
         return self.configs[self.select]
@@ -77,20 +62,21 @@ class ConfigList:
     @classmethod
     def _create_config(cls) -> None:
         with open("config.json", "a+") as config_file:
-            fmt = cls().to_json(indent=4)  # type:ignore
-            config_file.write(fmt)
+            base_config_dict = cls().dict()
+            base_config_json = orjson.dumps(
+                base_config_dict,
+                option=orjson.OPT_INDENT_2,
+            ).decode()
+            config_file.write(base_config_json)
             logger.warning(
                 "A config file was not found! Please edit the newly created `config.json` and run again.",
             )
-            config_file.close()
 
     @classmethod
     def get_config(cls) -> Config:
-        with open("config.json") as config_file:
-            config_file.seek(0)
-            data = config_file.read()
-            if data:
-                config_file.close()
-                return cls.from_json(data).__get_selected_config()  # type: ignore
+        try:
+            list = cls.parse_file("config.json")
+            return list.__get_selected_config()
+        except FileNotFoundError:
             cls._create_config()
-            exit()
+            exit(1)

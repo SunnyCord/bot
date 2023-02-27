@@ -165,20 +165,20 @@ class Sunny(commands.AutoShardedBot):
         self.user_prefs_service = UserPreferencesService(user_prefs_repo)
         self.recording_prefs_service = RecordingPreferencesService(recording_prefs_repo)
         self.graph_service = GraphService(graph_repo)
-        self.client_v1 = aiosu.v1.Client(self.config.osuAPI)
+        self.client_v1 = aiosu.v1.Client(self.config.osu_api.api_key)
         self.stable_storage = aiosu.v2.ClientStorage(
             token_repository=osu_repo,
-            client_secret=self.config.osuAPIv2.client_secret,
-            client_id=self.config.osuAPIv2.client_id,
+            client_secret=self.config.osu_api.client_secret,
+            client_id=self.config.osu_api.client_id,
         )
         self.lazer_storage = aiosu.v2.ClientStorage(
             token_repository=osu_repo,
-            client_secret=self.config.osuAPIv2.client_secret,
-            client_id=self.config.osuAPIv2.client_id,
+            client_secret=self.config.osu_api.client_secret,
+            client_id=self.config.osu_api.client_id,
             base_url="https://lazer.ppy.sh",
         )
         self.ordr_client = aiordr.ordrClient(
-            verification_key=self.config.ordrKey,
+            verification_key=self.config.ordr_key,
             limiter=(40, 60),
         )
         self.aes = Fernet(check_aes())
