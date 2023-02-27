@@ -1221,7 +1221,7 @@ class OsuCog(MetadataCog, name="osu!"):
         @client.on_render_fail
         async def render_fail(event: RenderFailEvent) -> None:
             if event.render_id == render.render_id:
-                await message.edit(content=f"Render failed!", embed=None)
+                await message.edit(content="Render failed!", embed=None)
 
 
 async def setup(bot: Sunny) -> None:

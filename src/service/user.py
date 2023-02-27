@@ -3,7 +3,7 @@
 ###
 from __future__ import annotations
 
-from models.user import User
+from models.user import DatabaseUser
 from repository.user import UserRepository
 
 
@@ -13,35 +13,35 @@ class UserService:
     def __init__(self, repository: UserRepository):
         self.repository = repository
 
-    async def get_one(self, user_id: int) -> User:
+    async def get_one(self, user_id: int) -> DatabaseUser:
         """Get user data from database.
         Args:
             user_id (int): User ID.
         Raises:
             ValueError: User not found.
         Returns:
-            User: User data.
+            DatabaseUser: User data.
         """
         return await self.repository.get_one(user_id)
 
-    async def get_many(self) -> list[User]:
+    async def get_many(self) -> list[DatabaseUser]:
         """Get all users from database.
         Returns:
-            list[User]: List of users.
+            list[DatabaseUser]: List of users.
         """
         return await self.repository.get_many()
 
-    async def add(self, user: User) -> None:
+    async def add(self, user: DatabaseUser) -> None:
         """Add new user to database.
         Args:
-            user (User): User data.
+            user (DatabaseUser): User data.
         """
         await self.repository.add(user)
 
-    async def update(self, user: User) -> None:
+    async def update(self, user: DatabaseUser) -> None:
         """Update user data.
         Args:
-            user (User): User data.
+            user (DatabaseUser): User data.
         """
         await self.repository.update(user)
 
@@ -62,7 +62,7 @@ class UserService:
             user.blacklist = True
             await self.update(user)
         except ValueError:
-            user = User(discord_id=user_id, blacklist=True)
+            user = DatabaseUser(discord_id=user_id, blacklist=True)
             await self.add(user)
 
     async def unblacklist(self, user_id: int) -> None:

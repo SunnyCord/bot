@@ -19,6 +19,13 @@ from ui.embeds.music import MusicTrackEmbed
 from ui.menus.music import MusicQueueView
 
 
+def is_privileged(ctx: commands.Context) -> bool:
+    """Check whether the user is allowed to bypass requirements."""
+    player: Player = ctx.voice_client
+
+    return player.dj == ctx.author or ctx.author.guild_permissions.kick_members
+
+
 class Music(MetadataGroupCog, name="music"):
     """
     Commands for music playback.
@@ -39,12 +46,6 @@ class Music(MetadataGroupCog, name="music"):
                 required = 2
 
         return required
-
-    def is_privileged(self, ctx: commands.Context) -> bool:
-        """Check whether the user is allowed to bypass requirements."""
-        player: Player = ctx.voice_client
-
-        return player.dj == ctx.author or ctx.author.guild_permissions.kick_members
 
     @MetadataGroupCog.listener()
     async def on_pomice_track_end(self, player: Player, track: pomice.Track, _) -> None:
@@ -196,7 +197,7 @@ class Music(MetadataGroupCog, name="music"):
 
         position *= 1000
 
-        if self.is_privileged(ctx):
+        if is_privileged(ctx):
             await player.seek(position)
             await ctx.send(
                 f"⏭ | An admin or DJ has seeked the player to {milliseconds_to_duration(player.position)}.",
@@ -222,7 +223,7 @@ class Music(MetadataGroupCog, name="music"):
         if player.is_paused:
             await ctx.send("⏯ | Track is already paused.", delete_after=10)
 
-        if self.is_privileged(ctx):
+        if is_privileged(ctx):
             await ctx.send("⏯ | An admin or DJ has paused the player.", delete_after=10)
             player.pause_votes.clear()
 
@@ -253,7 +254,7 @@ class Music(MetadataGroupCog, name="music"):
         if not player.is_paused:
             await ctx.send("⏯ | Track is not paused.", delete_after=10)
 
-        if self.is_privileged(ctx):
+        if is_privileged(ctx):
             await ctx.send(
                 "⏯ | An admin or DJ has resumed the player.",
                 delete_after=10,
@@ -287,7 +288,7 @@ class Music(MetadataGroupCog, name="music"):
     async def skip_command(self, ctx: commands.Context) -> None:
         player: Player = ctx.voice_client
 
-        if self.is_privileged(ctx):
+        if is_privileged(ctx):
             await ctx.send("⏭ | An admin or DJ has skipped the song.", delete_after=10)
             player.skip_votes.clear()
 
@@ -332,7 +333,7 @@ class Music(MetadataGroupCog, name="music"):
             )
             return
 
-        if self.is_privileged(ctx):
+        if is_privileged(ctx):
             await ctx.send(
                 "🔀 | An admin or DJ has shuffled the queue.",
                 delete_after=10,
@@ -369,7 +370,7 @@ class Music(MetadataGroupCog, name="music"):
     ) -> None:
         player: Player = ctx.voice_client
 
-        if not self.is_privileged(ctx):
+        if not is_privileged(ctx):
             await ctx.send(
                 "🔈 | Only the DJ or admins may change the volume",
                 delete_after=10,
@@ -386,7 +387,7 @@ class Music(MetadataGroupCog, name="music"):
     async def nightcore_command(self, ctx: commands.Context) -> None:
         player: Player = ctx.voice_client
 
-        if not self.is_privileged(ctx):
+        if not is_privileged(ctx):
             await ctx.send("🎶 | Only the DJ or admins may have fun", delete_after=10)
             return
 
@@ -407,7 +408,7 @@ class Music(MetadataGroupCog, name="music"):
     async def vaporwave_command(self, ctx: commands.Context) -> None:
         player: Player = ctx.voice_client
 
-        if not self.is_privileged(ctx):
+        if not is_privileged(ctx):
             await ctx.send("🎶 | Only the DJ or admins may have fun", delete_after=10)
             return
 
@@ -433,7 +434,7 @@ class Music(MetadataGroupCog, name="music"):
     ) -> None:
         player: Player = ctx.voice_client
 
-        if not self.is_privileged(ctx):
+        if not is_privileged(ctx):
             await ctx.send("🎶 | Only the DJ or admins may have fun", delete_after=10)
             return
 
@@ -459,7 +460,7 @@ class Music(MetadataGroupCog, name="music"):
     async def vibrato_command(self, ctx: commands.Context) -> None:
         player: Player = ctx.voice_client
 
-        if not self.is_privileged(ctx):
+        if not is_privileged(ctx):
             await ctx.send("🎶 | Only the DJ or admins may have fun", delete_after=10)
             return
 
@@ -480,7 +481,7 @@ class Music(MetadataGroupCog, name="music"):
     async def clear_filters_command(self, ctx: commands.Context) -> None:
         player: Player = ctx.voice_client
 
-        if not self.is_privileged(ctx):
+        if not is_privileged(ctx):
             await ctx.send("🎶 | Only the DJ or admins may have fun", delete_after=10)
             return
 
@@ -499,7 +500,7 @@ class Music(MetadataGroupCog, name="music"):
     ) -> None:
         player: Player = ctx.voice_client
 
-        if not self.is_privileged(ctx):
+        if not is_privileged(ctx):
             await ctx.send(
                 "🔁 | Only the DJ or admins may change the loop mode",
                 delete_after=10,
@@ -522,7 +523,7 @@ class Music(MetadataGroupCog, name="music"):
     async def disconnect_command(self, ctx: commands.Context) -> None:
         player: Player = ctx.voice_client
 
-        if self.is_privileged(ctx):
+        if is_privileged(ctx):
             await ctx.send(
                 "*⃣ | An admin or DJ has stopped the player.",
                 delete_after=10,
