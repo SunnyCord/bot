@@ -246,3 +246,10 @@ class Sunny(commands.AutoShardedBot):
 
     def run(self, **kwargs: Any) -> None:
         super().run(self.config.token, log_handler=None, **kwargs)
+
+    async def close(self) -> None:
+        await self.client_v1.close()
+        await self.stable_storage.close()
+        await self.lazer_storage.close()
+        await self.ordr_client.close()
+        await super().close()

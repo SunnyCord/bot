@@ -89,7 +89,7 @@ class Music(MetadataGroupCog, name="music"):
             )
             player: Player = ctx.voice_client
 
-            await player.set_volume(50)
+            await player.set_volume(20)
             await player.set_context(ctx=ctx)
             return
 

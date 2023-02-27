@@ -69,16 +69,16 @@ class OsuListeners(
 
         beatmapset = await client.get_beatmapset(beatmapset_id)
 
-        async with aiohttp.ClientSession() as session:
-            async with session.get(f"https:{beatmapset.preview_url}") as resp:
-                if resp.status != 200:
-                    return
-                audio_file = BytesIO(await resp.read())
+        async with client._session.get(f"https:{beatmapset.preview_url}") as resp:
+            if resp.status != 200:
+                audio_file = None
+            file_bytes = BytesIO(await resp.read())
+            audio_file = discord.File(file_bytes, filename="Preview.mp3")
 
         await OsuBeatmapView.start(
             ctx,
             beatmapset,
-            file=discord.File(audio_file, filename="Preview.mp3"),
+            file=audio_file,
         )
 
     async def user_listener(self, message: discord.Message) -> None:
