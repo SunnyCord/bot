@@ -19,9 +19,10 @@ if TYPE_CHECKING:
 def _split_queue_to_pages(
     ctx: Context,
     queue: list[Track],
+    title: str,
 ) -> list[MusicTrackEmbed]:
     embeds: list[MusicTrackEmbed] = [
-        MusicTrackEmbed(ctx, track, "Queued up") for track in queue
+        MusicTrackEmbed(ctx, track, title) for track in queue
     ]
 
     return embeds
@@ -32,6 +33,7 @@ class MusicQueueView(BaseView):
         self,
         ctx: Context,
         queue: list[Track],
+        title: str = "Queued up",
         *args: Any,
         **kwargs: Any,
     ):
@@ -42,7 +44,7 @@ class MusicQueueView(BaseView):
 
         super().__init__(*args, **kwargs)
 
-        self._embeds = _split_queue_to_pages(self.ctx, queue)
+        self._embeds = _split_queue_to_pages(self.ctx, queue, title)
         self._current = 0
 
         for i, embed in enumerate(self._embeds):

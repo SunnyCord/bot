@@ -160,6 +160,25 @@ class Music(MetadataGroupCog, name="music"):
         await MusicQueueView.start(ctx, queue)
 
     @commands.hybrid_command(
+        name="recommend",
+        description="Recommends a track based on the current track",
+    )
+    async def recommend_command(self, ctx: commands.Context) -> None:
+        player: Player = ctx.voice_client
+
+        if not player.current:
+            await ctx.send("Nothing is playing!")
+            return
+
+        results = await player.get_recommendations(track=player.current, ctx=ctx)
+
+        if not results:
+            await ctx.send("Nothing found!")
+            return
+
+        await MusicQueueView.start(ctx, results, title="Recommended tracks")
+
+    @commands.hybrid_command(
         name="seek",
         description="Seeks to a position in the current track",
     )
