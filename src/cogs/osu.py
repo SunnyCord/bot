@@ -42,7 +42,6 @@ if TYPE_CHECKING:
 
 class OsuProfileFlags(commands.FlagConverter, prefix="-"):  # type: ignore
     lazer: bool | None = commands.Flag(
-        aliases=["l"],
         description="Whether to use the lazer client",
         default=None,
     )
@@ -65,7 +64,6 @@ class OsuTopFlags(commands.FlagConverter, prefix="-"):  # type: ignore
         default=None,
     )
     lazer: bool | None = commands.Flag(
-        aliases=["l"],
         description="Whether to use the lazer client",
         default=None,
     )
@@ -87,6 +85,10 @@ class OsuRecentFlags(commands.FlagConverter):
         description="Include failed scores",
         default=True,
     )
+    lazer: bool | None = commands.Flag(
+        description="Whether to use the lazer client",
+        default=None,
+    )
 
 
 class OsuScoreFlags(commands.FlagConverter):
@@ -96,7 +98,6 @@ class OsuScoreFlags(commands.FlagConverter):
         default=None,
     )
     lazer: bool | None = commands.Flag(
-        aliases=["l"],
         description="Whether to use the lazer client",
         default=None,
     )
@@ -109,7 +110,6 @@ class OsuPPFlags(commands.FlagConverter):
         default=None,
     )
     lazer: bool | None = commands.Flag(
-        aliases=["l"],
         description="Whether to use the lazer client",
         default=None,
     )
@@ -132,7 +132,6 @@ class OsuRecordFlags(commands.FlagConverter):
         default=None,
     )
     lazer: bool | None = commands.Flag(
-        aliases=["l"],
         description="Whether to use the lazer client. Optional, defaults to the user's lazer preference",
         default=None,
     )
@@ -701,7 +700,7 @@ class OsuCog(MetadataCog, name="osu!"):
     ) -> None:
         await ctx.defer()
         mode = flags.mode
-        user_data = await OsuUserConverter().convert(ctx, username, mode, True)
+        user_data = await OsuUserConverter().convert(ctx, username, mode, flags.lazer)
 
         client, user = user_data.client, user_data.user
 
