@@ -25,7 +25,6 @@ class Fun(commands.Cog):
     async def poll_command(
         self, interaction: discord.Interaction, *, text: str
     ) -> None:
-
         try:
             await interaction.message.delete()
         except:

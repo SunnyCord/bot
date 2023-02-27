@@ -112,7 +112,6 @@ class Music(commands.GroupCog, name="music"):  # type: ignore
 
         # This ensures the client isn't overwritten during cog reloads.
         if not hasattr(bot, "lavalink"):
-
             bot.lavalink = lavalink.Client(bot.user.id)
             for node in bot.config.lavalink:
                 bot.lavalink.add_node(
