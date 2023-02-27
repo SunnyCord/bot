@@ -31,18 +31,27 @@ class VoiceListener(
         before: VoiceState,
         after: VoiceState,
     ) -> None:
-        player = self.bot.lavalink.player_manager.get(member.guild.id)
+        player = None
+        for node in self.bot.pomice_node_pool.nodes.values():
+            player = player or node.get_player(member.guild.id)
 
-        if player is None or not player.is_connected:
+        if player is None:
             return
 
-        # Disconnect if channel is empty
-        channel = await self.bot.fetch_channel(player.channel_id)
-        if len(channel.members) == 1:
-            player.queue.clear()
-            await player.stop()
-            await member.guild.change_voice_state(channel=None)
+        if member == self.bot.user and after.channel is None:
+            await player.destroy()
+            return
+
+        guild_settings = await self.bot.guild_settings_service.get_one(member.guild.id)
+        if (
+            after.channel is None
+            and len(before.channel.members) == 1
+            and self.bot.user in before.channel.members
+            and guild_settings.voice_auto_disconnect
+        ):
+            await player.destroy()
+            return
 
 
 async def setup(bot: Sunny) -> None:
-    pass  # await bot.add_cog(VoiceListener(bot))
+    await bot.add_cog(VoiceListener(bot))

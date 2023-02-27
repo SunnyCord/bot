@@ -27,6 +27,20 @@ class GuildSettingsService:
         """
         return await self.repository.get_one(guild_id)
 
+    async def get_safe(self, guild_id: int) -> GuildSettings:
+        """Get guild settings from database.
+
+        Args:
+            guild_id (int): Guild ID.
+
+        Returns:
+            GuildSettings: Guild settings.
+        """
+        try:
+            return await self.repository.get_one(guild_id)
+        except ValueError:
+            return GuildSettings(guild_id=guild_id)
+
     async def get_many(self) -> list[GuildSettings]:
         """Get all guild settings from database.
 
@@ -81,11 +95,8 @@ class GuildSettingsService:
         Returns:
             str: Guild prefix.
         """
-        try:
-            settings = await self.get_one(guild_id)
-            return settings.prefix
-        except ValueError:
-            return ""
+        settings = await self.get_safe(guild_id)
+        return settings.prefix
 
     async def set_prefix(self, guild_id: int, prefix: str) -> None:
         """Set guild prefix.
@@ -125,11 +136,8 @@ class GuildSettingsService:
         Returns:
             bool: Listener status.
         """
-        try:
-            settings = await self.get_one(guild_id)
-            return settings.use_listeners
-        except ValueError:
-            return True
+        settings = await self.get_safe(guild_id)
+        return settings.use_listeners
 
     async def toggle_listener(self, guild_id: int) -> bool:
         """Toggle listener status.
@@ -148,3 +156,33 @@ class GuildSettingsService:
         settings.use_listeners = not settings.use_listeners
         await self.update(settings)
         return settings.use_listeners
+
+    async def get_auto_disconnect_status(self, guild_id: int) -> bool:
+        """Get auto disconnect status.
+
+        Args:
+            guild_id (int): Guild ID.
+
+        Returns:
+            bool: Auto disconnect status.
+        """
+        settings = await self.get_safe(guild_id)
+        return settings.voice_auto_disconnect
+
+    async def toggle_auto_disconnect(self, guild_id: int) -> bool:
+        """Toggle auto disconnect status.
+
+        Args:
+            guild_id (int): Guild ID.
+
+        Returns:
+            bool: Auto disconnect status.
+        """
+        try:
+            settings = await self.get_one(guild_id)
+        except ValueError:
+            settings = await self.create(guild_id)
+
+        settings.voice_auto_disconnect = not settings.voice_auto_disconnect
+        await self.update(settings)
+        return settings.voice_auto_disconnect

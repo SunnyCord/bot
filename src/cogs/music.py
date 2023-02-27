@@ -73,8 +73,13 @@ class Music(MetadataGroupCog, name="music"):
         await player.do_next()
 
     async def ensure_voice(self, ctx: commands.Context) -> None:
+        """Ensure voice state."""
+        does_not_require_voice = ctx.command.name in ("autodisconnect",)
         should_connect = ctx.command.name in ("play",)
         player: Player | None = ctx.voice_client
+
+        if does_not_require_voice:
+            return
 
         if not ctx.author.voice or not ctx.author.voice.channel:
             raise MusicPlayerError("Join a voice channel first!")
@@ -545,6 +550,19 @@ class Music(MetadataGroupCog, name="music"):
         await ctx.send(
             f"*⃣ | {ctx.author.mention} has voted to stop the player. Votes: {len(player.stop_votes)}/{required}",
             delete_after=15,
+        )
+
+    @commands.hybrid_command(
+        name="autodisconnect",
+        description="Toggles voice channel auto-disconnect",
+    )
+    @commands.has_permissions(manage_guild=True)
+    async def auto_disconnect_command(self, ctx: commands.Context) -> None:
+        value = await self.bot.guild_settings_service.toggle_auto_disconnect(
+            ctx.guild.id,
+        )
+        await ctx.send(
+            f"🔌 | Auto-disconnect is now {'enabled' if value else 'disabled'}",
         )
 
 

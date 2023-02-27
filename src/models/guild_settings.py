@@ -10,3 +10,4 @@ class GuildSettings(BaseModel):
     guild_id: int
     prefix: str = ""
     use_listeners: bool = True
+    voice_auto_disconnect: bool = True
