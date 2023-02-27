@@ -7,6 +7,7 @@ import os
 from functools import partial
 from typing import TYPE_CHECKING
 
+import aiordr
 import aiosu
 import discord
 from common.crypto import check_aes
@@ -21,12 +22,14 @@ from repository import BeatmapRepository
 from repository import GraphRepository
 from repository import GuildSettingsRepository
 from repository import OsuRepository
+from repository import RecordingPreferencesRepository
 from repository import StatsRepository
 from repository import UserPreferencesRepository
 from repository import UserRepository
 from service import BeatmapService
 from service import GraphService
 from service import GuildSettingsService
+from service import RecordingPreferencesService
 from service import StatsService
 from service import UserPreferencesService
 from service import UserService
@@ -149,6 +152,7 @@ class Sunny(commands.AutoShardedBot):
         settings_repo = GuildSettingsRepository(self.database)
         osu_repo = OsuRepository(self.database)
         user_prefs_repo = UserPreferencesRepository(self.database)
+        recording_prefs_repo = RecordingPreferencesRepository(self.database)
 
         logger.info("Setting up services...")
 
@@ -157,6 +161,7 @@ class Sunny(commands.AutoShardedBot):
         self.stats_service = StatsService(stats_repo)
         self.guild_settings_service = GuildSettingsService(settings_repo)
         self.user_prefs_service = UserPreferencesService(user_prefs_repo)
+        self.recording_prefs_service = RecordingPreferencesService(recording_prefs_repo)
         self.graph_service = GraphService(graph_repo)
         self.client_v1 = aiosu.v1.Client(self.config.osuAPI)
         self.stable_storage = aiosu.v2.ClientStorage(
@@ -170,9 +175,9 @@ class Sunny(commands.AutoShardedBot):
             client_id=self.config.osuAPIv2.client_id,
             base_url="https://lazer.ppy.sh",
         )
-        self.ordr_client = aiosu.utils.ordr.ordrClient(
+        self.ordr_client = aiordr.ordrClient(
             verification_key=self.config.ordrKey,
-            limiter=(10, 60),
+            limiter=(40, 60),
         )
         self.aes = Fernet(check_aes())
 

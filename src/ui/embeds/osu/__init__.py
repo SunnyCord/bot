@@ -11,3 +11,4 @@ from .profile import OsuProfileExtendedEmbed
 from .render import OsuRenderEmbed
 from .score import OsuScoreMultipleEmbed
 from .score import OsuScoreSingleEmbed
+from .skin import OsuSkinEmbed

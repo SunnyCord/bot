@@ -16,6 +16,7 @@ orjson = "*"
 cryptography = "*"
 redis = {extras = ["hiredis"], version = "*"}
 matplotlib = "*"
+aiordr = "*"
 
 [dev-packages]
 black = ">=22.10.0"

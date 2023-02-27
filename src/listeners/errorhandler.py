@@ -5,12 +5,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import aiordr
 import aiosu
 import discord
+import sentry_sdk
 from classes import exceptions
 from classes.cog import MetadataCog
 from common.logging import logger
 from discord.ext import commands
+
 
 if TYPE_CHECKING:
     from classes.bot import Sunny
@@ -37,6 +40,8 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error: Exception) -> None:
+        if not isinstance(error, commands.CommandOnCooldown):
+            ctx.command.reset_cooldown(ctx)
         await self.error_handler(ctx.send, ctx.command, error)
 
     async def error_handler(
@@ -84,11 +89,10 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
             )
 
         elif isinstance(error, aiosu.exceptions.APIException):
-            logger.exception(
-                f"An osu! API error has occured in command {command}: ",
-                exc_info=error,
-            )
-            return await send_message("An osu! API error has occured.")
+            return await send_message("The requested data was not found on osu!")
+
+        elif isinstance(error, aiordr.exceptions.APIException):
+            return await send_message(f"That didn't work. {error.message}")
 
         elif isinstance(error, aiosu.exceptions.InvalidClientRequestedError):
             return await send_message(
@@ -98,16 +102,16 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
         elif isinstance(error, exceptions.MusicPlayerError):
             return await send_message(error)
 
-        exc = f"{type(error).__name__}"
+        sentry_id = sentry_sdk.capture_exception(error)
+
         embed = discord.Embed(
             title="Oh no! An unexpected error has occured",
             color=discord.Color.red(),
         )
         embed.add_field(
             name="Error:",
-            value=f"{exc}\nIf you can, please open an issue: https://github.com/SunnyCord/bot/issues",
+            value=f"```ID: {sentry_id}```\nProvide this ID if you need help. You may also join the [support server]({self.bot.config.support_invite}).",
         )
-        # TODO: Error ID, so we can track errors and remove traceback from embed
         embed.set_thumbnail(url="https://i.imgur.com/szL6ReL.png")
         await send_message(embed=embed)
 

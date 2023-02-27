@@ -3,11 +3,17 @@
 ###
 from __future__ import annotations
 
+from enum import Enum
+from typing import Literal
 from typing import TYPE_CHECKING
 
 import aiosu
 import discord
-from aiosu.utils import ordr
+from aiordr.models import RenderAddEvent
+from aiordr.models import RenderCreateResponse
+from aiordr.models import RenderFailEvent
+from aiordr.models import RenderFinishEvent
+from aiordr.models import RenderProgressEvent
 from classes.cog import MetadataCog
 from classes.cog import MetadataGroupCog
 from common import graphing
@@ -18,12 +24,15 @@ from common.helpers import get_beatmap_from_text
 from discord import app_commands
 from discord.ext import commands
 from discord.utils import escape_markdown
+from models.user import UserConverterDTO
+from models.user_preferences import RecordingPreferences
 from ui.embeds.osu import OsuDifficultyEmbed
 from ui.embeds.osu import OsuLinkEmbed
 from ui.embeds.osu import OsuProfileCompactEmbed
 from ui.embeds.osu import OsuProfileExtendedEmbed
 from ui.embeds.osu import OsuRenderEmbed
 from ui.embeds.osu import OsuScoreSingleEmbed
+from ui.embeds.osu import OsuSkinEmbed
 from ui.menus.osu import OsuScoresView
 
 if TYPE_CHECKING:
@@ -109,30 +118,28 @@ class OsuPPFlags(commands.FlagConverter):
 class OsuRecordFlags(commands.FlagConverter):
     beatmap_query: str | None = commands.Flag(
         aliases=["b"],
-        description="URL or ID of the beatmap",
+        description="URL or ID of the beatmap. Can be provided instead of replay_file",
         default=None,
     )
     username: str | None = commands.Flag(
         aliases=["u"],
-        description="Discord/osu! username or mention",
+        description="Discord/osu! username or mention. Optional, defaults to author",
         default=None,
     )
     mode: aiosu.models.Gamemode | None = commands.Flag(
         aliases=["m"],
-        description="The osu! mode to search for",
+        description="The osu! mode to search for. Optional, defaults to the user's main mode",
         default=None,
     )
     lazer: bool | None = commands.Flag(
         aliases=["l"],
-        description="Whether to use the lazer client",
+        description="Whether to use the lazer client. Optional, defaults to the user's lazer preference",
         default=None,
     )
 
 
 class OsuUserConverter(commands.Converter):
-    async def convert(
-        self, ctx: commands.Context, *args: Any
-    ) -> tuple[aiosu.v2.Client, aiosu.models.User]:
+    async def convert(self, ctx: commands.Context, *args: Any) -> UserConverterDTO:
         """
         Converts to an ``aiosu.models.User`` (case-insensitive)
 
@@ -142,6 +149,8 @@ class OsuUserConverter(commands.Converter):
         2. Lookup by string
         """
         raw_user, mode, lazer = args
+        client = None
+        author_client = None
 
         if lazer is None:
             lazer = await ctx.bot.user_prefs_service.get_lazer(ctx.author.id)
@@ -154,9 +163,21 @@ class OsuUserConverter(commands.Converter):
         if mode is not None:
             params = {"mode": mode}
 
+        try:
+            author_client = await client_storage.get_client(id=ctx.author.id)
+        except aiosu.exceptions.InvalidClientRequestedError:
+            pass
+
         if raw_user is None:
-            client = await client_storage.get_client(id=ctx.author.id)
-            return (client, await client.get_me(**params), lazer)
+            if author_client is None:
+                raise aiosu.exceptions.InvalidClientRequestedError()
+            return UserConverterDTO(
+                client=author_client,
+                author_client=author_client,
+                lazer=lazer,
+                is_app_client=False,
+                user=await author_client.get_me(**params),
+            )
 
         member = None
         try:
@@ -176,10 +197,22 @@ class OsuUserConverter(commands.Converter):
 
         if member is None:
             client = await client_storage.app_client
-            return (client, await client.get_user(raw_user, **params), lazer)
+            return UserConverterDTO(
+                client=client,
+                author_client=author_client,
+                lazer=lazer,
+                is_app_client=True,
+                user=await client.get_user(raw_user, **params),
+            )
 
         client = await client_storage.get_client(id=member.id)
-        return (client, await client.get_me(**params), lazer)
+        return UserConverterDTO(
+            client=client,
+            author_client=author_client,
+            lazer=lazer,
+            is_app_client=False,
+            user=await client.get_me(**params),
+        )
 
 
 class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):
@@ -210,17 +243,17 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):
         flags: OsuProfileFlags,
     ) -> None:
         await ctx.defer()
-        _, user, lazer = await OsuUserConverter().convert(
+        user_data = await OsuUserConverter().convert(
             ctx,
             username,
             mode,
             flags.lazer,
         )
         if flags.extended:
-            embed = OsuProfileExtendedEmbed(ctx, user, mode, lazer)
+            embed = OsuProfileExtendedEmbed(ctx, user_data.user, mode, user_data.lazer)
         else:
-            embed = OsuProfileCompactEmbed(ctx, user, mode, lazer)
-        graph = await self.get_graph(user, lazer)
+            embed = OsuProfileCompactEmbed(ctx, user_data.user, mode, user_data.lazer)
+        graph = await self.get_graph(user_data.user, user_data.lazer)
         embed.set_image(url="attachment://rank_graph.png")
         await ctx.send(embed=embed, file=discord.File(graph, "rank_graph.png"))
 
@@ -305,12 +338,14 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):
         flags: OsuTopFlags,
     ) -> None:
         await ctx.defer()
-        client, user, _ = await OsuUserConverter().convert(
+        user_data = await OsuUserConverter().convert(
             ctx,
             username,
             mode,
             flags.lazer,
         )
+
+        client, user = user_data.client, user_data.user
 
         safe_username = escape_markdown(user.username)
 
@@ -396,6 +431,207 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):
         await self.osu_top_command(ctx, user, aiosu.models.Gamemode.CTB, flags)
 
 
+TOGGLEABLE_SETTINGS = Literal[
+    "show_hit_error_meter",
+    "show_unstable_rate",
+    "show_score",
+    "show_hp_bar",
+    "show_combo_counter",
+    "show_pp_counter",
+    "show_key_overlay",
+    "show_scoreboard",
+    "show_borders",
+    "show_mods",
+    "show_result_screen",
+    "show_danser_logo",
+    "show_hit_counter",
+    "show_aim_error_meter",
+    "use_beatmap_colors",
+    "objects_rainbow",
+    "cursor_rainbow",
+    "cursor_trail",
+    "cursor_trail_glow",
+    "cursor_scale_to_cs",
+    "draw_follow_points",
+    "draw_combo_numbers",
+    "load_storyboard",
+    "load_video",
+    "play_nightcore_samples",
+]
+
+VOLUME_SETTINGS = Literal[
+    "global",
+    "music",
+    "hitsound",
+]
+
+DIM_SETTINGS = Literal[
+    "intro",
+    "ingame",
+    "break",
+]
+
+
+class OsuRecordSettingsCog(
+    MetadataGroupCog,
+    name="recordsettings",
+    display_parent="osu!",
+):
+    """
+    osu! Record Settings Commands
+    """
+
+    def __init__(self, bot: Sunny) -> None:
+        self.bot = bot
+
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    @app_commands.command(
+        name="show",
+        description="Shows your osu! record settings",
+    )
+    async def osu_record_show_command(
+        self,
+        interaction: discord.Interaction,
+    ) -> None:
+        settings = await self.bot.recording_prefs_service.get_safe(interaction.user.id)
+
+        settings_dict = settings.dict(exclude={"discord_id"})
+        settings_str = ""
+        # 3 items per line
+        for i, (key, value) in enumerate(settings_dict.items()):
+            if i % 3 == 0:
+                settings_str += "\n"
+            if isinstance(value, Enum):
+                value = value.value
+            settings_str += f"{key}: {value}, "
+
+        settings_str = settings_str.rstrip(", ")
+
+        await interaction.response.send_message(
+            f"Your osu! record settings are:\n```prolog{settings_str}```",
+            ephemeral=True,
+        )
+
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    @app_commands.command(
+        name="skins",
+        description="Show the available skins",
+    )
+    @app_commands.describe(
+        search="The search query",
+    )
+    async def osu_record_skins_command(
+        self,
+        interaction: discord.Interaction,
+        search: str | None,
+    ) -> None:
+        if search:
+            skins = await self.bot.ordr_client.get_skins(page_size=1, search=search)
+        else:
+            skins = await self.bot.ordr_client.get_skins(page_size=1)
+        if len(skins.skins) == 0:
+            await interaction.response.send_message(
+                "No skins found.",
+                ephemeral=True,
+            )
+            return
+        skin = skins.skins[0]
+        embed = OsuSkinEmbed(interaction, skin)
+        await interaction.response.send_message(
+            embed=embed,
+        )
+
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    @app_commands.command(
+        name="toggle",
+        description="Toggles a setting",
+    )
+    @app_commands.describe(
+        setting="The setting to toggle",
+    )
+    async def osu_record_toggle_command(
+        self,
+        interaction: discord.Interaction,
+        setting: TOGGLEABLE_SETTINGS,
+    ) -> None:
+        value = await self.bot.recording_prefs_service.toggle_option(
+            interaction.user.id,
+            setting,
+        )
+        setting_name = setting.replace("_", " ").title()
+        await interaction.response.send_message(
+            f"**{setting_name}** is now **{'enabled' if value else 'disabled'}**.",
+        )
+
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    @app_commands.command(
+        name="volume",
+        description="Changes the volume used for recording",
+    )
+    @app_commands.describe(
+        setting="The volume to change",
+        value="The new value",
+    )
+    async def osu_record_volume_command(
+        self,
+        interaction: discord.Interaction,
+        setting: VOLUME_SETTINGS,
+        value: app_commands.Range[int, 0, 100],
+    ) -> None:
+        await self.bot.recording_prefs_service.set_option(
+            interaction.user.id,
+            f"{setting}_volume",
+            value,
+        )
+        await interaction.response.send_message(
+            f"**{setting.title()}** volume is now **{value}**.",
+        )
+
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    @app_commands.command(
+        name="dim",
+        description="Changes the background dim used for recording",
+    )
+    @app_commands.describe(
+        setting="The dim to change",
+        value="The new value",
+    )
+    async def osu_record_dim_command(
+        self,
+        interaction: discord.Interaction,
+        setting: DIM_SETTINGS,
+        value: app_commands.Range[int, 0, 100],
+    ) -> None:
+        await self.bot.recording_prefs_service.set_option(
+            interaction.user.id,
+            f"{setting}_bg_dim",
+            value,
+        )
+        await interaction.response.send_message(
+            f"**{setting.title()}** dim is now **{value}**.",
+        )
+
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    @app_commands.command(
+        name="cursorsize",
+        description="Changes the cursor size used for recording",
+    )
+    @app_commands.describe(
+        value="The new value",
+    )
+    async def osu_record_cursorsize_command(
+        self,
+        interaction: discord.Interaction,
+        value: app_commands.Range[float, 0.5, 2.0],
+    ) -> None:
+        await self.bot.recording_prefs_service.set_option(
+            interaction.user.id,
+            "cursor_size",
+            value,
+        )
+        await interaction.response.send_message(f"**Cursor Size** is now **{value}**.")
+
+
 class OsuCog(MetadataCog, name="osu!"):
     """
     osu! related commands.
@@ -459,7 +695,9 @@ class OsuCog(MetadataCog, name="osu!"):
     ) -> None:
         await ctx.defer()
         mode = flags.mode
-        client, user, _ = await OsuUserConverter().convert(ctx, username, mode, True)
+        user_data = await OsuUserConverter().convert(ctx, username, mode, True)
+
+        client, user = user_data.client, user_data.user
 
         safe_username = escape_markdown(user.username)
 
@@ -496,12 +734,14 @@ class OsuCog(MetadataCog, name="osu!"):
         beatmap: aiosu.models.Beatmap,
         lazer: bool,
     ) -> None:
-        client, user, lazer = await OsuUserConverter().convert(
+        user_data = await OsuUserConverter().convert(
             ctx,
             username,
             mode,
             lazer,
         )
+
+        client, user, lazer = user_data.client, user_data.user, user_data.lazer
 
         safe_username = escape_markdown(user.username)
 
@@ -698,12 +938,14 @@ class OsuCog(MetadataCog, name="osu!"):
         await ctx.defer()
         mode = flags.mode
 
-        client, user, _ = await OsuUserConverter().convert(
+        user_data = await OsuUserConverter().convert(
             ctx,
             username,
             mode,
             flags.lazer,
         )
+
+        user, client = user_data.user, user_data.client
 
         total_pp_with_bonus = user.statistics.pp
 
@@ -759,12 +1001,14 @@ class OsuCog(MetadataCog, name="osu!"):
         await ctx.defer()
         mode = flags.mode
 
-        client, user, _ = await OsuUserConverter().convert(
+        user_data = await OsuUserConverter().convert(
             ctx,
             username,
             mode,
             flags.lazer,
         )
+
+        user, client = user_data.user, user_data.client
 
         safe_username = escape_markdown(user.username)
 
@@ -813,12 +1057,14 @@ class OsuCog(MetadataCog, name="osu!"):
         await ctx.defer()
         mode = flags.mode
 
-        client, user, _ = await OsuUserConverter().convert(
+        user_data = await OsuUserConverter().convert(
             ctx,
             username,
             mode,
             flags.lazer,
         )
+
+        user, client = user_data.user, user_data.client
 
         safe_username = escape_markdown(user.username)
 
@@ -840,19 +1086,31 @@ class OsuCog(MetadataCog, name="osu!"):
     async def record_from_file(
         self,
         ctx: commands.Context,
+        recording_prefs: RecordingPreferences,
         replay_file: discord.Attachment,
-    ) -> ordr.models.RenderCreateResponse:
+    ) -> RenderCreateResponse:
+        if not replay_file.filename.endswith(".osr"):
+            await ctx.send("You must upload a valid .osr file.")
+            return
+
+        render_options = recording_prefs.get_render_options()
         return await self.bot.ordr_client.create_render(
             username=ctx.author.name,
-            skin="YUGEN",
+            skin=recording_prefs.skin,
             replay_url=replay_file.url,
+            render_options=render_options,
         )
 
     async def record_from_flags(
         self,
         ctx: commands.Context,
+        recording_prefs: RecordingPreferences,
         flags: OsuRecordFlags,
-    ) -> ordr.models.RenderCreateResponse:
+    ) -> RenderCreateResponse:
+        if flags.beatmap_query is None:
+            await ctx.send("You must specify a beatmap ID or a beatmap link.")
+            return
+
         beatmap_ids = get_beatmap_from_text(flags.beatmap_query)
 
         beatmap_id = beatmap_ids.get("beatmap_id")
@@ -862,12 +1120,19 @@ class OsuCog(MetadataCog, name="osu!"):
             )
             return
 
-        client, user, _ = await OsuUserConverter().convert(
+        user_data = await OsuUserConverter().convert(
             ctx,
             flags.username,
             flags.mode,
             flags.lazer,
         )
+
+        user = user_data.user
+        client = user_data.client
+        if user_data.is_app_client:
+            if not user_data.author_client:
+                raise aiosu.exceptions.InvalidClientRequestedError()
+            client = user_data.author_client
 
         mode = flags.mode or user.playmode
 
@@ -883,21 +1148,23 @@ class OsuCog(MetadataCog, name="osu!"):
 
         score = scores[0]
 
-        replay_file = await client.get_score_replay(score.id)
+        replay_file = await client.get_score_replay(score.id, mode)
+        render_options = recording_prefs.get_render_options()
 
         return await self.bot.ordr_client.create_render(
             username=ctx.author.name,
-            skin="YUGEN",
-            replay_file=replay_file.read(),
+            skin=recording_prefs.skin,
+            replay_url=replay_file.url,
+            render_options=render_options,
         )
 
-    @commands.cooldown(1, 30, commands.BucketType.user)
+    @commands.cooldown(1, 300, commands.BucketType.user)
     @commands.hybrid_command(
         name="record",
         description="Records a score",
     )
     @app_commands.describe(
-        replay_file="Replay file, if provided other arguments will be ignored",
+        replay_file="Replay file. Optional, if provided other arguments will be ignored",
     )
     async def osu_record_command(
         self,
@@ -909,41 +1176,45 @@ class OsuCog(MetadataCog, name="osu!"):
         await ctx.defer()
 
         client = self.bot.ordr_client
+        recording_prefs = await self.bot.recording_prefs_service.get_safe(ctx.author.id)
 
         if replay_file is not None:
-            render = await self.record_from_file(ctx, replay_file)
+            render = await self.record_from_file(ctx, recording_prefs, replay_file)
         else:
-            render = await self.record_from_flags(ctx, flags)
+            render = await self.record_from_flags(ctx, recording_prefs, flags)
+
+        if render is None:
+            return
 
         message = await ctx.send("Starting render...")
 
         @client.on_render_added
-        async def render_added(data: dict) -> None:
-            if data["renderID"] == render.render_id:
+        async def render_added(event: RenderAddEvent) -> None:
+            if event.render_id == render.render_id:
                 await message.edit(
                     content=None,
                     embed=OsuRenderEmbed(ctx, "Rendering...", ""),
                 )
 
         @client.on_render_progress
-        async def render_progress(data: dict) -> None:
-            if data["renderID"] == render.render_id:
+        async def render_progress(event: RenderProgressEvent) -> None:
+            if event.render_id == render.render_id:
                 await message.edit(
                     content=None,
-                    embed=OsuRenderEmbed(ctx, data["description"], data["progress"]),
+                    embed=OsuRenderEmbed(ctx, event.description, event.progress),
                 )
 
         @client.on_render_finish
-        async def render_finish(data: dict) -> None:
-            if data["renderID"] == render.render_id:
+        async def render_finish(event: RenderFinishEvent) -> None:
+            if event.render_id == render.render_id:
                 await message.edit(
-                    content=f"Render finished! {data['videoUrl']}",
+                    content=f"Render finished! {event.video_url}",
                     embed=None,
                 )
 
         @client.on_render_fail
-        async def render_fail(data: dict) -> None:
-            if data["renderID"] == render.render_id:
+        async def render_fail(event: RenderFailEvent) -> None:
+            if event.render_id == render.render_id:
                 await message.edit(content=f"Render failed!", embed=None)
 
 
@@ -951,3 +1222,4 @@ async def setup(bot: Sunny) -> None:
     await bot.add_cog(OsuCog(bot))
     await bot.add_cog(OsuProfileCog(bot))
     await bot.add_cog(OsuTopsCog(bot))
+    await bot.add_cog(OsuRecordSettingsCog(bot))
