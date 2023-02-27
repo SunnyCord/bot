@@ -75,8 +75,8 @@ class ConfigList(FrozenModel):
     @classmethod
     def get_config(cls) -> Config:
         try:
-            list = cls.parse_file("config.json")
-            return list.__get_selected_config()
+            config_list = cls.parse_file("config.json")
+            return config_list.__get_selected_config()
         except FileNotFoundError:
             cls._create_config()
             exit(1)
