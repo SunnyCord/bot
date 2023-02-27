@@ -3,6 +3,8 @@
 ###
 from __future__ import annotations
 
+from datetime import timedelta
+
 
 def ordinal(n: int) -> str:
     if 11 <= (n % 100) <= 13:
@@ -62,3 +64,7 @@ def seconds_to_text(secs: int) -> str:
     formatted_units = [f"{value}{unit}" for unit, value in time_units if value > 0]
 
     return " ".join(formatted_units)
+
+
+def milliseconds_to_duration(position: float) -> str:
+    return str(timedelta(milliseconds=position)).split(".")[0].zfill(8)

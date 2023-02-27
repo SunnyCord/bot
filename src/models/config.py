@@ -35,7 +35,7 @@ class LavalinkConfig:
     host: str = "lavalink"
     port: int = 2333
     password: str = "youshallnotpass"
-    region: str = "eu"
+    ssl_enabled: bool = False
     name: str = "local"
 
 

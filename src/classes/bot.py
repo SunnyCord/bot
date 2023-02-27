@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING
 import aiordr
 import aiosu
 import discord
+import pomice
 from common.crypto import check_aes
 from common.logging import init_logging
 from common.logging import logger
@@ -155,6 +156,7 @@ class Sunny(commands.AutoShardedBot):
         recording_prefs_repo = RecordingPreferencesRepository(self.database)
 
         logger.info("Setting up services...")
+        self.pomice_node_pool = pomice.NodePool()
 
         self.beatmap_service = BeatmapService(beatmap_repo)
         self.user_service = UserService(user_repo)
@@ -181,6 +183,26 @@ class Sunny(commands.AutoShardedBot):
         )
         self.aes = Fernet(check_aes())
 
+    async def start_pomice_nodes(self) -> None:
+        await self.wait_until_ready()
+
+        for node_config in self.config.lavalink:
+            logger.info(f"Adding node '{node_config.name}'...")
+            try:
+                await self.pomice_node_pool.create_node(
+                    bot=self,
+                    host=node_config.host,
+                    port=node_config.port,
+                    password=node_config.password,
+                    secure=node_config.ssl_enabled,
+                    identifier=node_config.name,
+                )
+                logger.info(f"Connected to node '{node_config.name}`")
+            except pomice.NodeConnectionFailure:
+                logger.error(f"Failed connecting to node '{node_config.name}'!")
+
+        logger.info("Voice nodes ready!")
+
     async def setup_hook(self) -> None:
         logger.info("Setting up modules...")
         await self.load_extension("jishaku")
@@ -189,6 +211,7 @@ class Sunny(commands.AutoShardedBot):
 
     async def on_ready(self) -> None:
         logger.info(f"Logged in as {self.user} (ID: {self.user.id})")
+        await self.start_pomice_nodes()
         await self.stats_service.set_cog_count(len(self.cogs))
         await self.stats_service.set_command_count(len(self.all_commands))
         await self.stats_service.set_guild_count(len(self.guilds))

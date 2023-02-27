@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 import aiordr
 import aiosu
 import discord
+import pomice
 import sentry_sdk
 from classes import exceptions
 from classes.cog import MetadataCog
@@ -61,46 +62,64 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
             return
 
         elif isinstance(error, commands.BotMissingPermissions):
-            return await send_message(
+            await send_message(
                 f"I am missing the following permissions: ``{', '.join(error.missing_permissions)}`` for ``{command}``.",
             )
+            return
 
         elif isinstance(error, commands.MissingPermissions):
-            return await send_message(
+            await send_message(
                 f"You are missing the following permissions: ``{', '.join(error.missing_permissions)}`` for ``{command}``.",
             )
+            return
 
         elif isinstance(error, discord.errors.Forbidden):
-            return await send_message(
+            await send_message(
                 f"I do not have permissions to perform ``{command}``!",
             )
+            return
+
+        elif isinstance(error, commands.NotOwner):
+            await send_message("You are not the owner of this bot.")
+            return
 
         elif isinstance(error, commands.DisabledCommand):
-            return await send_message(f"``{command}`` has been disabled.")
+            await send_message(f"``{command}`` has been disabled.")
+            return
 
         elif isinstance(error, commands.CommandOnCooldown):
-            return await send_message(
-                "Slow down! You are on a %.2fs cooldown." % error.retry_after,
+            await send_message(
+                f"Slow down! You are on a {error.retry_after:.2f}s cooldown.",
             )
+            return
 
         elif isinstance(error, commands.RangeError):
-            return await send_message(
+            await send_message(
                 f"Value must be between **{error.minimum}** and **{error.maximum}**.",
             )
+            return
 
         elif isinstance(error, aiosu.exceptions.APIException):
-            return await send_message("The requested data was not found on osu!")
+            await send_message("The requested data was not found on osu!")
+            return
 
         elif isinstance(error, aiordr.exceptions.APIException):
-            return await send_message(f"That didn't work. {error.message}")
+            await send_message(f"That didn't work. {error.message}")
+            return
 
         elif isinstance(error, aiosu.exceptions.InvalidClientRequestedError):
-            return await send_message(
+            await send_message(
                 "Please set your profile! Use the ``osuset`` command.",
             )
+            return
 
         elif isinstance(error, exceptions.MusicPlayerError):
-            return await send_message(error)
+            await send_message(error, delete_after=10)
+            return
+
+        elif isinstance(error, pomice.exceptions.NoNodesAvailable):
+            await send_message("No music nodes are available. Try again later!")
+            return
 
         sentry_id = sentry_sdk.capture_exception(error)
 

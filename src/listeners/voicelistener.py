@@ -45,4 +45,4 @@ class VoiceListener(
 
 
 async def setup(bot: Sunny) -> None:
-    await bot.add_cog(VoiceListener(bot))
+    pass  # await bot.add_cog(VoiceListener(bot))

@@ -4,458 +4,527 @@
 from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING
+from typing import Literal
 
-import aiohttp
-import classes.exceptions as Exceptions
-import discord
-import lavalink
+import pomice
+from classes.bot import Sunny
 from classes.cog import MetadataGroupCog
-from common.regex import track_title_rx
-from common.regex import url_rx
+from classes.exceptions import MusicPlayerError
+from classes.pomice import Player
+from common.humanizer import milliseconds_to_duration
 from discord import app_commands
 from discord.ext import commands
-from lavalink.filters import LowPass
-
-if TYPE_CHECKING:
-    from typing import Any
-    from classes.bot import Sunny
-
-
-class LavalinkVoiceClient(discord.VoiceClient):
-    """
-    This is the preferred way to handle external voice sending
-    This client will be created via a cls in the connect method of the channel
-    see the following documentation:
-    https://discordpy.readthedocs.io/en/latest/api.html#voiceprotocol
-    """
-
-    def __init__(
-        self,
-        client: discord.Client,
-        channel: discord.abc.Connectable,
-    ) -> None:
-        self.client = client
-        self.channel = channel
-        # ensure a client already exists
-        if hasattr(self.client, "lavalink"):
-            self.lavalink = self.client.lavalink
-        else:
-            self.client.lavalink = lavalink.Client(client.user.id)
-            for node in client.config.lavalink:
-                self.client.lavalink.add_node(
-                    node.host,
-                    node.port,
-                    node.password,
-                    node.region,
-                    node.name,
-                )
-            self.lavalink = self.client.lavalink
-
-    async def on_voice_server_update(self, data: Any) -> None:
-        # the data needs to be transformed before being handed down to
-        # voice_update_handler
-        lavalink_data = {"t": "VOICE_SERVER_UPDATE", "d": data}
-        await self.lavalink.voice_update_handler(lavalink_data)
-
-    async def on_voice_state_update(self, data: Any) -> None:
-        # the data needs to be transformed before being handed down to
-        # voice_update_handler
-        lavalink_data = {"t": "VOICE_STATE_UPDATE", "d": data}
-        await self.lavalink.voice_update_handler(lavalink_data)
-
-    async def connect(
-        self,
-        *,
-        timeout: float,
-        reconnect: bool,
-        self_deaf: bool = False,
-        self_mute: bool = False,
-    ) -> None:
-        """
-        Connect the bot to the voice channel and create a player_manager
-        if it doesn't exist yet.
-        """
-        # ensure there is a player_manager when creating a new voice_client
-        self.lavalink.player_manager.create(guild_id=self.channel.guild.id)
-        await self.channel.guild.change_voice_state(
-            channel=self.channel,
-            self_mute=self_mute,
-            self_deaf=self_deaf,
-        )
-
-    async def disconnect(self, *, force: bool = False) -> None:
-        """
-        Handles the disconnect.
-        Cleans up running player and leaves the voice client.
-        """
-        player = self.lavalink.player_manager.get(self.channel.guild.id)
-
-        # no need to disconnect if we are not connected
-        if not force and not player.is_connected:
-            return
-
-        # None means disconnect
-        await self.channel.guild.change_voice_state(channel=None)
-
-        # update the channel_id of the player to None
-        # this must be done because the on_voice_state_update that would set channel_id
-        # to None doesn't get dispatched after the disconnect
-        player.channel_id = None
-        self.cleanup()
+from ui.embeds.music import MusicPlaylistEmbed
+from ui.embeds.music import MusicTrackEmbed
+from ui.menus.music import MusicQueueView
 
 
 class Music(MetadataGroupCog, name="music"):
     """
-    Commands related to music playback.
+    Commands for music playback.
     """
 
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
+        self.pomice = bot.pomice_node_pool
 
-        # This ensures the client isn't overwritten during cog reloads.
-        if not hasattr(bot, "lavalink"):
-            bot.lavalink = lavalink.Client(bot.user.id)
-            for node in bot.config.lavalink:
-                bot.lavalink.add_node(
-                    node.host,
-                    node.port,
-                    node.password,
-                    node.region,
-                    node.name,
-                )
+    def required(self, ctx: commands.Context) -> int:
+        """Get required number of votes based on channel members"""
+        player: Player = ctx.voice_client
+        channel = self.bot.get_channel(player.channel.id)
+        required = math.ceil((len(channel.members) - 1) / 2.5)
 
-        lavalink.add_event_hook(self.track_hook)
+        if ctx.command.name == "stop":
+            if len(channel.members) == 3:
+                required = 2
 
-    def cog_unload(self) -> None:
-        """Cog unload handler. This removes any event hooks that were registered."""
-        self.bot.lavalink._event_hooks.clear()
+        return required
 
-    async def cog_before_invoke(self, ctx: commands.Context) -> None:
-        """Command before-invoke handler."""
-        await self.ensure_voice(ctx)
-        #  Ensure that the bot and command author share a mutual voicechannel.
+    def is_privileged(self, ctx: commands.Context) -> bool:
+        """Check whether the user is allowed to bypass requirements."""
+        player: Player = ctx.voice_client
+
+        return player.dj == ctx.author or ctx.author.guild_permissions.kick_members
+
+    @MetadataGroupCog.listener()
+    async def on_pomice_track_end(self, player: Player, track: pomice.Track, _) -> None:
+        if player.queue.is_empty:
+            await player.teardown()
+            return
+        await player.do_next()
+
+    @MetadataGroupCog.listener()
+    async def on_pomice_track_stuck(
+        self,
+        player: Player,
+        track: pomice.Track,
+        _,
+    ) -> None:
+        await player.do_next()
+
+    @MetadataGroupCog.listener()
+    async def on_pomice_track_exception(
+        self,
+        player: Player,
+        track: pomice.Track,
+        _,
+    ) -> None:
+        await player.do_next()
 
     async def ensure_voice(self, ctx: commands.Context) -> None:
-        # TODO replace this with a suitable solution for slash commands
-        """This check ensures that the bot and command author are in the same voicechannel."""
-        player = self.bot.lavalink.player_manager.create(ctx.guild.id)
-        # Create returns a player if one exists, otherwise creates.
-        # This line is important because it ensures that a player always exists for a guild.
-
-        # Most people might consider this a waste of resources for guilds that aren't playing, but this is
-        # the easiest and simplest way of ensuring players are created.
-
-        # These are commands that require the bot to join a voicechannel (i.e. initiating playback).
-        # Commands such as volume/skip etc don't require the bot to be in a voicechannel so don't need listing here.
         should_connect = ctx.command.name in ("play",)
+        player: Player | None = ctx.voice_client
 
         if not ctx.author.voice or not ctx.author.voice.channel:
-            raise Exceptions.MusicPlayerError("Join a voicechannel first.")
+            raise MusicPlayerError("Join a voice channel first!")
 
-        v_client = ctx.voice_client
-        if not v_client:
+        if not player or not player.is_connected:
             if not should_connect:
-                raise Exceptions.MusicPlayerError("Not connected.")
+                raise MusicPlayerError("Not connected.")
 
-            permissions = ctx.author.voice.channel.permissions_for(ctx.me)
+            await ctx.author.voice.channel.connect(
+                cls=Player,
+                self_deaf=True,
+            )
+            player: Player = ctx.voice_client
 
-            if (
-                not permissions.connect or not permissions.speak
-            ):  # TODO Check user limit too?
-                raise Exceptions.MusicPlayerError(
-                    "I need the `CONNECT` and `SPEAK` permissions.",
-                )
-
-            player.store("channel", ctx.channel.id)
-            await ctx.author.voice.channel.connect(cls=LavalinkVoiceClient)
             await player.set_volume(50)
-        else:
-            if v_client.channel.id != ctx.author.voice.channel.id:
-                raise Exceptions.MusicPlayerError("You need to be in my voicechannel.")
+            await player.set_context(ctx=ctx)
+            return
 
-    async def track_hook(self, event: lavalink.events.Event) -> None:
-        if isinstance(event, lavalink.events.TrackStartEvent):
-            # This indicates that a track has started, so we can get track data from genius
-            if event.track.duration < 30:
-                event.player.delete("currentTrackData")
-                return
+        if player.channel.id != ctx.author.voice.channel.id:
+            raise MusicPlayerError("You are not in my voice channel.")
 
-            cleanTitle = track_title_rx.sub("", event.track.title)
-
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(
-                    "https://some-random-api.ml/lyrics",
-                    params={"title": cleanTitle},
-                ) as r:
-                    rawData = await r.json()
-                    if "error" in rawData:
-                        event.player.delete("currentTrackData")
-                        return
-                    rawData["cleanTitle"] = cleanTitle
-                    event.player.store("currentTrackData", rawData)
-
-        elif isinstance(event, lavalink.events.QueueEndEvent):
-            # When this track_hook receives a "QueueEndEvent" from lavalink.py
-            # it indicates that there are no tracks left in the player's queue.
-            # To save on resources, we can tell the bot to disconnect from the voicechannel.
-            guild_id = event.player.guild_id
-            guild = self.bot.get_guild(guild_id)
-            await guild.voice_client.disconnect(force=True)
+    async def cog_before_invoke(self, ctx: commands.Context) -> None:
+        """Ensure voice state."""
+        await self.ensure_voice(ctx)
 
     @commands.hybrid_command(
         name="play",
-        aliases=["p"],
-        description="Searches and plays a song from a given query",
+        aliaes=["p"],
+        description="Searches for and plays a song",
     )
     @app_commands.describe(query="URL or keywords for searching")
     async def play_command(self, ctx: commands.Context, *, query: str) -> None:
+        player: Player = ctx.voice_client
+
         await ctx.defer()
-        # Get the player for this guild from cache.
-        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
-        # Remove leading and trailing <>. <> may be used to suppress embedding links in Discord.
-        query = query.strip("<>")
+        results = await player.get_tracks(query, ctx=ctx)
 
-        # Check if the user input might be a URL. If it isn't, we can Lavalink do a YouTube search for it instead.
-        # SoundCloud searching is possible by prefixing "scsearch:" instead.
-        if not url_rx.match(query):
-            query = f"ytsearch:{query}"
+        if not results:
+            await ctx.send("Nothing found!")
+            return
 
-        # Get the results for the query from Lavalink.
-        results = await player.node.get_tracks(query)
-
-        # Results could be None if Lavalink returns an invalid response (non-JSON/non-200 (OK)).
-        # ALternatively, resullts.tracks could be an empty array if the query yielded no tracks.
-        if not results or not results.tracks:
-            return await ctx.send("Nothing found!")
-
-        embed = discord.Embed(color=self.bot.config.color)
-
-        # Valid loadTypes are:
-        #   TRACK_LOADED    - single video/direct URL)
-        #   PLAYLIST_LOADED - direct URL to playlist)
-        #   SEARCH_RESULT   - query prefixed with either ytsearch: or scsearch:.
-        #   NO_MATCHES      - query yielded no results
-        #   LOAD_FAILED     - most likely, the video encountered an exception during loading.
-        if results.load_type == "PLAYLIST_LOADED":
-            tracks = results.tracks
-
-            for track in tracks:
-                # Add all of the tracks from the playlist to the queue.
-                player.add(requester=ctx.author.id, track=track)
-
-            embed.title = "Playlist Enqueued!"
-            embed.description = f"{results.playlist_info.name} - {len(tracks)} tracks"
+        if isinstance(results, pomice.Playlist):
+            embed = MusicPlaylistEmbed(ctx, results.tracks)
+            for track in results.tracks:
+                player.queue.put(track)
         else:
-            track = results.tracks[0]
-            embed.title = "Track Enqueued"
-            embed.description = f"[{track.title}]({track.uri})"
+            track = results[0]
+            embed = MusicTrackEmbed(ctx, track, title="Added to queue")
+            player.queue.put(track)
 
-            player.add(requester=ctx.author.id, track=track)
+        if not player.is_playing:
+            await player.do_next()
+            return
 
         await ctx.send(embed=embed)
-
-        # We don't want to call .play() if the player is playing as that will effectively skip
-        # the current track.
-        if not player.is_playing:
-            await player.play()
 
     @commands.hybrid_command(
         name="playing",
-        aliases=["np"],
-        description="Shows the currently playing track",
+        description="Shows the current track",
     )
     async def playing_command(self, ctx: commands.Context) -> None:
-        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
+        player: Player = ctx.voice_client
 
         if not player.current:
-            return await ctx.send("Nothing is playing.")
+            await ctx.send("Nothing is playing!")
+            return
 
-        position = lavalink.utils.format_time(player.position)
-        if player.current.stream:
-            duration = "🔴 LIVE"
-        else:
-            duration = lavalink.utils.format_time(player.current.duration)
-        track = f"**[{player.current.title}]({player.current.uri})**\n({position}/{duration})"
-
-        embed = discord.Embed(
-            color=self.bot.config.color,
-            title="Now Playing",
-            description=track,
-        )
-
-        if (currentTrackData := player.fetch("currentTrackData")) != None:
-            embed.set_thumbnail(url=currentTrackData["thumbnail"]["genius"])
-            embed.description += f"\n[LYRICS]({currentTrackData['links']['genius']}) | [ARTIST](https://genius.com/artists/{currentTrackData['author'].replace(' ', '%20')})"
-
-        await ctx.send(embed=embed)
+        await ctx.send(embed=MusicTrackEmbed(ctx, player.current))
 
     @commands.hybrid_command(
         name="queue",
-        description="Shows the player's queue",
+        aliases=["q"],
+        description="Shows the current queue",
     )
-    @app_commands.describe(
-        page="Page number for the queue",
-    )  # TODO replace this with pagination probably
-    async def queue_command(self, ctx: commands.Context, page: int = 1) -> None:
-        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
-        playerQueueWithCurrent = [player.current] + player.queue
+    async def queue_command(self, ctx: commands.Context) -> None:
+        player: Player = ctx.voice_client
 
-        if not playerQueueWithCurrent:
-            return await ctx.send("Nothing queued.")
+        if player.queue.is_empty:
+            await ctx.send("Queue is empty!")
+            return
 
-        items_per_page = 10
-        pages = math.ceil(len(playerQueueWithCurrent) / items_per_page)
-
-        start = (page - 1) * items_per_page
-        end = start + items_per_page
-
-        queue_list = ""
-        for index, track in enumerate(playerQueueWithCurrent[start:end], start=start):
-            queue_list += f"`{index + 1}.` [**{track.title}**]({track.uri})\n"
-
-        embed = discord.Embed(
-            colour=self.bot.config.color,
-            description=f"**{len(playerQueueWithCurrent)} tracks**\n\n{queue_list}",
-        )
-        embed.set_footer(text=f"Viewing page {page}/{pages}")
-        await ctx.send(embed=embed)
-
-    @commands.hybrid_command(
-        name="volume",
-        description="Changes the bot volume",
-    )
-    @app_commands.describe(volume="Volume percentage")
-    async def volume_command(
-        self,
-        ctx: commands.Context,
-        volume: commands.Range[int, 1, 100] | None,
-    ) -> None:
-        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
-
-        if not volume:
-            return await ctx.send(f"🔈 | {player.volume * 2}%")
-
-        await player.set_volume(volume / 2)
-        await ctx.send(f"🔈 | Set to {player.volume * 2}%")
-
-    @commands.hybrid_command(
-        name="shuffle",
-        description="Shuffles the player's queue",
-    )
-    async def shuffle_command(self, ctx: commands.Context) -> None:
-        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
-        if not player.is_playing:
-            return await ctx.send("Nothing playing.")
-
-        player.shuffle = not player.shuffle
-        await ctx.send("🔀 | Shuffle " + ("enabled" if player.shuffle else "disabled"))
-
-    @commands.hybrid_command(
-        name="loop",
-        description="Repeats the current song until the command is invoked again",
-    )
-    async def repeat_command(self, ctx: commands.Context) -> None:
-        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
-
-        if not player.is_playing:
-            return await ctx.send("Nothing playing.")
-
-        player.repeat = not player.repeat
-        await ctx.send("🔁 | Repeat " + ("enabled" if player.repeat else "disabled"))
+        queue = player.queue.get_queue()
+        await MusicQueueView.start(ctx, queue)
 
     @commands.hybrid_command(
         name="seek",
-        description="Seeks the currently playing track",
+        description="Seeks to a position in the current track",
     )
-    @app_commands.describe(seconds="Seconds to skip by")
-    async def seek_command(self, ctx: commands.Context, *, seconds: int) -> None:
-        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
+    @app_commands.describe(position="Position to seek to (in seconds)")
+    async def seek_command(self, ctx: commands.Context, position: int) -> None:
+        player: Player = ctx.voice_client
 
-        track_time = player.position + (seconds * 1000)
-        await player.seek(track_time)
+        if not player.current:
+            await ctx.send("Nothing is playing!")
+            return
 
-        await ctx.send(f"Moved track to **{lavalink.utils.format_time(track_time)}**")
+        if not player.current.is_seekable:
+            await ctx.send("You cannot seek this track!")
+            return
+
+        position *= 1000
+
+        if self.is_privileged(ctx):
+            await player.seek(position)
+            await ctx.send(
+                f"⏭ | An admin or DJ has seeked the player to {milliseconds_to_duration(player.position)}.",
+            )
+            return
+
+        if ctx.author == player.current.requester:
+            await player.seek(position)
+            await ctx.send(
+                f"⏭ | The song requester has seeked the player to {milliseconds_to_duration(player.position)}.",
+            )
+            return
+
+        await ctx.send("⏭ | You are not allowed to seek the player.")
 
     @commands.hybrid_command(
         name="pause",
-        description="Pauses/Resumes the current track",
+        description="Pauses the current track",
     )
     async def pause_command(self, ctx: commands.Context) -> None:
-        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
+        player: Player = ctx.voice_client
 
-        if not player.is_playing:
-            return await ctx.send("Not playing.")
+        if player.is_paused:
+            await ctx.send("⏯ | Track is already paused.", delete_after=10)
 
-        if player.paused:
-            await player.set_pause(False)
-            await ctx.send("⏯ | Resumed")
-        else:
+        if self.is_privileged(ctx):
+            await ctx.send("⏯ | An admin or DJ has paused the player.", delete_after=10)
+            player.pause_votes.clear()
+
             await player.set_pause(True)
-            await ctx.send("⏯ | Paused")
+            return
+
+        required = self.required(ctx)
+        player.pause_votes.add(ctx.author)
+
+        if len(player.pause_votes) >= required:
+            await ctx.send("⏯ | Vote to pause passed. Pausing player.", delete_after=10)
+            player.pause_votes.clear()
+            await player.set_pause(True)
+            return
+
+        await ctx.send(
+            f"⏯ | {ctx.author.mention} has voted to pause the player. Votes: {len(player.pause_votes)}/{required}",
+            delete_after=15,
+        )
+
+    @commands.hybrid_command(
+        name="resume",
+        description="Resumes the current track",
+    )
+    async def resume_command(self, ctx: commands.Context) -> None:
+        player: Player = ctx.voice_client
+
+        if not player.is_paused:
+            await ctx.send("⏯ | Track is not paused.", delete_after=10)
+
+        if self.is_privileged(ctx):
+            await ctx.send(
+                "⏯ | An admin or DJ has resumed the player.",
+                delete_after=10,
+            )
+            player.resume_votes.clear()
+
+            await player.set_pause(False)
+            return
+
+        required = self.required(ctx)
+        player.resume_votes.add(ctx.author)
+
+        if len(player.resume_votes) >= required:
+            await ctx.send(
+                "⏯ | Vote to resume passed. Resuming player.",
+                delete_after=10,
+            )
+            player.resume_votes.clear()
+            await player.set_pause(False)
+            return
+
+        await ctx.send(
+            f"⏯ | {ctx.author.mention} has voted to resume the player. Votes: {len(player.resume_votes)}/{required}",
+            delete_after=15,
+        )
 
     @commands.hybrid_command(
         name="skip",
         description="Skips the currently playing track",
     )
-    async def skip(self, ctx: commands.Context) -> None:
-        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
+    async def skip_command(self, ctx: commands.Context) -> None:
+        player: Player = ctx.voice_client
 
-        await player.skip()
-        await ctx.send("⏭ | Skipped.")
+        if self.is_privileged(ctx):
+            await ctx.send("⏭ | An admin or DJ has skipped the song.", delete_after=10)
+            player.skip_votes.clear()
+
+            await player.stop()
+            return
+
+        if ctx.author == player.current.requester:
+            await ctx.send(
+                "⏭ | The song requester has skipped the song.",
+                delete_after=10,
+            )
+            player.skip_votes.clear()
+
+            await player.stop()
+            return
+
+        required = self.required(ctx)
+        player.skip_votes.add(ctx.author)
+
+        if len(player.skip_votes) >= required:
+            await ctx.send("⏭ | Vote to skip passed. Skipping song.", delete_after=10)
+            player.skip_votes.clear()
+            await player.stop()
+            return
+
+        await ctx.send(
+            f"⏭ | {ctx.author.mention} has voted to skip the song. Votes: {len(player.skip_votes)}/{required} ",
+            delete_after=15,
+        )
+
+    @commands.hybrid_command(
+        name="shuffle",
+        description="Shuffle the player queue",
+    )
+    async def shuffle_command(self, ctx: commands.Context) -> None:
+        player: Player = ctx.voice_client
+
+        if player.queue.count < 3:
+            await ctx.send(
+                "There aren't enough songs for me to shuffle!",
+                delete_after=15,
+            )
+            return
+
+        if self.is_privileged(ctx):
+            await ctx.send(
+                "🔀 | An admin or DJ has shuffled the queue.",
+                delete_after=10,
+            )
+            player.shuffle_votes.clear()
+            return player.queue.shuffle()
+
+        required = self.required(ctx)
+        player.shuffle_votes.add(ctx.author)
+
+        if len(player.shuffle_votes) >= required:
+            await ctx.send(
+                "🔀 | Vote to shuffle passed. Shuffling the queue.",
+                delete_after=10,
+            )
+            player.shuffle_votes.clear()
+            player.queue.shuffle()
+            return
+
+        await ctx.send(
+            f"🔀 | {ctx.author.mention} has voted to shuffle the queue. Votes: {len(player.shuffle_votes)}/{required}",
+            delete_after=15,
+        )
+
+    @commands.hybrid_command(
+        name="volume",
+        description="Changes the playback volume",
+    )
+    @app_commands.describe(volume="Volume percentage")
+    async def volume_command(
+        self,
+        ctx: commands.Context,
+        volume: commands.Range[int, 1, 100],
+    ) -> None:
+        player: Player = ctx.voice_client
+
+        if not self.is_privileged(ctx):
+            await ctx.send(
+                "🔈 | Only the DJ or admins may change the volume",
+                delete_after=10,
+            )
+            return
+
+        await player.set_volume(volume)
+        await ctx.send(f"🔈 | Set to {volume}%", delete_after=10)
+
+    @commands.hybrid_command(
+        name="nightcore",
+        description="uguu~~",
+    )
+    async def nightcore_command(self, ctx: commands.Context) -> None:
+        player: Player = ctx.voice_client
+
+        if not self.is_privileged(ctx):
+            await ctx.send("🎶 | Only the DJ or admins may have fun", delete_after=10)
+            return
+
+        enabled = player.filters.has_filter(filter_tag="nightcore")
+        if enabled:
+            await player.remove_filter("nightcore", fast_apply=True)
+            await ctx.send("🎶 | Nightcore mode disabled!")
+            return
+
+        nightcore = pomice.Timescale.nightcore()
+        await player.add_filter(nightcore, fast_apply=True)
+        await ctx.send("🎶 | Nightcore mode enabled!", delete_after=10)
+
+    @commands.hybrid_command(
+        name="vaporwave",
+        description="aesthetic",
+    )
+    async def vaporwave_command(self, ctx: commands.Context) -> None:
+        player: Player = ctx.voice_client
+
+        if not self.is_privileged(ctx):
+            await ctx.send("🎶 | Only the DJ or admins may have fun", delete_after=10)
+            return
+
+        enabled = player.filters.has_filter(filter_tag="vaporwave")
+        if enabled:
+            await player.remove_filter("vaporwave", fast_apply=True)
+            await ctx.send("🎶 | Ｖａｐｏｒｗａｖｅ mode disabled!", delete_after=10)
+            return
+
+        vaporwave = pomice.Timescale.vaporwave()
+        await player.add_filter(vaporwave, fast_apply=True)
+        await ctx.send("🎶 | Ｖａｐｏｒｗａｖｅ mode enabled!", delete_after=10)
 
     @commands.hybrid_command(
         name="lowpass",
-        description="Sets the strength of the low pass filter",
+        description="Suppresses high frequencies",
     )
-    @app_commands.describe(strength="Strength of the low pass filter")
-    async def lowpass(
+    @app_commands.describe(strength="Strength of the lowpass filter")
+    async def lowpass_command(
         self,
         ctx: commands.Context,
         strength: commands.Range[float, 0, 100],
     ) -> None:
-        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
+        player: Player = ctx.voice_client
 
-        embed = discord.Embed(color=self.bot.config.color, title="Low Pass Filter")
+        if not self.is_privileged(ctx):
+            await ctx.send("🎶 | Only the DJ or admins may have fun", delete_after=10)
+            return
 
-        if strength == 0.0:
-            player.remove_filter("lowpass")
-            embed.description = "Disabled **Low Pass Filter**"
-            return await ctx.send(embed=embed)
+        enabled = player.filters.has_filter(filter_tag="lowpass")
+        if enabled:
+            await player.remove_filter("lowpass", fast_apply=True)
 
-        low_pass = LowPass()
-        low_pass.update(smoothing=strength)
+        if strength == 0:
+            await ctx.send("🎶 | Lowpass filter disabled", delete_after=10)
+            return
 
-        await player.set_filter(low_pass)
-
-        embed.description = f"Set **Low Pass Filter** strength to {strength}."
-        await ctx.send(embed=embed)
+        lowpass = pomice.LowPass(tag="lowpass", smoothing=strength)
+        await player.add_filter(lowpass, fast_apply=True)
+        await ctx.send(
+            f"🎶 | Lowpass filter enabled with strength {strength}%",
+            delete_after=10,
+        )
 
     @commands.hybrid_command(
-        name="disconnect",
-        aliases=["dc"],
-        description="Disconnects the player from the voice channel and clears its queue",
+        name="vibrato",
+        description="Vibrato effect",
+    )
+    async def vibrato_command(self, ctx: commands.Context) -> None:
+        player: Player = ctx.voice_client
+
+        if not self.is_privileged(ctx):
+            await ctx.send("🎶 | Only the DJ or admins may have fun", delete_after=10)
+            return
+
+        enabled = player.filters.has_filter(filter_tag="vibrato")
+        if enabled:
+            await player.remove_filter("vibrato", fast_apply=True)
+            await ctx.send("🎶 | Vibrato effect disabled!", delete_after=10)
+            return
+
+        vibrato = pomice.Vibrato(tag="vibrato", frequency=10, depth=1)
+        await player.add_filter(vibrato, fast_apply=True)
+        await ctx.send("🎶 | Vibrato effect enabled!", delete_after=10)
+
+    @commands.hybrid_command(
+        name="clearfilters",
+        description="Clears all filters",
+    )
+    async def clear_filters_command(self, ctx: commands.Context) -> None:
+        player: Player = ctx.voice_client
+
+        if not self.is_privileged(ctx):
+            await ctx.send("🎶 | Only the DJ or admins may have fun", delete_after=10)
+            return
+
+        await player.reset_filters()
+        await ctx.send("🎶 | Filters cleared!", delete_after=10)
+
+    @commands.hybrid_command(
+        name="loop",
+        description="Sets the loop mode for the player",
+    )
+    @app_commands.describe(loop_mode="Loop mode")
+    async def loop_command(
+        self,
+        ctx: commands.Context,
+        loop_mode: Literal["OFF", "TRACK", "QUEUE"],
+    ) -> None:
+        player: Player = ctx.voice_client
+
+        if not self.is_privileged(ctx):
+            await ctx.send(
+                "🔁 | Only the DJ or admins may change the loop mode",
+                delete_after=10,
+            )
+            return
+
+        if loop_mode == "OFF":
+            player.disable_loop()
+            await ctx.send("🔁 | Loop mode disabled", delete_after=10)
+            return
+
+        await player.set_loop_mode(pomice.LoopMode[loop_mode])
+        await ctx.send(f"🔁 | Loop mode set to {loop_mode}", delete_after=10)
+
+    @commands.hybrid_command(
+        name="stop",
+        aliases=["disconnect", "dc"],
+        description="Stops playing and clears the queue" "",
     )
     async def disconnect_command(self, ctx: commands.Context) -> None:
-        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
+        player: Player = ctx.voice_client
 
-        if not ctx.voice_client:
-            return await ctx.send("Not connected.")
+        if self.is_privileged(ctx):
+            await ctx.send(
+                "*⃣ | An admin or DJ has stopped the player.",
+                delete_after=10,
+            )
+            await player.teardown()
+            return
 
-        if not ctx.author.voice or (
-            player.is_connected
-            and ctx.author.voice.channel.id != int(player.channel_id)
-        ):
-            return await ctx.send("You're not in my voicechannel!")
+        required = self.required(ctx)
+        player.stop_votes.add(ctx.author)
 
-        # Clear the queue to ensure old tracks don't start playing
-        # when someone else queues something.
-        player.queue.clear()
-        # Stop the current track so Lavalink consumes less resources.
-        await player.stop()
-        # Disconnect from the voice channel.
-        await ctx.voice_client.disconnect(force=True)
-        await ctx.send("*⃣ | Disconnected.")
+        if len(player.stop_votes) >= required:
+            await ctx.send(
+                "*⃣ | Vote to stop passed. Stopping the player.",
+                delete_after=10,
+            )
+            await player.teardown()
+            return
+
+        await ctx.send(
+            f"*⃣ | {ctx.author.mention} has voted to stop the player. Votes: {len(player.stop_votes)}/{required}",
+            delete_after=15,
+        )
 
 
 async def setup(bot: Sunny) -> None:
