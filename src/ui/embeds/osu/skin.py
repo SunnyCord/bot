@@ -15,6 +15,8 @@ if TYPE_CHECKING:
 
 class OsuSkinEmbed(InteractionEmbed):
     def __init__(self, interaction: Interaction, skin: Skin):
+        self.skin = skin
+
         title = f"{skin.presentation_name} by {skin.author}"
         description = cleandoc(
             f"""

@@ -32,8 +32,8 @@ from ui.embeds.osu import OsuProfileCompactEmbed
 from ui.embeds.osu import OsuProfileExtendedEmbed
 from ui.embeds.osu import OsuRenderEmbed
 from ui.embeds.osu import OsuScoreSingleEmbed
-from ui.embeds.osu import OsuSkinEmbed
 from ui.menus.osu import OsuScoresView
+from ui.menus.osu import OsuSkinsView
 
 if TYPE_CHECKING:
     from typing import Any
@@ -525,20 +525,26 @@ class OsuRecordSettingsCog(
         interaction: discord.Interaction,
         search: str | None,
     ) -> None:
+        params = {
+            "page_size": 35,
+        }
         if search:
-            skins = await self.bot.ordr_client.get_skins(page_size=1, search=search)
-        else:
-            skins = await self.bot.ordr_client.get_skins(page_size=1)
+            params["search"] = search
+
+        settings = await self.bot.recording_prefs_service.get_safe(interaction.user.id)
+
+        skins = await self.bot.ordr_client.get_skins(**params)
         if len(skins.skins) == 0:
             await interaction.response.send_message(
                 "No skins found.",
                 ephemeral=True,
             )
             return
-        skin = skins.skins[0]
-        embed = OsuSkinEmbed(interaction, skin)
-        await interaction.response.send_message(
-            embed=embed,
+
+        await OsuSkinsView.start(
+            interaction,
+            skins.skins,
+            content=f"Current skin: **{settings.skin}**",
         )
 
     @commands.cooldown(1, 1, commands.BucketType.user)
