@@ -186,3 +186,18 @@ class GuildSettingsService:
         settings.voice_auto_disconnect = not settings.voice_auto_disconnect
         await self.update(settings)
         return settings.voice_auto_disconnect
+
+    async def set_dj_role(self, guild_id: int, role_id: int) -> None:
+        """Set DJ role.
+
+        Args:
+            guild_id (int): Guild ID.
+            role_id (int): Role ID.
+        """
+        try:
+            settings = await self.get_one(guild_id)
+        except ValueError:
+            settings = await self.create(guild_id)
+
+        settings.dj_role = role_id
+        await self.update(settings)

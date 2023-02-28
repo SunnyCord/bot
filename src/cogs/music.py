@@ -13,6 +13,7 @@ from classes.exceptions import MusicPlayerError
 from classes.pomice import Player
 from common.humanizer import milliseconds_to_duration
 from discord import app_commands
+from discord import Role
 from discord.ext import commands
 from ui.embeds.music import MusicPlaylistEmbed
 from ui.embeds.music import MusicTrackEmbed
@@ -22,8 +23,13 @@ from ui.menus.music import MusicQueueView
 def is_privileged(ctx: commands.Context) -> bool:
     """Check whether the user is allowed to bypass requirements."""
     player: Player = ctx.voice_client
+    dj_role = player.guild_settings.dj_role
 
-    return player.dj == ctx.author or ctx.author.guild_permissions.kick_members
+    return (
+        player.dj == ctx.author
+        or dj_role in [role.id for role in ctx.author.roles]
+        or ctx.author.guild_permissions.kick_members
+    )
 
 
 class Music(MetadataGroupCog, name="music"):
@@ -598,6 +604,19 @@ class Music(MetadataGroupCog, name="music"):
         await ctx.send(
             f"🔌 | Auto-disconnect is now {'enabled' if value else 'disabled'}",
         )
+
+    @commands.hybrid_command(
+        name="djrole",
+        description="Sets the DJ role for the server",
+    )
+    @commands.has_permissions(manage_guild=True)
+    async def set_dj_role_command(
+        self,
+        ctx: commands.Context,
+        role: Role,
+    ) -> None:
+        await self.bot.guild_settings_service.set_dj_role(ctx.guild.id, role.id)
+        await ctx.send(f"🎶 | DJ role set to {role.mention}")
 
 
 async def setup(bot: Sunny) -> None:

@@ -10,4 +10,5 @@ class GuildSettings(BaseModel):
     guild_id: int
     prefix: str = ""
     use_listeners: bool = True
+    dj_role: int | None = None
     voice_auto_disconnect: bool = True
