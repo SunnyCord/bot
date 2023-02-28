@@ -29,15 +29,19 @@
                 "database": "sunny",
                 "timeout": 10000
             },
-            "lavalink": [
-                {
-                    "name": "local",
-                    "host": "lavalink",
-                    "port": 2333,
-                    "password": "youshallnotpass",
-                    "ssl_enabled": false
-                }
-            ]
+            "lavalink": {
+                "spotify_client_id": "",
+                "spotify_client_secret": "",
+                "nodes": [
+                    {
+                        "name": "local",
+                        "host": "lavalink",
+                        "port": 2333,
+                        "password": "youshallnotpass",
+                        "ssl_enabled": false
+                    }
+                ]
+            }
         }
     ]
 }

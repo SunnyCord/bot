@@ -3,6 +3,7 @@
 ###
 from __future__ import annotations
 
+import asyncio
 from typing import TYPE_CHECKING
 
 from classes.cog import MetadataCog
@@ -42,14 +43,19 @@ class VoiceListener(
             await player.destroy()
             return
 
-        guild_settings = await self.bot.guild_settings_service.get_one(member.guild.id)
+        auto_disconnect = (
+            await self.bot.guild_settings_service.get_auto_disconnect_status(
+                member.guild.id,
+            )
+        )
         if (
             after.channel is None
             and len(before.channel.members) == 1
             and self.bot.user in before.channel.members
-            and guild_settings.voice_auto_disconnect
+            and auto_disconnect
         ):
-            await player.destroy()
+            await asyncio.sleep(1)
+            await player.teardown()
             return
 
 

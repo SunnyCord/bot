@@ -49,9 +49,6 @@ class Music(MetadataGroupCog, name="music"):
 
     @MetadataGroupCog.listener()
     async def on_pomice_track_end(self, player: Player, track: pomice.Track, _) -> None:
-        if player.queue.is_empty:
-            await player.teardown()
-            return
         await player.do_next()
 
     @MetadataGroupCog.listener()
@@ -88,6 +85,13 @@ class Music(MetadataGroupCog, name="music"):
             if not should_connect:
                 raise MusicPlayerError("Not connected.")
 
+            permissions = ctx.author.voice.channel.permissions_for(ctx.me)
+
+            if not permissions.connect or not permissions.speak:
+                raise MusicPlayerError(
+                    "I need the permissions to join and speak in your voice channel.",
+                )
+
             await ctx.author.voice.channel.connect(
                 cls=Player,
                 self_deaf=True,
@@ -122,7 +126,7 @@ class Music(MetadataGroupCog, name="music"):
             return
 
         if isinstance(results, pomice.Playlist):
-            embed = MusicPlaylistEmbed(ctx, results.tracks)
+            embed = MusicPlaylistEmbed(ctx, results)
             for track in results.tracks:
                 player.queue.put(track)
         else:
@@ -162,8 +166,7 @@ class Music(MetadataGroupCog, name="music"):
             await ctx.send("Queue is empty!")
             return
 
-        queue = player.queue.get_queue()
-        await MusicQueueView.start(ctx, queue)
+        await MusicQueueView.start(ctx, player.queue)
 
     @commands.hybrid_command(
         name="recommend",
@@ -176,13 +179,44 @@ class Music(MetadataGroupCog, name="music"):
             await ctx.send("Nothing is playing!")
             return
 
+        if not player.current.track_type in (
+            pomice.TrackType.YOUTUBE,
+            pomice.TrackType.SPOTIFY,
+        ):
+            await ctx.send(
+                "Recommendations are only available for YouTube and Spotify tracks!",
+            )
+            return
+
         results = await player.get_recommendations(track=player.current, ctx=ctx)
 
         if not results:
             await ctx.send("Nothing found!")
             return
 
-        await MusicQueueView.start(ctx, results, title="Recommended tracks")
+        await MusicQueueView.start(
+            ctx,
+            player.queue,
+            results,
+            title="Recommended tracks",
+        )
+
+    @commands.hybrid_command(
+        name="search",
+        description="Searches for a track",
+    )
+    @app_commands.describe(query="URL or keywords for searching")
+    async def search_command(self, ctx: commands.Context, *, query: str) -> None:
+        player: Player = ctx.voice_client
+
+        await ctx.defer()
+        results = await player.get_tracks(query, ctx=ctx)
+
+        if not results:
+            await ctx.send("Nothing found!")
+            return
+
+        await MusicQueueView.start(ctx, player.queue, results, title="Search results")
 
     @commands.hybrid_command(
         name="seek",

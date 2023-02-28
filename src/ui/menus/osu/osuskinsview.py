@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from discord import ButtonStyle
 from discord.ui import button
 from ui.embeds.osu import OsuSkinEmbed
 from ui.menus.generic import BaseInteractionView
@@ -125,6 +126,7 @@ class OsuSkinsView(BaseInteractionView):
         self,
         interaction: Interaction,
         button: button.Button,
+        style=ButtonStyle.green,
     ) -> None:
         if interaction.user != self.author:
             await interaction.response.send_message(

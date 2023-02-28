@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from common.humanizer import milliseconds_to_duration
+from pomice import Playlist
 from pomice import Track
 from ui.embeds.generic import ContextEmbed
 
@@ -15,8 +16,14 @@ if TYPE_CHECKING:
 
 class MusicTrackEmbed(ContextEmbed):
     def __init__(self, ctx: commands.Context, track: Track, title="Now playing"):
+        self.track = track
+        self.title_str = (
+            f"**{track.title}** by **{track.author}**"
+            if track.author
+            else f"{track.title}"
+        )
         live_str = ":red_circle: **LIVE** " if track.is_stream else ""
-        description = f"{live_str}[{track.title}]({track.uri})"
+        description = f"{live_str}[{self.title_str}]({track.uri})"
         super().__init__(
             ctx,
             title=title,
@@ -28,10 +35,11 @@ class MusicTrackEmbed(ContextEmbed):
 
 
 class MusicPlaylistEmbed(ContextEmbed):
-    def __init__(self, ctx: commands.Context, playlist: list[Track]):
+    def __init__(self, ctx: commands.Context, playlist: Playlist):
+        self.playlist = playlist
         super().__init__(
             ctx,
-            title="Playlist",
-            description=f"Added {len(playlist)} songs to the queue!",
+            title=f"Playlist {playlist.name}",
+            description=f"Added **{playlist.track_count}** songs to the queue!",
         )
-        self.set_thumbnail(url=ctx.bot.user.avatar)
+        self.set_thumbnail(url=playlist.thumbnail)

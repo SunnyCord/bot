@@ -30,6 +30,12 @@ class LavalinkConfig(FrozenModel):
     ssl_enabled: bool = False
 
 
+class LavalinkConfigList(FrozenModel):
+    spotify_client_id: str = ""
+    spotify_client_secret: str = ""
+    nodes: List[LavalinkConfig] = Field(default_factory=lambda: [LavalinkConfig()])
+
+
 class OsuAPIConfig(FrozenModel):
     api_key: str = "key_here"
     client_id: str = 1
@@ -49,7 +55,7 @@ class Config(FrozenModel):
     command_prefixes: List[str] = Field(default_factory=lambda: ["s."])
     redis: RedisConfig = Field(default_factory=RedisConfig)
     mongo: MongoConfig = Field(default_factory=MongoConfig)
-    lavalink: List[LavalinkConfig] = Field(default_factory=lambda: [LavalinkConfig()])
+    lavalink: LavalinkConfigList = Field(default_factory=LavalinkConfigList)
 
 
 class ConfigList(FrozenModel):

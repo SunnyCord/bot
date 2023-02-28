@@ -186,20 +186,22 @@ class Sunny(commands.AutoShardedBot):
     async def start_pomice_nodes(self) -> None:
         await self.wait_until_ready()
 
-        for node_config in self.config.lavalink:
-            logger.info(f"Adding node '{node_config.name}'...")
+        for node in self.config.lavalink.nodes:
+            logger.info(f"Adding node '{node.name}'...")
             try:
                 await self.pomice_node_pool.create_node(
                     bot=self,
-                    host=node_config.host,
-                    port=node_config.port,
-                    password=node_config.password,
-                    secure=node_config.ssl_enabled,
-                    identifier=node_config.name,
+                    host=node.host,
+                    port=node.port,
+                    password=node.password,
+                    secure=node.ssl_enabled,
+                    identifier=node.name,
+                    spotify_client_id=self.config.lavalink.spotify_client_id,
+                    spotify_client_secret=self.config.lavalink.spotify_client_secret,
                 )
-                logger.info(f"Connected to node '{node_config.name}`")
+                logger.info(f"Connected to node '{node.name}`")
             except pomice.NodeConnectionFailure:
-                logger.error(f"Failed connecting to node '{node_config.name}'!")
+                logger.error(f"Failed connecting to node '{node.name}'!")
 
         logger.info("Voice nodes ready!")
 
