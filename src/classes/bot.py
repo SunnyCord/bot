@@ -68,35 +68,44 @@ def _get_intents() -> discord.Intents:
 
 def _get_cogs_dict(bot: Sunny) -> dict[str, Any]:
     """Gets a dict of all cogs and their commands."""
-    cogs_dict: dict[str, Any] = {}
+    cogs_list: list[dict[str, Any]] = []
     for cog in bot.cogs.values():
         if getattr(cog, "hidden", True):
             continue
 
-        commands_dict = {}
+        commands_list: list[dict[str, Any]] = []
         for cmd in cog.get_commands() + cog.get_app_commands():
             if getattr(cmd, "hidden", False):
                 continue
+
             cmd = getattr(cmd, "app_command", cmd)
 
             parameters = {p.display_name: p.description for p in cmd.parameters}
-            commands_dict[cmd.name] = {
-                "name": cmd.name,
-                "description": cmd.description,
-                "parameters": parameters,
-            }
+            commands_list.append(
+                {
+                    "name": cmd.name,
+                    "description": cmd.description,
+                    "parameters": parameters,
+                },
+            )
 
         if getattr(cog, "display_parent"):
-            parent = cogs_dict[cog.display_parent]
-            parent["commands"].update(commands_dict)
+            parent = next(
+                (p for p in cogs_list if p["name"] == cog.display_parent),
+                None,
+            )
+            parent["commands"].extend(commands_list)
             continue
 
-        cogs_dict[cog.qualified_name.lower()] = {
-            "description": cog.description,
-            "commands": commands_dict,
-        }
+        cogs_list.append(
+            {
+                "name": cog.qualified_name.lower(),
+                "description": cog.description,
+                "commands": commands_list,
+            },
+        )
 
-    return cogs_dict
+    return cogs_list
 
 
 def _get_modules(folder: str):
