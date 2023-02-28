@@ -14,7 +14,7 @@ from ui.menus.generic import BaseView
 if TYPE_CHECKING:
     from typing import Any
     from pomice import Track
-    from pomice import Queue
+    from classes.pomice import Player
     from discord.ext.commands import Context
 
 
@@ -34,7 +34,7 @@ class MusicQueueView(BaseView):
     def __init__(
         self,
         ctx: Context,
-        queue: Queue,
+        player: Player,
         results: list[Track] | None = None,
         title: str = "Queued up",
         *args: Any,
@@ -44,7 +44,8 @@ class MusicQueueView(BaseView):
         self.message = ctx.message
         self.bot = ctx.bot
         self.author = ctx.author
-        self.queue = queue
+        self.player = player
+        self.queue = player.queue
 
         super().__init__(*args, **kwargs)
 
@@ -52,7 +53,7 @@ class MusicQueueView(BaseView):
             display_tracks = results
             self.remove_item(self.stop_button)
         else:
-            display_tracks = queue.get_queue()
+            display_tracks = self.queue.get_queue()
             self.remove_item(self.play_button)
         self._redo_rows()
 
@@ -64,7 +65,7 @@ class MusicQueueView(BaseView):
             embed.set_footer(text=f"Track {i+1}/{self._len} | {footer}")
 
         if self._len <= 1:
-            self._stop()
+            self._remove_paginators()
         else:
             self._check_buttons()
 
@@ -101,6 +102,12 @@ class MusicQueueView(BaseView):
     def _next_embed(self) -> None:
         self._current = (self._current + 1) % self._len
         self._check_buttons()
+
+    def _remove_paginators(self) -> None:
+        self.remove_item(self.first_embed_button)
+        self.remove_item(self.last_embed_button)
+        self.remove_item(self.previous_embed_button)
+        self.remove_item(self.next_embed_button)
 
     def _stop(self) -> None:
         self.clear_items()
@@ -155,7 +162,10 @@ class MusicQueueView(BaseView):
         self._stop()
         await interaction.response.edit_message(view=self)
 
-    @button(emoji="\N{WHITE HEAVY CHECK MARK}", style=ButtonStyle.green)
+    @button(
+        emoji="\N{BLACK RIGHT-POINTING TRIANGLE}",
+        style=ButtonStyle.green,
+    )
     async def play_button(
         self,
         interaction: Interaction,
@@ -169,12 +179,22 @@ class MusicQueueView(BaseView):
             return
         current_embed = self._get_embed()
         track = current_embed.track
+
+        if track in self.queue or self.player.current == track:
+            await interaction.response.send_message(
+                f"Track {current_embed.title_str} is already in queue.",
+                ephemeral=True,
+            )
+            return
+
         self.queue.put(track)
         await interaction.response.send_message(
-            # check if has author track.title otherwise
             f"Added track {current_embed.title_str} to queue.",
             ephemeral=True,
         )
+
+        if not self.player.is_playing:
+            await self.player.do_next()
 
     @button(emoji="\N{BLACK RIGHTWARDS ARROW}")
     async def next_embed_button(

@@ -77,7 +77,10 @@ class Music(MetadataGroupCog, name="music"):
 
     async def ensure_voice(self, ctx: commands.Context) -> None:
         """Ensure voice state."""
-        does_not_require_voice = ctx.command.name in ("autodisconnect",)
+        does_not_require_voice = ctx.command.name in (
+            "autodisconnect",
+            "djrole",
+        )
         should_connect = ctx.command.name in ("play",)
         player: Player | None = ctx.voice_client
 
@@ -172,7 +175,7 @@ class Music(MetadataGroupCog, name="music"):
             await ctx.send("Queue is empty!")
             return
 
-        await MusicQueueView.start(ctx, player.queue)
+        await MusicQueueView.start(ctx, player)
 
     @commands.hybrid_command(
         name="recommend",
@@ -202,7 +205,7 @@ class Music(MetadataGroupCog, name="music"):
 
         await MusicQueueView.start(
             ctx,
-            player.queue,
+            player,
             results,
             title="Recommended tracks",
         )
@@ -222,7 +225,7 @@ class Music(MetadataGroupCog, name="music"):
             await ctx.send("Nothing found!")
             return
 
-        await MusicQueueView.start(ctx, player.queue, results, title="Search results")
+        await MusicQueueView.start(ctx, player, results, title="Search results")
 
     @commands.hybrid_command(
         name="seek",
