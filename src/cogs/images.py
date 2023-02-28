@@ -3,6 +3,7 @@
 ###
 from __future__ import annotations
 
+from typing import Literal
 from typing import TYPE_CHECKING
 
 import aiohttp
@@ -26,18 +27,24 @@ class Image(MetadataCog):
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @app_commands.command(name="avatar", description="Gets a user's avatar")
-    @app_commands.describe(user="(Optional) The user you want the avatar for")
+    @app_commands.describe(
+        user="(Optional) The user you want the avatar for",
+        avatar_type="The type of avatar you want",
+    )
     async def avatar_command(
         self,
         interaction: discord.Interaction,
         user: discord.Member | None,
+        avatar_type: Literal["guild", "profile"] = "profile",
     ) -> None:
         if user is None:
             user = interaction.user
+        avatar = user.avatar if avatar_type == "profile" else user.display_avatar
+
         embed = discord.Embed(
-            title=f"{user}'s avatar.",
+            title=f"{user}'s {avatar_type} avatar.",
             color=self.bot.config.color,
-        ).set_image(url=user.avatar)
+        ).set_image(url=avatar)
         await interaction.response.send_message(embed=embed)
 
     @commands.cooldown(1, 5, commands.BucketType.user)

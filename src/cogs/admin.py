@@ -42,7 +42,7 @@ class Admin(MetadataCog):
         description="Cleans the chat of the bot's messages",
     )
     async def clean_command(self, interaction: discord.Interaction) -> None:
-        def is_me(m: discord.Member) -> bool:
+        def is_me(m: discord.Message) -> bool:
             return m.author == self.bot.user
 
         await interaction.response.defer(ephemeral=True)

@@ -311,6 +311,7 @@ class Music(MetadataGroupCog, name="music"):
 
         await ctx.send(
             f"⏯ | {ctx.author.mention} has voted to pause the player. Votes: {len(player.pause_votes)}/{required}",
+            silent=True,
             delete_after=15,
         )
 
@@ -348,6 +349,7 @@ class Music(MetadataGroupCog, name="music"):
 
         await ctx.send(
             f"⏯ | {ctx.author.mention} has voted to resume the player. Votes: {len(player.resume_votes)}/{required}",
+            silent=True,
             delete_after=15,
         )
 
@@ -386,6 +388,7 @@ class Music(MetadataGroupCog, name="music"):
 
         await ctx.send(
             f"⏭ | {ctx.author.mention} has voted to skip the song. Votes: {len(player.skip_votes)}/{required} ",
+            silent=True,
             delete_after=15,
         )
 
@@ -425,6 +428,7 @@ class Music(MetadataGroupCog, name="music"):
 
         await ctx.send(
             f"🔀 | {ctx.author.mention} has voted to shuffle the queue. Votes: {len(player.shuffle_votes)}/{required}",
+            silent=True,
             delete_after=15,
         )
 
@@ -614,6 +618,7 @@ class Music(MetadataGroupCog, name="music"):
 
         await ctx.send(
             f"*⃣ | {ctx.author.mention} has voted to stop the player. Votes: {len(player.stop_votes)}/{required}",
+            silent=True,
             delete_after=15,
         )
 
@@ -641,7 +646,7 @@ class Music(MetadataGroupCog, name="music"):
         role: Role,
     ) -> None:
         await self.bot.guild_settings_service.set_dj_role(ctx.guild.id, role.id)
-        await ctx.send(f"🎶 | DJ role set to {role.mention}")
+        await ctx.send(f"🎶 | DJ role set to {role.mention}", silent=True)
 
 
 async def setup(bot: Sunny) -> None:

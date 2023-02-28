@@ -6,11 +6,11 @@ from __future__ import annotations
 import random
 from typing import TYPE_CHECKING
 
-from ui.embeds.generic import InteractionAuthorEmbed
+from ui.embeds.generic import ContextAuthorEmbed
 
 if TYPE_CHECKING:
     from typing import Any
-    from discord import Interaction
+    from discord.ext.commands import Context
 
 poll_images = [
     "https://i.imgur.com/t1OssGQ.gif",
@@ -32,15 +32,13 @@ poll_images = [
 ]
 
 
-class PollEmbed(InteractionAuthorEmbed):
-    def __init__(
-        self, interaction: Interaction, text: str, *args: Any, **kwargs: Any
-    ) -> None:
+class PollEmbed(ContextAuthorEmbed):
+    def __init__(self, ctx: Context, text: str, *args: Any, **kwargs: Any) -> None:
         super().__init__(
-            interaction,
+            ctx,
             title="Poll",
             description=text,
-            timestamp=interaction.created_at,
+            timestamp=ctx.message.created_at,
             *args,
             **kwargs,
         )
