@@ -134,7 +134,7 @@ class Music(MetadataGroupCog, name="music"):
         results = await player.get_tracks(query, ctx=ctx)
 
         if not results:
-            await ctx.send("Nothing found!")
+            await ctx.send("Nothing found!", delete_after=10)
             return
 
         if isinstance(results, pomice.Playlist):
@@ -176,7 +176,7 @@ class Music(MetadataGroupCog, name="music"):
         player: Player = ctx.voice_client
 
         if not player.current:
-            await ctx.send("Nothing is playing!")
+            await ctx.send("Nothing is playing!", delete_after=10)
             return
 
         await ctx.send(embed=MusicTrackEmbed(ctx, player.current))
@@ -191,7 +191,7 @@ class Music(MetadataGroupCog, name="music"):
 
         if player.queue.is_empty:
             if not player.current:
-                await ctx.send("Queue is empty!")
+                await ctx.send("Queue is empty!", delete_after=10)
                 return
 
             await ctx.invoke(self.playing_command)
@@ -207,7 +207,7 @@ class Music(MetadataGroupCog, name="music"):
         player: Player = ctx.voice_client
 
         if not player.current:
-            await ctx.send("Nothing is playing!")
+            await ctx.send("Nothing is playing!", delete_after=10)
             return
 
         if not player.current.track_type in (
@@ -216,13 +216,14 @@ class Music(MetadataGroupCog, name="music"):
         ):
             await ctx.send(
                 "Recommendations are only available for YouTube and Spotify tracks!",
+                delete_after=15,
             )
             return
 
         results = await player.get_recommendations(track=player.current, ctx=ctx)
 
         if not results:
-            await ctx.send("Nothing found!")
+            await ctx.send("Nothing found!", delete_after=10)
             return
 
         await MusicQueueView.start(
@@ -244,7 +245,7 @@ class Music(MetadataGroupCog, name="music"):
         results = await player.get_tracks(query, ctx=ctx)
 
         if not results:
-            await ctx.send("Nothing found!")
+            await ctx.send("Nothing found!", delete_after=10)
             return
 
         await MusicQueueView.start(ctx, player, results, title="Search results")
@@ -258,11 +259,11 @@ class Music(MetadataGroupCog, name="music"):
         player: Player = ctx.voice_client
 
         if not player.current:
-            await ctx.send("Nothing is playing!")
+            await ctx.send("Nothing is playing!", delete_after=10)
             return
 
         if not player.current.is_seekable:
-            await ctx.send("You cannot seek this track!")
+            await ctx.send("You cannot seek this track!", delete_after=10)
             return
 
         position *= 1000
@@ -271,6 +272,7 @@ class Music(MetadataGroupCog, name="music"):
             await player.seek(position)
             await ctx.send(
                 f"⏭ | An admin or DJ has seeked the player to {milliseconds_to_duration(player.position)}.",
+                delete_after=15,
             )
             return
 
@@ -278,10 +280,11 @@ class Music(MetadataGroupCog, name="music"):
             await player.seek(position)
             await ctx.send(
                 f"⏭ | The song requester has seeked the player to {milliseconds_to_duration(player.position)}.",
+                delete_after=15,
             )
             return
 
-        await ctx.send("⏭ | You are not allowed to seek the player.")
+        await ctx.send("⏭ | You are not allowed to seek the player.", delete_after=10)
 
     @commands.hybrid_command(
         name="pause",
@@ -468,7 +471,7 @@ class Music(MetadataGroupCog, name="music"):
         enabled = player.filters.has_filter(filter_tag="nightcore")
         if enabled:
             await player.remove_filter("nightcore", fast_apply=True)
-            await ctx.send("🎶 | Nightcore mode disabled!")
+            await ctx.send("🎶 | Nightcore mode disabled!", delete_after=10)
             return
 
         nightcore = pomice.Timescale.nightcore()
@@ -547,6 +550,27 @@ class Music(MetadataGroupCog, name="music"):
         vibrato = pomice.Vibrato(tag="vibrato", frequency=10, depth=1)
         await player.add_filter(vibrato, fast_apply=True)
         await ctx.send("🎶 | Vibrato effect enabled!", delete_after=10)
+
+    @commands.hybrid_command(
+        name="tremolo",
+        description="Tremolo effect",
+    )
+    async def tremolo_command(self, ctx: commands.Context) -> None:
+        player: Player = ctx.voice_client
+
+        if not is_privileged(ctx):
+            await ctx.send("🎶 | Only the DJ or admins may have fun", delete_after=10)
+            return
+
+        enabled = player.filters.has_filter(filter_tag="tremolo")
+        if enabled:
+            await player.remove_filter("tremolo", fast_apply=True)
+            await ctx.send("🎶 | Tremolo effect disabled!", delete_after=10)
+            return
+
+        tremolo = pomice.Tremolo(tag="tremolo", frequency=10, depth=1)
+        await player.add_filter(tremolo, fast_apply=True)
+        await ctx.send("🎶 | Tremolo effect enabled!", delete_after=10)
 
     @commands.hybrid_command(
         name="clearfilters",
@@ -639,6 +663,7 @@ class Music(MetadataGroupCog, name="music"):
         name="djrole",
         description="Sets the DJ role for the server",
     )
+    @app_commands.describe(role="Role to give DJ permissions to")
     @commands.has_permissions(manage_guild=True)
     async def set_dj_role_command(
         self,
