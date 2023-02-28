@@ -43,6 +43,11 @@ class Player(pomice.Player):
             self.queue.disable_loop()
             return
 
+    def in_queue(self, track: pomice.Track) -> bool:
+        is_in_queue = track in self.queue
+        is_playing = self.current and self.current.uri == track.uri
+        return is_in_queue or is_playing
+
     async def do_next(self) -> None:
         self.pause_votes.clear()
         self.resume_votes.clear()

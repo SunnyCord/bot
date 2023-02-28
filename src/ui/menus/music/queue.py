@@ -37,28 +37,30 @@ class MusicQueueView(BaseView):
         player: Player,
         results: list[Track] | None = None,
         title: str = "Queued up",
+        start: int = 0,
         *args: Any,
         **kwargs: Any,
     ):
         self.ctx = ctx
-        self.message = ctx.message
         self.bot = ctx.bot
         self.author = ctx.author
         self.player = player
         self.queue = player.queue
+        self.results = results
+        self.title = title
 
         super().__init__(*args, **kwargs)
 
         if results:
             display_tracks = results
-            self.remove_item(self.stop_button)
+            self.remove_item(self.remove_button)
         else:
             display_tracks = self.queue.get_queue()
             self.remove_item(self.play_button)
         self._redo_rows()
 
         self._embeds = _split_queue_to_pages(self.ctx, display_tracks, title)
-        self._current = 0
+        self._current = start
 
         for i, embed in enumerate(self._embeds):
             footer = embed.footer.text
@@ -147,8 +149,8 @@ class MusicQueueView(BaseView):
         await embed.prepare()
         await interaction.response.edit_message(embed=embed, view=self)
 
-    @button(emoji="\N{BLACK SQUARE FOR STOP}")
-    async def stop_button(
+    @button(emoji="\N{HEAVY MULTIPLICATION X}", style=ButtonStyle.red)
+    async def remove_button(
         self,
         interaction: Interaction,
         button: button.Button,
@@ -159,8 +161,44 @@ class MusicQueueView(BaseView):
                 ephemeral=True,
             )
             return
+
+        current_embed = self._get_embed()
+        track = current_embed.track
+
+        if track not in self.queue:
+            await interaction.response.send_message(
+                f"Track {current_embed.title_str} is not in queue anymore.",
+                ephemeral=True,
+            )
+            return
+
+        self.queue.remove(track)
+
+        if self.queue.is_empty:
+            await interaction.response.send_message(
+                f"Removed track {current_embed.title_str} from queue.",
+                ephemeral=True,
+            )
+
+            await self.message.edit(content="Queue is empty!", view=None, embed=None)
+            self._stop()
+            return
+
+        new_view = MusicQueueView(
+            self.ctx,
+            self.player,
+            self.results,
+            self.title,
+            self._current - 1,
+        )
+        new_view.message = self.message
+        await self.message.edit(view=new_view, embed=new_view.initial)
         self._stop()
-        await interaction.response.edit_message(view=self)
+
+        await interaction.response.send_message(
+            f"Removed track {current_embed.title_str} from queue.",
+            ephemeral=True,
+        )
 
     @button(
         emoji="\N{BLACK RIGHT-POINTING TRIANGLE}",

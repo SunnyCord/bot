@@ -137,10 +137,25 @@ class Music(MetadataGroupCog, name="music"):
         if isinstance(results, pomice.Playlist):
             embed = MusicPlaylistEmbed(ctx, results)
             for track in results.tracks:
+                if player.in_queue(track):
+                    continue
                 player.queue.put(track)
+
+            await ctx.send(
+                "Some tracks have been omitted as they are already in queue.",
+                delete_after=10,
+            )
         else:
             track = results[0]
             embed = MusicTrackEmbed(ctx, track, title="Added to queue")
+
+            if player.in_queue(track):
+                await ctx.send(
+                    f"Track {embed.title_str} is already in queue.",
+                    delete_after=10,
+                )
+                return
+
             player.queue.put(track)
 
         if not player.is_playing:
