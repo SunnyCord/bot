@@ -29,7 +29,6 @@ class Admin(commands.Cog):
         interaction: discord.Interaction,
         count: app_commands.Range[int, 1, 100],
     ) -> None:
-
         await interaction.response.defer(ephemeral=True)
         resp = await interaction.channel.purge(limit=count, bulk=True)
         await interaction.followup.send(f"Deleted {len(resp)} messages")
