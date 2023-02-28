@@ -81,7 +81,10 @@ class Music(MetadataGroupCog, name="music"):
             "autodisconnect",
             "djrole",
         )
-        should_connect = ctx.command.name in ("play",)
+        should_connect = ctx.command.name in (
+            "play",
+            "search",
+        )
         player: Player | None = ctx.voice_client
 
         if does_not_require_voice:
