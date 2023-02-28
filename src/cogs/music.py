@@ -187,7 +187,11 @@ class Music(MetadataGroupCog, name="music"):
         player: Player = ctx.voice_client
 
         if player.queue.is_empty:
-            await ctx.send("Queue is empty!")
+            if not player.current:
+                await ctx.send("Queue is empty!")
+                return
+
+            await ctx.invoke(self.playing_command)
             return
 
         await MusicQueueView.start(ctx, player)
