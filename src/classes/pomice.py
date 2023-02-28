@@ -11,6 +11,7 @@ from discord import HTTPException
 from discord import Member
 from discord import Message
 from discord.ext.commands import Context
+from models.guild_settings import GuildSettings
 from ui.embeds.music import MusicTrackEmbed
 
 
@@ -24,6 +25,7 @@ class Player(pomice.Player):
         self.queue: pomice.Queue = pomice.Queue()
         self.controller: Message | None = None
         self.context: Context | None = None
+        self.guild_settings: GuildSettings | None = None
         self.dj: Member | None = None
 
         self.pause_votes = set()
@@ -55,7 +57,9 @@ class Player(pomice.Player):
         try:
             track: pomice.Track = self.queue.get()
         except pomice.QueueEmpty:
-            return await self.teardown()
+            if self.guild_settings.voice_auto_disconnect:
+                await self.teardown()
+            return
 
         await self.play(track)
 
@@ -72,3 +76,6 @@ class Player(pomice.Player):
     async def set_context(self, ctx: Context) -> None:
         self.context = ctx
         self.dj = ctx.author
+        self.guild_settings = await self.bot.guild_settings_service.get_safe(
+            ctx.guild.id,
+        )

@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from discord import Member
     from discord import VoiceState
     from classes.bot import Sunny
+    from classes.pomice import Player
 
 
 class VoiceListener(
@@ -32,7 +33,7 @@ class VoiceListener(
         before: VoiceState,
         after: VoiceState,
     ) -> None:
-        player = None
+        player: Player = None
         for node in self.bot.pomice_node_pool.nodes.values():
             player = player or node.get_player(member.guild.id)
 
@@ -43,16 +44,11 @@ class VoiceListener(
             await player.destroy()
             return
 
-        auto_disconnect = (
-            await self.bot.guild_settings_service.get_auto_disconnect_status(
-                member.guild.id,
-            )
-        )
         if (
             after.channel is None
             and len(before.channel.members) == 1
             and self.bot.user in before.channel.members
-            and auto_disconnect
+            and player.guild_settings.voice_auto_disconnect
         ):
             await asyncio.sleep(1)
             await player.teardown()
