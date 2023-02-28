@@ -459,7 +459,7 @@ class Music(MetadataGroupCog, name="music"):
 
     @commands.hybrid_command(
         name="nightcore",
-        description="uguu~~",
+        description="Toggle uguu~~ mode",
     )
     async def nightcore_command(self, ctx: commands.Context) -> None:
         player: Player = ctx.voice_client
@@ -480,7 +480,7 @@ class Music(MetadataGroupCog, name="music"):
 
     @commands.hybrid_command(
         name="vaporwave",
-        description="aesthetic",
+        description="Toggle the aesthetic",
     )
     async def vaporwave_command(self, ctx: commands.Context) -> None:
         player: Player = ctx.voice_client
@@ -532,7 +532,7 @@ class Music(MetadataGroupCog, name="music"):
 
     @commands.hybrid_command(
         name="vibrato",
-        description="Vibrato effect",
+        description="Toggle vibrato effect",
     )
     async def vibrato_command(self, ctx: commands.Context) -> None:
         player: Player = ctx.voice_client
@@ -553,7 +553,7 @@ class Music(MetadataGroupCog, name="music"):
 
     @commands.hybrid_command(
         name="tremolo",
-        description="Tremolo effect",
+        description="Toggle tremolo effect",
     )
     async def tremolo_command(self, ctx: commands.Context) -> None:
         player: Player = ctx.voice_client
@@ -568,7 +568,7 @@ class Music(MetadataGroupCog, name="music"):
             await ctx.send("🎶 | Tremolo effect disabled!", delete_after=10)
             return
 
-        tremolo = pomice.Tremolo(tag="tremolo", frequency=10, depth=1)
+        tremolo = pomice.Tremolo(tag="tremolo", frequency=6, depth=0.75)
         await player.add_filter(tremolo, fast_apply=True)
         await ctx.send("🎶 | Tremolo effect enabled!", delete_after=10)
 
