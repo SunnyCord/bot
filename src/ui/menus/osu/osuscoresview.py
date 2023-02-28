@@ -113,6 +113,7 @@ class OsuScoresView(BaseView):
             await interaction.response.send_message(
                 "You are not the author of this message.",
                 ephemeral=True,
+                delete_after=10,
             )
             return
         self._current = 0
@@ -134,6 +135,7 @@ class OsuScoresView(BaseView):
             await interaction.response.send_message(
                 "You are not the author of this message.",
                 ephemeral=True,
+                delete_after=10,
             )
             return
         self._previous_embed()
@@ -155,6 +157,7 @@ class OsuScoresView(BaseView):
             await interaction.response.send_message(
                 "You are not the author of this message.",
                 ephemeral=True,
+                delete_after=10,
             )
             return
         self._stop()
@@ -170,6 +173,7 @@ class OsuScoresView(BaseView):
             await interaction.response.send_message(
                 "You are not the author of this message.",
                 ephemeral=True,
+                delete_after=10,
             )
             return
         self._next_embed()
@@ -191,6 +195,7 @@ class OsuScoresView(BaseView):
             await interaction.response.send_message(
                 "You are not the author of this message.",
                 ephemeral=True,
+                delete_after=10,
             )
             return
         self._current = self._len - 1

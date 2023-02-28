@@ -125,6 +125,7 @@ class MusicQueueView(BaseView):
             await interaction.response.send_message(
                 "You are not the author of this message.",
                 ephemeral=True,
+                delete_after=10,
             )
             return
         self._current = 0
@@ -142,6 +143,7 @@ class MusicQueueView(BaseView):
             await interaction.response.send_message(
                 "You are not the author of this message.",
                 ephemeral=True,
+                delete_after=10,
             )
             return
         self._previous_embed()
@@ -159,6 +161,7 @@ class MusicQueueView(BaseView):
             await interaction.response.send_message(
                 "You are not the author of this message.",
                 ephemeral=True,
+                delete_after=10,
             )
             return
 
@@ -169,6 +172,7 @@ class MusicQueueView(BaseView):
             await interaction.response.send_message(
                 f"Track {current_embed.title_str} is not in queue anymore.",
                 ephemeral=True,
+                delete_after=10,
             )
             return
 
@@ -178,6 +182,7 @@ class MusicQueueView(BaseView):
             await interaction.response.send_message(
                 f"Removed track {current_embed.title_str} from queue.",
                 ephemeral=True,
+                delete_after=10,
             )
 
             await self.message.edit(content="Queue is empty!", view=None, embed=None)
@@ -198,6 +203,7 @@ class MusicQueueView(BaseView):
         await interaction.response.send_message(
             f"Removed track {current_embed.title_str} from queue.",
             ephemeral=True,
+            delete_after=10,
         )
 
     @button(
@@ -213,6 +219,7 @@ class MusicQueueView(BaseView):
             await interaction.response.send_message(
                 "You are not the author of this message.",
                 ephemeral=True,
+                delete_after=10,
             )
             return
         current_embed = self._get_embed()
@@ -222,6 +229,7 @@ class MusicQueueView(BaseView):
             await interaction.response.send_message(
                 f"Track {current_embed.title_str} is already in queue.",
                 ephemeral=True,
+                delete_after=10,
             )
             return
 
@@ -229,6 +237,7 @@ class MusicQueueView(BaseView):
         await interaction.response.send_message(
             f"Added track {current_embed.title_str} to queue.",
             ephemeral=True,
+            delete_after=10,
         )
 
         if not self.player.is_playing:
@@ -244,6 +253,7 @@ class MusicQueueView(BaseView):
             await interaction.response.send_message(
                 "You are not the author of this message.",
                 ephemeral=True,
+                delete_after=10,
             )
             return
         self._next_embed()
@@ -261,6 +271,7 @@ class MusicQueueView(BaseView):
             await interaction.response.send_message(
                 "You are not the author of this message.",
                 ephemeral=True,
+                delete_after=10,
             )
             return
         self._current = self._len - 1

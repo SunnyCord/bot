@@ -537,6 +537,7 @@ class OsuRecordSettingsCog(
             await interaction.response.send_message(
                 "No skins found.",
                 ephemeral=True,
+                delete_after=10,
             )
             return
 

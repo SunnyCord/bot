@@ -97,6 +97,7 @@ class OsuSkinsView(BaseInteractionView):
             await interaction.response.send_message(
                 "You are not the author of this message.",
                 ephemeral=True,
+                delete_after=10,
             )
             return
         self._current = 0
@@ -114,6 +115,7 @@ class OsuSkinsView(BaseInteractionView):
             await interaction.response.send_message(
                 "You are not the author of this message.",
                 ephemeral=True,
+                delete_after=10,
             )
             return
         self._previous_embed()
@@ -132,6 +134,7 @@ class OsuSkinsView(BaseInteractionView):
             await interaction.response.send_message(
                 "You are not the author of this message.",
                 ephemeral=True,
+                delete_after=10,
             )
             return
         embed = self._get_embed()
@@ -155,6 +158,7 @@ class OsuSkinsView(BaseInteractionView):
             await interaction.response.send_message(
                 "You are not the author of this message.",
                 ephemeral=True,
+                delete_after=10,
             )
             return
         self._next_embed()
@@ -172,6 +176,7 @@ class OsuSkinsView(BaseInteractionView):
             await interaction.response.send_message(
                 "You are not the author of this message.",
                 ephemeral=True,
+                delete_after=10,
             )
             return
         self._current = self._len - 1
