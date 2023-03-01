@@ -62,17 +62,38 @@ def _score_to_embed_strs(
     statistics = score.statistics
     max_combo = beatmap.max_combo
     pp = score.pp
+    pp_fc = None
 
     if difficulty_attrs:
         name += f" ({difficulty_attrs.star_rating:.2f}★)"
         max_combo = difficulty_attrs.max_combo
+        calculator_type = get_calculator(score.mode)
+        calculator = calculator_type(difficulty_attrs)
+
         if not pp:
-            calculator_type = get_calculator(score.mode)
-            pp = calculator_type(difficulty_attrs).calculate(score).total
+            pp = calculator.calculate(score).total
+
+        is_fc = True
+        if (
+            hasattr(calculator, "_calculate_effective_miss_count")
+            and score.statistics.count_miss > 0
+        ):
+            is_fc = calculator._calculate_effective_miss_count(score) == 0
+            if not is_fc:
+                score_fc = score.copy()
+                score_fc.max_combo = max_combo
+                if isinstance(score, LazerScore):
+                    score_fc.statistics.great += score.statistics.miss
+                    score_fc.statistics.miss = 0
+                else:
+                    score_fc.statistics.count_300 += score.statistics.count_miss
+                    score_fc.statistics.count_miss = 0
+                pp_fc = calculator.calculate(score_fc).total
 
     weight = "" if not score.weight else f" (weight {score.weight.percentage/100:.2f})"
     score_text = f"[score]({score.score_url}) | " if score.score_url else ""
     user_text = f"[user]({score.user.url}) | " if include_user else ""
+    fc_text = "" if not pp_fc else f"(FC: **{pp_fc:.2f}pp**) "
 
     fail_text = "" if score.rank != "F" else f" ({score.completion:.2f}%)"
     bpm_text = _get_score_bpm(score)
@@ -89,7 +110,7 @@ def _score_to_embed_strs(
 
     value = cleandoc(
         f"""**{pp:.2f}pp**{weight}, accuracy: **{score.accuracy*100:.2f}%**, combo: **{score.max_combo}x/{max_combo}x**
-            score: **{score.score}** [**{statistics.count_300}**/**{statistics.count_100}**/**{statistics.count_50}**/**{statistics.count_miss}**]
+            {fc_text}score: **{score.score}** [**{statistics.count_300}**/**{statistics.count_100}**/**{statistics.count_50}**/**{statistics.count_miss}**]
             bpm: {bpm_text} | mods: {mods_text} | {ScoreRankIcon[score.rank]}{fail_text}{mods_settings_text}
             <t:{score.created_at.timestamp():.0f}:R>
             {score_text}{user_text}[map]({beatmap.url})
