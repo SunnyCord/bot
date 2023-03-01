@@ -11,6 +11,7 @@
                 "client_secret": "secret_here",
                 "redirect_uri": "http://localhost:5000/callback"
             },
+            "osu_daily_key": "",
             "ordr_key": "",
             "sentry": "",
             "support_invite": "https://discord.gg/ufHV3T3UPD",

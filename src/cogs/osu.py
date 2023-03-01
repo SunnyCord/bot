@@ -985,8 +985,36 @@ class OsuCog(MetadataCog, name="osu!"):
         ]
         final = sum(final_weighted_pps[:100])
 
+        new_rank = await self.bot.osu_daily_client.get_closest_rank(
+            final + bonus,
+            mode.id,
+        )
+
         await ctx.send(
-            f"{safe_username} would gain **{final - initial:.2f}pp** if they got a **{pp:.2f}pp** score, bringing them up to **{final + bonus:.2f}pp**.",
+            f"**{safe_username}** would gain **{final - initial:.2f}pp** if they got a **{pp:.2f}pp** score, bringing them up to **{final + bonus:.2f}pp** (**#{new_rank}**).",
+        )
+
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    @commands.hybrid_command(
+        name="ppforrank",
+        description="Shows pp required for a certain rank",
+    )
+    @app_commands.describe(
+        rank="Rank to calculate required pp for",
+        mode="The osu! mode to search for",
+    )
+    async def osu_pp_for_rank_command(
+        self,
+        ctx: commands.Context,
+        rank: commands.Range[int, 1, 1000000],
+        mode: aiosu.models.Gamemode = aiosu.models.Gamemode.STANDARD,
+    ) -> None:
+        await ctx.defer()
+
+        pp = await self.bot.osu_daily_client.get_closest_pp(rank, mode.id)
+
+        await ctx.send(
+            f"**{pp:.2f}pp** is required for **#{rank}** in **{mode.name_full}**.",
         )
 
     @commands.cooldown(1, 1, commands.BucketType.user)

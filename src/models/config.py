@@ -48,6 +48,7 @@ class Config(FrozenModel):
     color: int = 0xD74613
     token: str = ""
     osu_api: OsuAPIConfig = Field(default_factory=OsuAPIConfig)
+    osu_daily_key: str = ""
     ordr_key: str = ""
     sentry: str = ""
     support_invite: str = "https://discord.gg/ufHV3T3UPD"

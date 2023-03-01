@@ -14,6 +14,7 @@ import pomice
 from common.crypto import check_aes
 from common.logging import init_logging
 from common.logging import logger
+from common.osudaily import OsuDailyClient
 from cryptography.fernet import Fernet
 from discord.ext import commands
 from models.config import ConfigList
@@ -174,6 +175,7 @@ class Sunny(commands.AutoShardedBot):
         self.user_prefs_service = UserPreferencesService(user_prefs_repo)
         self.recording_prefs_service = RecordingPreferencesService(recording_prefs_repo)
         self.graph_service = GraphService(graph_repo)
+        self.osu_daily_client = OsuDailyClient(self.config.osu_daily_key)
         self.client_v1 = aiosu.v1.Client(self.config.osu_api.api_key)
         self.stable_storage = aiosu.v2.ClientStorage(
             token_repository=osu_repo,
