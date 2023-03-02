@@ -66,3 +66,17 @@ def get_user_from_text(text):
         lazer = match.group("domain") == "lazer"
         return match.group("userid"), lazer
     return None, None
+
+
+def get_bot_version():
+    from datetime import datetime
+    from subprocess import check_output
+
+    commit_date = (
+        check_output(["git", "show", "-s", "--format=%cd", "--date=short"])
+        .decode("utf-8")
+        .strip()
+    )
+    commit_date = datetime.strptime(commit_date, "%Y-%m-%d")
+
+    return f"sunny{commit_date:%Y.%m.%d}"

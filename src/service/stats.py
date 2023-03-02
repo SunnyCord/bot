@@ -48,3 +48,10 @@ class StatsService:
             commands (dict): Commands.
         """
         await self.repository.set_commands(commands)
+
+    async def set_bot_version(self, version: str) -> None:
+        """Set bot version.
+        Args:
+            version (str): Bot version.
+        """
+        await self.repository.set_bot_version(version)

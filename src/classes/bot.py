@@ -12,6 +12,7 @@ import aiosu
 import discord
 import pomice
 from common.crypto import check_aes
+from common.helpers import get_bot_version
 from common.logging import init_logging
 from common.logging import logger
 from common.osudaily import OsuDailyClient
@@ -221,6 +222,7 @@ class Sunny(commands.AutoShardedBot):
         await self.load_extension("jishaku")
         await _load_extensions(self)
         await self.stats_service.set_commands(_get_cogs_dict(self))
+        await self.stats_service.set_bot_version(get_bot_version())
 
     async def on_ready(self) -> None:
         logger.info(f"Logged in as {self.user} (ID: {self.user.id})")

@@ -49,3 +49,10 @@ class StatsRepository:
             commands (dict): Commands.
         """
         await self.redis.set("sunny:commands", orjson.dumps(commands))
+
+    async def set_bot_version(self, version: str) -> None:
+        """Set bot version.
+        Args:
+            version (str): Bot version.
+        """
+        await self.redis.set("sunny:bot-version", version)
