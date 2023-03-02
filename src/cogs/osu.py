@@ -648,27 +648,23 @@ class OsuCog(MetadataCog, name="osu!"):
         self.config_v2 = self.bot.config.osu_api
 
     @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.hybrid_command(
+    @app_commands.command(
         name="osuset",
         description="Sets the osu! profile for the message author",
     )
     async def osu_set_command(
         self,
-        ctx: commands.Context,
+        interaction: discord.Interaction,
     ) -> None:
-        await ctx.send("Please access the thread to link your osu! account.")
-        thread = await ctx.channel.create_thread(
-            name="osu! Profile Link",
-            auto_archive_duration=60,
-            invitable=False,
-        )
         url = aiosu.utils.auth.generate_url(
             client_id=self.config_v2.client_id,
             redirect_uri=self.config_v2.redirect_uri,
-            state=encode_discord_id(ctx.author.id, self.bot.aes),
+            state=encode_discord_id(interaction.user.id, self.bot.aes),
         )
-        await thread.add_user(ctx.author)
-        await thread.send(embed=OsuLinkEmbed(ctx, url))
+        await interaction.response.send_message(
+            embed=OsuLinkEmbed(interaction, url),
+            ephemeral=True,
+        )
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(

@@ -41,7 +41,7 @@ class OsuDailyClient:
             "m": mode_int,
         }
         async with self._session.get(
-            f"https://osudaily.net/api/pp.php",
+            "https://osudaily.net/api/pp.php",
             params=params,
         ) as resp:
             return orjson.loads(await resp.read())["rank"]
@@ -55,7 +55,7 @@ class OsuDailyClient:
             "m": mode_int,
         }
         async with self._session.get(
-            f"https://osudaily.net/api/pp.php",
+            "https://osudaily.net/api/pp.php",
             params=params,
         ) as resp:
             return orjson.loads(await resp.read())["pp"]
