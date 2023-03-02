@@ -46,6 +46,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Include .git information
+        run: |
+          cp -r .git src/
+
       - name: Copy Pipfile and Pipfile.lock
         run: |
           cp Pipfile src/
