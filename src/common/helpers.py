@@ -69,7 +69,6 @@ def get_user_from_text(text):
 
 
 async def get_bot_version():
-    # sunnyYYYY.MM.DD format from latest git commit date
     import aiohttp
 
     try:
