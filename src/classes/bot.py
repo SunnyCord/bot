@@ -222,7 +222,7 @@ class Sunny(commands.AutoShardedBot):
         await self.load_extension("jishaku")
         await _load_extensions(self)
         await self.stats_service.set_commands(_get_cogs_dict(self))
-        await self.stats_service.set_bot_version(get_bot_version())
+        await self.stats_service.set_bot_version(await get_bot_version())
 
     async def on_ready(self) -> None:
         logger.info(f"Logged in as {self.user} (ID: {self.user.id})")

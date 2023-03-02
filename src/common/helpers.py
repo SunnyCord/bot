@@ -68,15 +68,16 @@ def get_user_from_text(text):
     return None, None
 
 
-def get_bot_version():
-    from datetime import datetime
-    from subprocess import check_output
+async def get_bot_version():
+    # sunnyYYYY.MM.DD format from latest git commit date
+    import aiohttp
 
-    commit_date = (
-        check_output(["git", "show", "-s", "--format=%cd", "--date=short"])
-        .decode("utf-8")
-        .strip()
-    )
-    commit_date = datetime.strptime(commit_date, "%Y-%m-%d")
-
-    return f"sunny{commit_date:%Y.%m.%d}"
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                "https://api.github.com/repos/SunnyCord/bot/commits/master",
+            ) as resp:
+                data = await resp.json()
+                return f"sunny{data['commit']['author']['date'].split('T')[0].replace('-', '.')}"
+    except Exception:
+        return "sunny?.?.?"
