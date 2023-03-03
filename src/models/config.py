@@ -45,6 +45,7 @@ class OsuAPIConfig(FrozenModel):
 
 class Config(FrozenModel):
     log_level: str = "WARNING"
+    environment: str = "production"
     color: int = 0xD74613
     token: str = ""
     osu_api: OsuAPIConfig = Field(default_factory=OsuAPIConfig)

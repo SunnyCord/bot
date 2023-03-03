@@ -3,13 +3,14 @@
     "configs": [
         {
             "log_level": "WARNING",
+            "environment": "production",
             "color": 14108179,
             "token": "",
             "osu_api": {
                 "api_key": "key_here",
                 "client_id": 1,
                 "client_secret": "secret_here",
-                "redirect_uri": "http://localhost:5000/callback"
+                "redirect_uri": "http://localhost:3001/callback"
             },
             "osu_daily_key": "",
             "ordr_key": "",

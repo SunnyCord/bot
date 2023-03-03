@@ -8,7 +8,11 @@ from classes.bot import Sunny
 
 bot = Sunny()
 
-sentry_sdk.init(bot.config.sentry)
+sentry_sdk.init(
+    dsn=bot.config.sentry,
+    environment=bot.config.environment,
+    traces_sample_rate=1.0,
+)
 
 if __name__ == "__main__":
     bot.run(reconnect=True)
