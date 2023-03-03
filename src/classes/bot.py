@@ -80,6 +80,8 @@ def _get_cogs_dict(bot: Sunny) -> dict[str, Any]:
             if getattr(cmd, "hidden", False):
                 continue
 
+            is_hybrid = isinstance(cmd, commands.HybridCommand)
+
             cmd = getattr(cmd, "app_command", cmd)
 
             parameters = {p.display_name: p.description for p in cmd.parameters}
@@ -88,7 +90,7 @@ def _get_cogs_dict(bot: Sunny) -> dict[str, Any]:
                     "name": cmd.name,
                     "description": cmd.description,
                     "parameters": parameters,
-                    "is_hybrid": isinstance(cmd, commands.HybridCommand),
+                    "is_hybrid": is_hybrid,
                 },
             )
 
