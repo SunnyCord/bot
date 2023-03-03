@@ -103,6 +103,7 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
             await send_message(
                 f"Invalid input for ``{command}``. Please check your input and try again.",
             )
+            return
 
         elif isinstance(error, aiosu.exceptions.APIException):
             await send_message("The requested data was not found on osu!")

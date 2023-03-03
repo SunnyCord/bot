@@ -140,6 +140,7 @@ class Sunny(commands.AutoShardedBot):
         init_logging(self.config.log_level)
         self.setup_db()
         self.setup_services()
+        self.version: str = "sunny?.?.?"
 
     def setup_db(self) -> None:
         logger.info("Setting up database connections...")
@@ -222,7 +223,8 @@ class Sunny(commands.AutoShardedBot):
         await self.load_extension("jishaku")
         await _load_extensions(self)
         await self.stats_service.set_commands(_get_cogs_dict(self))
-        await self.stats_service.set_bot_version(await get_bot_version())
+        self.version = await get_bot_version()
+        await self.stats_service.set_bot_version(self.version)
 
     async def on_ready(self) -> None:
         logger.info(f"Logged in as {self.user} (ID: {self.user.id})")
