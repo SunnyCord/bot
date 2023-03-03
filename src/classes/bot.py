@@ -88,6 +88,7 @@ def _get_cogs_dict(bot: Sunny) -> dict[str, Any]:
                     "name": cmd.name,
                     "description": cmd.description,
                     "parameters": parameters,
+                    "is_hybrid": isinstance(cmd, commands.HybridCommand),
                 },
             )
 
