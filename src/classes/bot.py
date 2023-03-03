@@ -226,11 +226,11 @@ class Sunny(commands.AutoShardedBot):
 
     async def on_ready(self) -> None:
         logger.info(f"Logged in as {self.user} (ID: {self.user.id})")
-        await self.start_pomice_nodes()
         await self.stats_service.set_cog_count(len(self.cogs))
         await self.stats_service.set_command_count(len(self.all_commands))
         await self.stats_service.set_guild_count(len(self.guilds))
         await self.stats_service.set_user_count(len(self.users))
+        await self.start_pomice_nodes()
 
     async def on_guild_join(self, guild: discord.Guild) -> None:
         logger.info(f"Joined guild {guild.name} (ID: {guild.id})")
