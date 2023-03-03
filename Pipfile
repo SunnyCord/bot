@@ -23,3 +23,6 @@ black = ">=22.10.0"
 
 [requires]
 python_version = "3.10"
+
+[scripts]
+start = "bash -c 'cd src && python run.py'"
