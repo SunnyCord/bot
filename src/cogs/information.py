@@ -25,21 +25,21 @@ class Information(MetadataCog):
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
-    @app_commands.command(
+    @commands.hybrid_command(
         name="botinfo",
         description="Retrieve information about the bot.",
     )
-    async def info_bot_command(self, interaction: discord.Information) -> None:
-        embed = BotInfoEmbed(interaction)
-        await interaction.response.send_message(embed=embed)
+    async def info_bot_command(self, ctx: commands.Context) -> None:
+        embed = BotInfoEmbed(ctx)
+        await ctx.send(embed=embed)
 
-    @app_commands.command(
+    @commands.hybrid_command(
         name="serverinfo",
         description="Retrieve information about the current server.",
     )
-    async def info_server_command(self, interaction: discord.Interaction) -> None:
-        embed = ServerInfoEmbed(interaction)
-        await interaction.response.send_message(embed=embed)
+    async def info_server_command(self, ctx: commands.Context) -> None:
+        embed = ServerInfoEmbed(ctx)
+        await ctx.send(embed=embed)
 
     @commands.hybrid_command(
         name="help",

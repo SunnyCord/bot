@@ -6,48 +6,47 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import discord
-from ui.embeds.generic import InteractionEmbed
+from ui.embeds.generic import ContextEmbed
 
 if TYPE_CHECKING:
     from typing import Any
+    from discord.ext.commands import Context
 
 
-class ServerInfoEmbed(InteractionEmbed):
-    def __init__(
-        self, interaction: discord.Interaction, *args: Any, **kwargs: Any
-    ) -> None:
-        super().__init__(interaction, timestamp=interaction.created_at, *args, **kwargs)
-        self.set_thumbnail(url=interaction.guild.icon)
+class ServerInfoEmbed(ContextEmbed):
+    def __init__(self, ctx: Context, *args: Any, **kwargs: Any) -> None:
+        super().__init__(ctx, timestamp=ctx.message.created_at, *args, **kwargs)
+        self.set_thumbnail(url=ctx.guild.icon)
         self.set_footer(
-            text=interaction.client.user.name,
-            icon_url=interaction.client.user.avatar,
+            text=ctx.bot.user.name,
+            icon_url=ctx.bot.user.avatar,
         )
 
         self.add_field(
             name="Name (ID)",
-            value=f"{interaction.guild} ({interaction.guild.id})",
+            value=f"{ctx.guild} ({ctx.guild.id})",
             inline=False,
         )
-        self.add_field(name="Owner", value=interaction.guild.owner, inline=False)
+        self.add_field(name="Owner", value=ctx.guild.owner, inline=False)
         self.add_field(
             name="Verification Level",
-            value=interaction.guild.verification_level,
+            value=ctx.guild.verification_level,
         )
-        self.add_field(name="Members", value=interaction.guild.member_count)
+        self.add_field(name="Members", value=ctx.guild.member_count)
         self.add_field(
             name="Text Channels",
             value=len(
                 list(
                     filter(
                         lambda x: isinstance(x, discord.channel.TextChannel),
-                        interaction.guild.channels,
+                        ctx.guild.channels,
                     ),
                 ),
             ),
         )
-        self.add_field(name="Roles", value=len(interaction.guild.roles))
-        self.add_field(name="Emotes", value=len(interaction.guild.emojis))
+        self.add_field(name="Roles", value=len(ctx.guild.roles))
+        self.add_field(name="Emotes", value=len(ctx.guild.emojis))
         self.add_field(
             name="Created On:",
-            value=f"<t:{interaction.guild.created_at.timestamp():.0f}:R>",
+            value=f"<t:{ctx.guild.created_at.timestamp():.0f}:R>",
         )
