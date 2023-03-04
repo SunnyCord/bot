@@ -21,6 +21,36 @@ if TYPE_CHECKING:
     from typing import Callable
 
 
+def create_sentry_scope_ctx(ctx: commands.Context) -> sentry_sdk.Scope:
+    scope = sentry_sdk.Scope()
+    scope.set_user(
+        {
+            "id": ctx.author.id,
+            "username": ctx.author.name,
+        },
+    )
+    scope.set_tag("command", ctx.command.qualified_name)
+    scope.set_tag("guild", ctx.guild.id)
+    scope.set_tag("channel", ctx.channel.id)
+    return scope
+
+
+def create_sentry_scope_interaction(
+    interaction: discord.Interaction,
+) -> sentry_sdk.Scope:
+    scope = sentry_sdk.Scope()
+    scope.set_user(
+        {
+            "id": interaction.user.id,
+            "username": interaction.user.name,
+        },
+    )
+    scope.set_tag("command", interaction.command.qualified_name)
+    scope.set_tag("guild", interaction.guild.id)
+    scope.set_tag("channel", interaction.channel.id)
+    return scope
+
+
 class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
     """Handles any errors that may occur."""
 
@@ -32,25 +62,35 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
             interaction: discord.Interaction,
             error: Exception,
         ) -> None:
+            scope = create_sentry_scope_interaction(interaction)
             await self.error_handler(
-                interaction.response.send_message,
-                interaction.command,
-                error,
-                True,
+                send_message=interaction.response.send_message,
+                command=interaction.command,
+                error=error,
+                scope=scope,
+                is_slash=True,
             )
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error: Exception) -> None:
         if not isinstance(error, commands.CommandOnCooldown):
             ctx.command.reset_cooldown(ctx)
-        await self.error_handler(ctx.send, ctx.command, error)
+        scope = create_sentry_scope_ctx(ctx)
+        await self.error_handler(
+            send_message=ctx.send,
+            command=ctx.command,
+            error=error,
+            scope=scope,
+            is_slash=False,
+        )
 
     async def error_handler(
         self,
         send_message: Callable,
         command: commands.Command,
         error: Exception,
-        is_slash: bool = False,
+        scope: sentry_sdk.Scope,
+        is_slash: bool,
     ) -> None:
         if hasattr(command, "on_error") and not is_slash:
             return
@@ -127,7 +167,10 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
             await send_message("No music nodes are available. Try again later!")
             return
 
-        sentry_id = sentry_sdk.capture_exception(error)
+        sentry_id = sentry_sdk.capture_exception(
+            error=error,
+            scope=scope,
+        )
 
         embed = discord.Embed(
             title="Oh no! An unexpected error has occured",
