@@ -652,7 +652,7 @@ class Music(MetadataGroupCog, name="music"):
             delete_after=15,
         )
 
-    @premium.is_guild_or_user_premium()
+    @premium.is_guild_premium()
     @commands.hybrid_command(
         name="autodisconnect",
         description="Toggles voice channel auto-disconnect",
