@@ -3,7 +3,6 @@
 ###
 from __future__ import annotations
 
-import os
 from functools import partial
 from typing import TYPE_CHECKING
 
@@ -11,6 +10,7 @@ import aiordr
 import aiosu
 import discord
 import pomice
+from cogs import LOAD_EXTENSIONS as COGS_LOAD
 from common.crypto import check_aes
 from common.helpers import get_bot_version
 from common.logging import init_logging
@@ -18,6 +18,7 @@ from common.logging import logger
 from common.osudaily import OsuDailyClient
 from cryptography.fernet import Fernet
 from discord.ext import commands
+from listeners import LOAD_EXTENSIONS as LISTENER_LOAD
 from models.config import ConfigList
 from motor.motor_asyncio import AsyncIOMotorClient
 from redis.asyncio import Redis
@@ -36,6 +37,7 @@ from service import RecordingPreferencesService
 from service import StatsService
 from service import UserPreferencesService
 from service import UserService
+from tasks import LOAD_EXTENSIONS as TASKS_LOAD
 
 if TYPE_CHECKING:
     from typing import Any
@@ -113,17 +115,13 @@ def _get_cogs_dict(bot: Sunny) -> dict[str, Any]:
     return cogs_list
 
 
-def _get_modules(folder: str):
-    for file in os.listdir(f"./{folder}"):
-        if file.endswith(".py"):
-            yield file
-
-
 async def _load_extensions(bot: Sunny):
-    for folder in MODULE_FOLDERS:
-        for extension in _get_modules(folder):
-            name = f"{folder}.{os.path.splitext(extension)[0]}"
-            await bot.load_extension(name)
+    for cog in COGS_LOAD:
+        await bot.load_extension(cog)
+    for listener in LISTENER_LOAD:
+        await bot.load_extension(listener)
+    for task in TASKS_LOAD:
+        await bot.load_extension(task)
 
 
 class Sunny(commands.AutoShardedBot):
