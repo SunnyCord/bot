@@ -7,11 +7,11 @@ from typing import TYPE_CHECKING
 
 import async_timeout
 from classes.cog import MetadataCog
+from common.premium import check_premium
 from discord.ext import tasks
 
 if TYPE_CHECKING:
     from classes.bot import Sunny
-    from typing import Callable
 
 
 class CronTask(MetadataCog, hidden=True):
@@ -19,32 +19,26 @@ class CronTask(MetadataCog, hidden=True):
 
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
-        self.pubsub_task.start()
-
-        self.handlers: dict[str, Callable] = {}
+        self.premium_task.start()
 
     def cog_unload(self) -> None:
-        self.pubsub_task.cancel()
+        self.premium_task.cancel()
 
-    async def handle_message(self, message: dict[str, str]) -> None:
-        channel = message["channel"]
-        data = message["data"]
-        if handler := self.handlers.get(channel):
-            await handler(data)
+    @tasks.loop(seconds=60)
+    async def premium_task(self) -> None:
+        premium_guilds = await self.bot.guild_settings_service.get_all_boosted_guilds()
+        for guild_id in premium_guilds:
+            booster_id = await self.bot.guild_settings_service.get_premium_booster(
+                guild_id,
+            )
+            is_premium = await check_premium(booster_id, self.bot)
+            if not is_premium:
+                await self.bot.guild_settings_service.remove_premium_booster(guild_id)
 
-    @tasks.loop(seconds=0.5)
-    async def pubsub_task(self) -> None:
-        async with async_timeout.timeout(1):
-            message = await self.bot.redis_pubsub.get_message()
-            if message is not None:
-                await self.handle_message(message)
-
-    @pubsub_task.before_loop
-    async def before_pubsub_task(self) -> None:
+    @premium_task.before_loop
+    async def before_premium_task(self) -> None:
         await self.bot.wait_until_ready()
-        await self.bot.redis_pubsub.psubscribe("sunny:*")
 
 
 async def setup(bot: Sunny) -> None:
-    return  # Disabled for now
     await bot.add_cog(CronTask(bot))

@@ -13,6 +13,8 @@ import sentry_sdk
 from classes import exceptions
 from classes.cog import MetadataCog
 from common.logging import logger
+from common.premium import PremiumMissing
+from common.premium import SupportServerMissing
 from discord.ext import commands
 
 
@@ -142,6 +144,12 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
         elif isinstance(error, commands.UserInputError):
             await send_message(
                 f"Invalid input for ``{command}``. Please check your input and try again.",
+            )
+            return
+
+        elif isinstance(error, (SupportServerMissing, PremiumMissing)):
+            await send_message(
+                error,
             )
             return
 

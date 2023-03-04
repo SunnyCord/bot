@@ -142,6 +142,8 @@ class Sunny(commands.AutoShardedBot):
         self.setup_db()
         self.setup_services()
         self.version: str = "sunny?.?.?"
+        self.support_guild: discord.Guild | None = None
+        self.premium_role: discord.Role | None = None
 
     def setup_db(self) -> None:
         logger.info("Setting up database connections...")
@@ -228,6 +230,14 @@ class Sunny(commands.AutoShardedBot):
         self.version = await get_bot_version()
         await self.stats_service.set_bot_version(self.version)
 
+        logger.info("Setting up support guild...")
+        self.support_guild = await self.fetch_guild(
+            self.config.premium.support_guild_id,
+        )
+        self.premium_role = self.support_guild.get_role(
+            self.config.premium.premium_role_id,
+        )
+
     async def on_ready(self) -> None:
         logger.info(f"Logged in as {self.user} (ID: {self.user.id})")
         await self.stats_service.set_cog_count(len(self.cogs))
@@ -267,7 +277,6 @@ class Sunny(commands.AutoShardedBot):
         super().run(self.config.token, log_handler=None, **kwargs)
 
     async def close(self) -> None:
-        # TODO: Close pomice nodes (when pomice supports it)
         await self.client_v1.close()
         await self.stable_storage.close()
         await self.lazer_storage.close()

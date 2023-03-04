@@ -11,6 +11,7 @@ from classes.bot import Sunny
 from classes.cog import MetadataGroupCog
 from classes.exceptions import MusicPlayerError
 from classes.pomice import Player
+from common import premium
 from common.humanizer import milliseconds_to_duration
 from discord import app_commands
 from discord import Role
@@ -457,6 +458,7 @@ class Music(MetadataGroupCog, name="music"):
         await player.set_volume(volume)
         await ctx.send(f"🔈 | Set to {volume}%", delete_after=10)
 
+    @premium.is_guild_or_user_premium()
     @commands.hybrid_command(
         name="nightcore",
         description="Toggle uguu~~ mode",
@@ -478,6 +480,7 @@ class Music(MetadataGroupCog, name="music"):
         await player.add_filter(nightcore, fast_apply=True)
         await ctx.send("🎶 | Nightcore mode enabled!", delete_after=10)
 
+    @premium.is_guild_or_user_premium()
     @commands.hybrid_command(
         name="vaporwave",
         description="Toggle the aesthetic",
@@ -499,6 +502,7 @@ class Music(MetadataGroupCog, name="music"):
         await player.add_filter(vaporwave, fast_apply=True)
         await ctx.send("🎶 | Ｖａｐｏｒｗａｖｅ mode enabled!", delete_after=10)
 
+    @premium.is_guild_or_user_premium()
     @commands.hybrid_command(
         name="lowpass",
         description="Suppresses high frequencies",
@@ -530,6 +534,7 @@ class Music(MetadataGroupCog, name="music"):
             delete_after=10,
         )
 
+    @premium.is_guild_or_user_premium()
     @commands.hybrid_command(
         name="vibrato",
         description="Toggle vibrato effect",
@@ -551,6 +556,7 @@ class Music(MetadataGroupCog, name="music"):
         await player.add_filter(vibrato, fast_apply=True)
         await ctx.send("🎶 | Vibrato effect enabled!", delete_after=10)
 
+    @premium.is_guild_or_user_premium()
     @commands.hybrid_command(
         name="tremolo",
         description="Toggle tremolo effect",
@@ -646,6 +652,7 @@ class Music(MetadataGroupCog, name="music"):
             delete_after=15,
         )
 
+    @premium.is_guild_or_user_premium()
     @commands.hybrid_command(
         name="autodisconnect",
         description="Toggles voice channel auto-disconnect",

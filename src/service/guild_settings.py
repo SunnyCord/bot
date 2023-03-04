@@ -201,3 +201,74 @@ class GuildSettingsService:
 
         settings.dj_role = role_id
         await self.update(settings)
+
+    async def get_premium_booster(self, guild_id: int) -> int:
+        """Get premium booster.
+
+        Args:
+            guild_id (int): Guild ID.
+
+        Returns:
+            int: Booster ID.
+        """
+        settings = await self.get_safe(guild_id)
+        return settings.booster
+
+    async def set_premium_booster(self, guild_id: int, booster_id: int) -> None:
+        """Set premium booster.
+
+        Args:
+            guild_id (int): Guild ID.
+            booster_id (int): Booster ID.
+        """
+        try:
+            settings = await self.get_one(guild_id)
+        except ValueError:
+            settings = await self.create(guild_id)
+
+        settings.booster = booster_id
+        await self.update(settings)
+
+    async def remove_premium_booster(self, guild_id: int) -> None:
+        """Remove premium booster.
+
+        Args:
+            guild_id (int): Guild ID.
+        """
+        try:
+            settings = await self.get_one(guild_id)
+        except ValueError:
+            return
+
+        settings.booster = None
+        await self.update(settings)
+
+    async def get_user_boosts(self, user_id: int) -> list[int]:
+        """Get all guilds boosted by user.
+
+        Args:
+            user_id (int): User ID.
+
+        Returns:
+            list[int]: List of guild IDs.
+        """
+        return await self.repository.get_user_boosts(user_id)
+
+    async def get_user_boosts_count(self, user_id: int) -> int:
+        """Get user boosts count.
+
+        Args:
+            user_id (int): User ID.
+
+        Returns:
+            int: Boosts count.
+        """
+        return await self.repository.get_user_boosts_count(user_id)
+
+    async def get_all_boosted_guilds(self) -> list[int]:
+        """Get all guilds that are boosted.
+
+        Returns:
+            list[int]: List of guild IDs.
+        """
+        return await self.repository.get_all_boosted_guilds()

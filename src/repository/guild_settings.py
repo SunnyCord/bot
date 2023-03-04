@@ -68,3 +68,39 @@ class GuildSettingsRepository:
             guild_id (int): Guild ID.
         """
         await self.database.guild_settings.delete_one({"guild_id": guild_id})
+
+    async def get_user_boosts(self, user_id: int) -> list[int]:
+        """Get all guilds boosted by user.
+
+        Args:
+            user_id (int): User ID.
+
+        Returns:
+            list[int]: List of guild IDs.
+        """
+        guilds = await self.database.guild_settings.find(
+            {"booster": user_id},
+        ).to_list(None)
+        return [guild["guild_id"] for guild in guilds]
+
+    async def get_user_boosts_count(self, user_id: int) -> int:
+        """Get user boost count.
+
+        Args:
+            user_id (int): User ID.
+
+        Returns:
+            int: Boost count.
+        """
+        return await self.database.guild_settings.count_documents({"booster": user_id})
+
+    async def get_all_boosted_guilds(self) -> list[int]:
+        """Get all boosted guilds.
+
+        Returns:
+            list[int]: List of guild IDs.
+        """
+        guilds = await self.database.guild_settings.find(
+            {"booster": {"$ne": None}},
+        ).to_list(None)
+        return [guild["guild_id"] for guild in guilds]

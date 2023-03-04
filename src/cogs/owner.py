@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from classes.bot import Sunny
 
 
-class OwnerCog(MetadataCog, name="Owner", hidden=True):
+class Owner(MetadataCog, name="Owner", hidden=True):
     """
     Commands used for managing the bot.
     """
@@ -64,4 +64,4 @@ class OwnerCog(MetadataCog, name="Owner", hidden=True):
 
 
 async def setup(bot: Sunny) -> None:
-    await bot.add_cog(OwnerCog(bot))
+    await bot.add_cog(Owner(bot))

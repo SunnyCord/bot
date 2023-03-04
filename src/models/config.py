@@ -44,6 +44,13 @@ class OsuAPIConfig(FrozenModel):
     redirect_uri: str = "http://localhost:5000/callback"
 
 
+class PremiumConfig(FrozenModel):
+    boost_limit: int = 2
+    support_guild_id: int = 0
+    premium_role_id: int = 0
+    premium_url: str = "http://ko-fi.com/niceaesth/tiers"
+
+
 class Config(FrozenModel):
     log_level: str = "WARNING"
     environment: str = "production"
@@ -54,6 +61,7 @@ class Config(FrozenModel):
     ordr_key: str = ""
     sentry: str = ""
     support_invite: str = "https://discord.gg/ufHV3T3UPD"
+    premium: PremiumConfig = Field(default_factory=PremiumConfig)
     owners: List[int] = Field(default_factory=lambda: [151670779782758400])
     command_prefixes: List[str] = Field(default_factory=lambda: ["s."])
     redis: RedisConfig = Field(default_factory=RedisConfig)
