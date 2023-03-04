@@ -212,6 +212,7 @@ class Sunny(commands.AutoShardedBot):
                     password=node.password,
                     secure=node.ssl_enabled,
                     identifier=node.name,
+                    heartbeat=node.heartbeat,
                     spotify_client_id=self.config.lavalink.spotify_client_id,
                     spotify_client_secret=self.config.lavalink.spotify_client_secret,
                 )
@@ -268,6 +269,7 @@ class Sunny(commands.AutoShardedBot):
         super().run(self.config.token, log_handler=None, **kwargs)
 
     async def close(self) -> None:
+        # TODO: Close pomice nodes (when pomice supports it)
         await self.client_v1.close()
         await self.stable_storage.close()
         await self.lazer_storage.close()

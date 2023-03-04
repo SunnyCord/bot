@@ -28,6 +28,7 @@ class LavalinkConfig(FrozenModel):
     port: int = 2333
     password: str = "youshallnotpass"
     ssl_enabled: bool = False
+    heartbeat: int = 50
 
 
 class LavalinkConfigList(FrozenModel):

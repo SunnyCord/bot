@@ -40,7 +40,8 @@
                         "host": "lavalink",
                         "port": 2333,
                         "password": "youshallnotpass",
-                        "ssl_enabled": false
+                        "ssl_enabled": false,
+                        "heartbeat": 50
                     }
                 ]
             }
