@@ -93,7 +93,7 @@ async def user_or_guild_premium_interaction(interaction: Interaction) -> bool:
         pass
 
     raise PremiumMissing(
-        "You must have premium to use this command! Find out more about premium by using the `premium` commands.",
+        "You must have premium or boost the server to use this command! Find out more about premium by using the `premium` commands.",
     )
 
 
