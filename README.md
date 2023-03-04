@@ -1,10 +1,10 @@
 # ☀️Sunny☀️
 
-![Python](https://img.shields.io/badge/Python-3.10-brightgreen.svg)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+[![Python](https://img.shields.io/badge/Python-3.10-brightgreen.svg)](https://www.python.org/)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/fb85e414688643da8514d5a7bbf2f566)](https://www.codacy.com/gh/SunnyCord/bot/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=SunnyCord/bot&amp;utm_campaign=Badge_Grade)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/SunnyCord/bot/master.svg)](https://results.pre-commit.ci/latest/github/SunnyCord/bot/master)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
-[![Discord](https://img.shields.io/discord/1046862536621953054?logo=discord&style=flat-square)](https://discord.gg/ufHV3T3UPD)
+[![Discord](https://img.shields.io/discord/1046862536621953054?logo=discord&style=flat-rounded)](https://discord.gg/ufHV3T3UPD)
 
 ## About
 
