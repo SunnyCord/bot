@@ -11,6 +11,8 @@ from redis.asyncio import Redis
 class GraphRepository:
     """Graph Repository"""
 
+    __slots__ = ("redis",)
+
     def __init__(self, redis: Redis) -> None:
         self.redis = redis
 

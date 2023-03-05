@@ -200,6 +200,7 @@ class Music(MetadataGroupCog, name="music"):
 
         await MusicQueueView.start(ctx, player)
 
+    @premium.is_user_premium()
     @commands.hybrid_command(
         name="recommend",
         description="Recommends a track based on the current track",

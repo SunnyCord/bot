@@ -127,6 +127,31 @@ async def _load_extensions(bot: Sunny):
 class Sunny(commands.AutoShardedBot):
     """Sunny Bot"""
 
+    __slots__ = (
+        "config",
+        "database",
+        "redis_client",
+        "redis_pubsub",
+        "pomice_node_pool",
+        "version",
+        "support_guild",
+        "premium_role",
+        "beatmap_service",
+        "graph_service",
+        "guild_settings_service",
+        "recording_prefs_service",
+        "stats_service",
+        "user_prefs_service",
+        "user_service",
+        "osu_daily_client",
+        "client_v1",
+        "client_v2",
+        "stable_storage",
+        "lazer_storage",
+        "ordr_client",
+        "aes",
+    )
+
     def __init__(self, **kwargs: Any) -> None:
         activity = discord.Activity(type=discord.ActivityType.watching, name="you.")
         super().__init__(

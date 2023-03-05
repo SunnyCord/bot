@@ -12,6 +12,8 @@ from repository import RecordingPreferencesRepository
 class RecordingPreferencesService:
     """Recording Preferences Service"""
 
+    __slots__ = ("repository",)
+
     def __init__(self, repository: RecordingPreferencesRepository) -> None:
         self.repository = repository
 

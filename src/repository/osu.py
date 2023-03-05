@@ -12,6 +12,8 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 class OsuRepository(BaseTokenRepository):
     """Repository for osu! tokens."""
 
+    __slots__ = ("database",)
+
     def __init__(self, database: AsyncIOMotorDatabase) -> None:
         self.database = database
 

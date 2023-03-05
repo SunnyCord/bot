@@ -22,6 +22,11 @@ def prepare_client(func: Callable) -> Callable:
 
 
 class OsuDailyClient:
+    __slots__ = (
+        "__key",
+        "_session",
+    )
+
     def __init__(self, key: str):
         self.__key = key
         self._session: ClientSession = None

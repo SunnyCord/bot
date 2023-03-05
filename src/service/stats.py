@@ -11,6 +11,8 @@ from repository import StatsRepository
 class StatsService:
     """Service for statistics."""
 
+    __slots__ = ("repository",)
+
     def __init__(self, repository: StatsRepository) -> None:
         self.repository = repository
 

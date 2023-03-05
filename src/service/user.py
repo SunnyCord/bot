@@ -10,6 +10,8 @@ from repository.user import UserRepository
 class UserService:
     """Service for user data."""
 
+    __slots__ = ("repository",)
+
     def __init__(self, repository: UserRepository):
         self.repository = repository
 

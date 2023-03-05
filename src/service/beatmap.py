@@ -10,6 +10,8 @@ from repository.beatmap import BeatmapRepository
 class BeatmapService:
     """Service for channel beatmap data."""
 
+    __slots__ = ("repository",)
+
     def __init__(self, repository: BeatmapRepository):
         self.repository = repository
 

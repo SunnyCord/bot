@@ -10,6 +10,8 @@ from repository.user_preferences import UserPreferencesRepository
 class UserPreferencesService:
     """User Preferences Service"""
 
+    __slots__ = ("repository",)
+
     def __init__(self, repository: UserPreferencesRepository) -> None:
         self.repository = repository
 

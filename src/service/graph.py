@@ -11,6 +11,8 @@ from repository.graph import GraphRepository
 class GraphService:
     """Graph Service"""
 
+    __slots__ = ("repository",)
+
     def __init__(self, repository: GraphRepository) -> None:
         self.repository = repository
 

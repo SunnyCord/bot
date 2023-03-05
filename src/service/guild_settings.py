@@ -10,6 +10,8 @@ from repository.guild_settings import GuildSettingsRepository
 class GuildSettingsService:
     """Guild Settings Service"""
 
+    __slots__ = ("repository",)
+
     def __init__(self, repository: GuildSettingsRepository) -> None:
         self.repository = repository
 

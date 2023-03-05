@@ -10,6 +10,8 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 class UserRepository:
     """Repository for user data."""
 
+    __slots__ = ("database",)
+
     def __init__(self, database: AsyncIOMotorDatabase):
         self.database = database
 

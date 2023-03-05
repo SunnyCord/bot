@@ -10,6 +10,8 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 class GuildSettingsRepository:
     """Guild Settings Repository"""
 
+    __slots__ = ("database",)
+
     def __init__(self, database: AsyncIOMotorDatabase) -> None:
         self.database = database
 

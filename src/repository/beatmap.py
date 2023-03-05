@@ -10,6 +10,8 @@ from redis.asyncio import Redis
 class BeatmapRepository:
     """Repository for beatmap data."""
 
+    __slots__ = ("redis",)
+
     def __init__(self, redis: Redis):
         self.redis = redis
 
