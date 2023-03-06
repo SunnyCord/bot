@@ -60,8 +60,9 @@ class Player(pomice.Player):
             with suppress(HTTPException):
                 await self.controller.delete()
 
+        track = None
         try:
-            track: pomice.Track = self.queue.get()
+            track = self.queue.get()
         except pomice.QueueEmpty:
             should_disconnect = self.guild_settings.voice_auto_disconnect
 
@@ -71,26 +72,26 @@ class Player(pomice.Player):
                     ctx=self.context,
                 )
 
-                next_track = next(
-                    (
-                        track
-                        for track in recommendations
-                        if track.uri != self._ending_track.uri
-                    ),
-                    None,
-                )
+                next_track = None
+                if recommendations:
+                    next_track = next(
+                        (
+                            track
+                            for track in recommendations
+                            if track.uri != self._ending_track.uri
+                        ),
+                        None,
+                    )
 
                 if next_track:
                     should_disconnect = False
                     track = next_track
-                elif not should_disconnect:
-                    await self.context.send(
-                        "No more tracks to play, stopping...",
-                    )
-                    return
 
             if should_disconnect:
                 await self.teardown()
+                return
+
+            if not track:
                 return
 
         await self.play(track)

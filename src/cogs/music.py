@@ -130,8 +130,6 @@ class Music(MetadataGroupCog, name="music"):
     @app_commands.describe(query="URL or keywords for searching")
     async def play_command(self, ctx: commands.Context, *, query: str) -> None:
         player: Player = ctx.voice_client
-
-        await ctx.defer()
         results = await player.get_tracks(query, ctx=ctx)
 
         if not results:
