@@ -113,25 +113,55 @@ async def user_or_guild_premium_context(ctx: Context) -> bool:
     )
 
 
-def is_user_premium(type="context") -> Callable:
+def is_user_premium(command_type="context") -> Callable:
+    """
+    A decorator to check if the user has premium, to be used as:
+    @is_user_premium()
+    @commands.command()
+    async def my_command(self, ctx):
+        pass
+
+    :param command_type: The type of command. Defaults to "context".
+    :type command_type: str, optional
+    """
     return (
         commands.check(user_premium_context)
-        if type == "context"
+        if command_type == "context"
         else app_commands.check(user_premium_interaction)
     )
 
 
-def is_guild_premium(type="context") -> Callable:
+def is_guild_premium(command_type="context") -> Callable:
+    """
+    A decorator to check if the guild has premium, to be used as:
+    @is_guild_premium()
+    @commands.command()
+    async def my_command(self, ctx):
+        pass
+
+    :param command_type: The type of command. Defaults to "context".
+    :type command_type: str, optional
+    """
     return (
         commands.check(guild_premium_context)
-        if type == "context "
+        if command_type == "context "
         else app_commands.check(guild_premium_interaction)
     )
 
 
-def is_guild_or_user_premium(type="context") -> Callable:
+def is_guild_or_user_premium(command_type="context") -> Callable:
+    """
+    A decorator to check if the user or guild has premium, to be used as:
+    @is_guild_or_user_premium()
+    @commands.command()
+    async def my_command(self, ctx):
+        pass
+
+    :param command_type: The type of command. Defaults to "context".
+    :type command_type: str, optional
+    """
     return (
         commands.check(user_or_guild_premium_context)
-        if type == "context"
+        if command_type == "context"
         else app_commands.check(user_or_guild_premium_interaction)
     )

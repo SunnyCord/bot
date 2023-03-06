@@ -5,7 +5,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import async_timeout
 from classes.cog import MetadataCog
 from common.premium import check_premium
 from discord.ext import tasks
