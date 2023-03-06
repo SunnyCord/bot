@@ -7,7 +7,6 @@ import asyncio
 from typing import TYPE_CHECKING
 
 from classes.cog import MetadataCog
-from discord.ext import commands
 
 if TYPE_CHECKING:
     from discord import Member
@@ -26,7 +25,7 @@ class VoiceListener(
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
-    @commands.Cog.listener()
+    @MetadataCog.listener()
     async def on_voice_state_update(
         self,
         member: Member,

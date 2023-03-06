@@ -240,6 +240,7 @@ class Sunny(commands.AutoShardedBot):
                     heartbeat=node.heartbeat,
                     spotify_client_id=self.config.lavalink.spotify_client_id,
                     spotify_client_secret=self.config.lavalink.spotify_client_secret,
+                    apple_music=True,
                 )
                 logger.info(f"Connected to node '{node.name}`")
             except pomice.NodeConnectionFailure:

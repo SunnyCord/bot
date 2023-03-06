@@ -19,7 +19,6 @@ class Player(pomice.Player):
     """Pomice guild player."""
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        self.loop_mode: pomice.LoopMode = kwargs.pop("loop_mode", pomice.LoopMode.QUEUE)
         super().__init__(*args, **kwargs)
 
         self.queue: pomice.Queue = pomice.Queue()
@@ -27,6 +26,8 @@ class Player(pomice.Player):
         self.context: Context | None = None
         self.guild_settings: GuildSettings | None = None
         self.dj: Member | None = None
+        self.auto_play: bool = False
+        self.loop_mode: pomice.LoopMode = pomice.LoopMode.QUEUE
 
         self.pause_votes = set()
         self.resume_votes = set()
@@ -62,9 +63,35 @@ class Player(pomice.Player):
         try:
             track: pomice.Track = self.queue.get()
         except pomice.QueueEmpty:
-            if self.guild_settings.voice_auto_disconnect:
+            should_disconnect = self.guild_settings.voice_auto_disconnect
+
+            if self.auto_play:
+                recommendations = await self.get_recommendations(
+                    track=self._ending_track,
+                    ctx=self.context,
+                )
+
+                next_track = next(
+                    (
+                        track
+                        for track in recommendations
+                        if track.uri != self._ending_track.uri
+                    ),
+                    None,
+                )
+
+                if next_track:
+                    should_disconnect = False
+                    track = next_track
+                elif not should_disconnect:
+                    await self.context.send(
+                        "No more tracks to play, stopping...",
+                    )
+                    return
+
+            if should_disconnect:
                 await self.teardown()
-            return
+                return
 
         await self.play(track)
 

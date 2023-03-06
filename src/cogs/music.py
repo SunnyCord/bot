@@ -620,6 +620,27 @@ class Music(MetadataGroupCog, name="music"):
         await player.set_loop_mode(pomice.LoopMode[loop_mode])
         await ctx.send(f"🔁 | Loop mode set to {loop_mode}", delete_after=10)
 
+    @premium.is_guild_premium()
+    @commands.hybrid_command(
+        name="autoplay",
+        description="Toggle autoplay",
+    )
+    async def autoplay_command(self, ctx: commands.Context) -> None:
+        player: Player = ctx.voice_client
+
+        if not is_privileged(ctx):
+            await ctx.send(
+                "🔁 | Only the DJ or admins may change the autoplay mode",
+                delete_after=10,
+            )
+            return
+
+        player.auto_play = not player.auto_play
+        await ctx.send(
+            f"🔁 | Autoplay mode {'enabled' if player.auto_play else 'disabled'}",
+            delete_after=10,
+        )
+
     @commands.hybrid_command(
         name="stop",
         aliases=["disconnect", "dc"],
