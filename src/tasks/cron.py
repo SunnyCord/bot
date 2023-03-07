@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from classes.cog import MetadataCog
+from common.logging import logger
 from common.premium import check_premium
 from discord.ext import tasks
 
@@ -33,6 +34,9 @@ class CronTask(MetadataCog, hidden=True):
             is_premium = await check_premium(booster_id, self.bot)
             if not is_premium:
                 await self.bot.guild_settings_service.remove_premium_booster(guild_id)
+                logger.info(
+                    f"Removed premium from guild {guild_id} due to expiration on booster {booster_id}",
+                )
 
     @premium_task.before_loop
     async def before_premium_task(self) -> None:
