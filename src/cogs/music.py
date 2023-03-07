@@ -183,6 +183,7 @@ class Music(MetadataGroupCog, name="music"):
             await player.do_next()
             return
 
+        await player.set_context(ctx=ctx)
         await ctx.send(embed=embed)
 
     @commands.hybrid_command(
