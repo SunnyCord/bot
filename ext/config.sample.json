@@ -16,6 +16,12 @@
             "ordr_key": "",
             "sentry": "",
             "support_invite": "https://discord.gg/ufHV3T3UPD",
+            "premium": {
+                "boost_limit": 2,
+                "support_guild_id": 1046862536621953054,
+                "premium_role_id": 1081579412744585268,
+                "premium_url": "http://ko-fi.com/niceaesth/tiers"
+            },
             "owners": [
                 151670779782758400
             ],
