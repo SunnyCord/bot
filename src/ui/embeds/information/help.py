@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 
 class HelpEmbed(ContextEmbed):
     def __init__(self, ctx: commands.Context):
+        # TODO: change to sunnycord link
         super().__init__(
             ctx,
             title="Sunny Help",

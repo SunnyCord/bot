@@ -9,6 +9,7 @@ from classes.cog import MetadataGroupCog
 from common import premium
 from discord import app_commands
 from discord import Interaction
+from ui.embeds.information import UserPremiumEmbed
 
 if TYPE_CHECKING:
     from classes.bot import Sunny
@@ -38,9 +39,8 @@ class Premium(MetadataGroupCog, name="premium"):
             interaction.user.id,
         )
         guilds = [await self.bot.fetch_guild(guild_id) for guild_id in guilds_boosted]
-        guilds = ", ".join([guild.name for guild in guilds])
         await interaction.response.send_message(
-            f"You are a premium user. Thank you for supporting the bot! You are boosting the following servers:\n{guilds}",
+            embed=UserPremiumEmbed(interaction, guilds),
         )
 
     @premium.is_user_premium("interaction")
