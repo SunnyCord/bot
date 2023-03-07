@@ -1,18 +1,21 @@
+###
+# Copyright (c) 2023 NiceAesth. All rights reserved.
+###
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import discord
-from discord import app_commands
+from classes.cog import MetadataCog
 from discord.ext import commands
 from ui.embeds.information import BotInfoEmbed
+from ui.embeds.information import HelpEmbed
 from ui.embeds.information import ServerInfoEmbed
 
 if TYPE_CHECKING:
     from classes.bot import Sunny
 
 
-class Information(commands.Cog):
+class Information(MetadataCog):
     """
     Retrieve information about various items.
     """
@@ -20,21 +23,29 @@ class Information(commands.Cog):
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
-    @app_commands.command(
+    @commands.hybrid_command(
         name="botinfo",
         description="Retrieve information about the bot.",
     )
-    async def info_bot_command(self, interaction: discord.Information) -> None:
-        embed = BotInfoEmbed(interaction)
-        await interaction.response.send_message(embed=embed)
+    async def info_bot_command(self, ctx: commands.Context) -> None:
+        embed = BotInfoEmbed(ctx)
+        await ctx.send(embed=embed)
 
-    @app_commands.command(
+    @commands.hybrid_command(
         name="serverinfo",
         description="Retrieve information about the current server.",
     )
-    async def info_server_command(self, interaction: discord.Interaction) -> None:
-        embed = ServerInfoEmbed(interaction)
-        await interaction.response.send_message(embed=embed)
+    async def info_server_command(self, ctx: commands.Context) -> None:
+        embed = ServerInfoEmbed(ctx)
+        await ctx.send(embed=embed)
+
+    @commands.hybrid_command(
+        name="help",
+        description="Get help with the commands.",
+    )
+    async def help_command(self, ctx: commands.Context) -> None:
+        embed = HelpEmbed(ctx)
+        await ctx.send(embed=embed)
 
 
 async def setup(bot: Sunny) -> None:

@@ -1,0 +1,43 @@
+{
+    "python.formatting.provider": "black",
+    // License header
+    "psi-header.templates": [
+        {
+            "language": "*",
+            "template": [
+                "Copyright (c) <<year>> <<author>>. All rights reserved.",
+            ]
+        }
+    ],
+    "psi-header.changes-tracking": {
+        "isActive": true,
+        "exclude": [
+            "markdown",
+            "plaintext",
+            "json",
+            "jsonc",
+            "*.config.*",
+        ],
+        "autoHeader": "autoSave",
+        "excludeGlob": [
+            ".venv/**",
+        ]
+    },
+    "psi-header.config": {
+        "author": "NiceAesth",
+        "forceToTop": true,
+        "blankLinesAfter": 1,
+    },
+    "psi-header.lang-config": [
+        {
+            "language": "python",
+            "begin": "###",
+            "end": "###",
+            "prefix": "# ",
+        },
+        {
+            "language": "Makefile",
+            "mapTo": "python",
+        },
+    ],
+}

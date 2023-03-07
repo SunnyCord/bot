@@ -1,43 +1,57 @@
+###
+# Copyright (c) 2023 NiceAesth. All rights reserved.
+###
 from __future__ import annotations
 
+import asyncio
 from typing import TYPE_CHECKING
 
-from discord.ext import commands
+from classes.cog import MetadataCog
 
 if TYPE_CHECKING:
     from discord import Member
     from discord import VoiceState
     from classes.bot import Sunny
+    from classes.pomice import Player
 
 
 class VoiceListener(
-    commands.Cog,
-    command_attrs=dict(hidden=True),
+    MetadataCog,
     name="Voice State Update Listener",
-):  # type: ignore
+    hidden="True",
+):
     """Voice State Update Listener"""
 
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
-    @commands.Cog.listener()
+    @MetadataCog.listener()
     async def on_voice_state_update(
         self,
         member: Member,
         before: VoiceState,
         after: VoiceState,
     ) -> None:
-        player = self.bot.lavalink.player_manager.get(member.guild.id)
+        player: Player = None
+        for node in self.bot.pomice_node_pool.nodes.values():
+            player = player or node.get_player(member.guild.id)
 
-        if player is None or not player.is_connected:
+        if player is None:
             return
 
-        # Disconnect if channel is empty
-        channel = await self.bot.fetch_channel(player.channel_id)
-        if len(channel.members) == 1:
-            player.queue.clear()
-            await player.stop()
-            await member.guild.change_voice_state(channel=None)
+        if member == self.bot.user and after.channel is None:
+            await player.destroy()
+            return
+
+        if (
+            after.channel is None
+            and len(before.channel.members) == 1
+            and self.bot.user in before.channel.members
+            and player.guild_settings.voice_auto_disconnect
+        ):
+            await asyncio.sleep(1)
+            await player.teardown()
+            return
 
 
 async def setup(bot: Sunny) -> None:

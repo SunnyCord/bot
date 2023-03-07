@@ -1,19 +1,23 @@
+###
+# Copyright (c) 2023 NiceAesth. All rights reserved.
+###
 from __future__ import annotations
 
-from typing import Optional
+from typing import Literal
 from typing import TYPE_CHECKING
 
 import aiohttp
 import discord
-from classes.enums.animals import Animal
+from classes.cog import MetadataCog
 from discord import app_commands
 from discord.ext import commands
+from models.enums.animals import Animal
 
 if TYPE_CHECKING:
     from classes.bot import Sunny
 
 
-class Image(commands.Cog):
+class Image(MetadataCog):
     """
     Various image-related commands.
     """
@@ -23,18 +27,24 @@ class Image(commands.Cog):
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @app_commands.command(name="avatar", description="Gets a user's avatar")
-    @app_commands.describe(user="(Optional) The user you want the avatar for")
+    @app_commands.describe(
+        user="(Optional) The user you want the avatar for",
+        avatar_type="The type of avatar you want",
+    )
     async def avatar_command(
         self,
         interaction: discord.Interaction,
-        user: Optional[discord.Member],
+        user: discord.Member | None,
+        avatar_type: Literal["guild", "profile"] = "profile",
     ) -> None:
         if user is None:
             user = interaction.user
+        avatar = user.avatar if avatar_type == "profile" else user.display_avatar
+
         embed = discord.Embed(
-            title=f"{user}'s avatar.",
+            title=f"{user}'s {avatar_type} avatar.",
             color=self.bot.config.color,
-        ).set_image(url=user.avatar)
+        ).set_image(url=avatar)
         await interaction.response.send_message(embed=embed)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -59,7 +69,7 @@ class Image(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
-    @app_commands.command(name="wink", description="😉")
+    @app_commands.command(name="wink", description="Wink")
     async def wink_command(self, interaction: discord.Interaction) -> None:
         async with aiohttp.ClientSession() as cs:
             async with cs.get("https://some-random-api.ml/animu/wink") as r:
@@ -72,11 +82,12 @@ class Image(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
-    @app_commands.command(name="pat", description="Give someone (or yourself) a pat")
+    @app_commands.command(name="pat", description="Give someone a pat")
+    @app_commands.describe(user="User to pat")
     async def pat_command(
         self,
         interaction: discord.Interaction,
-        user: Optional[discord.Member],
+        user: discord.Member | None,
     ) -> None:
         if user is None:
             user = interaction.user
@@ -92,11 +103,12 @@ class Image(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
-    @app_commands.command(name="hug", description="Give someone (or yourself) a hug")
+    @app_commands.command(name="hug", description="Give someone a hug")
+    @app_commands.describe(user="User to hug")
     async def hug_command(
         self,
         interaction: discord.Interaction,
-        user: Optional[discord.Member],
+        user: discord.Member | None,
     ) -> None:
         if user is None:
             user = interaction.user

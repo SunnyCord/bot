@@ -1,30 +1,45 @@
+###
+# Copyright (c) 2023 NiceAesth. All rights reserved.
+###
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from discord.ext import commands
+from classes.cog import MetadataCog
+from common.logging import logger
+from common.premium import check_premium
 from discord.ext import tasks
 
 if TYPE_CHECKING:
     from classes.bot import Sunny
 
 
-class CronTask(commands.Cog):
+class CronTask(MetadataCog, hidden=True):
     """Database maintenance task"""
 
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
-        self.update.start()
+        self.premium_task.start()
 
     def cog_unload(self) -> None:
-        self.update.cancel()
+        self.premium_task.cancel()
 
-    @tasks.loop(minutes=720)
-    async def update(self) -> None:
-        ...
+    @tasks.loop(seconds=60)
+    async def premium_task(self) -> None:
+        premium_guilds = await self.bot.guild_settings_service.get_all_boosted_guilds()
+        for guild_id in premium_guilds:
+            booster_id = await self.bot.guild_settings_service.get_premium_booster(
+                guild_id,
+            )
+            is_premium = await check_premium(booster_id, self.bot)
+            if not is_premium:
+                await self.bot.guild_settings_service.remove_premium_booster(guild_id)
+                logger.info(
+                    f"Removed premium from guild {guild_id} due to expiration on booster {booster_id}",
+                )
 
-    @update.before_loop
-    async def before_update(self) -> None:
+    @premium_task.before_loop
+    async def before_premium_task(self) -> None:
         await self.bot.wait_until_ready()
 
 

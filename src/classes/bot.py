@@ -1,27 +1,66 @@
+###
+# Copyright (c) 2023 NiceAesth. All rights reserved.
+###
 from __future__ import annotations
 
-import logging
-import os
+from functools import partial
 from typing import TYPE_CHECKING
 
+import aiordr
 import aiosu
 import discord
-from classes.config import ConfigList
-from commons.helpers import list_module
-from commons.mongoIO import mongoIO
-from commons.redisIO import redisIO
+import pomice
+from cogs import LOAD_EXTENSIONS as COGS_LOAD
+from common.crypto import check_aes
+from common.helpers import get_bot_version
+from common.logging import init_logging
+from common.logging import logger
+from common.osudaily import OsuDailyClient
+from cryptography.fernet import Fernet
 from discord.ext import commands
-from motor import motor_asyncio
+from listeners import LOAD_EXTENSIONS as LISTENER_LOAD
+from models.config import ConfigList
+from motor.motor_asyncio import AsyncIOMotorClient
+from redis.asyncio import Redis
+from repository import BeatmapRepository
+from repository import GraphRepository
+from repository import GuildSettingsRepository
+from repository import OsuRepository
+from repository import RecordingPreferencesRepository
+from repository import StatsRepository
+from repository import UserPreferencesRepository
+from repository import UserRepository
+from service import BeatmapService
+from service import GraphService
+from service import GuildSettingsService
+from service import RecordingPreferencesService
+from service import StatsService
+from service import UserPreferencesService
+from service import UserService
+from tasks import LOAD_EXTENSIONS as TASKS_LOAD
 
 if TYPE_CHECKING:
     from typing import Any
+    from typing import Callable
 
-logger = logging.getLogger()
+
+MODULE_FOLDERS = ["listeners", "cogs", "tasks"]
 
 
 async def _get_prefix(bot: Sunny, message: discord.Message) -> list[str]:
     """A callable Prefix for our bot. This also has the ability to ignore certain messages by passing an empty string."""
-    return commands.when_mentioned_or(*bot.config.command_prefixes)(bot, message)
+    if not message.guild:
+        return bot.config.command_prefixes
+
+    prefix = await bot.guild_settings_service.get_prefix(message.guild.id)
+
+    if not prefix:
+        return commands.when_mentioned_or(*bot.config.command_prefixes)(bot, message)
+
+    return commands.when_mentioned_or(prefix, *bot.config.command_prefixes)(
+        bot,
+        message,
+    )
 
 
 def _get_intents() -> discord.Intents:
@@ -31,42 +70,223 @@ def _get_intents() -> discord.Intents:
     )
 
 
-class Sunny(commands.AutoShardedBot):
-    async def setup_hook(self) -> None:
-        await self.load_extension("jishaku")
+def _get_cogs_dict(bot: Sunny) -> dict[str, Any]:
+    """Gets a dict of all cogs and their commands."""
+    cogs_list: list[dict[str, Any]] = []
+    for cog in bot.cogs.values():
+        if getattr(cog, "hidden", True):
+            continue
 
-        module_folders = ["listeners", "cogs", "tasks"]
-        for module in module_folders:
-            for extension in list_module(module):
-                name = f"{module}.{os.path.splitext(extension)[0]}"
-                try:
-                    await self.load_extension(name)
-                except Exception as e:
-                    logging.error(f"Failed loading module {name} : {e}")
+        commands_list: list[dict[str, Any]] = []
+        for cmd in cog.get_commands() + cog.get_app_commands():
+            if getattr(cmd, "hidden", False):
+                continue
+
+            is_hybrid = isinstance(cmd, commands.HybridCommand)
+
+            cmd = getattr(cmd, "app_command", cmd)
+
+            parameters = {p.display_name: p.description for p in cmd.parameters}
+            commands_list.append(
+                {
+                    "name": cmd.name,
+                    "description": cmd.description,
+                    "parameters": parameters,
+                    "is_hybrid": is_hybrid,
+                },
+            )
+
+        if getattr(cog, "display_parent"):
+            parent = next(
+                (p for p in cogs_list if p["name"] == cog.display_parent),
+                None,
+            )
+            parent["commands"].extend(commands_list)
+            continue
+
+        cogs_list.append(
+            {
+                "name": cog.qualified_name.lower(),
+                "description": cog.description,
+                "commands": commands_list,
+            },
+        )
+
+    return cogs_list
+
+
+async def _load_extensions(bot: Sunny):
+    for cog in COGS_LOAD:
+        await bot.load_extension(cog)
+    for listener in LISTENER_LOAD:
+        await bot.load_extension(listener)
+    for task in TASKS_LOAD:
+        await bot.load_extension(task)
+
+
+class Sunny(commands.AutoShardedBot):
+    """Sunny Bot"""
+
+    __slots__ = (
+        "config",
+        "database",
+        "redis_client",
+        "redis_pubsub",
+        "pomice_node_pool",
+        "version",
+        "support_guild",
+        "premium_role",
+        "beatmap_service",
+        "graph_service",
+        "guild_settings_service",
+        "recording_prefs_service",
+        "stats_service",
+        "user_prefs_service",
+        "user_service",
+        "osu_daily_client",
+        "client_v1",
+        "client_v2",
+        "stable_storage",
+        "lazer_storage",
+        "ordr_client",
+        "aes",
+    )
 
     def __init__(self, **kwargs: Any) -> None:
+        activity = discord.Activity(type=discord.ActivityType.watching, name="you.")
         super().__init__(
             description="Sunny Bot",
             command_prefix=_get_prefix,
             intents=_get_intents(),
-            # activity=discord.Activity(),
+            activity=activity,
             help_command=None,
+            **kwargs,
         )
         self.config = ConfigList.get_config()
-        self.motorClient = motor_asyncio.AsyncIOMotorClient(
+        init_logging(self.config.log_level)
+        self.setup_db()
+        self.setup_services()
+        self.version: str = "sunny?.?.?"
+        self.support_guild: discord.Guild | None = None
+        self.premium_role: discord.Role | None = None
+
+    def setup_db(self) -> None:
+        logger.info("Setting up database connections...")
+        motor_client = AsyncIOMotorClient(
             self.config.mongo.host,
             serverSelectionTimeoutMS=self.config.mongo.timeout,
         )
-        self.redisIO = redisIO(self) if self.config.redis.enable else None
-        self.mongoIO = mongoIO(self)
-        self.client_v1 = aiosu.v1.Client(self.config.osuAPI)
-        self.client_storage = aiosu.v2.ClientStorage()
+        self.database = motor_client[self.config.mongo.database]
+        self.redis_client = Redis(
+            host=self.config.redis.host,
+            port=self.config.redis.port,
+        )
+        self.redis_pubsub = self.redis_client.pubsub(ignore_subscribe_messages=True)
+
+    def setup_services(self) -> None:
+        logger.info("Setting up repositories...")
+
+        beatmap_repo = BeatmapRepository(self.redis_client)
+        stats_repo = StatsRepository(self.redis_client)
+        graph_repo = GraphRepository(self.redis_client)
+        user_repo = UserRepository(self.database)
+        settings_repo = GuildSettingsRepository(self.database)
+        osu_repo = OsuRepository(self.database)
+        user_prefs_repo = UserPreferencesRepository(self.database)
+        recording_prefs_repo = RecordingPreferencesRepository(self.database)
+
+        logger.info("Setting up services...")
+        self.pomice_node_pool = pomice.NodePool()
+
+        self.beatmap_service = BeatmapService(beatmap_repo)
+        self.user_service = UserService(user_repo)
+        self.stats_service = StatsService(stats_repo)
+        self.guild_settings_service = GuildSettingsService(settings_repo)
+        self.user_prefs_service = UserPreferencesService(user_prefs_repo)
+        self.recording_prefs_service = RecordingPreferencesService(recording_prefs_repo)
+        self.graph_service = GraphService(graph_repo)
+        self.osu_daily_client = OsuDailyClient(self.config.osu_daily_key)
+        self.client_v1 = aiosu.v1.Client(self.config.osu_api.api_key)
+        self.stable_storage = aiosu.v2.ClientStorage(
+            token_repository=osu_repo,
+            client_secret=self.config.osu_api.client_secret,
+            client_id=self.config.osu_api.client_id,
+        )
+        self.lazer_storage = aiosu.v2.ClientStorage(
+            token_repository=osu_repo,
+            client_secret=self.config.osu_api.client_secret,
+            client_id=self.config.osu_api.client_id,
+            base_url="https://lazer.ppy.sh",
+        )
+        self.ordr_client = aiordr.ordrClient(
+            verification_key=self.config.ordr_key,
+            limiter=(40, 60),
+        )
+        self.aes = Fernet(check_aes())
+
+    async def start_pomice_nodes(self) -> None:
+        await self.wait_until_ready()
+
+        for node in self.config.lavalink.nodes:
+            logger.info(f"Adding node '{node.name}'...")
+            try:
+                await self.pomice_node_pool.create_node(
+                    bot=self,
+                    host=node.host,
+                    port=node.port,
+                    password=node.password,
+                    secure=node.ssl_enabled,
+                    identifier=node.name,
+                    heartbeat=node.heartbeat,
+                    spotify_client_id=self.config.lavalink.spotify_client_id,
+                    spotify_client_secret=self.config.lavalink.spotify_client_secret,
+                    apple_music=True,
+                )
+                logger.info(f"Connected to node '{node.name}`")
+            except pomice.NodeConnectionFailure:
+                logger.error(f"Failed connecting to node '{node.name}'!")
+
+        logger.info("Voice nodes ready!")
+
+    async def setup_hook(self) -> None:
+        logger.info("Setting up modules...")
+        await self.load_extension("jishaku")
+        await _load_extensions(self)
+        await self.stats_service.set_commands(_get_cogs_dict(self))
+        self.version = await get_bot_version()
+        await self.stats_service.set_bot_version(self.version)
+
+        logger.info("Setting up support guild...")
+        self.support_guild = await self.fetch_guild(
+            self.config.premium.support_guild_id,
+        )
+        self.premium_role = self.support_guild.get_role(
+            self.config.premium.premium_role_id,
+        )
+
+    async def on_ready(self) -> None:
+        logger.info(f"Logged in as {self.user} (ID: {self.user.id})")
+        await self.stats_service.set_cog_count(len(self.cogs))
+        await self.stats_service.set_command_count(len(self.all_commands))
+        await self.stats_service.set_guild_count(len(self.guilds))
+        await self.stats_service.set_user_count(len(self.users))
+        await self.start_pomice_nodes()
+
+    async def on_guild_join(self, guild: discord.Guild) -> None:
+        logger.info(f"Joined guild {guild.name} (ID: {guild.id})")
+        await self.stats_service.set_guild_count(len(self.guilds))
+        await self.guild_settings_service.create(guild.id)
+
+    async def on_guild_remove(self, guild: discord.Guild) -> None:
+        logger.info(f"Left guild {guild.name} (ID: {guild.id})")
+        await self.stats_service.set_guild_count(len(self.guilds))
+        await self.guild_settings_service.delete(guild.id)
 
     async def on_message(self, message: discord.Message) -> None:
         ignore = not message.guild
         ignore |= message.author.bot
         ignore |= not self.is_ready()
-        ignore |= await self.mongoIO.is_blacklisted(message.author)
+        ignore |= await self.user_service.is_blacklisted(message.author.id)
         if ignore:
             return
         await self.process_commands(message)
@@ -74,8 +294,17 @@ class Sunny(commands.AutoShardedBot):
     async def is_owner(self, user: discord.User) -> bool:
         if user.id in self.config.owners:
             return True
-        # Else fall back to the original
         return await super().is_owner(user)
 
+    async def run_blocking(self, func: Callable, *args: Any, **kwargs: Any) -> Any:
+        return await self.loop.run_in_executor(None, partial(func, *args, **kwargs))
+
     def run(self, **kwargs: Any) -> None:
-        super().run(self.config.token, log_level=self.config.log_level, **kwargs)
+        super().run(self.config.token, log_handler=None, **kwargs)
+
+    async def close(self) -> None:
+        await self.client_v1.close()
+        await self.stable_storage.close()
+        await self.lazer_storage.close()
+        await self.ordr_client.close()
+        await super().close()

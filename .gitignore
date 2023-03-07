@@ -109,10 +109,8 @@ application\.yml
 
 logs/
 
-Pipfile\.lock
-
 lavalink/
 
 Lavalink.jar
 
-.vscode/
+src/keys/
