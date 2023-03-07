@@ -21,6 +21,13 @@ class PremiumMissing(AppCheckFailure, CheckFailure):
     pass
 
 
+async def get_or_fetch_member(guild: discord.Guild, user_id: int) -> discord.Member:
+    member = guild.get_member(user_id)
+    if not member:
+        member = await guild.fetch_member(user_id)
+    return member
+
+
 async def check_premium(
     user_id: int,
     bot: discord.Client,
@@ -29,8 +36,9 @@ async def check_premium(
     if await bot.is_owner(bot.get_user(user_id)):
         return True
 
-    member = await bot.support_guild.fetch_member(user_id)
-    if not member:
+    try:
+        member = await get_or_fetch_member(bot.support_guild, user_id)
+    except discord.NotFound:
         raise SupportServerMissing(
             f"You must join the support server and link your Ko-Fi to gain premium! Join here: {bot.config.support_invite}",
         )
