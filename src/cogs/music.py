@@ -33,6 +33,16 @@ def is_privileged(ctx: commands.Context) -> bool:
     )
 
 
+def check_can_recommend(results: list[pomice.Track] | pomice.Playlist) -> bool:
+    """Check whether the user can recommend a track."""
+    if isinstance(results, pomice.Playlist):
+        return check_can_recommend(results.tracks)
+    return all(
+        track.track_type in (pomice.TrackType.SPOTIFY, pomice.TrackType.YOUTUBE)
+        for track in results
+    )
+
+
 class Music(MetadataGroupCog, name="music"):
     """
     Commands for music playback.
@@ -135,6 +145,15 @@ class Music(MetadataGroupCog, name="music"):
         if not results:
             await ctx.send("Nothing found!", delete_after=10)
             return
+
+        if player.auto_play:
+            can_play = check_can_recommend(results)
+            if not can_play:
+                await ctx.send(
+                    "Please disable autoplay in order to play tracks not from YouTube or Spotify.",
+                    delete_after=10,
+                )
+                return
 
         if isinstance(results, pomice.Playlist):
             embed = MusicPlaylistEmbed(ctx, results)
@@ -629,6 +648,17 @@ class Music(MetadataGroupCog, name="music"):
         if not is_privileged(ctx):
             await ctx.send(
                 "🔁 | Only the DJ or admins may change the autoplay mode",
+                delete_after=10,
+            )
+            return
+
+        queue = player.queue.get_queue()
+        if player.current:
+            queue = [player.current] + queue
+
+        if not check_can_recommend(queue) and not player.auto_play:
+            await ctx.send(
+                "🔁 | Autoplay is not available for queues containing tracks not from YouTube or Spotify",
                 delete_after=10,
             )
             return
