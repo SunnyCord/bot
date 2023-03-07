@@ -80,7 +80,8 @@ def _score_to_embed_strs(
         ):
             is_fc = calculator._calculate_effective_miss_count(score) == 0
             if not is_fc:
-                score_fc = score.copy(deep=True)
+                score_fc = score.copy()
+                score_fc.statistics = score.statistics.copy()
                 score_fc.max_combo = max_combo
                 if isinstance(score, LazerScore):
                     score_fc.statistics.great += score.statistics.miss
