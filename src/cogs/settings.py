@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from aiosu.exceptions import InvalidClientRequestedError
 from classes.cog import MetadataCog
 from discord import app_commands
 from discord.ext import commands
@@ -28,6 +29,10 @@ class Settings(MetadataCog):
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def forget_command(self, ctx: commands.Context) -> None:
         await self.bot.user_service.delete(ctx.author.id)
+        try:
+            await self.bot.stable_storage.revoke_client(ctx.author.id)
+        except InvalidClientRequestedError:
+            pass
         await ctx.send("Your data has been successfully deleted. Sorry to see you go!")
 
     @commands.hybrid_command(
