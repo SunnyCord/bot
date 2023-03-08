@@ -56,6 +56,8 @@ def create_sentry_scope_interaction(
 class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
     """Handles any errors that may occur."""
 
+    __slots__ = ("bot",)
+
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 

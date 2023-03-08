@@ -22,6 +22,8 @@ class VoiceListener(
 ):
     """Voice State Update Listener"""
 
+    __slots__ = ("bot",)
+
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 

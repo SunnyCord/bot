@@ -219,6 +219,8 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):
     osu! Profile Commands
     """
 
+    __slots__ = ("bot",)
+
     args_description = {
         "user": "Discord/osu! username or mention",
     }
@@ -321,6 +323,8 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):
     """
     osu! Tops Commands
     """
+
+    __slots__ = ("bot",)
 
     args_description = {
         "user": "Discord/osu! username or mention",
@@ -479,6 +483,8 @@ class OsuRecordSettingsCog(
     """
     osu! Record Settings Commands
     """
+
+    __slots__ = ("bot",)
 
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
@@ -642,6 +648,8 @@ class OsuCog(MetadataCog, name="osu!"):
     """
     osu! related commands.
     """
+
+    __slots__ = ("bot", "config_v2")
 
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot

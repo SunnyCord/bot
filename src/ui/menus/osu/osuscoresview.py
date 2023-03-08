@@ -34,6 +34,14 @@ def _split_tops_to_pages(
 
 
 class OsuScoresView(BaseView):
+    __slots__ = (
+        "ctx",
+        "bot",
+        "author",
+        "_embeds",
+        "_current",
+    )
+
     def __init__(
         self,
         ctx: Context,
@@ -46,7 +54,6 @@ class OsuScoresView(BaseView):
         **kwargs: Any,
     ):
         self.ctx = ctx
-        self.message = ctx.message
         self.bot = ctx.bot
         self.author = ctx.author
 

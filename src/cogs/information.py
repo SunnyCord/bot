@@ -20,6 +20,8 @@ class Information(MetadataCog):
     Retrieve information about various items.
     """
 
+    __slots__ = ("bot",)
+
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 

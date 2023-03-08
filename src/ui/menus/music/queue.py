@@ -31,6 +31,18 @@ def _split_queue_to_pages(
 
 
 class MusicQueueView(BaseView):
+    __slots__ = (
+        "ctx",
+        "bot",
+        "author",
+        "player",
+        "queue",
+        "results",
+        "title",
+        "_embeds",
+        "_current",
+    )
+
     def __init__(
         self,
         ctx: Context,

@@ -20,6 +20,8 @@ class Premium(MetadataGroupCog, name="premium"):
     Commands for managing premium perks.
     """
 
+    __slots__ = ("bot",)
+
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
