@@ -3,6 +3,7 @@
 ###
 from __future__ import annotations
 
+from inspect import cleandoc
 from typing import TYPE_CHECKING
 
 from models.weather import Units
@@ -16,11 +17,19 @@ if TYPE_CHECKING:
 class WeatherInfoEmbed(ContextEmbed):
     def __init__(self, ctx: commands.Context, response: WeatherResponse, units: Units):
         latest_forecast = response.items[0]
+        description = cleandoc(
+            f"""
+            {latest_forecast.description.capitalize()}
+            Sunrise <t:{response.location_data.sunrise:.0f}:R>
+            Sunset <t:{response.location_data.sunset:.0f}:R>
+            """,
+        )
 
         super().__init__(
             ctx,
             title=f"The current weather for {response.name}",
-            description=f"{latest_forecast.description.capitalize()}",
+            description=description,
+            url=response.url,
         )
 
         self.set_thumbnail(url=latest_forecast.icon_url)
@@ -40,6 +49,13 @@ class WeatherInfoEmbed(ContextEmbed):
             name="Humidity",
             value=f"{response.weather.humidity}%",
         )
+        self.add_field(
+            name="Cloudiness",
+            value=f"{response.clouds.all}%",
+        )
+
+        self.add_field(name="", value="", inline=False)
+
         self.add_field(
             name="Pressure",
             value=f"{response.weather.pressure} {units.pressure}",

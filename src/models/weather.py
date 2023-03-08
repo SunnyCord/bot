@@ -101,3 +101,7 @@ class WeatherResponse(BaseModel):
     wind: Wind
     clouds: Clouds
     cod: int
+
+    @property
+    def url(self) -> str:
+        return f"https://openweathermap.org/city/{self.id}"
