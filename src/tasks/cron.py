@@ -17,6 +17,8 @@ if TYPE_CHECKING:
 class CronTask(MetadataCog, hidden=True):
     """Database maintenance task"""
 
+    __slots__ = ("bot",)
+
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
         self.premium_task.start()
@@ -24,7 +26,7 @@ class CronTask(MetadataCog, hidden=True):
     def cog_unload(self) -> None:
         self.premium_task.cancel()
 
-    @tasks.loop(seconds=60)
+    @tasks.loop(seconds=300)
     async def premium_task(self) -> None:
         premium_guilds = await self.bot.guild_settings_service.get_all_boosted_guilds()
         for guild_id in premium_guilds:

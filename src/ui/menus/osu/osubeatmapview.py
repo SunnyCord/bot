@@ -28,6 +28,14 @@ def _split_beatmapset_to_pages(
 
 
 class OsuBeatmapView(BaseView):
+    __slots__ = (
+        "ctx",
+        "bot",
+        "author",
+        "_embeds",
+        "_current",
+    )
+
     def __init__(
         self,
         ctx: Context,
@@ -36,7 +44,6 @@ class OsuBeatmapView(BaseView):
         **kwargs: Any,
     ):
         self.ctx = ctx
-        self.message = ctx.message
         self.bot = ctx.bot
         self.author = ctx.author
 

@@ -27,6 +27,14 @@ def _split_skins_to_pages(
 
 
 class OsuSkinsView(BaseInteractionView):
+    __slots__ = (
+        "interaction",
+        "bot",
+        "author",
+        "_embeds",
+        "_current",
+    )
+
     def __init__(
         self,
         interaction: Interaction,
