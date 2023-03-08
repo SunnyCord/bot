@@ -6,6 +6,7 @@ from __future__ import annotations
 from inspect import cleandoc
 from typing import TYPE_CHECKING
 
+from emojiflags import lookup
 from models.weather import Units
 from models.weather import WeatherResponse
 from ui.embeds.generic import ContextEmbed
@@ -19,15 +20,16 @@ class WeatherInfoEmbed(ContextEmbed):
         latest_forecast = response.items[0]
         description = cleandoc(
             f"""
-            {latest_forecast.description.capitalize()}
+            {latest_forecast.main.capitalize()} ({latest_forecast.description})
             Sunrise <t:{response.location_data.sunrise:.0f}:R>
             Sunset <t:{response.location_data.sunset:.0f}:R>
             """,
         )
+        flag = lookup.lookup(response.location_data.country)
 
         super().__init__(
             ctx,
-            title=f"The current weather for {response.name}",
+            title=f"The current weather for {response.name} {flag}",
             description=description,
             url=response.url,
         )
