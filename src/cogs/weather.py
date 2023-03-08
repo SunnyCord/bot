@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from classes.cog import MetadataGroupCog
+from classes.exceptions import WeatherAPIError
 from common.weather import WeatherClient
 from discord import app_commands
 from discord.ext import commands
@@ -43,7 +44,13 @@ class Weather(MetadataGroupCog, name="weather"):
     )
     async def info_command(self, ctx: commands.Context, *, location: str) -> None:
         units = await self.bot.user_prefs_service.get_units(ctx.author.id)
-        weather = await self.weather_client.get_weather(location, units)
+
+        try:
+            weather = await self.weather_client.get_weather(location, units)
+        except WeatherAPIError as e:
+            await ctx.send(f"Sorry! {e.message.capitalize()}.")
+            return
+
         await ctx.send(embed=WeatherInfoEmbed(ctx, weather, units))
 
     @commands.hybrid_command(
