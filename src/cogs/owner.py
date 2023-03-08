@@ -18,6 +18,8 @@ class Owner(MetadataCog, name="Owner", hidden=True):
     Commands used for managing the bot.
     """
 
+    __slots__ = ("bot",)
+
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 

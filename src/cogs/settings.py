@@ -19,6 +19,8 @@ class Settings(MetadataCog):
     Commands user for changing server-based settings.
     """
 
+    __slots__ = ("bot",)
+
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 

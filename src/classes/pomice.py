@@ -18,6 +18,21 @@ from ui.embeds.music import MusicTrackEmbed
 class Player(pomice.Player):
     """Pomice guild player."""
 
+    __slots__ = (
+        "queue",
+        "controller",
+        "context",
+        "guild_settings",
+        "dj",
+        "auto_play",
+        "loop_mode",
+        "pause_votes",
+        "resume_votes",
+        "skip_votes",
+        "shuffle_votes",
+        "stop_votes",
+    )
+
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
@@ -27,17 +42,13 @@ class Player(pomice.Player):
         self.guild_settings: GuildSettings | None = None
         self.dj: Member | None = None
         self.auto_play: bool = False
-        self.loop_mode: pomice.LoopMode = pomice.LoopMode.QUEUE
+        self.loop_mode: pomice.LoopMode | None = None
 
         self.pause_votes = set()
         self.resume_votes = set()
         self.skip_votes = set()
         self.shuffle_votes = set()
         self.stop_votes = set()
-
-    def set_loop_mode(self, loop_mode: pomice.LoopMode) -> None:
-        self.loop_mode = loop_mode
-        self.queue.set_loop_mode(loop_mode)
 
     def disable_loop(self) -> None:
         if self.queue.is_looping:

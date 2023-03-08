@@ -48,6 +48,11 @@ class Music(MetadataGroupCog, name="music"):
     Commands for music playback.
     """
 
+    __slots__ = (
+        "bot",
+        "pomice",
+    )
+
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
         self.pomice = bot.pomice_node_pool
@@ -635,7 +640,7 @@ class Music(MetadataGroupCog, name="music"):
             await ctx.send("🔁 | Loop mode disabled", delete_after=10)
             return
 
-        await player.set_loop_mode(pomice.LoopMode[loop_mode])
+        await player.queue.set_loop_mode(pomice.LoopMode[loop_mode])
         await ctx.send(f"🔁 | Loop mode set to {loop_mode}", delete_after=10)
 
     @premium.is_guild_premium()

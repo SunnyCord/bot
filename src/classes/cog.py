@@ -10,6 +10,8 @@ from discord.ext.commands import GroupCog
 
 
 class MetadataCog(Cog):
+    __slots__ = ("hidden", "display_parent")
+
     def __init_subclass__(cls, *args: Any, **kwargs: Any) -> None:
         super().__init_subclass__(*args)
         cls.hidden = kwargs.pop("hidden", False)
@@ -17,6 +19,8 @@ class MetadataCog(Cog):
 
 
 class MetadataGroupCog(GroupCog):
+    __slots__ = ("hidden", "display_parent")
+
     def __init_subclass__(cls, *args: Any, **kwargs: Any) -> None:
         super().__init_subclass__(*args)
         cls.hidden = kwargs.pop("hidden", False)
