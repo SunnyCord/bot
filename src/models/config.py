@@ -59,6 +59,7 @@ class Config(FrozenModel):
     osu_api: OsuAPIConfig = Field(default_factory=OsuAPIConfig)
     osu_daily_key: str = ""
     ordr_key: str = ""
+    open_weather_key: str = ""
     sentry: str = ""
     support_invite: str = "https://discord.gg/ufHV3T3UPD"
     premium: PremiumConfig = Field(default_factory=PremiumConfig)
