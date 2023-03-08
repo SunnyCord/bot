@@ -46,6 +46,8 @@ class Fun(MetadataCog):
     Miscellaneous commands.
     """
 
+    __slots__ = ("bot",)
+
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 

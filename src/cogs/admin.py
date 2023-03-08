@@ -19,6 +19,8 @@ class Admin(MetadataCog):
     Commands for managing Discord servers.
     """
 
+    __slots__ = ("bot",)
+
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
