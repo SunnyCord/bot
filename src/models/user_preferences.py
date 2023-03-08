@@ -10,6 +10,7 @@ from pydantic import BaseModel
 class UserPreferences(BaseModel):
     discord_id: int
     lazer: bool = False
+    units: str = "metric"
 
 
 class RecordingPreferences(RenderOptions):
