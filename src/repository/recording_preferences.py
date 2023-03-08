@@ -72,3 +72,13 @@ class RecordingPreferencesRepository:
                 ),
             },
         )
+
+    async def delete(self, discord_id: int) -> None:
+        """Delete recording preferences from database.
+
+        Args:
+            discord_id (int): Discord ID.
+        """
+        await self.database.recording_preferences.delete_one(
+            {"discord_id": discord_id},
+        )

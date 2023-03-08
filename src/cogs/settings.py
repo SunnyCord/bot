@@ -31,6 +31,7 @@ class Settings(MetadataCog):
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def forget_command(self, ctx: commands.Context) -> None:
         await self.bot.user_service.delete(ctx.author.id)
+        await self.bot.recording_prefs_service.delete(ctx.author.id)
         try:
             await self.bot.stable_storage.revoke_client(ctx.author.id)
         except InvalidClientRequestedError:
