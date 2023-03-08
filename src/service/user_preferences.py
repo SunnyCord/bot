@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from models.user_preferences import UserPreferences
+from models.weather import Units
 from repository.user_preferences import UserPreferencesRepository
 
 
@@ -106,3 +107,33 @@ class UserPreferencesService:
         user_preferences.lazer = not user_preferences.lazer
         await self.update(user_preferences)
         return user_preferences.lazer
+
+    async def get_units(self, discord_id: int) -> str:
+        """Get user units preference.
+
+        Args:
+            discord_id (int): Discord ID.
+
+        Returns:
+            str: Units preference.
+        """
+        try:
+            user_preferences = await self.get_one(discord_id)
+            return Units(user_preferences.units)
+        except ValueError:
+            return Units.metric
+
+    async def set_units(self, discord_id: int, units: Units) -> None:
+        """Set user units preference.
+
+        Args:
+            discord_id (int): Discord ID.
+            units (str): Units preference.
+        """
+        try:
+            user_preferences = await self.get_one(discord_id)
+        except ValueError:
+            user_preferences = await self.create(discord_id)
+
+        user_preferences.units = str(units)
+        await self.update(user_preferences)
