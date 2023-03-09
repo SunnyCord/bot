@@ -52,10 +52,10 @@ class Fun(MetadataCog):
         self.bot = bot
 
     @commands.cooldown(1, 5, commands.BucketType.user)
-    @app_commands.command(name="poll", description="Creates a reaction poll")
+    @commands.hybrid_command(name="poll", description="Creates a reaction poll")
     @app_commands.describe(text="Text for the poll")
     async def poll_command(self, ctx: commands.Context, *, text: str) -> None:
-        with suppress(discord.HTTPException):
+        with suppress(discord.HTTPException, AttributeError):
             await ctx.message.delete()
 
         embed = PollEmbed(ctx, text)
@@ -129,6 +129,39 @@ class Fun(MetadataCog):
 
         await ctx.send(
             f"{ctx.author.mention} and {user.mention} love each other **{love_percentage}%**!",
+            silent=True,
+        )
+
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.hybrid_command(
+        name="rollduel",
+        description="Duel another user in a roll off",
+        aliases=["rd", "hc"],
+    )
+    @app_commands.describe(user="User to duel")
+    async def rollduel_command(self, ctx: commands.Context, user: discord.User) -> None:
+        if user == ctx.author:
+            await ctx.send("You can't duel yourself!")
+            return
+
+        if user.bot:
+            await ctx.send("You can't duel a bot!")
+            return
+
+        roll_1 = randint(1, 100)
+        roll_2 = randint(1, 100)
+
+        if roll_1 == roll_2:
+            await ctx.send(
+                f"{ctx.author.mention} and {user.mention} dueled in a roll off!\nThey tied with a roll of **{roll_1}**!",
+                silent=True,
+            )
+            return
+
+        winner, loser = (ctx.author, user) if roll_1 > roll_2 else (user, ctx.author)
+        roll_1, roll_2 = max(roll_1, roll_2), min(roll_1, roll_2)
+        await ctx.send(
+            f"{ctx.author.mention} and {user.mention} dueled in a roll off!\n{winner.mention} rolled **{roll_1}** and {loser.mention} rolled **{roll_2}**!\n{winner.mention} won!",
             silent=True,
         )
 
