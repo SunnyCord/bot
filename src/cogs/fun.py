@@ -9,7 +9,7 @@ from random import randint
 from typing import TYPE_CHECKING
 
 import discord
-from classes.cog import MetadataCog
+from classes.cog import MetadataGroupCog
 from discord import app_commands
 from discord.ext import commands
 from ui.embeds.fun import PollEmbed
@@ -41,15 +41,22 @@ EIGHT_BALL_RESPONSES = [
 ]
 
 
-class Fun(MetadataCog):
+class Fun(MetadataGroupCog, name="fun"):
     """
-    Miscellaneous commands.
+    Commands for fun.
     """
 
     __slots__ = ("bot",)
 
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
+
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.hybrid_command(name="ping", description="Pings the bot")
+    async def ping_command(self, ctx: commands.Context) -> None:
+        await ctx.send(
+            f"🏓 Pong!: {self.bot.latency*1000:.2f}ms",
+        )
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.hybrid_command(name="poll", description="Creates a reaction poll")
@@ -64,13 +71,6 @@ class Fun(MetadataCog):
         await message.add_reaction("👍")
         await message.add_reaction("👎")
         await message.add_reaction("🤷")
-
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.hybrid_command(name="ping", description="Pings the bot")
-    async def ping_command(self, ctx: commands.Context) -> None:
-        await ctx.send(
-            f"🏓 Pong!: {self.bot.latency*1000:.2f}ms",
-        )
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.hybrid_command(name="roll", description="Roll a random number")
@@ -97,7 +97,7 @@ class Fun(MetadataCog):
     @commands.hybrid_command(name="duel", description="Duel another user")
     @app_commands.describe(user="User to duel")
     async def duel_command(self, ctx: commands.Context, user: discord.User) -> None:
-        if user == ctx.author:
+        if user is ctx.author:
             await ctx.send("You can't duel yourself!")
             return
 
@@ -117,7 +117,7 @@ class Fun(MetadataCog):
     )
     @app_commands.describe(user="User to calculate love with")
     async def love_command(self, ctx: commands.Context, user: discord.User) -> None:
-        if user == ctx.author:
+        if user is ctx.author:
             await ctx.send("You can't love yourself!")
             return
 
@@ -140,7 +140,7 @@ class Fun(MetadataCog):
     )
     @app_commands.describe(user="User to duel")
     async def rollduel_command(self, ctx: commands.Context, user: discord.User) -> None:
-        if user == ctx.author:
+        if user is ctx.author:
             await ctx.send("You can't duel yourself!")
             return
 
