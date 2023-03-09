@@ -56,9 +56,8 @@ def _score_to_embed_strs(
 ) -> dict[str, str]:
     beatmap, beatmapset = score.beatmap, score.beatmapset
 
-    name = escape_markdown(
-        f"{beatmapset.artist} - {beatmapset.title} [{beatmap.version}]",
-    )
+    name = f"{beatmapset.artist} - {beatmapset.title} [{beatmap.version}]"
+
     statistics = score.statistics
     max_combo = beatmap.max_combo
     pp = score.pp
@@ -91,6 +90,9 @@ def _score_to_embed_strs(
                     score_fc.statistics.count_miss = 0
                 pp_fc = calculator.calculate(score_fc).total
 
+    if beatmapset.creator:
+        name += f" <{beatmapset.creator}>"
+
     weight = "" if not score.weight else f" (weight {score.weight.percentage/100:.2f})"
     score_text = f"[score]({score.score_url}) | " if score.score_url else ""
     user_text = f"[user]({score.user.url}) | " if include_user else ""
@@ -117,7 +119,10 @@ def _score_to_embed_strs(
             {score_text}{user_text}[map]({beatmap.url})
         """,
     )
-    return {"name": name, "value": value}
+    return {
+        "name": escape_markdown(name),
+        "value": value,
+    }
 
 
 class OsuScoreSingleEmbed(ContextEmbed):
