@@ -27,8 +27,7 @@ async def before_invoke(ctx: Context):
     transaction.set_tag("user.username", ctx.author.name)
     transaction.set_tag("guild", ctx.guild.id)
     transaction.set_tag("channel", ctx.channel.id)
-    sentry_sdk.start_transaction(transaction)
-    ctx.transaction = transaction
+    ctx.transaction = sentry_sdk.start_transaction(transaction)
 
 
 @bot.after_invoke
