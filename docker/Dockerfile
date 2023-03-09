@@ -6,8 +6,8 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONFAULTHANDLER 1
 FROM base AS python-deps
 # Install pipenv and compilation dependencies
-RUN pip install pipenv
-RUN apt-get update && apt-get install -y --no-install-recommends gcc
+RUN pip install pipenv==2023.2.18
+RUN apt-get update && apt-get install -y --no-install-recommends gcc=12.2.1 && rm -rf /var/lib/apt/lists/*
 # Install python dependencies in /.venv
 COPY Pipfile .
 COPY Pipfile.lock .

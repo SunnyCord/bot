@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 import aiohttp
 import discord
-from classes.cog import MetadataCog
+from classes.cog import MetadataGroupCog
 from discord import app_commands
 from discord.ext import commands
 from models.enums.animals import Animal
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from classes.bot import Sunny
 
 
-class Image(MetadataCog):
+class Image(MetadataGroupCog, name="image"):
     """
     Various image-related commands.
     """
