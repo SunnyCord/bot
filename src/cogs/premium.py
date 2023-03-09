@@ -62,7 +62,11 @@ class Premium(MetadataGroupCog, name="premium"):
             )
             return
 
-        current_boost_count = await self.get_user_boosts_count(interaction.user.id)
+        current_boost_count = (
+            await self.bot.guild_settings_service.get_user_boosts_count(
+                interaction.user.id,
+            )
+        )
         if current_boost_count >= self.bot.config.premium.boost_limit and not (
             await self.bot.is_owner(interaction.user)
         ):

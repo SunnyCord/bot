@@ -613,7 +613,7 @@ class Music(MetadataGroupCog, name="music"):
             await ctx.send("🎶 | Only the DJ or admins may have fun", delete_after=10)
             return
 
-        await player.reset_filters()
+        await player.reset_filters(fast_apply=True)
         await ctx.send("🎶 | Filters cleared!", delete_after=10)
 
     @commands.hybrid_command(
@@ -715,9 +715,15 @@ class Music(MetadataGroupCog, name="music"):
     )
     @commands.has_permissions(manage_guild=True)
     async def auto_disconnect_command(self, ctx: commands.Context) -> None:
+        player: Player = ctx.voice_client
+
         value = await self.bot.guild_settings_service.toggle_auto_disconnect(
             ctx.guild.id,
         )
+
+        if player:
+            player.guild_settings.voice_auto_disconnect = value
+
         await ctx.send(
             f"🔌 | Auto-disconnect is now {'enabled' if value else 'disabled'}",
         )
@@ -733,7 +739,13 @@ class Music(MetadataGroupCog, name="music"):
         ctx: commands.Context,
         role: Role,
     ) -> None:
+        player: Player = ctx.voice_client
+
         await self.bot.guild_settings_service.set_dj_role(ctx.guild.id, role.id)
+
+        if player:
+            player.guild_settings.dj_role_id = role.id
+
         await ctx.send(f"🎶 | DJ role set to {role.mention}", silent=True)
 
 
