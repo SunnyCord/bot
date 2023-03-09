@@ -7,7 +7,7 @@ ENV PYTHONFAULTHANDLER 1
 FROM base AS python-deps
 # Install pipenv and compilation dependencies
 RUN pip install pipenv==2023.2.18
-RUN apt-get update && apt-get install -y --no-install-recommends gcc=10.2.1 && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends gcc && rm -rf /var/lib/apt/lists/*
 # Install python dependencies in /.venv
 COPY Pipfile .
 COPY Pipfile.lock .
