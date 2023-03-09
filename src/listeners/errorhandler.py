@@ -24,6 +24,9 @@ if TYPE_CHECKING:
 
 
 def create_sentry_scope_ctx(ctx: commands.Context) -> sentry_sdk.Scope:
+    if hasattr(ctx, "transaction"):
+        ctx.transaction.set_status("internal_error")
+
     scope = sentry_sdk.Scope()
     scope.set_user(
         {
@@ -87,6 +90,8 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
             scope=scope,
             is_slash=False,
         )
+        if hasattr(ctx, "transaction"):
+            ctx.transaction.finish()
 
     async def error_handler(
         self,

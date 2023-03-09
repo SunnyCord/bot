@@ -894,8 +894,9 @@ class OsuCog(MetadataCog, name="osu!"):
             beatmap_data = get_beatmap_from_text(beatmap_query)
 
         if not beatmap_data:
-            beatmap = await self.bot.beatmap_service.get_one(ctx.channel.id)
-            if beatmap is None:
+            try:
+                beatmap = await self.bot.beatmap_service.get_one(ctx.channel.id)
+            except ValueError:
                 await ctx.send("No beatmap found in cache.")
                 return
         else:

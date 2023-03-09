@@ -37,6 +37,7 @@ async def before_invoke(ctx: Context) -> None:
 
 @bot.after_invoke
 async def after_invoke(ctx: Context) -> None:
+    ctx.transaction.set_status("ok")
     ctx.transaction.finish()
 
 
