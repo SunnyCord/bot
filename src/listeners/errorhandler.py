@@ -108,64 +108,75 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
         elif isinstance(error, commands.BotMissingPermissions):
             await send_message(
                 f"I am missing the following permissions: ``{', '.join(error.missing_permissions)}`` for ``{command}``.",
+                delete_after=10,
             )
             return
 
         elif isinstance(error, commands.MissingPermissions):
             await send_message(
                 f"You are missing the following permissions: ``{', '.join(error.missing_permissions)}`` for ``{command}``.",
+                delete_after=10,
             )
             return
 
         elif isinstance(error, discord.errors.Forbidden):
             await send_message(
                 f"I do not have permissions to perform ``{command}``!",
+                delete_after=10,
             )
             return
 
         elif isinstance(error, commands.NotOwner):
-            await send_message("You are not the owner of this bot.")
+            await send_message("You are not the owner of this bot.", delete_after=5)
             return
 
         elif isinstance(error, commands.DisabledCommand):
-            await send_message(f"``{command}`` has been disabled.")
+            await send_message(f"``{command}`` has been disabled.", delete_after=5)
             return
 
         elif isinstance(error, commands.CommandOnCooldown):
             await send_message(
                 f"Slow down! You are on a {error.retry_after:.2f}s cooldown.",
+                delete_after=max(error.retry_after, 1),
             )
             return
 
         elif isinstance(error, commands.RangeError):
             await send_message(
                 f"Value must be between **{error.minimum}** and **{error.maximum}**.",
+                delete_after=10,
             )
             return
 
         elif isinstance(error, commands.UserInputError):
             await send_message(
                 f"Invalid input for ``{command}``. Please check your input and try again.",
+                delete_after=10,
             )
             return
 
         elif isinstance(error, (SupportServerMissing, PremiumMissing)):
             await send_message(
                 error,
+                delete_after=30,
             )
             return
 
         elif isinstance(error, aiosu.exceptions.APIException):
-            await send_message("The requested data was not found on osu!")
+            await send_message(
+                "The requested data was not found on osu!",
+                delete_after=10,
+            )
             return
 
         elif isinstance(error, aiordr.exceptions.APIException):
-            await send_message(f"That didn't work. {error.message}")
+            await send_message(f"That didn't work. {error.message}", delete_after=10)
             return
 
         elif isinstance(error, aiosu.exceptions.InvalidClientRequestedError):
             await send_message(
                 "Please set your profile! Use the ``osuset`` command.",
+                delete_after=20,
             )
             return
 
@@ -174,7 +185,10 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
             return
 
         elif isinstance(error, pomice.exceptions.NoNodesAvailable):
-            await send_message("No music nodes are available. Try again later!")
+            await send_message(
+                "No music nodes are available. Try again later!",
+                delete_after=10,
+            )
             return
 
         sentry_id = sentry_sdk.capture_exception(
