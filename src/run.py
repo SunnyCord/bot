@@ -18,7 +18,7 @@ sentry_sdk.init(
 
 
 @bot.before_invoke
-async def before_invoke(ctx: Context):
+async def before_invoke(ctx: Context) -> None:
     transaction = Transaction(
         name=ctx.command.qualified_name,
         op="command",
@@ -31,7 +31,7 @@ async def before_invoke(ctx: Context):
 
 
 @bot.after_invoke
-async def after_invoke(ctx):
+async def after_invoke(ctx) -> None:
     ctx.transaction.finish()
 
 
