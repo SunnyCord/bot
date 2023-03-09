@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import sentry_sdk
 from classes.bot import Sunny
+from discord.ext.commands import Context
 from sentry_sdk.tracing import Transaction
 
 bot = Sunny()
@@ -17,7 +18,7 @@ sentry_sdk.init(
 
 
 @bot.before_invoke
-async def before_invoke(ctx):
+async def before_invoke(ctx: Context):
     transaction = Transaction(
         name=ctx.command.qualified_name,
         op="command",
