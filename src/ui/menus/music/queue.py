@@ -24,7 +24,7 @@ def _split_queue_to_pages(
     title: str,
 ) -> list[MusicTrackEmbed]:
     embeds: list[MusicTrackEmbed] = [
-        MusicTrackEmbed(ctx, track, title) for track in queue
+        MusicTrackEmbed(ctx, track, title=title) for track in queue
     ]
 
     return embeds

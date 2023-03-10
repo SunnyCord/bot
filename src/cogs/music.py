@@ -120,10 +120,15 @@ class Music(MetadataGroupCog, name="music"):
                     "I need the permissions to join and speak in your voice channel.",
                 )
 
-            await ctx.author.voice.channel.connect(
-                cls=Player,
-                self_deaf=True,
-            )
+            try:
+                await ctx.author.voice.channel.connect(
+                    cls=Player,
+                    self_deaf=True,
+                )
+            except pomice.exceptions.NoNodesAvailable:
+                raise MusicPlayerError(
+                    "No music nodes are available. Try again later!",
+                )
             player: Player = ctx.voice_client
 
             await player.set_volume(20)
@@ -203,7 +208,9 @@ class Music(MetadataGroupCog, name="music"):
             await ctx.send("Nothing is playing!", delete_after=10)
             return
 
-        await ctx.send(embed=MusicTrackEmbed(ctx, player.current))
+        await ctx.send(
+            embed=MusicTrackEmbed(ctx, player.current, position=player.position),
+        )
 
     @commands.hybrid_command(
         name="queue",

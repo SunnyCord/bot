@@ -189,13 +189,6 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
             await send_message(error, delete_after=10)
             return
 
-        elif isinstance(error, pomice.exceptions.NoNodesAvailable):
-            await send_message(
-                "No music nodes are available. Try again later!",
-                delete_after=10,
-            )
-            return
-
         sentry_id = sentry_sdk.capture_exception(
             error=error,
             scope=scope,
