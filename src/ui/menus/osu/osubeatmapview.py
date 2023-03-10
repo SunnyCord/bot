@@ -107,6 +107,7 @@ class OsuBeatmapView(BaseView):
             )
             return
         self._current = 0
+        self._check_buttons()
         embed = self._get_embed()
         await embed.prepare()
         await interaction.response.edit_message(embed=embed, view=self)
@@ -180,6 +181,7 @@ class OsuBeatmapView(BaseView):
             )
             return
         self._current = self._len - 1
+        self._check_buttons()
         embed = self._get_embed()
         await embed.prepare()
         await interaction.response.edit_message(embed=embed, view=self)
