@@ -303,6 +303,9 @@ class Sunny(commands.AutoShardedBot):
         super().run(self.config.token, log_handler=None, **kwargs)
 
     async def close(self) -> None:
+        for node in self.pomice_node_pool.nodes.copy().values():
+            await node.disconnect()
+
         await self.client_v1.close()
         await self.stable_storage.close()
         await self.lazer_storage.close()
