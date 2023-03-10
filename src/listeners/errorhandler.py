@@ -81,7 +81,9 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error: Exception) -> None:
         if not isinstance(error, commands.CommandOnCooldown):
-            ctx.command.reset_cooldown(ctx)
+            if ctx.command is not None:
+                ctx.command.reset_cooldown(ctx)
+
         scope = create_sentry_scope_ctx(ctx)
         await self.error_handler(
             send_message=ctx.send,
@@ -90,6 +92,7 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
             scope=scope,
             is_slash=False,
         )
+
         if hasattr(ctx, "transaction"):
             ctx.transaction.finish()
 

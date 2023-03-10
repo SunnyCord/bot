@@ -3,6 +3,7 @@
 ###
 from __future__ import annotations
 
+from contextlib import suppress
 from enum import Enum
 from typing import Literal
 from typing import TYPE_CHECKING
@@ -162,10 +163,8 @@ class OsuUserConverter(commands.Converter):
         if mode is not None:
             params = {"mode": mode}
 
-        try:
+        with suppress(aiosu.exceptions.InvalidClientRequestedError):
             author_client = await client_storage.get_client(id=ctx.author.id)
-        except aiosu.exceptions.InvalidClientRequestedError:
-            pass
 
         if raw_user is None:
             if author_client is None:

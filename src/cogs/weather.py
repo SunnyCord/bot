@@ -36,7 +36,7 @@ class Weather(MetadataGroupCog, name="weather"):
         await self.weather_client.close()
 
     @commands.hybrid_command(
-        name="info",
+        name="forecast",
         description="Get the weather for a location.",
     )
     @app_commands.describe(

@@ -3,6 +3,8 @@
 ###
 from __future__ import annotations
 
+from contextlib import suppress
+
 from models.user import DatabaseUser
 from repository.user import UserRepository
 
@@ -72,12 +74,10 @@ class UserService:
         Args:
             user_id (int): User ID.
         """
-        try:
+        with suppress(ValueError):
             user = await self.get_one(user_id)
             user.blacklist = False
             await self.update(user)
-        except ValueError:
-            pass
 
     async def is_blacklisted(self, user_id: int) -> bool:
         """Check if user is blacklisted.

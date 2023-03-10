@@ -3,6 +3,7 @@
 ###
 from __future__ import annotations
 
+from contextlib import suppress
 from typing import TYPE_CHECKING
 
 from aiosu.exceptions import InvalidClientRequestedError
@@ -32,10 +33,8 @@ class Settings(MetadataCog):
     async def forget_command(self, ctx: commands.Context) -> None:
         await self.bot.user_service.delete(ctx.author.id)
         await self.bot.recording_prefs_service.delete(ctx.author.id)
-        try:
+        with suppress(InvalidClientRequestedError):
             await self.bot.stable_storage.revoke_client(ctx.author.id)
-        except InvalidClientRequestedError:
-            pass
         await ctx.send("Your data has been successfully deleted. Sorry to see you go!")
 
     @commands.hybrid_command(
