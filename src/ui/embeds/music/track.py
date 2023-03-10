@@ -41,7 +41,11 @@ class MusicTrackEmbed(ContextEmbed):
         if position:
             position_text += f"Position: {milliseconds_to_duration(track.position)} | "
 
-        self.set_author(name=f"Requested by {track.requester}")
+        author_name = f"Requested by {track.requester}"
+        if track.requester is ctx.bot.user:
+            author_name = "Autoplayed"
+
+        self.set_author(name=author_name)
         self.set_footer(
             text=f"{position_text}Length: {milliseconds_to_duration(track.length)}",
         )
