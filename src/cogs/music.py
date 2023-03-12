@@ -300,20 +300,24 @@ class Music(MetadataGroupCog, name="music"):
 
         position *= 1000
 
-        if is_privileged(ctx):
-            await player.seek(position)
-            await ctx.send(
-                f"⏭ | An admin or DJ has seeked the player to {milliseconds_to_duration(player.position)}.",
-                delete_after=15,
-            )
-            return
+        try:
+            if is_privileged(ctx):
+                position = await player.seek(position)
+                await ctx.send(
+                    f"⏭ | An admin or DJ has seeked the player to {milliseconds_to_duration(position)}.",
+                    delete_after=15,
+                )
+                return
 
-        if ctx.author == player.current.requester:
-            await player.seek(position)
-            await ctx.send(
-                f"⏭ | The song requester has seeked the player to {milliseconds_to_duration(player.position)}.",
-                delete_after=15,
-            )
+            if ctx.author == player.current.requester:
+                position = await player.seek(position)
+                await ctx.send(
+                    f"⏭ | The song requester has seeked the player to {milliseconds_to_duration(position)}.",
+                    delete_after=15,
+                )
+                return
+        except pomice.TrackInvalidPosition:
+            await ctx.send("⏭ | You cannot seek past the song length.", delete_after=10)
             return
 
         await ctx.send("⏭ | You are not allowed to seek the player.", delete_after=10)
@@ -502,10 +506,15 @@ class Music(MetadataGroupCog, name="music"):
             return
 
         enabled = player.filters.has_filter(filter_tag="nightcore")
+        vaporwave = player.filters.has_filter(filter_tag="vaporwave")
+
         if enabled:
             await player.remove_filter("nightcore", fast_apply=True)
             await ctx.send("🎶 | Nightcore mode disabled!", delete_after=10)
             return
+        elif vaporwave:
+            await player.remove_filter("vaporwave", fast_apply=True)
+            await ctx.send("🎶 | Vaporwave mode disabled!", delete_after=10)
 
         nightcore = pomice.Timescale.nightcore()
         await player.add_filter(nightcore, fast_apply=True)
@@ -524,10 +533,15 @@ class Music(MetadataGroupCog, name="music"):
             return
 
         enabled = player.filters.has_filter(filter_tag="vaporwave")
+        nightcore = player.filters.has_filter(filter_tag="nightcore")
+
         if enabled:
             await player.remove_filter("vaporwave", fast_apply=True)
             await ctx.send("🎶 | Ｖａｐｏｒｗａｖｅ mode disabled!", delete_after=10)
             return
+        elif nightcore:
+            await player.remove_filter("nightcore", fast_apply=True)
+            await ctx.send("🎶 | Nightcore mode disabled!", delete_after=10)
 
         vaporwave = pomice.Timescale.vaporwave()
         await player.add_filter(vaporwave, fast_apply=True)
