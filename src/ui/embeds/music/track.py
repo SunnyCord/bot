@@ -39,7 +39,7 @@ class MusicTrackEmbed(ContextEmbed):
 
         position_text = ""
         if position:
-            position_text += f"Position: {milliseconds_to_duration(track.position)} | "
+            position_text += f"Position: {milliseconds_to_duration(position)} | "
 
         author_name = f"Requested by {track.requester}"
         if track.requester is ctx.bot.user:
