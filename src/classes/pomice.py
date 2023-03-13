@@ -112,7 +112,7 @@ class Player(pomice.Player):
         )
 
     async def teardown(self) -> None:
-        with suppress((HTTPException), (KeyError)):
+        with suppress(HTTPException, KeyError):
             await self.destroy()
             if self.controller:
                 await self.controller.delete()

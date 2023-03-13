@@ -228,7 +228,6 @@ class Sunny(commands.AutoShardedBot):
         await self.wait_until_ready()
 
         for node in self.config.lavalink.nodes:
-            logger.info(f"Adding node '{node.name}'...")
             try:
                 await self.pomice_node_pool.create_node(
                     bot=self,
@@ -241,8 +240,8 @@ class Sunny(commands.AutoShardedBot):
                     spotify_client_id=self.config.lavalink.spotify_client_id,
                     spotify_client_secret=self.config.lavalink.spotify_client_secret,
                     apple_music=True,
+                    log_handler=None,
                 )
-                logger.info(f"Connected to node '{node.name}`")
             except pomice.NodeConnectionFailure:
                 logger.error(f"Failed connecting to node '{node.name}'!")
 
