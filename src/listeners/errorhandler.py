@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING
 import aiordr
 import aiosu
 import discord
-import pomice
 import sentry_sdk
 from classes import exceptions
 from classes.cog import MetadataCog
@@ -34,7 +33,8 @@ def create_sentry_scope_ctx(ctx: commands.Context) -> sentry_sdk.Scope:
             "username": ctx.author.name,
         },
     )
-    scope.set_tag("command", ctx.command.qualified_name)
+    if ctx.command is not None:
+        scope.set_tag("command", ctx.command.qualified_name)
     scope.set_tag("guild", ctx.guild.id)
     scope.set_tag("channel", ctx.channel.id)
     return scope
@@ -50,7 +50,8 @@ def create_sentry_scope_interaction(
             "username": interaction.user.name,
         },
     )
-    scope.set_tag("command", interaction.command.qualified_name)
+    if interaction.command is not None:
+        scope.set_tag("command", interaction.command.qualified_name)
     scope.set_tag("guild", interaction.guild.id)
     scope.set_tag("channel", interaction.channel.id)
     return scope
