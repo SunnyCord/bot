@@ -7,7 +7,7 @@ import logging
 
 logger = logging.getLogger("sunny")
 discord_logger = logging.getLogger("discord")
-lavalink_logger = logging.getLogger("lavalink")
+lavalink_logger = logging.getLogger("pomice")
 
 
 class Formatter(logging.Formatter):

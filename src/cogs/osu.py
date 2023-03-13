@@ -193,6 +193,8 @@ class OsuUserConverter(commands.Converter):
             if found := discord.utils.find(check, ctx.guild.members):
                 member = found
 
+        # TODO: think this through to make it work if user is not linked and query is text
+
         if member is None:
             client = await client_storage.app_client
             return UserConverterDTO(
