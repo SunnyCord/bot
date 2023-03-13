@@ -664,7 +664,7 @@ class Music(MetadataGroupCog, name="music"):
             await ctx.send("🔁 | Loop mode disabled", delete_after=10)
             return
 
-        await player.queue.set_loop_mode(pomice.LoopMode[loop_mode])
+        player.queue.set_loop_mode(pomice.LoopMode[loop_mode])
         await ctx.send(f"🔁 | Loop mode set to {loop_mode}", delete_after=10)
 
     @premium.is_guild_premium()
