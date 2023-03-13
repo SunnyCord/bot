@@ -16,7 +16,7 @@ cryptography = "*"
 redis = {extras = ["hiredis"], version = "*"}
 matplotlib = "*"
 aiordr = "*"
-pomice = "*"
+pomice = {ref = "fix", git = "https://github.com/NiceAesth/pomice"}
 
 [dev-packages]
 black = ">=22.10.0"
