@@ -13,6 +13,7 @@ import pomice
 from cogs import LOAD_EXTENSIONS as COGS_LOAD
 from common.crypto import check_aes
 from common.helpers import get_bot_version
+from common.logging import get_handler
 from common.logging import init_logging
 from common.logging import logger
 from common.osudaily import OsuDailyClient
@@ -240,7 +241,7 @@ class Sunny(commands.AutoShardedBot):
                     spotify_client_id=self.config.lavalink.spotify_client_id,
                     spotify_client_secret=self.config.lavalink.spotify_client_secret,
                     apple_music=True,
-                    log_handler=None,
+                    log_handler=get_handler(),
                 )
             except pomice.NodeConnectionFailure:
                 logger.error(f"Failed connecting to node '{node.name}'!")

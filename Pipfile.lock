@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "7080fa7dfdf3e056f2ac78590f84cd392207a83d476c6b255921bee9b473f40c"
+            "sha256": "ea3b92061cebef8c7d2e38ea6c0e0bf0e6408d8a0b2cd0e6f73d0e7c7fcb20ff"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -1239,12 +1239,12 @@
             "version": "==9.4.0"
         },
         "pomice": {
-            "git": "https://github.com/NiceAesth/pomice",
             "hashes": [
-                "sha256:1d47d9721ec6e96792c953ee92280ad4c729be9542526b7b72cb1247d15aa6aa",
-                "sha256:b05bf63f0c6821702f190f69b7aab0728cc641c3e45262b717b8c7f83b2c48a5"
+                "sha256:68d4f4254c973eb7400e566949af0cbe01c95cb08824b6ee7c615a6801e21be4",
+                "sha256:aa522d7c66e25747876ec8b101769366626ae8caa7a23a3723c408b1e57b3f8c"
             ],
-            "ref": "367a215b05c7fb652a7058696bc307ecb16a05c4"
+            "index": "pypi",
+            "version": "==2.3.1"
         },
         "pycares": {
             "hashes": [
