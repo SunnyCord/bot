@@ -72,21 +72,24 @@ def _score_to_embed_strs(
         if not pp:
             pp = calculator.calculate(score).total
 
-        is_fc = True
-        if (
-            hasattr(calculator, "_calculate_effective_miss_count")
-            and score.statistics.count_miss > 0
-        ):
-            is_fc = calculator._calculate_effective_miss_count(score) == 0
-            if not is_fc:
+        if hasattr(calculator, "_calculate_effective_miss_count"):
+            is_fc = True
+            if score.passed:
+                is_fc = calculator._calculate_effective_miss_count(score) == 0
+            if not is_fc or not score.passed:
                 score_fc = score.copy()
                 score_fc.statistics = score.statistics.copy()
                 score_fc.max_combo = max_combo
+                adjusted_greats = (
+                    beatmap.count_objects
+                    - score.statistics.count_100
+                    - score.statistics.count_50
+                )
                 if isinstance(score, LazerScore):
-                    score_fc.statistics.great += score.statistics.miss
+                    score_fc.statistics.great = adjusted_greats
                     score_fc.statistics.miss = 0
                 else:
-                    score_fc.statistics.count_300 += score.statistics.count_miss
+                    score_fc.statistics.count_300 = adjusted_greats
                     score_fc.statistics.count_miss = 0
                 pp_fc = calculator.calculate(score_fc).total
 
@@ -98,7 +101,7 @@ def _score_to_embed_strs(
     user_text = f"[user]({score.user.url}) | " if include_user else ""
     fc_text = "" if not pp_fc else f"(FC: **{pp_fc:.2f}pp**) "
 
-    fail_text = "" if score.rank != "F" else f" ({score.completion:.2f}%)"
+    fail_text = "" if score.passed else f" ({score.completion:.2f}%)"
     bpm_text = _get_score_bpm(score)
 
     mods_text = score.mods

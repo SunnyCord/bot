@@ -15,7 +15,13 @@ if TYPE_CHECKING:
 
 
 class MusicTrackEmbed(ContextEmbed):
-    def __init__(self, ctx: commands.Context, track: Track, title="Now playing"):
+    def __init__(
+        self,
+        ctx: commands.Context,
+        track: Track,
+        title="Now playing",
+        position=0,
+    ):
         self.track = track
         self.title_str = (
             f"**{track.title}** by **{track.author}**"
@@ -24,13 +30,25 @@ class MusicTrackEmbed(ContextEmbed):
         )
         live_str = ":red_circle: **LIVE** " if track.is_stream else ""
         description = f"{live_str}[{self.title_str}]({track.uri})"
+
         super().__init__(
             ctx,
             title=title,
             description=description,
         )
-        self.set_author(name=f"Requested by {track.requester}")
-        self.set_footer(text=f"Length: {milliseconds_to_duration(track.length)}")
+
+        position_text = ""
+        if position:
+            position_text += f"Position: {milliseconds_to_duration(position)} | "
+
+        author_name = f"Requested by {track.requester}"
+        if track.requester is ctx.bot.user:
+            author_name = "Autoplayed"
+
+        self.set_author(name=author_name)
+        self.set_footer(
+            text=f"{position_text}Length: {milliseconds_to_duration(track.length)}",
+        )
         self.set_thumbnail(url=track.thumbnail)
 
 

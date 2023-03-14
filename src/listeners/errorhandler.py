@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING
 import aiordr
 import aiosu
 import discord
-import pomice
 import sentry_sdk
 from classes import exceptions
 from classes.cog import MetadataCog
@@ -34,7 +33,8 @@ def create_sentry_scope_ctx(ctx: commands.Context) -> sentry_sdk.Scope:
             "username": ctx.author.name,
         },
     )
-    scope.set_tag("command", ctx.command.qualified_name)
+    if ctx.command is not None:
+        scope.set_tag("command", ctx.command.qualified_name)
     scope.set_tag("guild", ctx.guild.id)
     scope.set_tag("channel", ctx.channel.id)
     return scope
@@ -50,7 +50,8 @@ def create_sentry_scope_interaction(
             "username": interaction.user.name,
         },
     )
-    scope.set_tag("command", interaction.command.qualified_name)
+    if interaction.command is not None:
+        scope.set_tag("command", interaction.command.qualified_name)
     scope.set_tag("guild", interaction.guild.id)
     scope.set_tag("channel", interaction.channel.id)
     return scope
@@ -81,7 +82,9 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error: Exception) -> None:
         if not isinstance(error, commands.CommandOnCooldown):
-            ctx.command.reset_cooldown(ctx)
+            if ctx.command is not None:
+                ctx.command.reset_cooldown(ctx)
+
         scope = create_sentry_scope_ctx(ctx)
         await self.error_handler(
             send_message=ctx.send,
@@ -90,6 +93,7 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
             scope=scope,
             is_slash=False,
         )
+
         if hasattr(ctx, "transaction"):
             ctx.transaction.finish()
 
@@ -187,13 +191,6 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
 
         elif isinstance(error, exceptions.MusicPlayerError):
             await send_message(error, delete_after=10)
-            return
-
-        elif isinstance(error, pomice.exceptions.NoNodesAvailable):
-            await send_message(
-                "No music nodes are available. Try again later!",
-                delete_after=10,
-            )
             return
 
         sentry_id = sentry_sdk.capture_exception(

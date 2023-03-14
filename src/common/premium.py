@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import suppress
 from typing import Callable
 
 import discord
@@ -14,11 +15,11 @@ from discord.ext.commands import Context
 
 
 class SupportServerMissing(AppCommandError, CommandError):
-    pass
+    ...
 
 
 class PremiumMissing(AppCheckFailure, CheckFailure):
-    pass
+    ...
 
 
 async def get_or_fetch_member(guild: discord.Guild, user_id: int) -> discord.Member:
@@ -90,15 +91,11 @@ async def guild_premium_context(ctx: Context) -> bool:
 
 
 async def user_or_guild_premium_interaction(interaction: Interaction) -> bool:
-    try:
+    with suppress(PremiumMissing):
         return await user_premium_interaction(interaction)
-    except PremiumMissing:
-        pass
 
-    try:
+    with suppress(PremiumMissing):
         return await guild_premium_interaction(interaction)
-    except PremiumMissing:
-        pass
 
     raise PremiumMissing(
         "You must have premium or boost the server to use this command! Find out more about premium by using the `premium` commands.",
@@ -106,15 +103,11 @@ async def user_or_guild_premium_interaction(interaction: Interaction) -> bool:
 
 
 async def user_or_guild_premium_context(ctx: Context) -> bool:
-    try:
+    with suppress(PremiumMissing):
         return await user_premium_context(ctx)
-    except PremiumMissing:
-        pass
 
-    try:
+    with suppress(PremiumMissing):
         return await guild_premium_context(ctx)
-    except PremiumMissing:
-        pass
 
     raise PremiumMissing(
         "You must have premium or boost the server to use this command! Find out more about premium by using the `premium` commands.",
@@ -127,7 +120,6 @@ def is_user_premium(command_type="context") -> Callable:
     @is_user_premium()
     @commands.command()
     async def my_command(self, ctx):
-        pass
 
     :param command_type: The type of command. Defaults to "context".
     :type command_type: str, optional
@@ -145,7 +137,6 @@ def is_guild_premium(command_type="context") -> Callable:
     @is_guild_premium()
     @commands.command()
     async def my_command(self, ctx):
-        pass
 
     :param command_type: The type of command. Defaults to "context".
     :type command_type: str, optional
@@ -163,7 +154,6 @@ def is_guild_or_user_premium(command_type="context") -> Callable:
     @is_guild_or_user_premium()
     @commands.command()
     async def my_command(self, ctx):
-        pass
 
     :param command_type: The type of command. Defaults to "context".
     :type command_type: str, optional

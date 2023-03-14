@@ -42,7 +42,6 @@ class Player(pomice.Player):
         self.guild_settings: GuildSettings | None = None
         self.dj: Member | None = None
         self.auto_play: bool = False
-        self.loop_mode: pomice.LoopMode | None = None
 
         self.pause_votes = set()
         self.resume_votes = set()
@@ -112,7 +111,7 @@ class Player(pomice.Player):
         )
 
     async def teardown(self) -> None:
-        with suppress((HTTPException), (KeyError)):
+        with suppress(HTTPException, KeyError):
             await self.destroy()
             if self.controller:
                 await self.controller.delete()

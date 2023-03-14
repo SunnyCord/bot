@@ -24,7 +24,7 @@ def _split_queue_to_pages(
     title: str,
 ) -> list[MusicTrackEmbed]:
     embeds: list[MusicTrackEmbed] = [
-        MusicTrackEmbed(ctx, track, title) for track in queue
+        MusicTrackEmbed(ctx, track, title=title) for track in queue
     ]
 
     return embeds
@@ -141,6 +141,7 @@ class MusicQueueView(BaseView):
             )
             return
         self._current = 0
+        self._check_buttons()
         embed = self._get_embed()
         await embed.prepare()
         await interaction.response.edit_message(embed=embed, view=self)
@@ -287,6 +288,7 @@ class MusicQueueView(BaseView):
             )
             return
         self._current = self._len - 1
+        self._check_buttons()
         embed = self._get_embed()
         await embed.prepare()
         await interaction.response.edit_message(embed=embed, view=self)
