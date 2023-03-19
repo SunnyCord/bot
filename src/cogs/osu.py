@@ -138,45 +138,19 @@ class OsuRecordFlags(commands.FlagConverter):
     )
 
 
-class OsuUserConverter(commands.Converter):
-    async def convert(self, ctx: commands.Context, *args: Any) -> UserConverterDTO:
+class UserConverter(commands.Converter):
+    async def convert(
+        self,
+        ctx: commands.Context,
+        raw_user: str,
+    ) -> discord.Member | None:
         """
-        Converts to an ``aiosu.models.User`` (case-insensitive)
+        Converts to a ``discord.Member`` (case-insensitive)
 
         The lookup strategy is as follows (in order):
-
         1. Lookup by commands.MemberConverter()
         2. Lookup by string
         """
-        raw_user, mode, lazer = args
-        client = None
-        author_client = None
-
-        if lazer is None:
-            lazer = await ctx.bot.user_prefs_service.get_lazer(ctx.author.id)
-
-        client_storage = ctx.bot.stable_storage
-        if lazer:
-            client_storage = ctx.bot.lazer_storage
-
-        params = {}
-        if mode is not None:
-            params = {"mode": mode}
-
-        with suppress(aiosu.exceptions.InvalidClientRequestedError):
-            author_client = await client_storage.get_client(id=ctx.author.id)
-
-        if raw_user is None:
-            if author_client is None:
-                raise aiosu.exceptions.InvalidClientRequestedError()
-            return UserConverterDTO(
-                client=author_client,
-                author_client=author_client,
-                lazer=lazer,
-                is_app_client=False,
-                user=await author_client.get_me(**params),
-            )
-
         member = None
         try:
             member = await commands.MemberConverter().convert(ctx, raw_user)
@@ -193,10 +167,61 @@ class OsuUserConverter(commands.Converter):
             if found := discord.utils.find(check, ctx.guild.members):
                 member = found
 
-        # TODO: think this through to make it work if user is not linked and query is text
+        return member
 
-        if member is None:
-            client = await client_storage.app_client
+
+class OsuUserConverter(commands.Converter):
+    async def convert(self, ctx: commands.Context, *args: Any) -> UserConverterDTO:
+        """
+        Converts to an ``aiosu.models.User`` (case-insensitive)
+
+        The lookup strategy is as follows (in order):
+
+        1. Lookup author's profile
+        2. Lookup by Discord member
+        3. Lookup by osu! query
+        """
+        raw_user, mode, lazer = args
+        client, author_client = None, None
+        if lazer is None:
+            lazer = await ctx.bot.user_prefs_service.get_lazer(ctx.author.id)
+
+        client_storage: aiosu.v2.ClientStorage = (
+            ctx.bot.lazer_storage if lazer else ctx.bot.stable_storage
+        )
+
+        params = {}
+        if mode is not None:
+            params["mode"] = mode
+
+        with suppress(aiosu.exceptions.InvalidClientRequestedError):
+            author_client = await client_storage.get_client(id=ctx.author.id)
+
+        if raw_user is None:  # Get author profile
+            if author_client is None:
+                raise aiosu.exceptions.InvalidClientRequestedError()
+            return UserConverterDTO(
+                client=author_client,
+                author_client=author_client,
+                lazer=lazer,
+                is_app_client=False,
+                user=await author_client.get_me(**params),
+            )
+
+        member = await UserConverter().convert(ctx, raw_user)
+        if member is not None:  # Get member profile
+            with suppress(aiosu.exceptions.InvalidClientRequestedError):
+                client = await client_storage.get_client(id=member.id)
+                return UserConverterDTO(
+                    client=client,
+                    author_client=author_client,
+                    lazer=lazer,
+                    is_app_client=False,
+                    user=await client.get_me(**params),
+                )
+
+        client = await client_storage.app_client  # Get lookup profile
+        try:
             return UserConverterDTO(
                 client=client,
                 author_client=author_client,
@@ -204,15 +229,10 @@ class OsuUserConverter(commands.Converter):
                 is_app_client=True,
                 user=await client.get_user(raw_user, **params),
             )
-
-        client = await client_storage.get_client(id=member.id)
-        return UserConverterDTO(
-            client=client,
-            author_client=author_client,
-            lazer=lazer,
-            is_app_client=False,
-            user=await client.get_me(**params),
-        )
+        except aiosu.exceptions.APIException:
+            if member is not None:  # Failed to get member profile
+                raise aiosu.exceptions.InvalidClientRequestedError()
+            raise  # Failed to get lookup profile
 
 
 class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):
