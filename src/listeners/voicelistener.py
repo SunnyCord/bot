@@ -34,12 +34,19 @@ class VoiceListener(
         before: VoiceState,
         after: VoiceState,
     ) -> None:
-        player: Player = None
-        for node in self.bot.pomice_node_pool.nodes.values():
-            player = player or node.get_player(member.guild.id)
-
+        player: Player = member.guild.voice_client
         if player is None:
             return
+
+        # Disabled for now. Broken Pomice-side.
+        # if (
+        #    member == self.bot.user
+        #    and before.channel is not after.channel
+        #    and before.channel is not None
+        #    and after.channel is not None
+        # ):
+        #    await player.move_to(channel=after.channel)
+        #    return
 
         if member == self.bot.user and after.channel is None:
             await player.destroy()
@@ -47,7 +54,7 @@ class VoiceListener(
 
         if (
             after.channel is None
-            and len(before.channel.members) == 1
+            and len(before.channel.members) <= 1
             and self.bot.user in before.channel.members
             and player.guild_settings.voice_auto_disconnect
         ):
