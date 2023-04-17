@@ -38,15 +38,14 @@ class VoiceListener(
         if player is None:
             return
 
-        # Disabled for now. Broken Pomice-side.
-        # if (
-        #    member == self.bot.user
-        #    and before.channel is not after.channel
-        #    and before.channel is not None
-        #    and after.channel is not None
-        # ):
-        #    await player.move_to(channel=after.channel)
-        #    return
+        if (
+            member == self.bot.user
+            and before.channel is not after.channel
+            and before.channel is not None
+            and after.channel is not None
+        ):
+            await player.move_to(after.channel)
+            return
 
         if member == self.bot.user and after.channel is None:
             await player.destroy()
