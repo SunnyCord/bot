@@ -414,7 +414,11 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):
     )
     @app_commands.describe(**args_description)
     async def osu_std_top_command(
-        self, ctx: commands.Context, user: str | None, *, flags: OsuTopFlags,
+        self,
+        ctx: commands.Context,
+        user: str | None,
+        *,
+        flags: OsuTopFlags,
     ) -> None:
         await self.osu_top_command(ctx, user, aiosu.models.Gamemode.STANDARD, flags)
 
@@ -426,7 +430,11 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):
     )
     @app_commands.describe(**args_description)
     async def osu_mania_top_command(
-        self, ctx: commands.Context, user: str | None, *, flags: OsuTopFlags,
+        self,
+        ctx: commands.Context,
+        user: str | None,
+        *,
+        flags: OsuTopFlags,
     ) -> None:
         await self.osu_top_command(ctx, user, aiosu.models.Gamemode.MANIA, flags)
 
@@ -438,7 +446,11 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):
     )
     @app_commands.describe(**args_description)
     async def osu_taiko_top_command(
-        self, ctx: commands.Context, user: str | None, *, flags: OsuTopFlags,
+        self,
+        ctx: commands.Context,
+        user: str | None,
+        *,
+        flags: OsuTopFlags,
     ) -> None:
         await self.osu_top_command(ctx, user, aiosu.models.Gamemode.TAIKO, flags)
 
@@ -450,7 +462,11 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):
     )
     @app_commands.describe(**args_description)
     async def osu_ctb_top_command(
-        self, ctx: commands.Context, user: str | None, *, flags: OsuTopFlags,
+        self,
+        ctx: commands.Context,
+        user: str | None,
+        *,
+        flags: OsuTopFlags,
     ) -> None:
         await self.osu_top_command(ctx, user, aiosu.models.Gamemode.CTB, flags)
 
