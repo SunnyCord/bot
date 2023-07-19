@@ -32,7 +32,7 @@ class RecordingPreferencesRepository:
         )
         if preferences is None:
             raise ValueError("Preferences not found.")
-        return RecordingPreferences.parse_obj(preferences)
+        return RecordingPreferences.model_validate(preferences)
 
     async def get_many(self) -> list[RecordingPreferences]:
         """Get all recording preferences from database.
@@ -42,7 +42,8 @@ class RecordingPreferencesRepository:
         """
         preferences = await self.database.recording_preferences.find().to_list(None)
         return [
-            RecordingPreferences.parse_obj(preference) for preference in preferences
+            RecordingPreferences.model_validate(preference)
+            for preference in preferences
         ]
 
     async def add(self, recording_preferences: RecordingPreferences) -> None:

@@ -42,7 +42,7 @@ class WeatherClient:
             "https://api.openweathermap.org/data/2.5/weather",
             params=params,
         )
-        return WeatherResponse.parse_obj(data)
+        return WeatherResponse.model_validate(data)
 
     async def close(self) -> None:
         if self._session:
