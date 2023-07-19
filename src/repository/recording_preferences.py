@@ -54,7 +54,7 @@ class RecordingPreferencesRepository:
             recording_preferences (RecordingPreferences): Recording preferences.
         """
         await self.database.recording_preferences.insert_one(
-            recording_preferences.dict(exclude_defaults=True),
+            recording_preferences.model_dump(exclude_defaults=True),
         )
 
     async def update(self, preferences: RecordingPreferences) -> None:
@@ -67,7 +67,7 @@ class RecordingPreferencesRepository:
         await self.database.recording_preferences.update_one(
             {"discord_id": preferences.discord_id},
             {
-                "$set": preferences.dict(
+                "$set": preferences.model_dump(
                     exclude={"discord_id"},
                     exclude_unset=True,
                 ),

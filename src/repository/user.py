@@ -45,7 +45,7 @@ class UserRepository:
         Args:
             user (DatabaseUser): User data.
         """
-        await self.database.users.insert_one(user.dict())
+        await self.database.users.insert_one(user.model_dump())
 
     async def update(self, user: DatabaseUser) -> None:
         """Update user data.
@@ -55,7 +55,7 @@ class UserRepository:
         """
         await self.database.users.update_one(
             {"discord_id": user.discord_id},
-            {"$set": user.dict()},
+            {"$set": user.model_dump()},
             upsert=True,
         )
 

@@ -48,7 +48,7 @@ class BeatmapRepository:
         """
         await self.redis.set(
             f"sunny:{channel_id}:beatmap",
-            beatmap.json(),
+            beatmap.model_dump_json(),
         )
 
     async def update(self, channel_id: int, beatmap: Beatmap) -> None:
@@ -60,7 +60,7 @@ class BeatmapRepository:
         """
         await self.redis.set(
             f"sunny:{channel_id}:beatmap",
-            beatmap.json(),
+            beatmap.model_dump_json(),
         )
 
     async def delete(self, channel_id: int) -> None:

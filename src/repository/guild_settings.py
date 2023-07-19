@@ -49,7 +49,7 @@ class GuildSettingsRepository:
         Args:
             settings (GuildSettings): Guild settings.
         """
-        await self.database.guild_settings.insert_one(guild_settings.dict())
+        await self.database.guild_settings.insert_one(guild_settings.model_dump())
 
     async def update(self, guild_settings: GuildSettings) -> None:
         """Update guild settings.
@@ -59,7 +59,7 @@ class GuildSettingsRepository:
         """
         await self.database.guild_settings.update_one(
             {"guild_id": guild_settings.guild_id},
-            {"$set": guild_settings.dict(exclude={"guild_id"})},
+            {"$set": guild_settings.model_dump(exclude={"guild_id"})},
             upsert=True,
         )
 

@@ -18,4 +18,4 @@ class RecordingPreferences(RenderOptions):
     skin: str = "YUGEN"
 
     def get_render_options(self) -> RenderOptions:
-        return RenderOptions(**self.dict(exclude_defaults=True))
+        return RenderOptions(**self.model_dump(exclude_defaults=True))
