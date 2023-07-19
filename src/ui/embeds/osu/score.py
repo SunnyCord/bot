@@ -163,7 +163,8 @@ class OsuScoreSingleEmbed(ContextEmbed):
         )
 
         self.add_field(
-            inline=False, **_score_to_embed_strs(self.score, True, difficulty_attrs)
+            inline=False,
+            **_score_to_embed_strs(self.score, True, difficulty_attrs),
         )
 
         self.prepared = True
