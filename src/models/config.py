@@ -39,7 +39,7 @@ class LavalinkConfigList(FrozenModel):
 
 class OsuAPIConfig(FrozenModel):
     api_key: str = "key_here"
-    client_id: str = 1
+    client_id: int = 1
     client_secret: str = "secret_here"
     redirect_uri: str = "http://localhost:5000/callback"
 
@@ -80,7 +80,7 @@ class ConfigList(FrozenModel):
     @classmethod
     def _create_config(cls) -> None:
         with open("config.json", "a+") as config_file:
-            base_config_dict = cls().dict()
+            base_config_dict = cls().model_dump()
             base_config_json = orjson.dumps(
                 base_config_dict,
                 option=orjson.OPT_INDENT_2,
@@ -93,7 +93,7 @@ class ConfigList(FrozenModel):
     @classmethod
     def get_config(cls) -> Config:
         try:
-            config_list = cls.parse_file("config.json")
+            config_list = cls.model_validate_file("config.json")
             return config_list.__get_selected_config()
         except FileNotFoundError:
             cls._create_config()

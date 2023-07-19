@@ -51,7 +51,7 @@ class UserPreferencesRepository:
         Args:
             user_preferences (UserPreferences): User preferences.
         """
-        await self.database.user_preferences.insert_one(user_preferences.dict())
+        await self.database.user_preferences.insert_one(user_preferences.model_dump())
 
     async def update(self, user_preferences: UserPreferences) -> None:
         """Update user preferences.
@@ -61,7 +61,7 @@ class UserPreferencesRepository:
         """
         await self.database.user_preferences.update_one(
             {"discord_id": user_preferences.discord_id},
-            {"$set": user_preferences.dict(exclude={"discord_id"})},
+            {"$set": user_preferences.model_dump(exclude={"discord_id"})},
         )
 
     async def delete(self, discord_id: int) -> None:

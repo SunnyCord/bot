@@ -28,7 +28,7 @@ class UserRepository:
         user = await self.database.users.find_one({"discord_id": discord_id})
         if user is None:
             raise ValueError("User not found.")
-        return DatabaseUser.parse_obj(user)
+        return DatabaseUser.model_validate(user)
 
     async def get_many(self) -> list[DatabaseUser]:
         """Get all users from database.
@@ -37,7 +37,7 @@ class UserRepository:
             list[DatabaseUser]: List of users.
         """
         users = await self.database.users.find().to_list(None)
-        return [DatabaseUser.parse_obj(user) for user in users]
+        return [DatabaseUser.model_validate(user) for user in users]
 
     async def add(self, user: DatabaseUser) -> None:
         """Add new user to database.
@@ -45,7 +45,7 @@ class UserRepository:
         Args:
             user (DatabaseUser): User data.
         """
-        await self.database.users.insert_one(user.dict())
+        await self.database.users.insert_one(user.model_dump())
 
     async def update(self, user: DatabaseUser) -> None:
         """Update user data.
@@ -55,7 +55,7 @@ class UserRepository:
         """
         await self.database.users.update_one(
             {"discord_id": user.discord_id},
-            {"$set": user.dict()},
+            {"$set": user.model_dump()},
             upsert=True,
         )
 

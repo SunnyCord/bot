@@ -537,7 +537,7 @@ class OsuRecordSettingsCog(
     ) -> None:
         settings = await self.bot.recording_prefs_service.get_safe(interaction.user.id)
 
-        settings_dict = settings.dict(exclude={"discord_id"})
+        settings_dict = settings.model_dump(exclude={"discord_id"})
         settings_str = ""
         # 3 items per line
         for i, (key, value) in enumerate(settings_dict.items()):

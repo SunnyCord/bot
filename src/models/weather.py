@@ -80,8 +80,8 @@ class Clouds(BaseModel):
 
 
 class LocationData(BaseModel):
-    id: int | None
-    type: int | None
+    id: int | None = None
+    type: int | None = None
     country: str
     sunrise: int
     sunset: int

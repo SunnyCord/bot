@@ -28,7 +28,7 @@ class BeatmapRepository:
         beatmap = await self.redis.get(f"sunny:{channel_id}:beatmap")
         if beatmap is None:
             raise ValueError("Beatmap not found.")
-        return Beatmap.parse_raw(beatmap)
+        return Beatmap.model_validate_json(beatmap)
 
     async def get_many(self) -> list[Beatmap]:
         """Get all beatmaps from database.
@@ -37,7 +37,7 @@ class BeatmapRepository:
             list[Beatmap]: List of beatmaps.
         """
         beatmaps = await self.redis.keys("sunny:*:beatmap")
-        return [Beatmap.parse_raw(beatmap) for beatmap in beatmaps]
+        return [Beatmap.model_validate_json(beatmap) for beatmap in beatmaps]
 
     async def add(self, channel_id: int, beatmap: Beatmap) -> None:
         """Add new beatmap to database.
@@ -48,7 +48,7 @@ class BeatmapRepository:
         """
         await self.redis.set(
             f"sunny:{channel_id}:beatmap",
-            beatmap.json(),
+            beatmap.model_dump_json(),
         )
 
     async def update(self, channel_id: int, beatmap: Beatmap) -> None:
@@ -60,7 +60,7 @@ class BeatmapRepository:
         """
         await self.redis.set(
             f"sunny:{channel_id}:beatmap",
-            beatmap.json(),
+            beatmap.model_dump_json(),
         )
 
     async def delete(self, channel_id: int) -> None:

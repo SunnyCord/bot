@@ -32,7 +32,7 @@ class RecordingPreferencesRepository:
         )
         if preferences is None:
             raise ValueError("Preferences not found.")
-        return RecordingPreferences.parse_obj(preferences)
+        return RecordingPreferences.model_validate(preferences)
 
     async def get_many(self) -> list[RecordingPreferences]:
         """Get all recording preferences from database.
@@ -42,7 +42,8 @@ class RecordingPreferencesRepository:
         """
         preferences = await self.database.recording_preferences.find().to_list(None)
         return [
-            RecordingPreferences.parse_obj(preference) for preference in preferences
+            RecordingPreferences.model_validate(preference)
+            for preference in preferences
         ]
 
     async def add(self, recording_preferences: RecordingPreferences) -> None:
@@ -53,7 +54,7 @@ class RecordingPreferencesRepository:
             recording_preferences (RecordingPreferences): Recording preferences.
         """
         await self.database.recording_preferences.insert_one(
-            recording_preferences.dict(exclude_defaults=True),
+            recording_preferences.model_dump(exclude_defaults=True),
         )
 
     async def update(self, preferences: RecordingPreferences) -> None:
@@ -66,7 +67,7 @@ class RecordingPreferencesRepository:
         await self.database.recording_preferences.update_one(
             {"discord_id": preferences.discord_id},
             {
-                "$set": preferences.dict(
+                "$set": preferences.model_dump(
                     exclude={"discord_id"},
                     exclude_unset=True,
                 ),
