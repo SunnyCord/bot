@@ -723,6 +723,9 @@ class OsudleCog(MetadataGroupCog, name="osudle"):
         name="song",
         description="Starts a new game based on beatmap preview audio",
     )
+    @app_commands.describe(
+        mode="The osu! gamemode to get beatmaps for",
+    )
     async def osudle_song_command(
         self,
         interaction: discord.Interaction,
