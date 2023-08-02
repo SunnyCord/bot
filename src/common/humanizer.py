@@ -5,6 +5,20 @@ from __future__ import annotations
 
 from datetime import timedelta
 
+from thefuzz import fuzz
+
+FUZZY_MATCH_THRESHOLD = 80
+FUZZY_MATCH_THRESHOLD_LOW = 35
+
+
+__all__ = (
+    "ordinal",
+    "number",
+    "seconds_to_long_text",
+    "seconds_to_text",
+    "fuzzy_string_match",
+)
+
 
 def ordinal(n: int) -> str:
     if 11 <= (n % 100) <= 13:
@@ -68,3 +82,8 @@ def seconds_to_text(secs: int) -> str:
 
 def milliseconds_to_duration(position: float) -> str:
     return str(timedelta(milliseconds=position)).split(".")[0].zfill(8)
+
+
+def fuzzy_string_match(str1: str, str2: str, permit_low_match: bool = False) -> bool:
+    THRESHOLD = FUZZY_MATCH_THRESHOLD_LOW if permit_low_match else FUZZY_MATCH_THRESHOLD
+    return fuzz.ratio(str1.casefold(), str2.casefold()) >= THRESHOLD

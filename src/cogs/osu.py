@@ -3,6 +3,7 @@
 ###
 from __future__ import annotations
 
+import asyncio
 from contextlib import suppress
 from enum import Enum
 from typing import Literal
@@ -15,6 +16,7 @@ from aiordr.models import RenderCreateResponse
 from aiordr.models import RenderFailEvent
 from aiordr.models import RenderFinishEvent
 from aiordr.models import RenderProgressEvent
+from classes import osudle
 from classes.cog import MetadataCog
 from classes.cog import MetadataGroupCog
 from common import graphing
@@ -681,6 +683,120 @@ class OsuRecordSettingsCog(
         await interaction.response.send_message(f"**Cursor Size** is now **{value}**.")
 
 
+class OsudleCog(MetadataGroupCog, name="osudle"):
+    """
+    osu!dle guessing game
+    """
+
+    __slots__ = (
+        "bot",
+        "running_games",
+    )
+
+    args_description = {
+        "mode": "The osu! gamemode to get beatmaps from",
+    }
+
+    def __init__(self, bot: Sunny) -> None:
+        self.bot = bot
+        self.running_games: dict[int, osudle.BaseOsudleGame] = {}
+
+    async def start_game(
+        self,
+        interaction: discord.Interaction,
+        mode: aiosu.models.Gamemode,
+        game: osudle.BaseOsudleGame,
+    ) -> None:
+        channel = interaction.channel
+
+        if channel.id in self.running_games:
+            await interaction.response.send_message(
+                f"A game is already running in {channel}",
+            )
+            return
+
+        self.running_games[channel.id] = game
+
+        try:
+            await game.start_game(interaction, mode)
+        except asyncio.TimeoutError:
+            del self.running_games[channel.id]
+
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    @app_commands.command(
+        name="song",
+        description="Starts a new game based on beatmap preview audio",
+    )
+    @app_commands.describe(**args_description)
+    async def osudle_song_command(
+        self,
+        interaction: discord.Interaction,
+        mode: aiosu.models.Gamemode = aiosu.models.Gamemode.STANDARD,
+    ) -> None:
+        await self.start_game(
+            interaction,
+            mode,
+            osudle.OsudleSongGame(),
+        )
+
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    @app_commands.command(
+        name="background",
+        description="Starts a new game based on beatmap backgrounds",
+    )
+    @app_commands.describe(**args_description)
+    async def osudle_background_command(
+        self,
+        interaction: discord.Interaction,
+        mode: aiosu.models.Gamemode = aiosu.models.Gamemode.STANDARD,
+    ) -> None:
+        await self.start_game(
+            interaction,
+            mode,
+            osudle.OsudleBackgroundGame(),
+        )
+
+    @commands.cooldown(1, 2, commands.BucketType.user)
+    @app_commands.command(
+        name="skip",
+        description="Skips the current beatmap",
+    )
+    async def osudle_skip_command(
+        self,
+        interaction: discord.Interaction,
+    ) -> None:
+        channel = interaction.channel
+
+        if channel.id not in self.running_games:
+            await interaction.response.send_message("No game is running.")
+            return
+
+        self.running_games[channel.id].interaction = interaction
+        try:
+            await self.running_games[channel.id].do_next()
+        except asyncio.TimeoutError:
+            del self.running_games[channel.id]
+
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    @app_commands.command(
+        name="stop",
+        description="Stops the current game",
+    )
+    async def osudle_stop_command(
+        self,
+        interaction: discord.Interaction,
+    ) -> None:
+        channel = interaction.channel
+
+        if channel.id not in self.running_games:
+            await interaction.response.send_message("No game is running.")
+            return
+
+        self.running_games[channel.id].interaction = interaction
+        await self.running_games[channel.id].stop_game()
+        del self.running_games[channel.id]
+
+
 class OsuCog(MetadataCog, name="osu!"):
     """
     osu! related commands.
@@ -1299,3 +1415,4 @@ async def setup(bot: Sunny) -> None:
     await bot.add_cog(OsuProfileCog(bot))
     await bot.add_cog(OsuTopsCog(bot))
     await bot.add_cog(OsuRecordSettingsCog(bot))
+    await bot.add_cog(OsudleCog(bot))

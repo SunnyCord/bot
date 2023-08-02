@@ -72,6 +72,7 @@ class RecordingPreferencesRepository:
                     exclude_unset=True,
                 ),
             },
+            upsert=True,
         )
 
     async def delete(self, discord_id: int) -> None:

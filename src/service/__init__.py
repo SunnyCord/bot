@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from .beatmap import BeatmapService
+from .beatmapset import BeatmapsetService
 from .graph import GraphService
 from .guild_settings import GuildSettingsService
 from .recording_preferences import RecordingPreferencesService

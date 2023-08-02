@@ -6,6 +6,7 @@ from __future__ import annotations
 from functools import partial
 from typing import TYPE_CHECKING
 
+import aiohttp
 import aiordr
 import aiosu
 import discord
@@ -24,6 +25,7 @@ from models.config import ConfigList
 from motor.motor_asyncio import AsyncIOMotorClient
 from redis.asyncio import Redis
 from repository import BeatmapRepository
+from repository import BeatmapsetRepository
 from repository import GraphRepository
 from repository import GuildSettingsRepository
 from repository import OsuRepository
@@ -32,6 +34,7 @@ from repository import StatsRepository
 from repository import UserPreferencesRepository
 from repository import UserRepository
 from service import BeatmapService
+from service import BeatmapsetService
 from service import GraphService
 from service import GuildSettingsService
 from service import RecordingPreferencesService
@@ -78,8 +81,15 @@ def _get_cogs_dict(bot: Sunny) -> dict[str, Any]:
         if getattr(cog, "hidden", True):
             continue
 
-        commands_list: list[dict[str, Any]] = []
-        for cmd in cog.get_commands() + cog.get_app_commands():
+        commands_metadata: list[dict[str, Any]] = []
+
+        commands_list = (
+            cog.get_commands()
+            + cog.get_app_commands()
+            + (cog.app_command.commands if cog.app_command else [])
+        )
+
+        for cmd in commands_list:
             if getattr(cmd, "hidden", False):
                 continue
 
@@ -88,7 +98,7 @@ def _get_cogs_dict(bot: Sunny) -> dict[str, Any]:
             cmd = getattr(cmd, "app_command", cmd)
 
             parameters = {p.display_name: p.description for p in cmd.parameters}
-            commands_list.append(
+            commands_metadata.append(
                 {
                     "name": cmd.name,
                     "description": cmd.description,
@@ -102,14 +112,14 @@ def _get_cogs_dict(bot: Sunny) -> dict[str, Any]:
                 (p for p in cogs_list if p["name"] == cog.display_parent),
                 None,
             )
-            parent["commands"].extend(commands_list)
+            parent["commands"].extend(commands_metadata)
             continue
 
         cogs_list.append(
             {
                 "name": cog.qualified_name.lower(),
                 "description": cog.description,
-                "commands": commands_list,
+                "commands": commands_metadata,
             },
         )
 
@@ -190,6 +200,7 @@ class Sunny(commands.AutoShardedBot):
         beatmap_repo = BeatmapRepository(self.redis_client)
         stats_repo = StatsRepository(self.redis_client)
         graph_repo = GraphRepository(self.redis_client)
+        beatmapset_repo = BeatmapsetRepository(self.database)
         user_repo = UserRepository(self.database)
         settings_repo = GuildSettingsRepository(self.database)
         osu_repo = OsuRepository(self.database)
@@ -200,6 +211,7 @@ class Sunny(commands.AutoShardedBot):
         self.pomice_node_pool = pomice.NodePool()
 
         self.beatmap_service = BeatmapService(beatmap_repo)
+        self.beatmapset_service = BeatmapsetService(beatmapset_repo)
         self.user_service = UserService(user_repo)
         self.stats_service = StatsService(stats_repo)
         self.guild_settings_service = GuildSettingsService(settings_repo)
@@ -249,6 +261,7 @@ class Sunny(commands.AutoShardedBot):
         logger.info("Voice nodes ready!")
 
     async def setup_hook(self) -> None:
+        self.aiohttp_session = aiohttp.ClientSession()
         logger.info("Setting up modules...")
         await self.load_extension("jishaku")
         await _load_extensions(self)
@@ -308,4 +321,5 @@ class Sunny(commands.AutoShardedBot):
         await self.stable_storage.close()
         await self.lazer_storage.close()
         await self.ordr_client.close()
+        await self.aiohttp_session.close()
         await super().close()

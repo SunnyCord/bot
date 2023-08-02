@@ -32,7 +32,7 @@ class UserPreferencesRepository:
         )
         if user_preferences is None:
             raise ValueError("Preferences not found.")
-        return UserPreferences(**user_preferences)
+        return UserPreferences.model_validate(user_preferences)
 
     async def get_many(self) -> list[UserPreferences]:
         """Get all user preferences from database.
@@ -42,7 +42,8 @@ class UserPreferencesRepository:
         """
         user_preferences = await self.database.user_preferences.find().to_list(None)
         return [
-            UserPreferences(**user_preference) for user_preference in user_preferences
+            UserPreferences.model_validate(user_preference)
+            for user_preference in user_preferences
         ]
 
     async def add(self, user_preferences: UserPreferences) -> None:
@@ -62,6 +63,7 @@ class UserPreferencesRepository:
         await self.database.user_preferences.update_one(
             {"discord_id": user_preferences.discord_id},
             {"$set": user_preferences.model_dump(exclude={"discord_id"})},
+            upsert=True,
         )
 
     async def delete(self, discord_id: int) -> None:
