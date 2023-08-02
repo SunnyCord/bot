@@ -16,7 +16,7 @@ __all__ = (
     "number",
     "seconds_to_long_text",
     "seconds_to_text",
-    "fuzzy_match",
+    "fuzzy_string_match",
 )
 
 
