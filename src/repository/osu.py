@@ -42,7 +42,7 @@ class OsuRepository(BaseTokenRepository):
         token = await self.database.tokens.find_one({"discord_id": discord_id})
         if token is None:
             raise ValueError("Token not found.")
-        return OAuthToken(**token["token"])
+        return OAuthToken.model_validate(token["token"])
 
     async def add(self, discord_id: int, token: OAuthToken) -> None:
         """Add new token to database.
@@ -64,6 +64,7 @@ class OsuRepository(BaseTokenRepository):
         await self.database.tokens.update_one(
             {"discord_id": session_id},
             {"$set": {"token": token.model_dump()}},
+            upsert=True,
         )
 
     async def delete(self, discord_id: int) -> None:

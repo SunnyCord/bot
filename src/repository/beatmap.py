@@ -8,7 +8,7 @@ from redis.asyncio import Redis
 
 
 class BeatmapRepository:
-    """Repository for beatmap data."""
+    """Repository for cached beatmap data."""
 
     __slots__ = ("redis",)
 

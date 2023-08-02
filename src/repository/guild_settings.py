@@ -32,7 +32,7 @@ class GuildSettingsRepository:
         )
         if guild_settings is None:
             raise ValueError("Settings not found.")
-        return GuildSettings(**guild_settings)
+        return GuildSettings.model_validate(guild_settings)
 
     async def get_many(self) -> list[GuildSettings]:
         """Get all guild settings from database.
@@ -41,7 +41,10 @@ class GuildSettingsRepository:
             list[GuildSettings]: List of guild settings.
         """
         guild_settings = await self.database.guild_settings.find().to_list(None)
-        return [GuildSettings(**guild_setting) for guild_setting in guild_settings]
+        return [
+            GuildSettings.model_validate(guild_setting)
+            for guild_setting in guild_settings
+        ]
 
     async def add(self, guild_settings: GuildSettings) -> None:
         """Add new guild settings to database.
