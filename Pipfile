@@ -17,6 +17,7 @@ redis = {extras = ["hiredis"], version = "*"}
 matplotlib = "*"
 aiordr = "*"
 pomice = "*"
+thefuzz = {extras = ["speedup"], version = "*"}
 
 [dev-packages]
 black = ">=22.10.0"
