@@ -693,6 +693,10 @@ class OsudleCog(MetadataGroupCog, name="osudle"):
         "running_games",
     )
 
+    args_description = {
+        "mode": "The osu! gamemode to get beatmaps from",
+    }
+
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
         self.running_games: dict[int, osudle.BaseOsudleGame] = {}
@@ -723,9 +727,7 @@ class OsudleCog(MetadataGroupCog, name="osudle"):
         name="song",
         description="Starts a new game based on beatmap preview audio",
     )
-    @app_commands.describe(
-        mode="The osu! gamemode to get beatmaps for",
-    )
+    @app_commands.describe(**args_description)
     async def osudle_song_command(
         self,
         interaction: discord.Interaction,
@@ -742,6 +744,7 @@ class OsudleCog(MetadataGroupCog, name="osudle"):
         name="background",
         description="Starts a new game based on beatmap backgrounds",
     )
+    @app_commands.describe(**args_description)
     async def osudle_background_command(
         self,
         interaction: discord.Interaction,
