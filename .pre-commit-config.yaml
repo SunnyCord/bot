@@ -29,11 +29,11 @@ repos:
     hooks:
     -   id: add-trailing-comma
 -   repo: https://github.com/asottile/blacken-docs
-    rev: 1.15.0
+    rev: 1.16.0
     hooks:
     -   id: blacken-docs
 -   repo: https://github.com/hadialqattan/pycln
-    rev: v2.2.0
+    rev: v2.2.2
     hooks:
     -   id: pycln
 
