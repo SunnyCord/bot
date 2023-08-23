@@ -18,6 +18,8 @@ matplotlib = "*"
 aiordr = "*"
 pomice = "*"
 thefuzz = {extras = ["speedup"], version = "*"}
+pydantic = "*"
+pydantic-core = "*"
 
 [dev-packages]
 black = ">=22.10.0"
