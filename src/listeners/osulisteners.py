@@ -32,12 +32,12 @@ class OsuListeners(
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
-    async def get_graph(self, user: User, lazer: bool):
+    async def get_graph(self, user: User, mode_id: int, lazer: bool):
         try:
-            graph = await self.bot.graph_service.get_one(user.id, lazer)
+            graph = await self.bot.graph_service.get_one(user.id, mode_id, lazer)
         except ValueError:
             graph = await self.bot.run_blocking(graphing.plot_rank_graph, user)
-            await self.bot.graph_service.add(user.id, graph, lazer)
+            await self.bot.graph_service.add(user.id, graph, mode_id, lazer)
         return graph
 
     @commands.Cog.listener()
@@ -96,7 +96,7 @@ class OsuListeners(
 
         embed = OsuProfileCompactEmbed(ctx, user, user.playmode, lazer)
 
-        graph = await self.get_graph(user, lazer)
+        graph = await self.get_graph(user, int(user.playmode), lazer)
         embed.set_image(url="attachment://rank_graph.png")
         await ctx.send(embed=embed, file=discord.File(graph, "rank_graph.png"))
 

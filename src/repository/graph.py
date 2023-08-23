@@ -16,7 +16,7 @@ class GraphRepository:
     def __init__(self, redis: Redis) -> None:
         self.redis = redis
 
-    async def get_one(self, osu_id: int, lazer: bool = False) -> BytesIO:
+    async def get_one(self, osu_id: int, mode_id: int, lazer: bool = False) -> BytesIO:
         """Get graph from Redis.
 
         Args:
@@ -30,9 +30,9 @@ class GraphRepository:
             BytesIO: Graph.
         """
         if lazer:
-            graph = await self.redis.get(f"sunny:{osu_id}:lazer:graph")
+            graph = await self.redis.get(f"sunny:{osu_id}:{mode_id}:lazer:graph")
         else:
-            graph = await self.redis.get(f"sunny:{osu_id}:graph")
+            graph = await self.redis.get(f"sunny:{osu_id}:{mode_id}:graph")
         if graph is None:
             raise ValueError("Graph not found.")
         return BytesIO(graph)
@@ -47,12 +47,18 @@ class GraphRepository:
             list[BytesIO]: List of graphs.
         """
         if lazer:
-            graphs = await self.redis.keys("sunny:*:lazer:graph")
+            graphs = await self.redis.keys("sunny:*:*:lazer:graph")
         else:
-            graphs = await self.redis.keys("sunny:*:graph")
+            graphs = await self.redis.keys("sunny:*:*:graph")
         return [BytesIO(graph) for graph in graphs]
 
-    async def add(self, osu_id: int, graph: BytesIO, lazer: bool = False) -> None:
+    async def add(
+        self,
+        osu_id: int,
+        graph: BytesIO,
+        mode_id: int,
+        lazer: bool = False,
+    ) -> None:
         """Add new graph to Redis.
 
         Args:
@@ -62,18 +68,18 @@ class GraphRepository:
         """
         if lazer:
             await self.redis.set(
-                f"sunny:{osu_id}:lazer:graph",
+                f"sunny:{osu_id}:{mode_id}:lazer:graph",
                 graph.getvalue(),
                 ex=86400,
             )
         else:
             await self.redis.set(
-                f"sunny:{osu_id}:graph",
+                f"sunny:{osu_id}:{mode_id}:graph",
                 graph.getvalue(),
                 ex=86400,
             )
 
-    async def delete(self, osu_id: int, lazer: bool = False) -> None:
+    async def delete(self, osu_id: int, mode_id: int, lazer: bool = False) -> None:
         """Delete graph from Redis.
 
         Args:
@@ -81,6 +87,6 @@ class GraphRepository:
             lazer (bool, optional): Lazer graph. Defaults to False.
         """
         if lazer:
-            await self.redis.delete(f"sunny:{osu_id}:lazer:graph")
+            await self.redis.delete(f"sunny:{osu_id}:{mode_id}:lazer:graph")
         else:
-            await self.redis.delete(f"sunny:{osu_id}:graph")
+            await self.redis.delete(f"sunny:{osu_id}:{mode_id}:graph")
