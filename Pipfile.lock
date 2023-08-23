@@ -1352,11 +1352,11 @@
         },
         "pomice": {
             "hashes": [
-                "sha256:5fe585fc407d515da9c43b020b636c47188954d87ba0fa90f0af15ea2f596991",
-                "sha256:7d2bd6532c8c49d988108d2889d49a41cecc6289eaae462bf9dc971564599917"
+                "sha256:1ca6ece9411c440bdb69660a89fc4f5d09047f145db1f627936864f25c89fd69",
+                "sha256:56a54b39e3defadcb8e16cd2c58f830e55d98b4dffb2d68d45467a4bc47bdb97"
             ],
             "index": "pypi",
-            "version": "==2.7.0"
+            "version": "==2.7.2"
         },
         "pycares": {
             "hashes": [
