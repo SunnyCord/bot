@@ -40,7 +40,18 @@ class Premium(MetadataGroupCog, name="premium"):
         guilds_boosted = await self.bot.guild_settings_service.get_user_boosts(
             interaction.user.id,
         )
-        guilds = [await self.bot.fetch_guild(guild_id) for guild_id in guilds_boosted]
+
+        guilds = []
+        for guild in guilds_boosted:
+            try:
+                guild = await self.bot.fetch_guild(guild)
+            except Exception:
+                # This could also be handled by removing the guild from the database, not in here though.
+                await self.bot.guild_settings_service.remove_premium_booster(guild.id)
+                continue
+
+            guilds.append(guild)
+
         await interaction.response.send_message(
             embed=UserPremiumEmbed(interaction, guilds),
         )
