@@ -251,12 +251,12 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
-    async def get_graph(self, user: aiosu.models.User, lazer: bool):
+    async def get_graph(self, user: aiosu.models.User, mode_id: int, lazer: bool):
         try:
-            graph = await self.bot.graph_service.get_one(user.id, lazer)
+            graph = await self.bot.graph_service.get_one(user.id, mode_id, lazer)
         except ValueError:
             graph = await self.bot.run_blocking(graphing.plot_rank_graph, user)
-            await self.bot.graph_service.add(user.id, graph, lazer)
+            await self.bot.graph_service.add(user.id, graph, mode_id, lazer)
         return graph
 
     async def osu_profile_command(
@@ -277,7 +277,7 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):
             embed = OsuProfileExtendedEmbed(ctx, user_data.user, mode, user_data.lazer)
         else:
             embed = OsuProfileCompactEmbed(ctx, user_data.user, mode, user_data.lazer)
-        graph = await self.get_graph(user_data.user, user_data.lazer)
+        graph = await self.get_graph(user_data.user, int(mode), user_data.lazer)
         embed.set_image(url="attachment://rank_graph.png")
         await ctx.send(embed=embed, file=discord.File(graph, "rank_graph.png"))
 
