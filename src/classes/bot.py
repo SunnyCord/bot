@@ -122,7 +122,7 @@ def _get_cogs_dict(bot: Sunny) -> dict[str, Any]:
                 (p for p in cogs_list if p["name"] == cog.display_parent),
                 None,
             )
-            parent["commands"].extend(cogs_list)
+            parent["commands"].extend(cmd_list)
             continue
 
         cogs_list.append(
