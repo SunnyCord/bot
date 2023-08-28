@@ -74,22 +74,32 @@ def _get_intents() -> discord.Intents:
     )
 
 
+def _intersect_commands(
+    cog: commands.Cog,
+) -> Any:
+    """Gets an iterable of all (app) commands in a cog."""
+    seen_commands = {}
+
+    for cmd in cog.walk_app_commands():
+        seen_commands[cmd.name] = cmd
+
+    for cmd in cog.walk_commands():
+        seen_commands[cmd.name] = cmd
+
+    return seen_commands.values()
+
+
 def _get_cogs_dict(bot: Sunny) -> dict[str, Any]:
     """Gets a dict of all cogs and their commands."""
     cogs_list: list[dict[str, Any]] = []
+
     for cog in bot.cogs.values():
         if getattr(cog, "hidden", True):
             continue
 
-        commands_metadata: list[dict[str, Any]] = []
+        cmd_list = []
 
-        commands_list = (
-            cog.get_commands()
-            + cog.get_app_commands()
-            + (cog.app_command.commands if cog.app_command else [])
-        )
-
-        for cmd in commands_list:
+        for cmd in _intersect_commands(cog):
             if getattr(cmd, "hidden", False):
                 continue
 
@@ -98,7 +108,7 @@ def _get_cogs_dict(bot: Sunny) -> dict[str, Any]:
             cmd = getattr(cmd, "app_command", cmd)
 
             parameters = {p.display_name: p.description for p in cmd.parameters}
-            commands_metadata.append(
+            cmd_list.append(
                 {
                     "name": cmd.name,
                     "description": cmd.description,
@@ -107,19 +117,11 @@ def _get_cogs_dict(bot: Sunny) -> dict[str, Any]:
                 },
             )
 
-        if getattr(cog, "display_parent"):
-            parent = next(
-                (p for p in cogs_list if p["name"] == cog.display_parent),
-                None,
-            )
-            parent["commands"].extend(commands_metadata)
-            continue
-
         cogs_list.append(
             {
                 "name": cog.qualified_name.lower(),
                 "description": cog.description,
-                "commands": commands_metadata,
+                "commands": cmd_list,
             },
         )
 
