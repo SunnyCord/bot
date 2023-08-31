@@ -26,8 +26,8 @@ PRESSURE_STRINGS = {
 
 
 class Units(Enum):
-    metric = "metric"
-    imperial = "imperial"
+    METRIC = "metric"
+    IMPERIAL = "imperial"
 
     def __str__(self) -> str:
         return self.value

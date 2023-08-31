@@ -11,7 +11,7 @@ from pydantic import BaseModel
 class UserPreferences(BaseModel):
     discord_id: int
     lazer: bool = False
-    units: Units
+    units: Units = Units.METRIC
 
 
 class RecordingPreferences(RenderOptions):
@@ -19,4 +19,4 @@ class RecordingPreferences(RenderOptions):
     skin: str = "YUGEN"
 
     def get_render_options(self) -> RenderOptions:
-        return RenderOptions(**self.model_dump(exclude_defaults=True))
+        return RenderOptions.model_validate(self.model_dump(exclude_defaults=True))

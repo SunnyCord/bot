@@ -13,7 +13,7 @@ from pydantic import BaseModel
 
 class DatabaseUser(BaseModel):
     discord_id: int
-    blacklist: bool
+    blacklist: bool = False
 
 
 class TokenDTO(BaseModel):
