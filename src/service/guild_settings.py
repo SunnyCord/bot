@@ -96,7 +96,7 @@ class GuildSettingsService:
             GuildSettings: Guild settings.
         """
         guild_settings = await self.get_safe(guild_id)
-        await self.update(guild_id, guild_settings)
+        await self.update(guild_settings)
         return guild_settings
 
     async def update(self, guild_settings: GuildSettings) -> None:
