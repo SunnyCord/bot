@@ -28,7 +28,10 @@ class BeatmapsetService:
         Returns:
             Beatmapset: Beatmapset data.
         """
-        return await self.repository.get_one(beatmapset_id)
+        data = await self.repository.get_one(beatmapset_id)
+        if data is None:
+            raise ValueError("Beatmapset not found.")
+        return Beatmapset.model_validate(data)
 
     async def get_many(self) -> list[Beatmapset]:
         """Get all beatmapsets from database.
@@ -36,7 +39,8 @@ class BeatmapsetService:
         Returns:
             list[Beatmapset]: List of beatmapsets.
         """
-        return await self.repository.get_many()
+        data = await self.repository.get_many()
+        return [Beatmapset.model_validate(beatmapset) for beatmapset in data]
 
     async def get_random(self, gamemode: Gamemode) -> Beatmapset:
         """Get random beatmapset from database.
@@ -47,4 +51,5 @@ class BeatmapsetService:
         Returns:
             Beatmapset: Beatmapset data.
         """
-        return await self.repository.get_random(gamemode)
+        data = await self.repository.get_random(gamemode.name_api)
+        return Beatmapset.model_validate(data[0])

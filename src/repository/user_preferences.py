@@ -3,7 +3,8 @@
 ###
 from __future__ import annotations
 
-from models.user_preferences import UserPreferences
+from typing import Any
+
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 
@@ -15,54 +16,45 @@ class UserPreferencesRepository:
     def __init__(self, database: AsyncIOMotorDatabase) -> None:
         self.database = database
 
-    async def get_one(self, discord_id: int) -> UserPreferences:
+    async def get_one(self, discord_id: int) -> dict[str, Any] | None:
         """Get user preferences from database.
 
         Args:
             discord_id (int): Discord ID.
 
-        Raises:
-            ValueError: Preferences not found.
-
         Returns:
-            UserPreferences: User preferences.
+            Optional[dict[str, Any]]: User preferences data.
         """
-        user_preferences = await self.database.user_preferences.find_one(
+        return await self.database.user_preferences.find_one(
             {"discord_id": discord_id},
         )
-        if user_preferences is None:
-            raise ValueError("Preferences not found.")
-        return UserPreferences.model_validate(user_preferences)
 
-    async def get_many(self) -> list[UserPreferences]:
+    async def get_many(self) -> list[dict[str, Any]]:
         """Get all user preferences from database.
 
         Returns:
-            list[UserPreferences]: List of user preferences.
+            list[dict[str, Any]]: List of user preferences data.
         """
-        user_preferences = await self.database.user_preferences.find().to_list(None)
-        return [
-            UserPreferences.model_validate(user_preference)
-            for user_preference in user_preferences
-        ]
+        return await self.database.user_preferences.find().to_list(None)
 
-    async def add(self, user_preferences: UserPreferences) -> None:
+    async def add(self, user_preferences: dict[str, Any]) -> None:
         """Add new user preferences to database.
 
         Args:
-            user_preferences (UserPreferences): User preferences.
+            user_preferences (dict[str, Any]): User preferences data.
         """
-        await self.database.user_preferences.insert_one(user_preferences.model_dump())
+        await self.database.user_preferences.insert_one(user_preferences)
 
-    async def update(self, user_preferences: UserPreferences) -> None:
+    async def update(self, discord_id: int, user_preferences: dict[str, Any]) -> None:
         """Update user preferences.
 
         Args:
-            user_preferences (UserPreferences): User preferences.
+            discord_id (int): Discord ID.
+            user_preferences (dict[str, Any]): User preferences data.
         """
         await self.database.user_preferences.update_one(
-            {"discord_id": user_preferences.discord_id},
-            {"$set": user_preferences.model_dump(exclude={"discord_id"})},
+            {"discord_id": discord_id},
+            {"$set": user_preferences},
             upsert=True,
         )
 

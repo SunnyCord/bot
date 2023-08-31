@@ -3,9 +3,6 @@
 ###
 from __future__ import annotations
 
-from typing import Any
-
-import orjson
 from redis.asyncio import Redis
 
 
@@ -45,12 +42,12 @@ class StatsRepository:
         """
         await self.redis.set("sunny:user-count", count)
 
-    async def set_commands(self, commands: dict[str, Any]) -> None:
+    async def set_commands(self, commands_data: bytes) -> None:
         """Set commands.
         Args:
-            commands (dict): Commands.
+            commands_data (bytes): Commands JSON data.
         """
-        await self.redis.set("sunny:commands", orjson.dumps(commands))
+        await self.redis.set("sunny:commands", commands_data)
 
     async def set_bot_version(self, version: str) -> None:
         """Set bot version.

@@ -3,8 +3,6 @@
 ###
 from __future__ import annotations
 
-from typing import List
-
 import orjson
 from aiosu.models import FrozenModel
 from common.logging import logger
@@ -34,7 +32,7 @@ class LavalinkConfig(FrozenModel):
 class LavalinkConfigList(FrozenModel):
     spotify_client_id: str = ""
     spotify_client_secret: str = ""
-    nodes: List[LavalinkConfig] = Field(default_factory=lambda: [LavalinkConfig()])
+    nodes: list[LavalinkConfig] = Field(default_factory=lambda: [LavalinkConfig()])
 
 
 class OsuAPIConfig(FrozenModel):
@@ -63,8 +61,8 @@ class Config(FrozenModel):
     sentry: str = ""
     support_invite: str = "https://discord.gg/ufHV3T3UPD"
     premium: PremiumConfig = Field(default_factory=PremiumConfig)
-    owners: List[int] = Field(default_factory=lambda: [151670779782758400])
-    command_prefixes: List[str] = Field(default_factory=lambda: ["s."])
+    owners: list[int] = Field(default_factory=lambda: [151670779782758400])
+    command_prefixes: list[str] = Field(default_factory=lambda: ["s."])
     redis: RedisConfig = Field(default_factory=RedisConfig)
     mongo: MongoConfig = Field(default_factory=MongoConfig)
     lavalink: LavalinkConfigList = Field(default_factory=LavalinkConfigList)
@@ -72,7 +70,7 @@ class Config(FrozenModel):
 
 class ConfigList(FrozenModel):
     select: int = 0
-    configs: List[Config] = Field(default_factory=lambda: [Config()])
+    configs: list[Config] = Field(default_factory=lambda: [Config()])
 
     def __get_selected_config(self) -> Config:
         return self.configs[self.select]

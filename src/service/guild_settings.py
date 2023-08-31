@@ -27,7 +27,10 @@ class GuildSettingsService:
         Returns:
             GuildSettings: Guild settings.
         """
-        return await self.repository.get_one(guild_id)
+        data = await self.repository.get_one(guild_id=guild_id)
+        if data is None:
+            raise ValueError("Settings not found.")
+        return GuildSettings.model_validate(data)
 
     async def get_safe(self, guild_id: int) -> GuildSettings:
         """Get guild settings from database.
@@ -39,17 +42,41 @@ class GuildSettingsService:
             GuildSettings: Guild settings.
         """
         try:
-            return await self.repository.get_one(guild_id)
+            return await self.get_one(guild_id)
         except ValueError:
             return GuildSettings(guild_id=guild_id)
 
-    async def get_many(self) -> list[GuildSettings]:
-        """Get all guild settings from database.
+    async def get_user_boosts(self, user_id: int) -> list[int]:
+        """Get all guilds boosted by user.
+
+        Args:
+            user_id (int): User ID.
 
         Returns:
-            list[GuildSettings]: List of guild settings.
+            list[int]: List of guild IDs.
         """
-        return await self.repository.get_many()
+        data = await self.repository.get_many(booster_id=user_id)
+        return [guild_setting["guild_id"] for guild_setting in data]
+
+    async def get_user_boosts_count(self, user_id: int) -> int:
+        """Get user boosts count.
+
+        Args:
+            user_id (int): User ID.
+
+        Returns:
+            int: Boosts count.
+        """
+        return await self.repository.count(booster_id=user_id)
+
+    async def get_all_boosted_guilds(self) -> list[int]:
+        """Get all guilds that are boosted.
+
+        Returns:
+            list[int]: List of guild IDs.
+        """
+        data = await self.repository.get_many(boosted=True)
+        return [guild_setting["guild_id"] for guild_setting in data]
 
     async def add(self, guild_settings: GuildSettings) -> None:
         """Add new guild settings to database.
@@ -57,7 +84,20 @@ class GuildSettingsService:
         Args:
             guild_settings (GuildSettings): Guild settings.
         """
-        await self.repository.add(guild_settings)
+        await self.repository.add(guild_settings.model_dump())
+
+    async def create(self, guild_id: int) -> GuildSettings:
+        """Create default guild settings.
+
+        Args:
+            guild_id (int): Guild ID.
+
+        Returns:
+            GuildSettings: Guild settings.
+        """
+        guild_settings = await self.get_safe(guild_id)
+        await self.update(guild_settings)
+        return guild_settings
 
     async def update(self, guild_settings: GuildSettings) -> None:
         """Update guild settings.
@@ -65,7 +105,10 @@ class GuildSettingsService:
         Args:
             guild_settings (GuildSettings): Guild settings.
         """
-        await self.repository.update(guild_settings)
+        await self.repository.update(
+            guild_settings.guild_id,
+            guild_settings.model_dump(exclude={"guild_id"}),
+        )
 
     async def delete(self, guild_id: int) -> None:
         """Delete guild settings.
@@ -74,19 +117,6 @@ class GuildSettingsService:
             guild_id (int): Guild ID.
         """
         await self.repository.delete(guild_id)
-
-    async def create(self, guild_id: int) -> GuildSettings:
-        """Create default settings for guild.
-
-        Args:
-            guild_id (int): Guild ID.
-
-        Returns:
-            GuildSettings: Guild settings.
-        """
-        settings = GuildSettings(guild_id=guild_id)
-        await self.add(settings)
-        return settings
 
     async def get_prefix(self, guild_id: int) -> str:
         """Get guild prefix.
@@ -107,11 +137,7 @@ class GuildSettingsService:
             guild_id (int): Guild ID.
             prefix (str): Guild prefix.
         """
-        try:
-            settings = await self.get_one(guild_id)
-        except ValueError:
-            settings = await self.create(guild_id)
-
+        settings = await self.get_safe(guild_id)
         settings.prefix = prefix
         await self.update(settings)
 
@@ -150,11 +176,7 @@ class GuildSettingsService:
         Returns:
             bool: Listener status.
         """
-        try:
-            settings = await self.get_one(guild_id)
-        except ValueError:
-            settings = await self.create(guild_id)
-
+        settings = await self.get_safe(guild_id)
         settings.use_listeners = not settings.use_listeners
         await self.update(settings)
         return settings.use_listeners
@@ -180,11 +202,7 @@ class GuildSettingsService:
         Returns:
             bool: Auto disconnect status.
         """
-        try:
-            settings = await self.get_one(guild_id)
-        except ValueError:
-            settings = await self.create(guild_id)
-
+        settings = await self.get_safe(guild_id)
         settings.voice_auto_disconnect = not settings.voice_auto_disconnect
         await self.update(settings)
         return settings.voice_auto_disconnect
@@ -196,11 +214,7 @@ class GuildSettingsService:
             guild_id (int): Guild ID.
             role_id (int): Role ID.
         """
-        try:
-            settings = await self.get_one(guild_id)
-        except ValueError:
-            settings = await self.create(guild_id)
-
+        settings = await self.get_safe(guild_id)
         settings.dj_role = role_id
         await self.update(settings)
 
@@ -216,61 +230,17 @@ class GuildSettingsService:
         settings = await self.get_safe(guild_id)
         return settings.booster
 
-    async def set_premium_booster(self, guild_id: int, booster_id: int) -> None:
+    async def set_premium_booster(
+        self,
+        guild_id: int,
+        booster_id: int | None,
+    ) -> None:
         """Set premium booster.
 
         Args:
             guild_id (int): Guild ID.
             booster_id (int): Booster ID.
         """
-        try:
-            settings = await self.get_one(guild_id)
-        except ValueError:
-            settings = await self.create(guild_id)
-
+        settings = await self.get_safe(guild_id)
         settings.booster = booster_id
         await self.update(settings)
-
-    async def remove_premium_booster(self, guild_id: int) -> None:
-        """Remove premium booster.
-
-        Args:
-            guild_id (int): Guild ID.
-        """
-        try:
-            settings = await self.get_one(guild_id)
-        except ValueError:
-            return
-
-        settings.booster = None
-        await self.update(settings)
-
-    async def get_user_boosts(self, user_id: int) -> list[int]:
-        """Get all guilds boosted by user.
-
-        Args:
-            user_id (int): User ID.
-
-        Returns:
-            list[int]: List of guild IDs.
-        """
-        return await self.repository.get_user_boosts(user_id)
-
-    async def get_user_boosts_count(self, user_id: int) -> int:
-        """Get user boosts count.
-
-        Args:
-            user_id (int): User ID.
-
-        Returns:
-            int: Boosts count.
-        """
-        return await self.repository.get_user_boosts_count(user_id)
-
-    async def get_all_boosted_guilds(self) -> list[int]:
-        """Get all guilds that are boosted.
-
-        Returns:
-            list[int]: List of guild IDs.
-        """
-        return await self.repository.get_all_boosted_guilds()

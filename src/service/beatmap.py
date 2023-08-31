@@ -24,14 +24,18 @@ class BeatmapService:
         Returns:
             Beatmap: Beatmap data.
         """
-        return await self.repository.get_one(channel_id)
+        data = await self.repository.get_one(channel_id)
+        if data is None:
+            raise ValueError("Beatmap not found.")
+        return Beatmap.model_validate_json(data)
 
     async def get_many(self) -> list[Beatmap]:
         """Get all beatmaps from database.
         Returns:
             list[Beatmap]: List of beatmaps.
         """
-        return await self.repository.get_many()
+        data = await self.repository.get_many()
+        return [Beatmap.model_validate_json(beatmap) for beatmap in data]
 
     async def add(self, channel_id: int, beatmap: Beatmap) -> None:
         """Add new beatmap to database.
@@ -39,7 +43,8 @@ class BeatmapService:
             channel_id (int): Channel ID.
             beatmap (Beatmap): Beatmap data.
         """
-        await self.repository.add(channel_id, beatmap)
+        data = beatmap.model_dump_json()
+        await self.repository.add(channel_id, data)
 
     async def update(self, channel_id: int, beatmap: Beatmap) -> None:
         """Update beatmap data.
@@ -47,7 +52,8 @@ class BeatmapService:
             channel_id (int): Channel ID.
             beatmap (Beatmap): Beatmap data.
         """
-        await self.repository.update(channel_id, beatmap)
+        data = beatmap.model_dump_json()
+        await self.repository.update(channel_id, data)
 
     async def delete(self, channel_id: int) -> None:
         """Delete beatmap data.

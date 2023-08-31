@@ -29,7 +29,10 @@ class GraphService:
         Returns:
             BytesIO: Graph.
         """
-        return await self.repository.get_one(osu_id, mode_id, lazer)
+        data = await self.repository.get_one(osu_id, mode_id, lazer)
+        if data is None:
+            raise ValueError("Graph not found.")
+        return data
 
     async def get_many(self, lazer: bool = False) -> list[BytesIO]:
         """Get all graphs from Redis.
@@ -40,7 +43,8 @@ class GraphService:
         Returns:
             list[BytesIO]: List of graphs.
         """
-        return await self.repository.get_many(lazer)
+        data = await self.repository.get_many(lazer)
+        return [BytesIO(graph) for graph in data]
 
     async def add(
         self,
@@ -56,7 +60,7 @@ class GraphService:
             graph (BytesIO): Graph.
             lazer (bool, optional): Lazer graph. Defaults to False.
         """
-        await self.repository.add(osu_id, graph, mode_id, lazer)
+        await self.repository.add(osu_id, graph.getvalue(), mode_id, lazer)
 
     async def delete(self, osu_id: int, mode_id: int, lazer: bool = False) -> None:
         """Delete graph from Redis.

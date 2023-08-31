@@ -3,8 +3,8 @@
 ###
 from __future__ import annotations
 
-from aiosu.models import Beatmapset
-from aiosu.models import Gamemode
+from typing import Any
+
 from motor.motor_asyncio import AsyncIOMotorClient
 
 
@@ -16,47 +16,39 @@ class BeatmapsetRepository:
     def __init__(self, database: AsyncIOMotorClient) -> None:
         self.database = database
 
-    async def get_one(self, beatmapset_id: int) -> Beatmapset:
+    async def get_one(self, beatmapset_id: int) -> dict[str, Any] | None:
         """Get beatmapset from database.
 
         Args:
             beatmapset_id (int): Beatmapset ID.
 
-        Raises:
-            ValueError: Beatmapset not found.
-
         Returns:
-            Beatmapset: Beatmapset data.
+            Optional[dict[str, Any]]: Beatmapset data.
         """
-        beatmapset = await self.database.beatmapsets.find_one(
+        return await self.database.beatmapsets.find_one(
             {"beatmapset_id": beatmapset_id},
         )
-        if beatmapset is None:
-            raise ValueError("Beatmapset not found.")
-        return Beatmapset.model_validate(beatmapset)
 
-    async def get_many(self) -> list[Beatmapset]:
+    async def get_many(self) -> list[dict[str, Any]]:
         """Get all beatmapsets from database.
 
         Returns:
-            list[Beatmapset]: List of beatmapsets.
+            list[dict[str, Any]]: List of beatmapset data.
         """
-        beatmapsets = await self.database.beatmapsets.find().to_list(None)
-        return [Beatmapset.model_validate(beatmapset) for beatmapset in beatmapsets]
+        return await self.database.beatmapsets.find().to_list(None)
 
-    async def get_random(self, gamemode: Gamemode) -> Beatmapset:
+    async def get_random(self, gamemode: str) -> dict[str, Any]:
         """Get random beatmapset from database.
 
         Args:
-            gamemode (Gamemode): Gamemode.
+            gamemode (str): Gamemode name.
 
         Returns:
-            Beatmapset: Beatmapset data.
+            dict[str, Any]: Beatmapset data.
         """
-        beatmapset = await self.database.beatmapsets.aggregate(
+        return await self.database.beatmapsets.aggregate(
             [
-                {"$match": {"gamemode": gamemode.name_api}},
+                {"$match": {"gamemode": gamemode}},
                 {"$sample": {"size": 1}},
             ],
         ).to_list(None)
-        return Beatmapset.model_validate(beatmapset[0])

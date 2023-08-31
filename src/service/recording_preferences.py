@@ -29,7 +29,10 @@ class RecordingPreferencesService:
         Returns:
             RecordingPreferences: Recording preferences.
         """
-        return await self.repository.get_one(discord_id)
+        data = await self.repository.get_one(discord_id)
+        if data is None:
+            raise ValueError("Preferences not found.")
+        return RecordingPreferences.model_validate(data)
 
     async def get_many(self) -> list[RecordingPreferences]:
         """Get all recording preferences from database.
@@ -37,7 +40,8 @@ class RecordingPreferencesService:
         Returns:
             list[RecordingPreferences]: List of recording preferences.
         """
-        return await self.repository.get_many()
+        data = await self.repository.get_many()
+        return [RecordingPreferences.model_validate(preference) for preference in data]
 
     async def get_safe(self, discord_id: int) -> RecordingPreferences:
         """Get recording preferences from database.
@@ -49,7 +53,7 @@ class RecordingPreferencesService:
             RecordingPreferences: Recording preferences.
         """
         try:
-            return await self.repository.get_one(discord_id)
+            return await self.get_one(discord_id)
         except ValueError:
             return RecordingPreferences(discord_id=discord_id)
 
@@ -59,15 +63,36 @@ class RecordingPreferencesService:
         Args:
             recording_preferences (RecordingPreferences): Recording preferences.
         """
-        await self.repository.add(recording_preferences)
+        await self.repository.add(
+            recording_preferences.model_dump(exclude_defaults=True),
+        )
 
-    async def update(self, preferences: RecordingPreferences) -> None:
+    async def create(self, discord_id: int) -> RecordingPreferences:
+        """Create default recording preferences.
+
+        Args:
+            discord_id (int): Discord ID.
+
+        Returns:
+            RecordingPreferences: Recording preferences.
+        """
+        preferences = await self.get_safe(discord_id)
+        await self.update(preferences)
+        return preferences
+
+    async def update(self, recording_preferences: RecordingPreferences) -> None:
         """Update recording preferences.
 
         Args:
             preferences (RecordingPreferences): Recording preferences.
         """
-        await self.repository.update(preferences)
+        await self.repository.update(
+            recording_preferences.discord_id,
+            recording_preferences.model_dump(
+                exclude={"discord_id"},
+                exclude_unset=True,
+            ),
+        )
 
     async def delete(self, discord_id: int) -> None:
         """Delete recording preferences.
@@ -87,15 +112,11 @@ class RecordingPreferencesService:
         Returns:
             bool: New value of option.
         """
-        try:
-            preferences = await self.get_one(discord_id)
-        except ValueError:
-            preferences = RecordingPreferences(discord_id=discord_id)
-            await self.add(preferences)
-        value = getattr(preferences, option)
-        setattr(preferences, option, not value)
+        preferences = await self.get_safe(discord_id)
+        value = not getattr(preferences, option)
+        setattr(preferences, option, value)
         await self.update(preferences)
-        return not value
+        return value
 
     async def set_option(self, discord_id: int, option: str, value: Any) -> None:
         """Set recording preferences option.
@@ -105,10 +126,6 @@ class RecordingPreferencesService:
             option (str): Option to toggle.
             value (Any): Value to set.
         """
-        try:
-            preferences = await self.get_one(discord_id)
-        except ValueError:
-            preferences = RecordingPreferences(discord_id=discord_id)
-            await self.add(preferences)
+        preferences = await self.get_safe(discord_id)
         setattr(preferences, option, value)
         await self.update(preferences)

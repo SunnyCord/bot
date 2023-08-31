@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from typing import Any
 
+import orjson
 from repository import StatsRepository
 
 
@@ -49,7 +50,7 @@ class StatsService:
         Args:
             commands (dict): Commands.
         """
-        await self.repository.set_commands(commands)
+        await self.repository.set_commands(orjson.dumps(commands))
 
     async def set_bot_version(self, version: str) -> None:
         """Set bot version.
