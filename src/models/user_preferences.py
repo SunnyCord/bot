@@ -4,13 +4,14 @@
 from __future__ import annotations
 
 from aiordr.models import RenderOptions
+from models.weather import Units
 from pydantic import BaseModel
 
 
 class UserPreferences(BaseModel):
     discord_id: int
     lazer: bool = False
-    units: str = "metric"
+    units: Units
 
 
 class RecordingPreferences(RenderOptions):

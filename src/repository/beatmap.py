@@ -3,7 +3,6 @@
 ###
 from __future__ import annotations
 
-from aiosu.models import Beatmap
 from redis.asyncio import Redis
 
 
@@ -15,52 +14,46 @@ class BeatmapRepository:
     def __init__(self, redis: Redis):
         self.redis = redis
 
-    async def get_one(self, channel_id: int) -> Beatmap:
+    async def get_one(self, channel_id: int) -> str | None:
         """Get beatmap from database.
 
         Args:
             channel_id (int): Channel ID.
-        Raises:
-            ValueError: Beatmap not found.
         Returns:
-            Beatmap: Beatmap data.
+            Optional[str]: Beatmap data.
         """
-        beatmap = await self.redis.get(f"sunny:{channel_id}:beatmap")
-        if beatmap is None:
-            raise ValueError("Beatmap not found.")
-        return Beatmap.model_validate_json(beatmap)
+        return await self.redis.get(f"sunny:{channel_id}:beatmap")
 
-    async def get_many(self) -> list[Beatmap]:
+    async def get_many(self) -> list[str]:
         """Get all beatmaps from database.
 
         Returns:
-            list[Beatmap]: List of beatmaps.
+            list[Any]: List of beatmap data.
         """
-        beatmaps = await self.redis.keys("sunny:*:beatmap")
-        return [Beatmap.model_validate_json(beatmap) for beatmap in beatmaps]
+        return await self.redis.keys("sunny:*:beatmap")
 
-    async def add(self, channel_id: int, beatmap: Beatmap) -> None:
+    async def add(self, channel_id: int, beatmap: str) -> None:
         """Add new beatmap to database.
 
         Args:
             channel_id (int): Channel ID.
-            beatmap (Beatmap): Beatmap data.
+            beatmap (str): Beatmap JSON data.
         """
         await self.redis.set(
             f"sunny:{channel_id}:beatmap",
-            beatmap.model_dump_json(),
+            beatmap,
         )
 
-    async def update(self, channel_id: int, beatmap: Beatmap) -> None:
+    async def update(self, channel_id: int, beatmap: str) -> None:
         """Update beatmap data.
 
         Args:
             channel_id (int): Channel ID.
-            beatmap (Beatmap): Beatmap data.
+            beatmap (str): Beatmap JSON data.
         """
         await self.redis.set(
             f"sunny:{channel_id}:beatmap",
-            beatmap.model_dump_json(),
+            beatmap,
         )
 
     async def delete(self, channel_id: int) -> None:

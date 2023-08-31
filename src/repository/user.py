@@ -3,7 +3,8 @@
 ###
 from __future__ import annotations
 
-from models.user import DatabaseUser
+from typing import Any
+
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 
@@ -15,47 +16,42 @@ class UserRepository:
     def __init__(self, database: AsyncIOMotorDatabase):
         self.database = database
 
-    async def get_one(self, discord_id: int) -> DatabaseUser:
+    async def get_one(self, discord_id: int) -> dict[str, Any] | None:
         """Get user data from database.
 
         Args:
             discord_id (int): User ID.
-        Raises:
-            ValueError: User not found.
         Returns:
-            DatabaseUser: User data.
+            Optional[dict[str, Any]]: User data.
         """
-        user = await self.database.users.find_one({"discord_id": discord_id})
-        if user is None:
-            raise ValueError("User not found.")
-        return DatabaseUser.model_validate(user)
+        return await self.database.users.find_one({"discord_id": discord_id})
 
-    async def get_many(self) -> list[DatabaseUser]:
+    async def get_many(self) -> list[dict[str, Any]]:
         """Get all users from database.
 
         Returns:
-            list[DatabaseUser]: List of users.
+            list[dict[str, Any]]: List of users.
         """
-        users = await self.database.users.find().to_list(None)
-        return [DatabaseUser.model_validate(user) for user in users]
+        return await self.database.users.find().to_list(None)
 
-    async def add(self, user: DatabaseUser) -> None:
+    async def add(self, user: dict[str, Any]) -> None:
         """Add new user to database.
 
         Args:
-            user (DatabaseUser): User data.
+            user (dict[str, Any]): User data.
         """
-        await self.database.users.insert_one(user.model_dump())
+        await self.database.users.insert_one(user)
 
-    async def update(self, user: DatabaseUser) -> None:
+    async def update(self, discord_id: int, user: dict[str, Any]) -> None:
         """Update user data.
 
         Args:
-            user (DatabaseUser): User data.
+            discord_id (int): User Discord ID.
+            user (dict[str, Any]): User data.
         """
         await self.database.users.update_one(
-            {"discord_id": user.discord_id},
-            {"$set": user.model_dump()},
+            {"discord_id": discord_id},
+            {"$set": user},
             upsert=True,
         )
 

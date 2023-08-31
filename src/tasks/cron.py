@@ -35,7 +35,10 @@ class CronTask(MetadataCog, hidden=True):
             )
             is_premium = await check_premium(booster_id, self.bot)
             if not is_premium:
-                await self.bot.guild_settings_service.remove_premium_booster(guild_id)
+                await self.bot.guild_settings_service.set_premium_booster(
+                    guild_id,
+                    None,
+                )
                 logger.info(
                     f"Removed premium from guild {guild_id} due to expiration on booster {booster_id}",
                 )

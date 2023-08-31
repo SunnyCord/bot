@@ -47,7 +47,10 @@ class Premium(MetadataGroupCog, name="premium"):
                 guild = await self.bot.fetch_guild(guild)
             except Exception:
                 # This could also be handled by removing the guild from the database, not in here though.
-                await self.bot.guild_settings_service.remove_premium_booster(guild.id)
+                await self.bot.guild_settings_service.set_premium_booster(
+                    guild.id,
+                    None,
+                )
                 continue
 
             guilds.append(guild)
@@ -117,8 +120,9 @@ class Premium(MetadataGroupCog, name="premium"):
             )
             return
 
-        await self.bot.guild_settings_service.remove_premium_booster(
+        await self.bot.guild_settings_service.set_premium_booster(
             interaction.guild.id,
+            None,
         )
         await interaction.response.send_message(
             "You are no longer boosting this server.",

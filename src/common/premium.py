@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from contextlib import suppress
-from typing import Callable
 
 import discord
 from discord import app_commands

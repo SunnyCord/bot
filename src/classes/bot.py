@@ -45,7 +45,7 @@ from tasks import LOAD_EXTENSIONS as TASKS_LOAD
 
 if TYPE_CHECKING:
     from typing import Any
-    from typing import Callable
+    from collections.abc import Callable
 
 
 MODULE_FOLDERS = ["listeners", "cogs", "tasks"]

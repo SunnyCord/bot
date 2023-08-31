@@ -3,7 +3,8 @@
 ###
 from __future__ import annotations
 
-from models.guild_settings import GuildSettings
+from typing import Any
+
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 
@@ -15,54 +16,65 @@ class GuildSettingsRepository:
     def __init__(self, database: AsyncIOMotorDatabase) -> None:
         self.database = database
 
-    async def get_one(self, guild_id: int) -> GuildSettings:
+    async def get_one(self, guild_id: int) -> dict[str, Any] | None:
         """Get guild settings from database.
 
         Args:
             guild_id (int): Guild ID.
 
-        Raises:
-            ValueError: Settings not found.
-
         Returns:
-            GuildSettings: Guild settings.
+            Optional[dict[str, Any]]: Guild settings data.
         """
-        guild_settings = await self.database.guild_settings.find_one(
-            {"guild_id": guild_id},
-        )
-        if guild_settings is None:
-            raise ValueError("Settings not found.")
-        return GuildSettings.model_validate(guild_settings)
+        return await self.database.guild_settings.find_one({"guild_id": guild_id})
 
-    async def get_many(self) -> list[GuildSettings]:
+    async def get_many(
+        self,
+        booster_id: int | None = None,
+        boosted: bool = False,
+    ) -> list[dict[str, Any]]:
         """Get all guild settings from database.
 
         Returns:
-            list[GuildSettings]: List of guild settings.
+            list[dict[str, Any]]: List of guild settings data.
         """
-        guild_settings = await self.database.guild_settings.find().to_list(None)
-        return [
-            GuildSettings.model_validate(guild_setting)
-            for guild_setting in guild_settings
-        ]
+        query = {}
+        if booster_id is not None:
+            query["booster"] = booster_id
+        elif boosted:
+            query["booster"] = {"$ne": None}
 
-    async def add(self, guild_settings: GuildSettings) -> None:
+        return await self.database.guild_settings.find(query).to_list(None)
+
+    async def count(self, booster_id: int | None) -> int:
+        """Get guild settings count.
+
+        Returns:
+            int: Guild settings count.
+        """
+        query = {}
+        if booster_id is not None:
+            query["booster"] = booster_id
+
+        return await self.database.guild_settings.count_documents(query)
+
+    async def add(self, guild_settings: dict[str, Any]) -> None:
         """Add new guild settings to database.
 
         Args:
-            settings (GuildSettings): Guild settings.
+            guild_settings (dict[str, Any]): Guild settings data.
         """
-        await self.database.guild_settings.insert_one(guild_settings.model_dump())
+        await self.database.guild_settings.insert_one(guild_settings)
 
-    async def update(self, guild_settings: GuildSettings) -> None:
+    async def update(self, guild_id: int, guild_settings: dict[str, Any]) -> None:
         """Update guild settings.
 
         Args:
-            settings (GuildSettings): Guild settings.
+            guild_id (int): Guild ID.
+            guild_settings (dict[str, Any]): Guild settings data.
         """
         await self.database.guild_settings.update_one(
-            {"guild_id": guild_settings.guild_id},
-            {"$set": guild_settings.model_dump(exclude={"guild_id"})},
+            {"guild_id": guild_id},
+            {"$set": guild_settings},
             upsert=True,
         )
 
@@ -73,39 +85,3 @@ class GuildSettingsRepository:
             guild_id (int): Guild ID.
         """
         await self.database.guild_settings.delete_one({"guild_id": guild_id})
-
-    async def get_user_boosts(self, user_id: int) -> list[int]:
-        """Get all guilds boosted by user.
-
-        Args:
-            user_id (int): User ID.
-
-        Returns:
-            list[int]: List of guild IDs.
-        """
-        guilds = await self.database.guild_settings.find(
-            {"booster": user_id},
-        ).to_list(None)
-        return [guild["guild_id"] for guild in guilds]
-
-    async def get_user_boosts_count(self, user_id: int) -> int:
-        """Get user boost count.
-
-        Args:
-            user_id (int): User ID.
-
-        Returns:
-            int: Boost count.
-        """
-        return await self.database.guild_settings.count_documents({"booster": user_id})
-
-    async def get_all_boosted_guilds(self) -> list[int]:
-        """Get all boosted guilds.
-
-        Returns:
-            list[int]: List of guild IDs.
-        """
-        guilds = await self.database.guild_settings.find(
-            {"booster": {"$ne": None}},
-        ).to_list(None)
-        return [guild["guild_id"] for guild in guilds]
