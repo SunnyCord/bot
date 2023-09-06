@@ -3,6 +3,7 @@
 ###
 from __future__ import annotations
 
+from contextlib import suppress
 from functools import partial
 from typing import TYPE_CHECKING
 
@@ -331,5 +332,6 @@ class Sunny(commands.AutoShardedBot):
         await self.stable_storage.close()
         await self.lazer_storage.close()
         await self.ordr_client.close()
-        await self.aiohttp_session.close()
+        with suppress(AttributeError):
+            await self.aiohttp_session.close()
         await super().close()
