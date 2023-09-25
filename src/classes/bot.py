@@ -272,8 +272,6 @@ class Sunny(commands.AutoShardedBot):
         logger.info("Voice nodes ready!")
 
     async def setup_hook(self) -> None:
-        with suppress(NotImplementedError):
-            self.loop.add_signal_handler("SIGTERM", self.close)
         self.aiohttp_session = aiohttp.ClientSession()
         logger.info("Setting up modules...")
         await self.load_extension("jishaku")
