@@ -32,7 +32,7 @@ class GraphService:
         data = await self.repository.get_one(osu_id, mode_id, lazer)
         if data is None:
             raise ValueError("Graph not found.")
-        return data
+        return BytesIO(data)
 
     async def get_many(self, lazer: bool = False) -> list[BytesIO]:
         """Get all graphs from Redis.
