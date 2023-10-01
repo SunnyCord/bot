@@ -13,10 +13,9 @@ if TYPE_CHECKING:
 
 class HelpEmbed(ContextEmbed):
     def __init__(self, ctx: commands.Context):
-        # TODO: change to sunnycord link
         super().__init__(
             ctx,
             title="Sunny Help",
-            description="Click [here](https://github.com/SunnyCord/bot/wiki/Commands) to view the help page!",
+            description="Click [here](https://sunnycord.me/commands) to view the help page!",
         )
         self.set_thumbnail(url=ctx.bot.user.avatar)
