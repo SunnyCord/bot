@@ -39,6 +39,7 @@ from ui.menus.osu import OsuScoresView
 from ui.menus.osu import OsuSkinsView
 
 if TYPE_CHECKING:
+    from io import BytesIO
     from typing import Any
     from classes.bot import Sunny
 
@@ -251,7 +252,12 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
-    async def get_graph(self, user: aiosu.models.User, mode_id: int, lazer: bool):
+    async def get_graph(
+        self,
+        user: aiosu.models.User,
+        mode_id: int,
+        lazer: bool,
+    ) -> BytesIO:
         try:
             graph = await self.bot.graph_service.get_one(user.id, mode_id, lazer)
         except ValueError:
