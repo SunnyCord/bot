@@ -27,7 +27,11 @@ def compute_ticks(x) -> list[int]:
 
 def plot_rank_graph(user: User) -> BytesIO:
     plt.rcParams.update(
-        {"xtick.color": "white", "ytick.color": "white", "savefig.pad_inches": 0},
+        {
+            "xtick.color": "#9A9A9A",
+            "ytick.color": "#9A9A9A",
+            "savefig.pad_inches": 0,
+        },
     )
 
     rank_history_data = user.rank_history.data
@@ -40,6 +44,8 @@ def plot_rank_graph(user: User) -> BytesIO:
 
     ax = fig.add_subplot(111)
     ax.grid()
+    for spine in ax.spines.values():
+        spine.set_visible(False)
     ax.plot(dates, rank_history_data[::-1], "g")
     ax.set_ylim(ax.get_ylim()[::-1])
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%m-%d"))
