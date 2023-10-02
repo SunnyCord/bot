@@ -57,6 +57,16 @@ def create_sentry_scope_interaction(
     return scope
 
 
+def reply_interaction(interaction: discord.Interaction):
+    async def send_message(*args, **kwargs):
+        try:
+            await interaction.response.send_message(*args, **kwargs)
+        except:
+            await interaction.followup.send(*args, **kwargs)
+
+    return send_message
+
+
 class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
     """Handles any errors that may occur."""
 
@@ -72,7 +82,7 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
         ) -> None:
             scope = create_sentry_scope_interaction(interaction)
             await self.error_handler(
-                send_message=interaction.response.send_message,
+                send_message=reply_interaction(interaction),
                 command=interaction.command,
                 error=error,
                 scope=scope,
