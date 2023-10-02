@@ -101,10 +101,18 @@ class Music(MetadataGroupCog, name="music"):
             "play",
             "search",
         )
+        potentially_slow = ctx.command.name in (
+            "play",
+            "search",
+            "recommend",
+        )
         player: Player | None = ctx.voice_client
 
         if does_not_require_voice:
             return
+
+        if potentially_slow:
+            await ctx.defer()
 
         if not ctx.author.voice or not ctx.author.voice.channel:
             raise MusicPlayerError("Join a voice channel first!")
@@ -276,7 +284,6 @@ class Music(MetadataGroupCog, name="music"):
     async def search_command(self, ctx: commands.Context, *, query: str) -> None:
         player: Player = ctx.voice_client
 
-        await ctx.defer()
         results = await player.get_tracks(query, ctx=ctx)
 
         if not results:
