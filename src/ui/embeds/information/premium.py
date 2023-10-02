@@ -19,10 +19,9 @@ class UserPremiumEmbed(InteractionEmbed):
             title="Premium Information",
             description="You are a premium user. Thank you for supporting the bot!",
         )
-        # TODO : this url does not exist yet
         self.add_field(
             name="Perks",
-            value="You may see the perks you have unlocked [here](https://sunnycord.me/premium).",
+            value="You may see the perks you have unlocked [here](https://sunnycord.me/support).",
         )
 
         boosted_guilds_str = "\n".join(
