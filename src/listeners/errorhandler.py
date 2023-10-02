@@ -75,7 +75,6 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
-        @bot.tree.error
         async def on_app_command_error(
             interaction: discord.Interaction,
             error: Exception,
@@ -88,6 +87,8 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
                 scope=scope,
                 is_slash=True,
             )
+
+        bot.tree.error(on_app_command_error)
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error: Exception) -> None:
