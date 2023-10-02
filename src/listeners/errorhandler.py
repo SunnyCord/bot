@@ -57,6 +57,16 @@ def create_sentry_scope_interaction(
     return scope
 
 
+def reply_interaction(interaction: discord.Interaction):
+    async def send_message(*args, **kwargs):
+        if not interaction.response.is_done():
+            await interaction.response.send_message(*args, **kwargs)
+        else:
+            await interaction.followup.send(*args, **kwargs)
+
+    return send_message
+
+
 class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
     """Handles any errors that may occur."""
 
@@ -64,20 +74,21 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
 
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
+        self.bot.tree.error(self.on_app_command_error)
 
-        @bot.tree.error
-        async def on_app_command_error(
-            interaction: discord.Interaction,
-            error: Exception,
-        ) -> None:
-            scope = create_sentry_scope_interaction(interaction)
-            await self.error_handler(
-                send_message=interaction.response.send_message,
-                command=interaction.command,
-                error=error,
-                scope=scope,
-                is_slash=True,
-            )
+    async def on_app_command_error(
+        self,
+        interaction: discord.Interaction,
+        error: Exception,
+    ) -> None:
+        scope = create_sentry_scope_interaction(interaction)
+        await self.error_handler(
+            send_message=reply_interaction(interaction),
+            command=interaction.command,
+            error=error,
+            scope=scope,
+            is_slash=True,
+        )
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error: Exception) -> None:
