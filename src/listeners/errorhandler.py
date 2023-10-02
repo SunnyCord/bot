@@ -74,21 +74,21 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
 
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
+        bot.tree.error(self.on_app_command_error)
 
-        async def on_app_command_error(
-            interaction: discord.Interaction,
-            error: Exception,
-        ) -> None:
-            scope = create_sentry_scope_interaction(interaction)
-            await self.error_handler(
-                send_message=reply_interaction(interaction),
-                command=interaction.command,
-                error=error,
-                scope=scope,
-                is_slash=True,
-            )
-
-        bot.tree.error(on_app_command_error)
+    async def on_app_command_error(
+        self,
+        interaction: discord.Interaction,
+        error: Exception,
+    ) -> None:
+        scope = create_sentry_scope_interaction(interaction)
+        await self.error_handler(
+            send_message=reply_interaction(interaction),
+            command=interaction.command,
+            error=error,
+            scope=scope,
+            is_slash=True,
+        )
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error: Exception) -> None:
