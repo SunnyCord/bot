@@ -74,7 +74,7 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
 
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
-        bot.tree.error(self.on_app_command_error)
+        self.bot.tree.error(self.on_app_command_error)
 
     async def on_app_command_error(
         self,
