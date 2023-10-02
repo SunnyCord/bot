@@ -59,9 +59,9 @@ def create_sentry_scope_interaction(
 
 def reply_interaction(interaction: discord.Interaction):
     async def send_message(*args, **kwargs):
-        try:
+        if not interaction.response.is_done():
             await interaction.response.send_message(*args, **kwargs)
-        except:
+        else:
             await interaction.followup.send(*args, **kwargs)
 
     return send_message
