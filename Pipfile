@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 "discord.py" = {version = ">=2.1.0", extras = ["speed", "voice"]}
 "motor" = {version = ">=3.1.1", extras = ["srv"]}
+redis = {extras = ["hiredis"], version = "*"}
+thefuzz = {extras = ["speedup"], version = "*"}
 jishaku = ">=2.5.1"
 sentry-sdk = ">=1.11.0"
 pytimeparse = ">=1.1.8"
@@ -13,11 +15,9 @@ dataclasses-json = ">=0.5.7"
 aiosu = "*"
 orjson = "*"
 cryptography = "*"
-redis = {extras = ["hiredis"], version = "*"}
 matplotlib = "*"
 aiordr = "*"
 pomice = "*"
-thefuzz = {extras = ["speedup"], version = "*"}
 pydantic = "*"
 pydantic-core = "*"
 
@@ -26,7 +26,7 @@ black = ">=22.10.0"
 pre-commit = "*"
 
 [requires]
-python_version = "3.10"
+python_version = "3.12"
 
 [scripts]
 start = "bash -c 'cd src && python run.py'"
