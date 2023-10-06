@@ -90,6 +90,14 @@ def _intersect_commands(
     return seen_commands.values()
 
 
+def _check_is_premium(cmd: commands.Command | discord.app_commands.AppCommand) -> bool:
+    checks = getattr(cmd, "checks", [])
+    for check in checks:
+        if "premium" in check.__name__.casefold():
+            return True
+    return False
+
+
 def _get_cogs_dict(bot: Sunny) -> dict[str, Any]:
     """Gets a dict of all cogs and their commands."""
     cogs_list: list[dict[str, Any]] = []
@@ -105,6 +113,7 @@ def _get_cogs_dict(bot: Sunny) -> dict[str, Any]:
                 continue
 
             is_hybrid = isinstance(cmd, commands.HybridCommand)
+            is_premium = _check_is_premium(cmd)
 
             cmd = getattr(cmd, "app_command", cmd)
 
@@ -115,6 +124,7 @@ def _get_cogs_dict(bot: Sunny) -> dict[str, Any]:
                     "description": cmd.description,
                     "parameters": parameters,
                     "is_hybrid": is_hybrid,
+                    "is_premium": is_premium,
                 },
             )
 
