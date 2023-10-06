@@ -84,7 +84,7 @@ class GuildSettingsService:
         Args:
             guild_settings (GuildSettings): Guild settings.
         """
-        await self.repository.add(guild_settings.model_dump_json())
+        await self.repository.add(guild_settings.model_dump(mode="json"))
 
     async def create(self, guild_id: int) -> GuildSettings:
         """Create default guild settings.
@@ -107,7 +107,7 @@ class GuildSettingsService:
         """
         await self.repository.update(
             guild_settings.guild_id,
-            guild_settings.model_dump_json(exclude={"guild_id"}),
+            guild_settings.model_dump(mode="json", exclude={"guild_id"}),
         )
 
     async def delete(self, guild_id: int) -> None:

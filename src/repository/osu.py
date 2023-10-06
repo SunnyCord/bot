@@ -52,7 +52,7 @@ class OsuRepository(BaseTokenRepository):
             token (OAuthToken): osu! token.
         """
         token_dto = TokenDTO(discord_id=discord_id, token=token, osu_id=token.owner_id)
-        await self.database.tokens.insert_one(token_dto.model_dump_json())
+        await self.database.tokens.insert_one(token_dto.model_dump(mode="json"))
 
     async def update(self, session_id: int, token: OAuthToken) -> None:
         """Update token in database.
@@ -63,7 +63,7 @@ class OsuRepository(BaseTokenRepository):
         """
         await self.database.tokens.update_one(
             {"discord_id": session_id},
-            {"$set": {"token": token.model_dump_json()}},
+            {"$set": {"token": token.model_dump(mode="json")}},
             upsert=True,
         )
 

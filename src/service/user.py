@@ -54,7 +54,7 @@ class UserService:
         Args:
             user (DatabaseUser): User data.
         """
-        await self.repository.add(user.model_dump_json())
+        await self.repository.add(user.model_dump(mode="json"))
 
     async def update(self, user: DatabaseUser) -> None:
         """Update user data.
@@ -63,7 +63,7 @@ class UserService:
         """
         await self.repository.update(
             user.discord_id,
-            user.model_dump_json(exclude={"discord_id"}),
+            user.model_dump(mode="json", exclude={"discord_id"}),
         )
 
     async def delete(self, user_id: int) -> None:
