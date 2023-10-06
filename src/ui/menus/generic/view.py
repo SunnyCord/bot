@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 import abc
+from contextlib import suppress
 from typing import TYPE_CHECKING
 
+from discord import NotFound
 from discord.ui import View
 from discord.utils import MISSING
 
@@ -19,7 +21,8 @@ class BaseView(View, abc.ABC):
     async def on_timeout(self) -> None:
         self.clear_items()
         self.stop()
-        await self.message.edit(view=self)
+        with suppress(NotFound):
+            await self.message.edit(view=self)
 
     @classmethod
     async def start(cls, ctx: commands.Context, *args: Any, **kwargs: Any) -> View:
@@ -41,7 +44,8 @@ class BaseInteractionView(View, abc.ABC):
     async def on_timeout(self) -> None:
         self.clear_items()
         self.stop()
-        await self.interaction.edit_original_response(view=self)
+        with suppress(NotFound):
+            await self.interaction.edit_original_response(view=self)
 
     @classmethod
     async def start(
