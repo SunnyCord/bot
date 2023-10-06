@@ -42,7 +42,10 @@ class OsuDifficultyEmbed(ContextEmbed):
 
         self.set_thumbnail(url=beatmap.beatmapset.covers.list_2_x)
 
-        difficulty_attributes_dict = difficulty_attributes.model_dump(exclude_none=True)
+        difficulty_attributes_dict = difficulty_attributes.model_dump(
+            mode="json",
+            exclude_none=True,
+        )
 
         total_length = timedelta(seconds=beatmap.total_length)
         drain_time = timedelta(seconds=beatmap.hit_length)

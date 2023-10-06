@@ -78,7 +78,7 @@ class ConfigList(FrozenModel):
     @classmethod
     def _create_config(cls) -> None:
         with open("config.json", "a+") as config_file:
-            base_config_dict = cls().model_dump()
+            base_config_dict = cls().model_dump(mode="json")
             base_config_json = orjson.dumps(
                 base_config_dict,
                 option=orjson.OPT_INDENT_2,
