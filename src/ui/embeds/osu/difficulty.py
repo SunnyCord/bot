@@ -43,7 +43,6 @@ class OsuDifficultyEmbed(ContextEmbed):
         self.set_thumbnail(url=beatmap.beatmapset.covers.list_2_x)
 
         difficulty_attributes_dict = difficulty_attributes.model_dump(
-            mode="json",
             exclude_none=True,
         )
 
