@@ -88,8 +88,7 @@ class RecordingPreferencesService:
         """
         await self.repository.update(
             recording_preferences.discord_id,
-            recording_preferences.model_dump(
-                mode="json",
+            recording_preferences.model_dump_json(
                 exclude={"discord_id"},
                 exclude_unset=True,
             ),
