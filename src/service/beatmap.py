@@ -43,7 +43,7 @@ class BeatmapService:
             channel_id (int): Channel ID.
             beatmap (Beatmap): Beatmap data.
         """
-        data = beatmap.model_dump_json()
+        data = beatmap.model_dump_json(mode="json")
         await self.repository.add(channel_id, data)
 
     async def update(self, channel_id: int, beatmap: Beatmap) -> None:
@@ -52,7 +52,7 @@ class BeatmapService:
             channel_id (int): Channel ID.
             beatmap (Beatmap): Beatmap data.
         """
-        data = beatmap.model_dump_json()
+        data = beatmap.model_dump_json(mode="json")
         await self.repository.update(channel_id, data)
 
     async def delete(self, channel_id: int) -> None:

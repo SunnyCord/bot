@@ -64,7 +64,7 @@ class UserPreferencesService:
         Args:
             user_preferences (UserPreferences): User preferences.
         """
-        await self.repository.add(user_preferences.model_dump())
+        await self.repository.add(user_preferences.model_dump(mode="json"))
 
     async def create(self, discord_id: int) -> UserPreferences:
         """Create user preferences.
@@ -87,7 +87,7 @@ class UserPreferencesService:
         """
         await self.repository.update(
             user_preferences.discord_id,
-            user_preferences.model_dump(exclude={"discord_id"}),
+            user_preferences.model_dump(mode="json", exclude={"discord_id"}),
         )
 
     async def delete(self, discord_id: int) -> None:

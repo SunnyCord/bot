@@ -64,7 +64,7 @@ class RecordingPreferencesService:
             recording_preferences (RecordingPreferences): Recording preferences.
         """
         await self.repository.add(
-            recording_preferences.model_dump(exclude_defaults=True),
+            recording_preferences.model_dump(mode="json", exclude_defaults=True),
         )
 
     async def create(self, discord_id: int) -> RecordingPreferences:
@@ -89,6 +89,7 @@ class RecordingPreferencesService:
         await self.repository.update(
             recording_preferences.discord_id,
             recording_preferences.model_dump(
+                mode="json",
                 exclude={"discord_id"},
                 exclude_unset=True,
             ),
