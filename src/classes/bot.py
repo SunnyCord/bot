@@ -91,7 +91,6 @@ def _intersect_commands(
 
 
 def _check_is_premium(cmd: commands.Command | discord.app_commands.AppCommand) -> bool:
-    cmd.checks
     checks = getattr(cmd, "checks", [])
     for check in checks:
         if "premium" in check.__name__.casefold():
