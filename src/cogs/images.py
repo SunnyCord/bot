@@ -91,15 +91,12 @@ class Image(MetadataGroupCog, name="image"):
         interaction: discord.Interaction,
         user: discord.Member | None,
     ) -> None:
-        if user is None:
-            user = interaction.user
-
         async with aiohttp.ClientSession() as cs:
             async with cs.get("https://some-random-api.com/animu/pat") as r:
                 res = await r.json()
 
         embed = discord.Embed(
-            title=f'{user} pats {f"themselves. 😔" if user is None else f"{user} <:angery:545969728527663114>"}',
+            title=f'{interaction.user} pats {f"themselves. 😔" if user is None else f"{user} <:lewd:545969728527663114>"}',
             color=self.bot.config.color,
         ).set_image(url=res["link"])
         await interaction.response.send_message(embed=embed)
@@ -112,15 +109,12 @@ class Image(MetadataGroupCog, name="image"):
         interaction: discord.Interaction,
         user: discord.Member | None,
     ) -> None:
-        if user is None:
-            user = interaction.user
-
         async with aiohttp.ClientSession() as cs:
             async with cs.get("https://some-random-api.com/animu/hug") as r:
                 res = await r.json()
 
         embed = discord.Embed(
-            title=f'{user} hugs {f"themselves. 😔" if user is None else f"{user} <:angery:545969728527663114>"}',
+            title=f'{interaction.user} hugs {f"themselves. 😔" if user is None else f"{user} <:lewd:545969728527663114>"}',
             color=self.bot.config.color,
         ).set_image(url=res["link"])
         await interaction.response.send_message(embed=embed)
