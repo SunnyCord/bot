@@ -59,7 +59,7 @@ class Image(MetadataGroupCog, name="image"):
     ) -> None:
         async with aiohttp.ClientSession() as cs:
             async with cs.get(
-                f"https://some-random-api.ml/animal/{animal.name}",
+                f"https://some-random-api.com/animal/{animal.name}",
             ) as r:
                 res = await r.json()
 
@@ -74,7 +74,7 @@ class Image(MetadataGroupCog, name="image"):
     @app_commands.command(name="wink", description="Wink")
     async def wink_command(self, interaction: discord.Interaction) -> None:
         async with aiohttp.ClientSession() as cs:
-            async with cs.get("https://some-random-api.ml/animu/wink") as r:
+            async with cs.get("https://some-random-api.com/animu/wink") as r:
                 res = await r.json()
 
         embed = discord.Embed(
@@ -95,7 +95,7 @@ class Image(MetadataGroupCog, name="image"):
             user = interaction.user
 
         async with aiohttp.ClientSession() as cs:
-            async with cs.get("https://some-random-api.ml/animu/pat") as r:
+            async with cs.get("https://some-random-api.com/animu/pat") as r:
                 res = await r.json()
 
         embed = discord.Embed(
@@ -116,7 +116,7 @@ class Image(MetadataGroupCog, name="image"):
             user = interaction.user
 
         async with aiohttp.ClientSession() as cs:
-            async with cs.get("https://some-random-api.ml/animu/hug") as r:
+            async with cs.get("https://some-random-api.com/animu/hug") as r:
                 res = await r.json()
 
         embed = discord.Embed(
