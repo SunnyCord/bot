@@ -259,6 +259,12 @@ class Sunny(commands.AutoShardedBot):
         self.aes = Fernet(check_aes())
 
     async def start_pomice_nodes(self) -> None:
+        if self.pomice_node_pool.node_count > 0:
+            logger.debug(
+                "Attempted to call start_pomice_nodes when nodes already exist!",
+            )
+            return
+
         await self.wait_until_ready()
 
         for node in self.config.lavalink.nodes:
