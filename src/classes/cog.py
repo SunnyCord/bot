@@ -14,8 +14,8 @@ class MetadataCog(Cog):
 
     def __init_subclass__(cls, *args: Any, **kwargs: Any) -> None:
         super().__init_subclass__(*args)
-        cls.hidden = kwargs.pop("hidden", False)
-        cls.display_parent = kwargs.pop("display_parent", None)
+        cls.hidden: bool = kwargs.pop("hidden", False)
+        cls.display_parent: str | None = kwargs.pop("display_parent", None)
 
 
 class MetadataGroupCog(GroupCog):
@@ -23,5 +23,5 @@ class MetadataGroupCog(GroupCog):
 
     def __init_subclass__(cls, *args: Any, **kwargs: Any) -> None:
         super().__init_subclass__(*args)
-        cls.hidden = kwargs.pop("hidden", False)
-        cls.display_parent = kwargs.pop("display_parent", None)
+        cls.hidden: bool = kwargs.pop("hidden", False)
+        cls.display_parent: str | None = kwargs.pop("display_parent", None)
