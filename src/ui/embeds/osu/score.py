@@ -76,7 +76,7 @@ def _get_score_bpm(score: aiosu.models.Score) -> str:
 def _score_to_embed_strs(
     score: Score,
     include_user: bool = False,
-    difficulty_attrs: aiosu.models.BeatmapDifficultyAttributes = None,
+    difficulty_attrs: aiosu.models.BeatmapDifficultyAttributes | None = None,
 ) -> dict[str, str]:
     beatmap, beatmapset = score.beatmap, score.beatmapset
 
@@ -84,7 +84,7 @@ def _score_to_embed_strs(
 
     statistics = score.statistics
     max_combo = beatmap.max_combo
-    pp = score.pp
+    pp = score.pp or 0.0
     pp_fc = None
 
     if difficulty_attrs:
