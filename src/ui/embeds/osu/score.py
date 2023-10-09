@@ -6,6 +6,7 @@ from __future__ import annotations
 from inspect import cleandoc
 from typing import TYPE_CHECKING
 
+from aiosu.models import BeatmapRankStatus
 from aiosu.models import LazerScore
 from aiosu.models import Mod
 from aiosu.models import Score
@@ -18,6 +19,29 @@ if TYPE_CHECKING:
     from typing import Any
     import aiosu
     from discord import commands
+
+
+def _check_leaderboarded(score: aiosu.models.Score) -> bool:
+    return score.beatmap.status in (
+        BeatmapRankStatus.APPROVED,
+        BeatmapRankStatus.QUALIFIED,
+        BeatmapRankStatus.LOVED,
+        BeatmapRankStatus.RANKED,
+    )
+
+
+async def get_score_beatmap_attributes(
+    score: aiosu.models.Score,
+    client: aiosu.v2.Client,
+) -> aiosu.models.BeatmapDifficultyAttributes | None:
+    if not _check_leaderboarded(score):
+        return None
+
+    return await client.get_beatmap_attributes(
+        score.beatmap.id,
+        mods=score.mods,
+        mode=score.mode,
+    )
 
 
 def _get_lazer_speed_modifier(mod):
@@ -77,8 +101,8 @@ def _score_to_embed_strs(
             if score.passed:
                 is_fc = calculator._calculate_effective_miss_count(score) == 0
             if not is_fc or not score.passed:
-                score_fc = score.copy()
-                score_fc.statistics = score.statistics.copy()
+                score_fc = score.model_copy()
+                score_fc.statistics = score.statistics.model_copy()
                 score_fc.max_combo = max_combo
                 adjusted_greats = (
                     beatmap.count_objects
@@ -156,11 +180,7 @@ class OsuScoreSingleEmbed(ContextEmbed):
 
         client = await self.ctx.bot.stable_storage.app_client
 
-        difficulty_attrs = await client.get_beatmap_attributes(
-            self.score.beatmap.id,
-            mods=self.score.mods,
-            mode=self.score.mode,
-        )
+        difficulty_attrs = await get_score_beatmap_attributes(self.score, client)
 
         self.add_field(
             inline=False,
@@ -202,21 +222,13 @@ class OsuScoreMultipleEmbed(ContextEmbed):
             self.set_thumbnail(url=score.beatmapset.covers.list)
 
             self.difficulty_attrs = [
-                await client.get_beatmap_attributes(
-                    score.beatmap.id,
-                    mods=score.mods,
-                    mode=score.mode,
-                ),
+                await get_score_beatmap_attributes(score, client),
             ] * len(self.scores)
 
-        if len(self.difficulty_attrs) != len(self.scores):
+        else:
             for score in self.scores:
                 self.difficulty_attrs.append(
-                    await client.get_beatmap_attributes(
-                        score.beatmap.id,
-                        mods=score.mods,
-                        mode=score.mode,
-                    ),
+                    await get_score_beatmap_attributes(score, client),
                 )
 
         for idx, score in enumerate(self.scores):
