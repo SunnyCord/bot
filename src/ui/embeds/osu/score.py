@@ -100,8 +100,8 @@ def _score_to_embed_strs(
             if score.passed:
                 is_fc = calculator._calculate_effective_miss_count(score) == 0
             if not is_fc or not score.passed:
-                score_fc = score.copy()
-                score_fc.statistics = score.statistics.copy()
+                score_fc = score.model_copy()
+                score_fc.statistics = score.statistics.model_copy()
                 score_fc.max_combo = max_combo
                 adjusted_greats = (
                     beatmap.count_objects
