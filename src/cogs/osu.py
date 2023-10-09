@@ -814,6 +814,17 @@ class OsuCog(MetadataCog, name="osu!"):
         self.bot = bot
         self.config_v2 = self.bot.config.osu_api
 
+    @commands.command(
+        name="osuset",
+        aliases=["link"],
+        hidden=True,
+    )
+    async def legacy_osu_set_command(
+        self,
+        ctx: commands.Context,
+    ) -> None:
+        await ctx.send("Please use the `/osuset` command instead.")
+
     @commands.cooldown(1, 5, commands.BucketType.user)
     @app_commands.command(
         name="osuset",
