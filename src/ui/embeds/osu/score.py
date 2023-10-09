@@ -6,6 +6,7 @@ from __future__ import annotations
 from inspect import cleandoc
 from typing import TYPE_CHECKING
 
+from aiosu.models import BeatmapRankStatus
 from aiosu.models import LazerScore
 from aiosu.models import Mod
 from aiosu.models import Score
@@ -22,10 +23,10 @@ if TYPE_CHECKING:
 
 def _check_leaderboarded(score: aiosu.models.Score) -> bool:
     return score.beatmap.status in (
-        aiosu.models.BeatmapRankStatus.APPROVED,
-        aiosu.models.BeatmapRankStatus.QUALIFIED,
-        aiosu.models.BeatmapRankStatus.LOVED,
-        aiosu.models.BeatmapRankStatus.RANKED,
+        BeatmapRankStatus.APPROVED,
+        BeatmapRankStatus.QUALIFIED,
+        BeatmapRankStatus.LOVED,
+        BeatmapRankStatus.RANKED,
     )
 
 
