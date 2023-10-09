@@ -823,7 +823,13 @@ class OsuCog(MetadataCog, name="osu!"):
         self,
         ctx: commands.Context,
     ) -> None:
-        await ctx.send("Please use the `/osuset` command instead.")
+        commands = await self.bot.tree.fetch_commands()
+        osuset_command = next(
+            (c for c in commands if c.name == "osuset"),
+        )
+        await ctx.send(
+            f"Please use the {osuset_command.mention} command instead.",
+        )
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @app_commands.command(
