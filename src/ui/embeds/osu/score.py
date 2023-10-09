@@ -29,6 +29,20 @@ def _check_leaderboarded(score: aiosu.models.Score) -> bool:
     )
 
 
+async def get_score_beatmap_attributes(
+    score: aiosu.models.Score,
+    client: aiosu.v2.Client,
+) -> aiosu.models.BeatmapDifficultyAttributes | None:
+    if not _check_leaderboarded(score):
+        return None
+
+    return await client.get_beatmap_attributes(
+        score.beatmap.id,
+        mods=score.mods,
+        mode=score.mode,
+    )
+
+
 def _get_lazer_speed_modifier(mod):
     speed_change = mod.settings.get("speed_change")
     if speed_change:
@@ -165,13 +179,7 @@ class OsuScoreSingleEmbed(ContextEmbed):
 
         client = await self.ctx.bot.stable_storage.app_client
 
-        difficulty_attrs = None
-        if _check_leaderboarded(self.score):
-            difficulty_attrs = await client.get_beatmap_attributes(
-                self.score.beatmap.id,
-                mods=self.score.mods,
-                mode=self.score.mode,
-            )
+        difficulty_attrs = await get_score_beatmap_attributes(self.score, client)
 
         self.add_field(
             inline=False,
@@ -194,7 +202,7 @@ class OsuScoreMultipleEmbed(ContextEmbed):
         self.ctx = ctx
         self.prepared = False
         self.scores = scores
-        self.difficulty_attrs = None
+        self.difficulty_attrs = []
         self.same_beatmap = same_beatmap
 
     async def prepare(self) -> None:
@@ -212,28 +220,14 @@ class OsuScoreMultipleEmbed(ContextEmbed):
 
             self.set_thumbnail(url=score.beatmapset.covers.list)
 
-            if _check_leaderboarded(score):
-                self.difficulty_attrs = [
-                    await client.get_beatmap_attributes(
-                        score.beatmap.id,
-                        mods=score.mods,
-                        mode=score.mode,
-                    ),
-                ] * len(self.scores)
+            self.difficulty_attrs = [
+                await get_score_beatmap_attributes(score, client),
+            ] * len(self.scores)
 
         else:
             for score in self.scores:
-                if not _check_leaderboarded(score):
-                    continue
-                if self.difficulty_attrs is None:
-                    self.difficulty_attrs = []
-
                 self.difficulty_attrs.append(
-                    await client.get_beatmap_attributes(
-                        score.beatmap.id,
-                        mods=score.mods,
-                        mode=score.mode,
-                    ),
+                    await get_score_beatmap_attributes(score, client),
                 )
 
         for idx, score in enumerate(self.scores):
