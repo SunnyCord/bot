@@ -30,7 +30,8 @@ class BeatmapRepository:
         Returns:
             list[Any]: List of beatmap data.
         """
-        return await self.redis.keys("sunny:*:beatmap")
+        keys = await self.redis.keys("sunny:*:beatmap")
+        return [await self.redis.get(key) for key in keys]
 
     async def add(self, channel_id: int, beatmap: str) -> None:
         """Add new beatmap to database.

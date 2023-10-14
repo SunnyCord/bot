@@ -48,10 +48,10 @@ class GraphRepository:
             list[bytes]: List of graphs data.
         """
         if lazer:
-            graphs = await self.redis.keys("sunny:*:*:lazer:graph")
+            keys = await self.redis.keys("sunny:*:*:lazer:graph")
         else:
-            graphs = await self.redis.keys("sunny:*:*:graph")
-        return graphs
+            keys = await self.redis.keys("sunny:*:*:graph")
+        return [await self.redis.get(key) for key in keys]
 
     async def add(
         self,
