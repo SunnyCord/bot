@@ -1060,7 +1060,12 @@ class OsuCog(MetadataCog, name="osu!"):
         await ctx.defer()
 
         mode = flags.mode
-        mods = aiosu.models.Mods(mods)
+        try:
+            mods = aiosu.models.Mods(mods.upper())
+        except ValueError:
+            await ctx.send("Invalid mods specified.")
+            return
+
         client = await self.bot.stable_storage.app_client
 
         beatmap_data = None

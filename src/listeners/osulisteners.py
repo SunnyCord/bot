@@ -78,6 +78,10 @@ class OsuListeners(
             file_bytes = BytesIO(await resp.read())
             audio_file = discord.File(file_bytes, filename="Preview.mp3")
 
+        if len(beatmapset.beatmaps) == 0:
+            return
+
+        await self.bot.beatmap_service.add(ctx.channel.id, beatmapset.beatmaps[0])
         await OsuBeatmapView.start(
             ctx,
             beatmapset,
