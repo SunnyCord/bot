@@ -12,11 +12,11 @@ FUZZY_MATCH_THRESHOLD_LOW = 35
 
 
 __all__ = (
-    "ordinal",
+    "fuzzy_string_match",
     "number",
+    "ordinal",
     "seconds_to_long_text",
     "seconds_to_text",
-    "fuzzy_string_match",
 )
 
 
