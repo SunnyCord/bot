@@ -36,6 +36,10 @@ repos:
     rev: v2.3.0
     hooks:
       - id: pycln
+  - repo: https://github.com/aio-libs/sort-all
+    rev: v1.2.0
+    hooks:
+      - id: sort-all
 
 default_language_version:
   python: python3.10
