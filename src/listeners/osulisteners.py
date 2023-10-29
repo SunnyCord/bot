@@ -7,6 +7,7 @@ from io import BytesIO
 from typing import TYPE_CHECKING
 
 import discord
+from aiosu.exceptions import APIException
 from aiosu.models import User
 from classes.cog import MetadataCog
 from common import graphing
@@ -62,13 +63,16 @@ class OsuListeners(
         ctx = await self.bot.get_context(message)
         client = await self.bot.stable_storage.app_client
 
-        if beatmapset_id is None:
-            beatmap = await client.get_beatmap(beatmap_id)
-            if beatmap is None:
-                return
-            beatmapset_id = beatmap.beatmapset_id
+        try:
+            if beatmapset_id is None:
+                beatmap = await client.get_beatmap(beatmap_id)
+                if beatmap is None:
+                    return
+                beatmapset_id = beatmap.beatmapset_id
 
-        beatmapset = await client.get_beatmapset(beatmapset_id)
+            beatmapset = await client.get_beatmapset(beatmapset_id)
+        except APIException:
+            return
 
         async with self.bot.aiohttp_session.get(
             f"https:{beatmapset.preview_url}",
