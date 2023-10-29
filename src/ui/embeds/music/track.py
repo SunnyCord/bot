@@ -19,7 +19,7 @@ class MusicTrackEmbed(ContextEmbed):
         self,
         ctx: commands.Context,
         track: Track,
-        title="Now playing",
+        title: str | None = None,
         position=0,
     ):
         self.track = track
@@ -33,7 +33,7 @@ class MusicTrackEmbed(ContextEmbed):
 
         super().__init__(
             ctx,
-            title=title,
+            title=title or "Now playing",
             description=description,
         )
 
@@ -42,7 +42,7 @@ class MusicTrackEmbed(ContextEmbed):
             position_text += f"Position: {milliseconds_to_duration(position)} | "
 
         author_name = f"Requested by {track.requester}"
-        if track.requester is ctx.bot.user:
+        if track.requester is ctx.bot.user and title is None:
             author_name = "Autoplayed"
 
         self.set_author(name=author_name)
