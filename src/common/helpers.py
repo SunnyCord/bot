@@ -39,7 +39,7 @@ def get_beatmap_from_text(
     elif result_link.group("bmapid1") is not None:
         beatmap_data["beatmap_id"] = int(result_link.group("bmapid1"))
     else:
-        beatmap_data["beatmapset_id"] = int(result_link.group("bmapset1"))
+        beatmap_data["beatmapset_id"] = int(result_link.group("bmapsetid1"))
 
     return beatmap_data
 
