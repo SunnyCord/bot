@@ -1374,7 +1374,7 @@ class OsuCog(MetadataCog, name="osu!"):
         return await self.bot.ordr_client.create_render(
             username=ctx.author.name,
             skin=recording_prefs.skin,
-            replay_url=replay_file.url,
+            replay_file=replay_file,
             render_options=render_options,
         )
 
