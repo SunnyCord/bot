@@ -45,7 +45,7 @@ class BaseOsudleGame(ABC):
             and humanizer.fuzzy_string_match(
                 message.content,
                 self.current_beatmapset.title,
-                permit_low_match=True,
+                permit_low_match=False,
             )
         )
 
