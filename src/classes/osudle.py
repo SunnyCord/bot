@@ -42,10 +42,9 @@ class BaseOsudleGame(ABC):
         return (
             message.channel is self.interaction.channel
             and not message.author.bot
-            and humanizer.fuzzy_string_match(
+            and humanizer.song_title_match(
                 message.content,
                 self.current_beatmapset.title,
-                permit_low_match=False,
             )
         )
 
