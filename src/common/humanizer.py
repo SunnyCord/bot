@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from datetime import timedelta
 
+from common.regex import alphanumeric_rx
 from thefuzz import fuzz
 
 FUZZY_MATCH_THRESHOLD = 80
@@ -87,3 +88,14 @@ def milliseconds_to_duration(position: float) -> str:
 def fuzzy_string_match(str1: str, str2: str, permit_low_match: bool = False) -> bool:
     THRESHOLD = FUZZY_MATCH_THRESHOLD_LOW if permit_low_match else FUZZY_MATCH_THRESHOLD
     return fuzz.ratio(str1.casefold(), str2.casefold()) >= THRESHOLD
+
+
+def song_title_match(guess: str, answer: str) -> bool:
+    alphanumeric = alphanumeric_rx.split(answer)[0]
+    guess_length = len(guess.split(" "))
+    partial_words = " ".join(answer.split(" ")[:guess_length])
+    return (
+        fuzzy_string_match(guess, answer)
+        or fuzzy_string_match(guess, alphanumeric)
+        or fuzzy_string_match(guess, partial_words)
+    )
