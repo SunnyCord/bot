@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 import aiordr
 import aiosu
 import discord
+import pomice
 import sentry_sdk
 from classes import exceptions
 from classes.cog import MetadataCog
@@ -202,6 +203,10 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
 
         elif isinstance(error, exceptions.MusicPlayerError):
             await send_message(error, delete_after=10)
+            return
+
+        elif isinstance(error, pomice.TrackLoadError):
+            await send_message(f"Failed to load this track!", delete_after=10)
             return
 
         sentry_id = sentry_sdk.capture_exception(

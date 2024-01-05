@@ -775,7 +775,7 @@ class Music(MetadataGroupCog, name="music"):
         await self.bot.guild_settings_service.set_dj_role(ctx.guild.id, role.id)
 
         if player:
-            player.guild_settings.dj_role_id = role.id
+            player.guild_settings.dj_role = role.id
 
         await ctx.send(f"🎶 | DJ role set to {role.mention}", silent=True)
 
