@@ -12,4 +12,4 @@ beatmap_link_rx = re.compile(
 user_link_rx = re.compile(
     r"(https?)://(?P<domain>osu|lazer)\.ppy\.sh/u(sers)?/(?P<userid>[0-9]+)",
 )
-alphanumeric_rx = re.compile(r"[^a-zA-Z0-9]")
+alphanumeric_rx = re.compile(r"[^a-zA-Z0-9 ]")
