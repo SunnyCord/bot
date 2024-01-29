@@ -127,8 +127,7 @@ class BaseOsudleGame(ABC):
         await self.send_response("Game stopped.")
 
     @abstractmethod
-    async def send_message(self, beatmapset: Beatmapset) -> None:
-        ...
+    async def send_message(self, beatmapset: Beatmapset) -> None: ...
 
 
 class OsudleSongGame(BaseOsudleGame):

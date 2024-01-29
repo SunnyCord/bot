@@ -15,8 +15,7 @@ class ContextEmbed(discord.Embed):
     def __init__(self, ctx: discord.ext.commands.Context, *args: Any, **kwargs: Any):
         super().__init__(color=ctx.bot.config.color, *args, **kwargs)
 
-    async def prepare(self) -> None:
-        ...
+    async def prepare(self) -> None: ...
 
 
 class ContextAuthorEmbed(ContextEmbed):
