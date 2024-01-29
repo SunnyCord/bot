@@ -14,12 +14,10 @@ from discord.ext.commands import CommandError
 from discord.ext.commands import Context
 
 
-class SupportServerMissing(AppCommandError, CommandError):
-    ...
+class SupportServerMissing(AppCommandError, CommandError): ...
 
 
-class PremiumMissing(AppCheckFailure, CheckFailure):
-    ...
+class PremiumMissing(AppCheckFailure, CheckFailure): ...
 
 
 async def get_or_fetch_member(guild: discord.Guild, user_id: int) -> discord.Member:

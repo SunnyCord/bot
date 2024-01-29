@@ -15,8 +15,7 @@ class InteractionEmbed(discord.Embed):
     def __init__(self, interaction: discord.Interaction, *args: Any, **kwargs: Any):
         super().__init__(color=interaction.client.config.color, *args, **kwargs)
 
-    async def prepare(self) -> None:
-        ...
+    async def prepare(self) -> None: ...
 
 
 class InteractionAuthorEmbed(InteractionEmbed):
