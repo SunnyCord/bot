@@ -308,11 +308,13 @@ class Sunny(commands.AutoShardedBot):
     async def on_guild_join(self, guild: discord.Guild) -> None:
         logger.info(f"Joined guild {guild.name} (ID: {guild.id})")
         await self.stats_service.set_guild_count(len(self.guilds))
+        await self.stats_service.set_user_count(len(self.users))
         await self.guild_settings_service.create(guild.id)
 
     async def on_guild_remove(self, guild: discord.Guild) -> None:
         logger.info(f"Left guild {guild.name} (ID: {guild.id})")
         await self.stats_service.set_guild_count(len(self.guilds))
+        await self.stats_service.set_user_count(len(self.users))
         await self.guild_settings_service.delete(guild.id)
 
     async def on_message(self, message: discord.Message) -> None:
