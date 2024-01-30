@@ -200,7 +200,7 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
                 (c for c in cmd_list if c.name == "osuset"),
             )
             await send_message(
-                f"Please set your profile! Use the f{osuset_command.mention} command.",
+                f"Please set your profile! Use the {osuset_command.mention} command.",
                 delete_after=20,
             )
             return
