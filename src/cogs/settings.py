@@ -34,7 +34,7 @@ class Settings(MetadataCog):
         await self.bot.user_service.delete(ctx.author.id)
         await self.bot.recording_prefs_service.delete(ctx.author.id)
         with suppress(InvalidClientRequestedError):
-            await self.bot.stable_storage.revoke_client(ctx.author.id)
+            await self.bot.client_storage.revoke_client(ctx.author.id)
         await ctx.send("Your data has been successfully deleted. Sorry to see you go!")
 
     @commands.hybrid_command(

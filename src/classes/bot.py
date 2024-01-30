@@ -178,8 +178,7 @@ class Sunny(commands.AutoShardedBot):
         "osu_daily_client",
         "client_v1",
         "client_v2",
-        "stable_storage",
-        "lazer_storage",
+        "client_storage",
         "ordr_client",
         "aes",
     )
@@ -241,16 +240,10 @@ class Sunny(commands.AutoShardedBot):
         self.graph_service = GraphService(graph_repo)
         self.osu_daily_client = OsuDailyClient(self.config.osu_daily_key)
         self.client_v1 = aiosu.v1.Client(self.config.osu_api.api_key)
-        self.stable_storage = aiosu.v2.ClientStorage(
+        self.client_storage = aiosu.v2.ClientStorage(
             token_repository=osu_repo,
             client_secret=self.config.osu_api.client_secret,
             client_id=self.config.osu_api.client_id,
-        )
-        self.lazer_storage = aiosu.v2.ClientStorage(
-            token_repository=osu_repo,
-            client_secret=self.config.osu_api.client_secret,
-            client_id=self.config.osu_api.client_id,
-            base_url="https://lazer.ppy.sh",
         )
         self.ordr_client = aiordr.ordrClient(
             verification_key=self.config.ordr_key,
@@ -345,8 +338,7 @@ class Sunny(commands.AutoShardedBot):
     async def close(self) -> None:
         await self.pomice_node_pool.disconnect()
         await self.client_v1.close()
-        await self.stable_storage.close()
-        await self.lazer_storage.close()
+        await self.client_storage.close()
         await self.ordr_client.close()
         with suppress(AttributeError):
             await self.aiohttp_session.close()

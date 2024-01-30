@@ -33,12 +33,12 @@ class OsuListeners(
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
-    async def get_graph(self, user: User, mode_id: int, lazer: bool):
+    async def get_graph(self, user: User, mode_id: int):
         try:
-            graph = await self.bot.graph_service.get_one(user.id, mode_id, lazer)
+            graph = await self.bot.graph_service.get_one(user.id, mode_id)
         except ValueError:
             graph = await self.bot.run_blocking(graphing.plot_rank_graph, user)
-            await self.bot.graph_service.add(user.id, graph, mode_id, lazer)
+            await self.bot.graph_service.add(user.id, graph, mode_id)
         return graph
 
     @commands.Cog.listener()
@@ -61,7 +61,7 @@ class OsuListeners(
             return
 
         ctx = await self.bot.get_context(message)
-        client = await self.bot.stable_storage.app_client
+        client = await self.bot.client_storage.app_client
 
         try:
             if beatmapset_id is None:
@@ -93,18 +93,18 @@ class OsuListeners(
         )
 
     async def user_listener(self, message: discord.Message) -> None:
-        user_id, lazer = get_user_from_text(message.content)
+        user_id = get_user_from_text(message.content)
         if user_id is None:
             return
 
         ctx = await self.bot.get_context(message)
 
-        client = await self.bot.stable_storage.app_client
+        client = await self.bot.client_storage.app_client
         user = await client.get_user(user_id)
 
-        embed = OsuProfileCompactEmbed(ctx, user, user.playmode, lazer)
+        embed = OsuProfileCompactEmbed(ctx, user, user.playmode)
 
-        graph = await self.get_graph(user, int(user.playmode), lazer)
+        graph = await self.get_graph(user, int(user.playmode))
         embed.set_image(url="attachment://rank_graph.png")
         await ctx.send(embed=embed, file=discord.File(graph, "rank_graph.png"))
 

@@ -45,10 +45,6 @@ if TYPE_CHECKING:
 
 
 class OsuProfileFlags(commands.FlagConverter, prefix="-"):  # type: ignore
-    lazer: bool | None = commands.Flag(
-        description="Whether to use the lazer client",
-        default=None,
-    )
     extended: bool = commands.Flag(
         aliases=["e"],
         description="Show extended stats",
@@ -65,10 +61,6 @@ class OsuTopFlags(commands.FlagConverter, prefix="-"):  # type: ignore
     position: int | None = commands.Flag(
         aliases=["p"],
         description="The position of the score to show",
-        default=None,
-    )
-    lazer: bool | None = commands.Flag(
-        description="Whether to use the lazer client",
         default=None,
     )
 
@@ -89,10 +81,6 @@ class OsuRecentFlags(commands.FlagConverter):
         description="Include failed scores",
         default=True,
     )
-    lazer: bool | None = commands.Flag(
-        description="Whether to use the lazer client",
-        default=None,
-    )
 
 
 class OsuScoreFlags(commands.FlagConverter):
@@ -101,20 +89,12 @@ class OsuScoreFlags(commands.FlagConverter):
         description="The osu! mode to search for",
         default=None,
     )
-    lazer: bool | None = commands.Flag(
-        description="Whether to use the lazer client",
-        default=None,
-    )
 
 
 class OsuPPFlags(commands.FlagConverter):
     mode: aiosu.models.Gamemode | None = commands.Flag(
         aliases=["m"],
         description="The osu! mode to search for",
-        default=None,
-    )
-    lazer: bool | None = commands.Flag(
-        description="Whether to use the lazer client",
         default=None,
     )
 
@@ -133,10 +113,6 @@ class OsuRecordFlags(commands.FlagConverter):
     mode: aiosu.models.Gamemode | None = commands.Flag(
         aliases=["m"],
         description="The osu! mode to search for. Optional, defaults to the user's main mode",
-        default=None,
-    )
-    lazer: bool | None = commands.Flag(
-        description="Whether to use the lazer client. Optional, defaults to the user's lazer preference",
         default=None,
     )
 
@@ -184,21 +160,15 @@ class OsuUserConverter(commands.Converter):
         2. Lookup by Discord member
         3. Lookup by osu! query
         """
-        raw_user, mode, lazer = args
+        raw_user, mode = args
         client, author_client = None, None
-        if lazer is None:
-            lazer = await ctx.bot.user_prefs_service.get_lazer(ctx.author.id)
-
-        client_storage: aiosu.v2.ClientStorage = (
-            ctx.bot.lazer_storage if lazer else ctx.bot.stable_storage
-        )
 
         params = {}
         if mode is not None:
             params["mode"] = mode
 
         with suppress(aiosu.exceptions.InvalidClientRequestedError):
-            author_client = await client_storage.get_client(id=ctx.author.id)
+            author_client = await ctx.bot.client_storage.get_client(id=ctx.author.id)
 
         if raw_user is None:  # Get author profile
             if author_client is None:
@@ -206,7 +176,6 @@ class OsuUserConverter(commands.Converter):
             return UserConverterDTO(
                 client=author_client,
                 author_client=author_client,
-                lazer=lazer,
                 is_app_client=False,
                 user=await author_client.get_me(**params),
             )
@@ -214,21 +183,19 @@ class OsuUserConverter(commands.Converter):
         member = await UserConverter().convert(ctx, raw_user)
         if member is not None:  # Get member profile
             with suppress(aiosu.exceptions.InvalidClientRequestedError):
-                client = await client_storage.get_client(id=member.id)
+                client = await ctx.bot.client_storage.get_client(id=member.id)
                 return UserConverterDTO(
                     client=client,
                     author_client=author_client,
-                    lazer=lazer,
                     is_app_client=False,
                     user=await client.get_me(**params),
                 )
 
-        client = await client_storage.app_client  # Get lookup profile
+        client = await ctx.bot.client_storage.app_client  # Get lookup profile
         try:
             return UserConverterDTO(
                 client=client,
                 author_client=author_client,
-                lazer=lazer,
                 is_app_client=True,
                 user=await client.get_user(raw_user, **params),
             )
@@ -256,13 +223,12 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):
         self,
         user: aiosu.models.User,
         mode_id: int,
-        lazer: bool,
     ) -> BytesIO:
         try:
-            graph = await self.bot.graph_service.get_one(user.id, mode_id, lazer)
+            graph = await self.bot.graph_service.get_one(user.id, mode_id)
         except ValueError:
             graph = await self.bot.run_blocking(graphing.plot_rank_graph, user)
-            await self.bot.graph_service.add(user.id, graph, mode_id, lazer)
+            await self.bot.graph_service.add(user.id, graph, mode_id)
         return graph
 
     async def osu_profile_command(
@@ -277,13 +243,12 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):
             ctx,
             username,
             mode,
-            flags.lazer,
         )
         if flags.extended:
-            embed = OsuProfileExtendedEmbed(ctx, user_data.user, mode, user_data.lazer)
+            embed = OsuProfileExtendedEmbed(ctx, user_data.user, mode)
         else:
-            embed = OsuProfileCompactEmbed(ctx, user_data.user, mode, user_data.lazer)
-        graph = await self.get_graph(user_data.user, int(mode), user_data.lazer)
+            embed = OsuProfileCompactEmbed(ctx, user_data.user, mode)
+        graph = await self.get_graph(user_data.user, int(mode))
         embed.set_image(url="attachment://rank_graph.png")
         await ctx.send(embed=embed, file=discord.File(graph, "rank_graph.png"))
 
@@ -374,7 +339,6 @@ class OsuTopsCog(MetadataGroupCog, name="top", display_parent="osu!"):
             ctx,
             username,
             mode,
-            flags.lazer,
         )
 
         client, user = user_data.client, user_data.user
@@ -852,19 +816,6 @@ class OsuCog(MetadataCog, name="osu!"):
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(
-        name="lazertoggle",
-        description="Toggles whether osu! commands use lazer stats by default or not",
-    )
-    async def lazer_toggle_command(
-        self,
-        ctx: commands.Context,
-    ) -> None:
-        lazer = await self.bot.user_prefs_service.toggle_lazer(ctx.author.id)
-        default = "lazer" if lazer else "stable"
-        await ctx.send(f"Defaulting to {default} stats for osu! commands.")
-
-    @commands.cooldown(1, 1, commands.BucketType.user)
-    @commands.hybrid_command(
         name="recent",
         aliases=["rs", "r"],
         description="Shows recent osu! scores for a user",
@@ -881,7 +832,7 @@ class OsuCog(MetadataCog, name="osu!"):
     ) -> None:
         await ctx.defer()
         mode = flags.mode
-        user_data = await OsuUserConverter().convert(ctx, username, mode, flags.lazer)
+        user_data = await OsuUserConverter().convert(ctx, username, mode)
 
         client, user = user_data.client, user_data.user
 
@@ -918,16 +869,14 @@ class OsuCog(MetadataCog, name="osu!"):
         username: str | None,
         mode: aiosu.models.Gamemode,
         beatmap: aiosu.models.Beatmap,
-        lazer: bool,
     ) -> None:
         user_data = await OsuUserConverter().convert(
             ctx,
             username,
             mode,
-            lazer,
         )
 
-        client, user, lazer = user_data.client, user_data.user, user_data.lazer
+        client, user = user_data.client, user_data.user
 
         safe_username = escape_markdown(user.username)
 
@@ -970,9 +919,9 @@ class OsuCog(MetadataCog, name="osu!"):
         flags: OsuScoreFlags,
     ) -> None:
         await ctx.defer()
-        mode, lazer = flags.mode, flags.lazer
+        mode = flags.mode
 
-        client = await self.bot.stable_storage.app_client
+        client = await self.bot.client_storage.app_client
 
         if ctx.message.reference:
             beatmap_data = get_beatmap_from_reference(ctx.message.reference)
@@ -996,7 +945,6 @@ class OsuCog(MetadataCog, name="osu!"):
             username,
             mode,
             beatmap,
-            lazer,
         )
 
     @commands.cooldown(1, 1, commands.BucketType.user)
@@ -1018,14 +966,14 @@ class OsuCog(MetadataCog, name="osu!"):
         flags: OsuScoreFlags,
     ) -> None:
         await ctx.defer()
-        mode, lazer = flags.mode, flags.lazer
+        mode = flags.mode
 
         beatmap_data = get_beatmap_from_text(beatmap_query)
         if (beatmap_id := beatmap_data["beatmap_id"]) is None:
             await ctx.send("Unknown beatmap ID specified.")
             return
 
-        client = await self.bot.stable_storage.app_client
+        client = await self.bot.client_storage.app_client
         beatmap = await client.get_beatmap(beatmap_id)
         await self.bot.beatmap_service.add(ctx.channel.id, beatmap)
 
@@ -1037,7 +985,6 @@ class OsuCog(MetadataCog, name="osu!"):
             username,
             mode,
             beatmap,
-            lazer,
         )
 
     @commands.cooldown(1, 1, commands.BucketType.user)
@@ -1066,7 +1013,7 @@ class OsuCog(MetadataCog, name="osu!"):
             await ctx.send("Invalid mods specified.")
             return
 
-        client = await self.bot.stable_storage.app_client
+        client = await self.bot.client_storage.app_client
 
         beatmap_data = None
         if ctx.message.reference:
@@ -1134,7 +1081,6 @@ class OsuCog(MetadataCog, name="osu!"):
             ctx,
             username,
             mode,
-            flags.lazer,
         )
 
         user, client = user_data.user, user_data.client
@@ -1225,7 +1171,6 @@ class OsuCog(MetadataCog, name="osu!"):
             ctx,
             username,
             mode,
-            flags.lazer,
         )
 
         user, client = user_data.user, user_data.client
@@ -1281,7 +1226,6 @@ class OsuCog(MetadataCog, name="osu!"):
             ctx,
             username,
             mode,
-            flags.lazer,
         )
 
         user, client = user_data.user, user_data.client
@@ -1344,7 +1288,6 @@ class OsuCog(MetadataCog, name="osu!"):
             ctx,
             flags.username,
             flags.mode,
-            flags.lazer,
         )
 
         user = user_data.user
