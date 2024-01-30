@@ -132,12 +132,12 @@
         },
         "aiosu": {
             "hashes": [
-                "sha256:2c9a74e93ac108070e4f593e8c9f2f1d8873157c6fdddd5162e043e7e7bef54f",
-                "sha256:fb4a815495d957fcf4e0d64a90cacd642e982587b50bb5a7762b8d15f3794bba"
+                "sha256:81718e91c0cf87b653243bb25427e5b345b03674b6869f1709f5c34433955622",
+                "sha256:e4687e9a979e02ad2e6124377f9019e69f1ce343c29ba0c9e5d7a1bad9eba393"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.9' and python_version < '4.0'",
-            "version": "==2.1.7"
+            "version": "==2.1.8"
         },
         "annotated-types": {
             "hashes": [

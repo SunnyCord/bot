@@ -36,7 +36,7 @@ class Image(MetadataGroupCog, name="image"):
     async def avatar_command(
         self,
         interaction: discord.Interaction,
-        user: discord.Member | None,
+        user: discord.User | None,
         avatar_type: Literal["guild", "profile"] = "profile",
     ) -> None:
         if user is None:
@@ -89,7 +89,7 @@ class Image(MetadataGroupCog, name="image"):
     async def pat_command(
         self,
         interaction: discord.Interaction,
-        user: discord.Member | None,
+        user: discord.User | None,
     ) -> None:
         async with aiohttp.ClientSession() as cs:
             async with cs.get("https://some-random-api.com/animu/pat") as r:
@@ -107,7 +107,7 @@ class Image(MetadataGroupCog, name="image"):
     async def hug_command(
         self,
         interaction: discord.Interaction,
-        user: discord.Member | None,
+        user: discord.User | None,
     ) -> None:
         async with aiohttp.ClientSession() as cs:
             async with cs.get("https://some-random-api.com/animu/hug") as r:
