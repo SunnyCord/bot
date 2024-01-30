@@ -24,7 +24,6 @@ class OsuProfileCompactEmbed(ContextEmbed):
         ctx: commands.Context,
         user: User,
         mode: Gamemode,
-        lazer: bool = False,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -46,7 +45,6 @@ class OsuProfileCompactEmbed(ContextEmbed):
 
         safe_username = escape_markdown(user.username)
         online_str = "🟢" if user.is_online else "🔴"
-        lazer_str = " (lazer)" if lazer else ""
 
         super().__init__(
             ctx,
@@ -56,7 +54,7 @@ class OsuProfileCompactEmbed(ContextEmbed):
             **kwargs,
         )
         self.set_author(
-            name=f"osu!{lazer_str} {mode.name_full} stats for {safe_username} {online_str}",
+            name=f"osu! {mode.name_full} stats for {safe_username} {online_str}",
             url=user.url,
             icon_url=GamemodeIcon[mode.name].icon,
         )
@@ -69,7 +67,6 @@ class OsuProfileExtendedEmbed(ContextEmbed):
         ctx: commands.Context,
         user: User,
         mode: Gamemode,
-        lazer: bool = False,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -128,7 +125,6 @@ class OsuProfileExtendedEmbed(ContextEmbed):
 
         safe_username = escape_markdown(user.username)
         online_str = "🟢" if user.is_online else "🔴"
-        lazer_str = " (lazer)" if lazer else ""
 
         super().__init__(
             ctx,
@@ -137,7 +133,7 @@ class OsuProfileExtendedEmbed(ContextEmbed):
             **kwargs,
         )
         self.set_author(
-            name=f"osu!{lazer_str} {mode.name_full} stats for {safe_username} {online_str}",
+            name=f"osu! {mode.name_full} stats for {safe_username} {online_str}",
             url=user.url,
             icon_url=GamemodeIcon[mode.name].icon,
         )

@@ -16,12 +16,11 @@ class GraphService:
     def __init__(self, repository: GraphRepository) -> None:
         self.repository = repository
 
-    async def get_one(self, osu_id: int, mode_id: int, lazer: bool = False) -> BytesIO:
+    async def get_one(self, osu_id: int, mode_id: int) -> BytesIO:
         """Get graph from Redis.
 
         Args:
             osu_id (int): osu! ID.
-            lazer (bool, optional): Lazer graph. Defaults to False.
 
         Raises:
             ValueError: Graph not found.
@@ -29,21 +28,18 @@ class GraphService:
         Returns:
             BytesIO: Graph.
         """
-        data = await self.repository.get_one(osu_id, mode_id, lazer)
+        data = await self.repository.get_one(osu_id, mode_id)
         if data is None:
             raise ValueError("Graph not found.")
         return BytesIO(data)
 
-    async def get_many(self, lazer: bool = False) -> list[BytesIO]:
+    async def get_many(self) -> list[BytesIO]:
         """Get all graphs from Redis.
-
-        Args:
-            lazer (bool, optional): Lazer graph. Defaults to False.
 
         Returns:
             list[BytesIO]: List of graphs.
         """
-        data = await self.repository.get_many(lazer)
+        data = await self.repository.get_many()
         return [BytesIO(graph) for graph in data]
 
     async def add(
@@ -51,22 +47,19 @@ class GraphService:
         osu_id: int,
         graph: BytesIO,
         mode_id: int,
-        lazer: bool = False,
     ) -> None:
         """Add new graph to Redis.
 
         Args:
             osu_id (int): osu! ID.
             graph (BytesIO): Graph.
-            lazer (bool, optional): Lazer graph. Defaults to False.
         """
-        await self.repository.add(osu_id, graph.getvalue(), mode_id, lazer)
+        await self.repository.add(osu_id, graph.getvalue(), mode_id)
 
-    async def delete(self, osu_id: int, mode_id: int, lazer: bool = False) -> None:
+    async def delete(self, osu_id: int, mode_id: int) -> None:
         """Delete graph from Redis.
 
         Args:
             osu_id (int): osu! ID.
-            lazer (bool, optional): Lazer graph. Defaults to False.
         """
-        await self.repository.delete(osu_id, mode_id, lazer)
+        await self.repository.delete(osu_id, mode_id)

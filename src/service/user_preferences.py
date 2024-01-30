@@ -98,32 +98,6 @@ class UserPreferencesService:
         """
         await self.repository.delete(discord_id)
 
-    async def get_lazer(self, discord_id: int) -> bool:
-        """Get user lazer preference.
-
-        Args:
-            discord_id (int): Discord ID.
-
-        Returns:
-            bool: Lazer preference.
-        """
-        user_preferences = await self.get_safe(discord_id)
-        return user_preferences.lazer
-
-    async def toggle_lazer(self, discord_id: int) -> bool:
-        """Toggle user lazer preference.
-
-        Args:
-            discord_id (int): Discord ID.
-
-        Returns:
-            bool: Lazer preference.
-        """
-        user_preferences = await self.get_safe(discord_id)
-        user_preferences.lazer = not user_preferences.lazer
-        await self.update(user_preferences)
-        return user_preferences.lazer
-
     async def get_units(self, discord_id: int) -> Units:
         """Get user units preference.
 

@@ -178,7 +178,7 @@ class OsuScoreSingleEmbed(ContextEmbed):
         if self.prepared:
             return
 
-        client = await self.ctx.bot.stable_storage.app_client
+        client = await self.ctx.bot.client_storage.app_client
 
         difficulty_attrs = await get_score_beatmap_attributes(self.score, client)
 
@@ -210,7 +210,7 @@ class OsuScoreMultipleEmbed(ContextEmbed):
         if self.prepared:
             return
 
-        client = await self.ctx.bot.stable_storage.app_client
+        client = await self.ctx.bot.client_storage.app_client
 
         if self.same_beatmap:
             score = self.scores[0]

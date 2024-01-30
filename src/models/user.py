@@ -27,5 +27,4 @@ class UserConverterDTO:
     client: Client
     user: User
     is_app_client: bool = False
-    lazer: bool = False
     author_client: Client | None = None

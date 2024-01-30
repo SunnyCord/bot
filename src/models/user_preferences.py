@@ -10,7 +10,6 @@ from pydantic import BaseModel
 
 class UserPreferences(BaseModel):
     discord_id: int
-    lazer: bool = False
     units: Units = Units.METRIC
 
 
