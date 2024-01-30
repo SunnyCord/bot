@@ -195,8 +195,12 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
             return
 
         elif isinstance(error, aiosu.exceptions.InvalidClientRequestedError):
+            cmd_list = await self.bot.tree.fetch_commands()
+            osuset_command = next(
+                (c for c in cmd_list if c.name == "osuset"),
+            )
             await send_message(
-                "Please set your profile! Use the ``osuset`` command.",
+                f"Please set your profile! Use the f{osuset_command.mention} command.",
                 delete_after=20,
             )
             return
