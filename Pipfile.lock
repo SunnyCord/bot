@@ -115,12 +115,12 @@
         },
         "aiordr": {
             "hashes": [
-                "sha256:748f5e7041cb8b1305825c61adea3ecc9a1d035223dc5c6607897c5452441faa",
-                "sha256:a6c21d570c6aad5b80964d1464e1a885cab8a459a492d996b197238f323d5117"
+                "sha256:65e7d529abf8cf819c44338ea5bdd40fa0969227ce2f05ce759a38ed878acd78",
+                "sha256:a88a1bfc0b8e9e9299f62c3223a283fbe55bafa6d49f69a5d6ffedfd6bd08a2d"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.9' and python_version < '4.0'",
-            "version": "==0.2.0"
+            "version": "==0.2.1"
         },
         "aiosignal": {
             "hashes": [
