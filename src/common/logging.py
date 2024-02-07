@@ -7,6 +7,7 @@ import logging
 
 logger = logging.getLogger("sunny")
 discord_logger = logging.getLogger("discord")
+pomice_logger = logging.getLogger("pomice")
 
 
 class Formatter(logging.Formatter):
@@ -44,5 +45,7 @@ def init_logging(level: str = "INFO"):
     handler = get_handler()
     discord_logger.setLevel(level)
     discord_logger.addHandler(handler)
+    pomice_logger.setLevel(level)
+    pomice_logger.addHandler(handler)
     logger.setLevel(level)
     logger.addHandler(handler)
