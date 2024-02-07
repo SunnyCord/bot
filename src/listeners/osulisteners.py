@@ -3,6 +3,7 @@
 ###
 from __future__ import annotations
 
+from contextlib import suppress
 from io import BytesIO
 from typing import TYPE_CHECKING
 
@@ -86,11 +87,12 @@ class OsuListeners(
             return
 
         await self.bot.beatmap_service.add(ctx.channel.id, beatmapset.beatmaps[0])
-        await OsuBeatmapView.start(
-            ctx,
-            beatmapset,
-            file=audio_file,
-        )
+        with suppress(discord.Forbidden):
+            await OsuBeatmapView.start(
+                ctx,
+                beatmapset,
+                file=audio_file,
+            )
 
     async def user_listener(self, message: discord.Message) -> None:
         user_id = get_user_from_text(message.content)
@@ -106,7 +108,8 @@ class OsuListeners(
 
         graph = await self.get_graph(user, int(user.playmode))
         embed.set_image(url="attachment://rank_graph.png")
-        await ctx.send(embed=embed, file=discord.File(graph, "rank_graph.png"))
+        with suppress(discord.Forbidden):
+            await ctx.send(embed=embed, file=discord.File(graph, "rank_graph.png"))
 
 
 async def setup(bot: Sunny) -> None:
