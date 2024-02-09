@@ -339,9 +339,9 @@ class Sunny(commands.AutoShardedBot):
 
     async def close(self) -> None:
         await self.pomice_node_pool.disconnect()
-        await self.client_v1.close()
-        await self.client_storage.close()
-        await self.ordr_client.close()
+        await self.client_v1.aclose()
+        await self.client_storage.aclose()
+        await self.ordr_client.aclose()
         with suppress(AttributeError):
             await self.aiohttp_session.close()
         await super().close()
