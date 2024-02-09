@@ -183,15 +183,22 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
             )
             return
 
+        elif isinstance(error, aiosu.exceptions.RefreshTokenExpiredError):
+            cmd_list = await self.bot.tree.fetch_commands()
+            osuset_command = next(
+                (c for c in cmd_list if c.name == "osuset"),
+            )
+            await send_message(
+                f"Your osu! session has expired! Use the {osuset_command.mention} command to refresh it.",
+                delete_after=20,
+            )
+            return
+
         elif isinstance(error, aiosu.exceptions.APIException):
             await send_message(
                 "The requested data was not found on osu!",
                 delete_after=10,
             )
-            return
-
-        elif isinstance(error, aiordr.exceptions.APIException):
-            await send_message(f"That didn't work. {error.message}", delete_after=10)
             return
 
         elif isinstance(error, aiosu.exceptions.InvalidClientRequestedError):
@@ -201,17 +208,6 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
             )
             await send_message(
                 f"Please set your profile! Use the {osuset_command.mention} command.",
-                delete_after=20,
-            )
-            return
-
-        elif isinstance(error, aiosu.exceptions.RefreshTokenExpiredError):
-            cmd_list = await self.bot.tree.fetch_commands()
-            osuset_command = next(
-                (c for c in cmd_list if c.name == "osuset"),
-            )
-            await send_message(
-                f"Your osu! session has expired! Use the {osuset_command.mention} command to refresh it.",
                 delete_after=20,
             )
             return
