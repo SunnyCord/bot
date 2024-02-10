@@ -6,8 +6,8 @@ from __future__ import annotations
 import asyncio
 from contextlib import suppress
 from enum import Enum
-from typing import Literal
 from typing import TYPE_CHECKING
+from typing import Literal
 
 import aiosu
 import discord
@@ -16,6 +16,10 @@ from aiordr.models import RenderCreateResponse
 from aiordr.models import RenderFailEvent
 from aiordr.models import RenderFinishEvent
 from aiordr.models import RenderProgressEvent
+from discord import app_commands
+from discord.ext import commands
+from discord.utils import escape_markdown
+
 from classes import osudle
 from classes.cog import MetadataCog
 from classes.cog import MetadataGroupCog
@@ -24,9 +28,6 @@ from common import humanizer
 from common.crypto import encode_discord_id
 from common.helpers import get_beatmap_from_reference
 from common.helpers import get_beatmap_from_text
-from discord import app_commands
-from discord.ext import commands
-from discord.utils import escape_markdown
 from models.user import UserConverterDTO
 from models.user_preferences import RecordingPreferences
 from ui.embeds.osu import OsuDifficultyEmbed
@@ -41,6 +42,7 @@ from ui.menus.osu import OsuSkinsView
 if TYPE_CHECKING:
     from io import BytesIO
     from typing import Any
+
     from classes.bot import Sunny
 
 

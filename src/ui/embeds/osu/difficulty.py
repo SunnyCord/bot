@@ -8,11 +8,12 @@ from inspect import cleandoc
 from typing import TYPE_CHECKING
 
 from discord.utils import escape_markdown
+
 from ui.embeds.generic import ContextEmbed
 
 if TYPE_CHECKING:
-    from aiosu.models import BeatmapDifficultyAttributes
     from aiosu.models import Beatmap
+    from aiosu.models import BeatmapDifficultyAttributes
     from aiosu.models import Mods
     from discord import commands
 

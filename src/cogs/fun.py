@@ -9,9 +9,10 @@ from random import randint
 from typing import TYPE_CHECKING
 
 import discord
-from classes.cog import MetadataGroupCog
 from discord import app_commands
 from discord.ext import commands
+
+from classes.cog import MetadataGroupCog
 from ui.embeds.fun import PollEmbed
 
 if TYPE_CHECKING:

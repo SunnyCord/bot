@@ -7,15 +7,17 @@ from typing import TYPE_CHECKING
 
 from discord import Interaction
 from discord.ui import button
+
 from ui.embeds.osu import OsuScoreMultipleEmbed
 from ui.icons import GamemodeIcon
 from ui.menus.generic import BaseView
 
 if TYPE_CHECKING:
     from typing import Any
-    from aiosu.models import User
-    from aiosu.models import Score
+
     from aiosu.models import Gamemode
+    from aiosu.models import Score
+    from aiosu.models import User
     from discord.ext.commands import Context
 
 

@@ -11,6 +11,7 @@ from classes.cog import MetadataCog
 if TYPE_CHECKING:
     from discord import Member
     from discord import VoiceState
+
     from classes.bot import Sunny
     from classes.pomice import Player
 

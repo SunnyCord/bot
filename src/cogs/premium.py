@@ -5,10 +5,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from discord import Interaction
+from discord import app_commands
+
 from classes.cog import MetadataGroupCog
 from common import premium
-from discord import app_commands
-from discord import Interaction
 from ui.embeds.information import UserPremiumEmbed
 
 if TYPE_CHECKING:

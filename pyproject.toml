@@ -8,3 +8,8 @@ check_untyped_defs = true
 warn_unused_ignores = true
 ignore_missing_imports = true
 show_error_codes = true
+
+[tool.isort]
+add_imports = ["from __future__ import annotations"]
+force_single_line = true
+profile = "black"

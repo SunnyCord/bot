@@ -7,15 +7,16 @@ import math
 from typing import Literal
 
 import pomice
+from discord import Role
+from discord import app_commands
+from discord.ext import commands
+
 from classes.bot import Sunny
 from classes.cog import MetadataGroupCog
 from classes.exceptions import MusicPlayerError
 from classes.pomice import Player
 from common import premium
 from common.humanizer import milliseconds_to_duration
-from discord import app_commands
-from discord import Role
-from discord.ext import commands
 from ui.embeds.music import MusicPlaylistEmbed
 from ui.embeds.music import MusicTrackEmbed
 from ui.menus.music import MusicQueueView

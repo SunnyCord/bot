@@ -4,8 +4,8 @@ from collections.abc import Callable
 from contextlib import suppress
 
 import discord
-from discord import app_commands
 from discord import Interaction
+from discord import app_commands
 from discord.app_commands import AppCommandError
 from discord.app_commands import CheckFailure as AppCheckFailure
 from discord.ext import commands

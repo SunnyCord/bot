@@ -5,10 +5,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from discord.ext import tasks
+
 from classes.cog import MetadataCog
 from common.logging import logger
 from common.premium import check_premium
-from discord.ext import tasks
 
 if TYPE_CHECKING:
     from classes.bot import Sunny

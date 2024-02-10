@@ -5,8 +5,9 @@ from __future__ import annotations
 
 from aiosu.models import OAuthToken
 from aiosu.v2.repository import BaseTokenRepository
-from models.user import TokenDTO
 from motor.motor_asyncio import AsyncIOMotorDatabase
+
+from models.user import TokenDTO
 
 
 class OsuRepository(BaseTokenRepository):

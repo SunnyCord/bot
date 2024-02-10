@@ -10,17 +10,18 @@ import aiosu
 import discord
 import pomice
 import sentry_sdk
+from discord.ext import commands
+
 from classes import exceptions
 from classes.cog import MetadataCog
 from common.logging import logger
 from common.premium import PremiumMissing
 from common.premium import SupportServerMissing
-from discord.ext import commands
-
 
 if TYPE_CHECKING:
-    from classes.bot import Sunny
     from collections.abc import Callable
+
+    from classes.bot import Sunny
 
 
 def create_sentry_scope_ctx(ctx: commands.Context) -> sentry_sdk.Scope:

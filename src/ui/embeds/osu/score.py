@@ -12,11 +12,13 @@ from aiosu.models import Mod
 from aiosu.models import Score
 from aiosu.utils.performance import get_calculator
 from discord.utils import escape_markdown
+
 from ui.embeds.generic import ContextEmbed
 from ui.icons.score import ScoreRankIcon
 
 if TYPE_CHECKING:
     from typing import Any
+
     import aiosu
     from discord import commands
 

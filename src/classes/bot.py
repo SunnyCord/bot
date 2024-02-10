@@ -12,6 +12,11 @@ import aiordr
 import aiosu
 import discord
 import pomice
+from cryptography.fernet import Fernet
+from discord.ext import commands
+from motor.motor_asyncio import AsyncIOMotorClient
+from redis.asyncio import Redis
+
 from cogs import LOAD_EXTENSIONS as COGS_LOAD
 from common.crypto import check_aes
 from common.helpers import get_bot_version
@@ -19,12 +24,8 @@ from common.logging import init_logging
 from common.logging import logger
 from common.logging import pomice_logger
 from common.osudaily import OsuDailyClient
-from cryptography.fernet import Fernet
-from discord.ext import commands
 from listeners import LOAD_EXTENSIONS as LISTENER_LOAD
 from models.config import ConfigList
-from motor.motor_asyncio import AsyncIOMotorClient
-from redis.asyncio import Redis
 from repository import BeatmapRepository
 from repository import BeatmapsetRepository
 from repository import GraphRepository
@@ -45,8 +46,8 @@ from service import UserService
 from tasks import LOAD_EXTENSIONS as TASKS_LOAD
 
 if TYPE_CHECKING:
-    from typing import Any
     from collections.abc import Callable
+    from typing import Any
 
 
 MODULE_FOLDERS = ["listeners", "cogs", "tasks"]

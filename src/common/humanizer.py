@@ -5,8 +5,9 @@ from __future__ import annotations
 
 from datetime import timedelta
 
-from common.regex import alphanumeric_rx
 from thefuzz import fuzz
+
+from common.regex import alphanumeric_rx
 
 FUZZY_MATCH_THRESHOLD = 80
 FUZZY_MATCH_THRESHOLD_LOW = 35

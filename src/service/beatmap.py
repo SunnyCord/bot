@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from aiosu.models import Beatmap
+
 from repository.beatmap import BeatmapRepository
 
 
