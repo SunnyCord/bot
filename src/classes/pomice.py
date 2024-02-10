@@ -11,6 +11,7 @@ from discord import HTTPException
 from discord import Member
 from discord import Message
 from discord.ext.commands import Context
+
 from models.guild_settings import GuildSettings
 from ui.embeds.music import MusicTrackEmbed
 

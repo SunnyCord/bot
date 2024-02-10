@@ -7,13 +7,16 @@ from typing import TYPE_CHECKING
 
 from discord import ButtonStyle
 from discord.ui import button
+
 from ui.embeds.osu import OsuSkinEmbed
 from ui.menus.generic import BaseInteractionView
 
 if TYPE_CHECKING:
     from typing import Any
+
     from aiordr.models import Skin
     from discord import Interaction
+
     from classes.bot import Sunny
 
 

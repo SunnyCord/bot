@@ -7,6 +7,7 @@ from inspect import cleandoc
 from typing import TYPE_CHECKING
 
 from emojiflags import lookup
+
 from models.weather import Units
 from models.weather import WeatherResponse
 from ui.embeds.generic import ContextEmbed

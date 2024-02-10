@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from aiosu.models import Beatmapset
 from aiosu.models import Gamemode
+
 from repository.beatmapset import BeatmapsetRepository
 
 

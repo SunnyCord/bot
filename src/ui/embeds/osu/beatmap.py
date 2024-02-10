@@ -10,11 +10,13 @@ from typing import TYPE_CHECKING
 from aiosu.models import Beatmap
 from aiosu.models import Beatmapset
 from discord.utils import escape_markdown
+
 from ui.embeds.generic import ContextEmbed
 from ui.icons.beatmap import BeatmapDifficultyIcon
 
 if TYPE_CHECKING:
     from typing import Any
+
     from discord.ext.commands import Context
 
 

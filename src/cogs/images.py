@@ -3,14 +3,15 @@
 ###
 from __future__ import annotations
 
-from typing import Literal
 from typing import TYPE_CHECKING
+from typing import Literal
 
 import aiohttp
 import discord
-from classes.cog import MetadataGroupCog
 from discord import app_commands
 from discord.ext import commands
+
+from classes.cog import MetadataGroupCog
 from models.enums.animals import Animal
 
 if TYPE_CHECKING:

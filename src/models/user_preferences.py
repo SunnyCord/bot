@@ -4,8 +4,9 @@
 from __future__ import annotations
 
 from aiordr.models import RenderOptions
-from models.weather import Units
 from pydantic import BaseModel
+
+from models.weather import Units
 
 
 class UserPreferences(BaseModel):

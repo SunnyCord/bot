@@ -10,11 +10,12 @@ from typing import TYPE_CHECKING
 import discord
 from aiosu.exceptions import APIException
 from aiosu.models import User
+from discord.ext import commands
+
 from classes.cog import MetadataCog
 from common import graphing
 from common.helpers import get_beatmap_from_text
 from common.helpers import get_user_from_text
-from discord.ext import commands
 from ui.embeds.osu import OsuProfileCompactEmbed
 from ui.menus.osu import OsuBeatmapView
 

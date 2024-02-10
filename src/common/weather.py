@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import aiohttp
 import orjson
+
 from classes.exceptions import WeatherAPIError
 from models.weather import Units
 from models.weather import WeatherResponse

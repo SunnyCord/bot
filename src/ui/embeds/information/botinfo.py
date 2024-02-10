@@ -9,6 +9,7 @@ from ui.embeds.generic import ContextEmbed
 
 if TYPE_CHECKING:
     from typing import Any
+
     from discord.ext.commands import Context
 
 

@@ -9,8 +9,9 @@ from abc import abstractmethod
 from io import BytesIO
 from typing import TYPE_CHECKING
 
-from common import humanizer
 from discord import File
+
+from common import humanizer
 
 if TYPE_CHECKING:
     from aiosu.models import Beatmapset

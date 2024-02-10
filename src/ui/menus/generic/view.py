@@ -13,8 +13,9 @@ from discord.utils import MISSING
 
 if TYPE_CHECKING:
     from typing import Any
-    from discord.ext import commands
+
     from discord import Interaction
+    from discord.ext import commands
 
 
 class BaseView(View, abc.ABC):

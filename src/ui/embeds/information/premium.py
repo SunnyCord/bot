@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING
 from ui.embeds.generic import InteractionEmbed
 
 if TYPE_CHECKING:
-    from discord import Interaction
     from discord import Guild
+    from discord import Interaction
 
 
 class UserPremiumEmbed(InteractionEmbed):

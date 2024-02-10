@@ -10,6 +10,7 @@ from ui.embeds.generic import ContextAuthorEmbed
 
 if TYPE_CHECKING:
     from typing import Any
+
     from discord.ext.commands import Context
 
 poll_images = [

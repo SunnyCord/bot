@@ -6,10 +6,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import discord
+
 from ui.embeds.generic import ContextEmbed
 
 if TYPE_CHECKING:
     from typing import Any
+
     from discord.ext.commands import Context
 
 

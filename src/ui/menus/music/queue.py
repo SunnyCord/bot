@@ -8,14 +8,17 @@ from typing import TYPE_CHECKING
 from discord import ButtonStyle
 from discord import Interaction
 from discord.ui import button
+
 from ui.embeds.music import MusicTrackEmbed
 from ui.menus.generic import BaseView
 
 if TYPE_CHECKING:
     from typing import Any
-    from pomice import Track
-    from classes.pomice import Player
+
     from discord.ext.commands import Context
+    from pomice import Track
+
+    from classes.pomice import Player
 
 
 def _split_queue_to_pages(

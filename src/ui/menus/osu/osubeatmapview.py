@@ -7,11 +7,13 @@ from typing import TYPE_CHECKING
 
 from discord import Interaction
 from discord.ui import button
+
 from ui.embeds.osu import OsuBeatmapEmbed
 from ui.menus.generic import BaseView
 
 if TYPE_CHECKING:
     from typing import Any
+
     from aiosu.models import Beatmapset
     from discord.ext.commands import Context
 

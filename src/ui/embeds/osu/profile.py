@@ -8,9 +8,10 @@ from typing import TYPE_CHECKING
 
 from aiosu.models import Gamemode
 from aiosu.models import User
-from common import humanizer
 from discord.ext import commands
 from discord.utils import escape_markdown
+
+from common import humanizer
 from ui.embeds.generic import ContextEmbed
 from ui.icons import GamemodeIcon
 

@@ -5,9 +5,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from common.humanizer import milliseconds_to_duration
 from pomice import Playlist
 from pomice import Track
+
+from common.humanizer import milliseconds_to_duration
 from ui.embeds.generic import ContextEmbed
 
 if TYPE_CHECKING:

@@ -4,9 +4,10 @@
 from __future__ import annotations
 
 import sentry_sdk
-from classes.bot import Sunny
 from discord.ext.commands import Context
 from sentry_sdk.tracing import Transaction
+
+from classes.bot import Sunny
 
 bot = Sunny()
 sample_rate = 1.0 if bot.config.environment == "development" else 0.2
