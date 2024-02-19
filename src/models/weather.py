@@ -83,8 +83,8 @@ class LocationData(BaseModel):
     id: int | None = None
     type: int | None = None
     country: str
-    sunrise: int
-    sunset: int
+    sunrise: datetime
+    sunset: datetime
 
 
 class WeatherResponse(BaseModel):

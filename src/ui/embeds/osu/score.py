@@ -12,6 +12,7 @@ from aiosu.models import Mod
 from aiosu.models import Score
 from aiosu.utils.performance import get_calculator
 from discord.utils import escape_markdown
+from discord.utils import format_dt
 
 from ui.embeds.generic import ContextEmbed
 from ui.icons.score import ScoreRankIcon
@@ -144,7 +145,7 @@ def _score_to_embed_strs(
         f"""**{pp:.2f}pp**{weight}, accuracy: **{score.accuracy*100:.2f}%**, combo: **{score.max_combo}x/{max_combo}x**
             {fc_text}score: **{score.score}** [**{statistics.count_300}**/**{statistics.count_100}**/**{statistics.count_50}**/**{statistics.count_miss}**]
             bpm: {bpm_text} | mods: {mods_text} | {ScoreRankIcon[score.rank]}{fail_text}{mods_settings_text}
-            <t:{score.created_at.timestamp():.0f}:R>
+            {format_dt(score.created_at, style="R")}
             {score_text}{user_text}[map]({beatmap.url})
         """,
     )

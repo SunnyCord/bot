@@ -5,6 +5,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from discord.utils import format_dt
+
 from ui.embeds.generic import ContextEmbed
 
 if TYPE_CHECKING:
@@ -34,6 +36,7 @@ class BotInfoEmbed(ContextEmbed):
         self.add_field(name="Commands", value=len(ctx.bot.all_commands))
         self.add_field(name="Cogs", value=len(ctx.bot.cogs))
         self.add_field(
-            name="Created:",
-            value=f"<t:{ctx.bot.user.created_at.timestamp():.0f}:R>",
+            name="Shard Info",
+            value=f"`ID {ctx.guild.shard_id}`: `{ctx.bot.shard_count} total`",
         )
+        self.add_field(name="Created", value=format_dt(ctx.bot.user.created_at))

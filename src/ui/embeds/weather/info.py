@@ -6,6 +6,7 @@ from __future__ import annotations
 from inspect import cleandoc
 from typing import TYPE_CHECKING
 
+from discord.utils import format_dt
 from emojiflags import lookup
 
 from models.weather import Units
@@ -22,8 +23,8 @@ class WeatherInfoEmbed(ContextEmbed):
         description = cleandoc(
             f"""
             {latest_forecast.main.capitalize()} ({latest_forecast.description})
-            Sunrise <t:{response.location_data.sunrise:.0f}:R>
-            Sunset <t:{response.location_data.sunset:.0f}:R>
+            Sunrise {format_dt(response.location_data.sunrise, style="t")}
+            Sunset {format_dt(response.location_data.sunset, style="t")}
             """,
         )
         flag = lookup.lookup(response.location_data.country)

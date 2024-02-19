@@ -5,7 +5,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import discord
+from discord.channel import TextChannel
+from discord.utils import format_dt
 
 from ui.embeds.generic import ContextEmbed
 
@@ -40,7 +41,7 @@ class ServerInfoEmbed(ContextEmbed):
             value=len(
                 list(
                     filter(
-                        lambda x: isinstance(x, discord.channel.TextChannel),
+                        lambda x: isinstance(x, TextChannel),
                         ctx.guild.channels,
                     ),
                 ),
@@ -48,7 +49,4 @@ class ServerInfoEmbed(ContextEmbed):
         )
         self.add_field(name="Roles", value=len(ctx.guild.roles))
         self.add_field(name="Emotes", value=len(ctx.guild.emojis))
-        self.add_field(
-            name="Created On:",
-            value=f"<t:{ctx.guild.created_at.timestamp():.0f}:R>",
-        )
+        self.add_field(name="Created", value=format_dt(ctx.guild.created_at))

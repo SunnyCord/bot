@@ -42,30 +42,6 @@ def number(n: float) -> str:
     )
 
 
-def seconds_to_long_text(secs: int) -> str:
-    if secs == 0:
-        return "0 seconds"
-
-    time_units = [
-        ("day", secs // 86400),
-        ("hour", (secs // 3600) % 24),
-        ("minute", (secs // 60) % 60),
-        ("second", secs % 60),
-    ]
-
-    formatted_units = [
-        f"{value} {unit}s" if value != 1 else f"{value} {unit}"
-        for unit, value in time_units
-        if value > 0
-    ]
-
-    return (
-        " ".join(formatted_units[:-1]) + " and " + formatted_units[-1]
-        if len(formatted_units) > 1
-        else formatted_units[0]
-    )
-
-
 def seconds_to_text(secs: int) -> str:
     if secs == 0:
         return "0 seconds"
