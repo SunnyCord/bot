@@ -15,6 +15,8 @@ from discord.ext.commands import Context
 from models.guild_settings import GuildSettings
 from ui.embeds.music import MusicTrackEmbed
 
+FLAKY_EXCEPTION_CUTOFF = 2
+
 
 class Player(pomice.Player):
     """Pomice guild player."""
@@ -26,6 +28,7 @@ class Player(pomice.Player):
         "guild_settings",
         "dj",
         "auto_play",
+        "consecutive_exception_count",
         "loop_mode",
         "pause_votes",
         "resume_votes",
@@ -43,6 +46,7 @@ class Player(pomice.Player):
         self.guild_settings: GuildSettings | None = None
         self.dj: Member | None = None
         self.auto_play: bool = False
+        self.consecutive_exception_count: int = 0
 
         self.pause_votes = set()
         self.resume_votes = set()
@@ -66,6 +70,14 @@ class Player(pomice.Player):
         self.skip_votes.clear()
         self.shuffle_votes.clear()
         self.stop_votes.clear()
+
+        if self.consecutive_exception_count >= FLAKY_EXCEPTION_CUTOFF:
+            if self.context:
+                await self.context.send(
+                    "⚠️ | Sorry! I've been having trouble playing music. I will disconnect for now.",
+                )
+            await self.teardown()
+            return
 
         if self.controller:
             with suppress(HTTPException):
