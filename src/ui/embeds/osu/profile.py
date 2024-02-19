@@ -10,6 +10,7 @@ from aiosu.models import Gamemode
 from aiosu.models import User
 from discord.ext import commands
 from discord.utils import escape_markdown
+from discord.utils import format_dt
 
 from common import humanizer
 from ui.embeds.generic import ContextEmbed
@@ -30,7 +31,7 @@ class OsuProfileCompactEmbed(ContextEmbed):
     ) -> None:
         peak_str = ""
         if user.rank_highest:
-            peak_str = f"(peaked #{user.rank_highest.rank} <t:{user.rank_highest.updated_at.timestamp():.0f}:R>)\n"
+            peak_str = f"(peaked #{user.rank_highest.rank} {format_dt(user.rank_highest.updated_at)}\n"
 
         content = (
             f"{user.statistics.pp}pp (#{user.statistics.global_rank} | {user.country.flag_emoji}#{user.statistics.country_rank})\n"
@@ -73,7 +74,7 @@ class OsuProfileExtendedEmbed(ContextEmbed):
     ) -> None:
         peak_str = ""
         if user.rank_highest:
-            peak_str = f"peak: **#{user.rank_highest.rank}** <t:{user.rank_highest.updated_at.timestamp():.0f}:R>\n"
+            peak_str = f"peak: **#{user.rank_highest.rank}** {format_dt(user.rank_highest.updated_at)}\n"
 
         rank_content = (
             f"rank: **#{user.statistics.global_rank}**\n"
@@ -94,7 +95,7 @@ class OsuProfileExtendedEmbed(ContextEmbed):
             max combo: **{user.statistics.maximum_combo}**
             pp/hour: **{user.statistics.pp_per_playtime:.2f}**
             avg. rank gain: **{user.rank_history.average_gain:.2f}**
-            joined: <t:{user.join_date.timestamp():.0f}:R>
+            joined: {format_dt(user.join_date)}
             """,
         )
         self.add_field(name="", value=average_content)
