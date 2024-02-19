@@ -71,25 +71,41 @@ class Music(MetadataGroupCog, name="music"):
         return required
 
     @MetadataGroupCog.listener()
-    async def on_pomice_track_end(self, player: Player, track: pomice.Track, _) -> None:
+    async def on_pomice_track_start(
+        self,
+        player: Player,
+        track: pomice.Track | None,
+        _,
+    ) -> None:
+        player.consecutive_exception_count = 0
+
+    @MetadataGroupCog.listener()
+    async def on_pomice_track_end(
+        self,
+        player: Player,
+        track: pomice.Track | None,
+        _,
+    ) -> None:
         await player.do_next()
 
     @MetadataGroupCog.listener()
     async def on_pomice_track_stuck(
         self,
         player: Player,
-        track: pomice.Track,
+        track: pomice.Track | None,
         _,
     ) -> None:
+        player.consecutive_exception_count += 1
         await player.do_next()
 
     @MetadataGroupCog.listener()
     async def on_pomice_track_exception(
         self,
         player: Player,
-        track: pomice.Track,
+        track: pomice.Track | None,
         _,
     ) -> None:
+        player.consecutive_exception_count += 1
         await player.do_next()
 
     async def ensure_voice(self, ctx: commands.Context) -> None:
