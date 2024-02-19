@@ -225,10 +225,12 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):
         self,
         user: aiosu.models.User,
         mode_id: int,
-    ) -> BytesIO:
+    ) -> BytesIO | None:
         try:
             graph = await self.bot.graph_service.get_one(user.id, mode_id)
         except ValueError:
+            if not user.rank_history:
+                return None
             graph = await self.bot.run_blocking(graphing.plot_rank_graph, user)
             await self.bot.graph_service.add(user.id, graph, mode_id)
         return graph
@@ -250,9 +252,13 @@ class OsuProfileCog(MetadataGroupCog, name="profile", display_parent="osu!"):
             embed = OsuProfileExtendedEmbed(ctx, user_data.user, mode)
         else:
             embed = OsuProfileCompactEmbed(ctx, user_data.user, mode)
+
         graph = await self.get_graph(user_data.user, int(mode))
-        embed.set_image(url="attachment://rank_graph.png")
-        await ctx.send(embed=embed, file=discord.File(graph, "rank_graph.png"))
+        if graph:
+            embed.set_image(url="attachment://rank_graph.png")
+            await ctx.send(embed=embed, file=discord.File(graph, "rank_graph.png"))
+        else:
+            await ctx.send(embed=embed)
 
     @commands.cooldown(1, 1, commands.BucketType.user)
     @commands.hybrid_command(

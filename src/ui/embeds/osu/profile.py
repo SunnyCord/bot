@@ -33,12 +33,15 @@ class OsuProfileCompactEmbed(ContextEmbed):
         if user.rank_highest:
             peak_str = f"(peaked #{user.rank_highest.rank} {format_dt(user.rank_highest.updated_at)}\n"
 
+        if user.rank_history:
+            peak_str += f"avg. ranks/day: {user.rank_history.average_gain:.2f} |"
+
         content = (
             f"{user.statistics.pp}pp (#{user.statistics.global_rank} | {user.country.flag_emoji}#{user.statistics.country_rank})\n"
             + peak_str
             + cleandoc(
                 f"""
-                avg. ranks/day: {user.rank_history.average_gain:.2f} | pp/hour: {user.statistics.pp_per_playtime:.2f}
+                pp/hour: {user.statistics.pp_per_playtime:.2f}
                 accuracy: {user.statistics.hit_accuracy:.2f}%
                 level: {user.statistics.level.current} ({user.statistics.level.progress:.2f}%)
                 """,
@@ -90,11 +93,16 @@ class OsuProfileExtendedEmbed(ContextEmbed):
         )
         self.add_field(name="", value=rank_content)
 
+        rank_gain_str = ""
+        if user.rank_history:
+            rank_gain_str = (
+                f"\navg. rank gain: **{user.rank_history.average_gain:.2f}**\n"
+            )
+
         average_content = cleandoc(
             f"""
             max combo: **{user.statistics.maximum_combo}**
-            pp/hour: **{user.statistics.pp_per_playtime:.2f}**
-            avg. rank gain: **{user.rank_history.average_gain:.2f}**
+            pp/hour: **{user.statistics.pp_per_playtime:.2f}**{rank_gain_str}
             joined: {format_dt(user.join_date)}
             """,
         )
@@ -113,11 +121,12 @@ class OsuProfileExtendedEmbed(ContextEmbed):
         )
         self.add_field(name="", value=play_content)
 
-        playstyle_str = " ".join(user.playstyle)
+        playstyle_str = ""
+        if user.playstyle:
+            playstyle_str = f"playstyle: **{' '.join(user.playstyle)}**\n"
         playstyle_content = cleandoc(
             f"""
-            playstyle: **{playstyle_str}**
-            followers: **{user.follower_count}**
+            {playstyle_str}followers: **{user.follower_count}**
             has supported: **{user.has_supported}**
             support level: **{user.support_level}**
             total kudosu: **{humanizer.number(user.kudosu.total)}**
