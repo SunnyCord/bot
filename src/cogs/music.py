@@ -75,7 +75,6 @@ class Music(MetadataGroupCog, name="music"):
         self,
         player: Player,
         track: pomice.Track | None,
-        _,
     ) -> None:
         player.consecutive_exception_count = 0
 
