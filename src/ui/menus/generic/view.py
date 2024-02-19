@@ -7,7 +7,7 @@ import abc
 from contextlib import suppress
 from typing import TYPE_CHECKING
 
-from discord import NotFound
+from discord import HTTPException
 from discord.ui import View
 from discord.utils import MISSING
 
@@ -22,7 +22,7 @@ class BaseView(View, abc.ABC):
     async def on_timeout(self) -> None:
         self.clear_items()
         self.stop()
-        with suppress(NotFound):
+        with suppress(HTTPException):
             await self.message.edit(view=self)
 
     @classmethod
@@ -45,7 +45,7 @@ class BaseInteractionView(View, abc.ABC):
     async def on_timeout(self) -> None:
         self.clear_items()
         self.stop()
-        with suppress(NotFound):
+        with suppress(HTTPException):
             await self.interaction.edit_original_response(view=self)
 
     @classmethod

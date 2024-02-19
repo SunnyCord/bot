@@ -9,6 +9,7 @@ from random import randint
 from typing import TYPE_CHECKING
 
 import discord
+from discord import HTTPException
 from discord import app_commands
 from discord.ext import commands
 
@@ -63,7 +64,7 @@ class Fun(MetadataGroupCog, name="fun"):
     @commands.hybrid_command(name="poll", description="Creates a reaction poll")
     @app_commands.describe(text="Text for the poll")
     async def poll_command(self, ctx: commands.Context, *, text: str) -> None:
-        with suppress(discord.HTTPException, AttributeError):
+        with suppress(HTTPException, AttributeError):
             await ctx.message.delete()
 
         embed = PollEmbed(ctx, text)

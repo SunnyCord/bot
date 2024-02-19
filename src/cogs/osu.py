@@ -16,6 +16,7 @@ from aiordr.models import RenderCreateResponse
 from aiordr.models import RenderFailEvent
 from aiordr.models import RenderFinishEvent
 from aiordr.models import RenderProgressEvent
+from aiosu.models.base import cast_float
 from discord import app_commands
 from discord.ext import commands
 from discord.utils import escape_markdown
@@ -1108,8 +1109,8 @@ class OsuCog(MetadataCog, name="osu!"):
             )
             return
 
-        pps_list = [top.pp for top in tops]
-        weights = [top.weight.percentage for top in tops]
+        pps_list = [cast_float(top.pp) for top in tops]
+        weights = [cast_float(top.weight.percentage) for top in tops]
 
         initial_weighted_pps = [
             pp * weight / 100 for pp, weight in zip(pps_list, weights)
@@ -1198,8 +1199,8 @@ class OsuCog(MetadataCog, name="osu!"):
 
         tops = await client.get_user_bests(user.id, mode=mode, limit=100)
 
-        pps_list = [top.pp for top in tops]
-        weights = [top.weight.percentage for top in tops]
+        pps_list = [cast_float(top.pp) for top in tops]
+        weights = [cast_float(top.weight.percentage) for top in tops]
 
         initial_weighted_pps = [
             pp * weight / 100 for pp, weight in zip(pps_list, weights)
@@ -1245,8 +1246,8 @@ class OsuCog(MetadataCog, name="osu!"):
 
         tops = await client.get_user_bests(user.id, mode=mode, limit=100)
 
-        pps_list = [top.pp for top in tops]
-        weights = [top.weight.percentage for top in tops]
+        pps_list = [cast_float(top.pp) for top in tops]
+        weights = [cast_float(top.weight.percentage) for top in tops]
 
         initial_weighted_pps = [
             pp * weight / 100 for pp, weight in zip(pps_list, weights)
