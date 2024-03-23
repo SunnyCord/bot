@@ -5,7 +5,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import aiordr
 import aiosu
 import discord
 import pomice
@@ -218,7 +217,7 @@ class CommandErrorHandler(MetadataCog, name="Error Handler", hidden=True):
             return
 
         elif isinstance(error, pomice.TrackLoadError):
-            await send_message(f"Failed to load this track!", delete_after=10)
+            await send_message("Failed to load this track!", delete_after=10)
             return
 
         sentry_id = sentry_sdk.capture_exception(
