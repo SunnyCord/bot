@@ -15,10 +15,11 @@ FUZZY_MATCH_THRESHOLD_LOW = 35
 
 __all__ = (
     "fuzzy_string_match",
+    "milliseconds_to_duration",
     "number",
     "ordinal",
-    "seconds_to_long_text",
     "seconds_to_text",
+    "song_title_match",
 )
 
 
