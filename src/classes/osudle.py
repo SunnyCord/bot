@@ -28,8 +28,8 @@ class OsudleSkipButton(discord.ui.Button["BaseOsudleGame"]):
         super().__init__(style=discord.ButtonStyle.danger, label="Skip")
         self.game = game
 
-    async def callback(self, _: discord.Interaction):
-        self.game.skip()
+    async def callback(self, interaction: discord.Interaction):
+        await self.game.skip(interaction.user)
 
 
 class BaseOsudleGame(ABC):
@@ -44,6 +44,7 @@ class BaseOsudleGame(ABC):
         "scores",
         "current_view",
         "latest_beatmap_message",
+        "skip_votes",
     )
 
     def __init__(self) -> None:
@@ -57,6 +58,7 @@ class BaseOsudleGame(ABC):
         self.scores = {}
         self.current_view = None
         self.latest_beatmap_message = None
+        self.skip_votes = set()
 
     def get_formatted_scoreboard(self) -> str:
         if not self.scores:
@@ -78,6 +80,18 @@ class BaseOsudleGame(ABC):
                 self.current_beatmapset.title,
             )
         )
+
+    def can_skip(self, user: discord.User) -> bool:
+        if user.id in self.skip_votes:
+            return False
+
+        if not self.scores:
+            return True
+
+        return user.id in self.scores
+
+    def skips_needed(self) -> int:
+        return max(1, len(self.scores) // 2)
 
     async def send_response(self, *args, **kwargs) -> Message | None:
         if self.interaction.response.is_done():
@@ -144,7 +158,23 @@ class BaseOsudleGame(ABC):
             await self.stop_game()
             raise
 
-    def skip(self) -> None:
+    async def skip(self, user: discord.User) -> None:
+        if not self.can_skip(user):
+            await self.send_response(
+                "Only players on the scoreboard can vote to skip.",
+                ephemeral=True,
+            )
+            return
+
+        self.skip_votes.add(user.id)
+        if len(self.skip_votes) < self.skips_needed():
+            await self.send_response(
+                f"{user.mention} voted to skip the current song. {len(self.skip_votes)}/{self.skips_needed()} votes needed.",
+                silent=True,
+            )
+            return
+
+        self.skip_votes.clear()
         if self.current_task:
             self.current_task.cancel()
             self.current_task = None
