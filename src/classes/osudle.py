@@ -74,34 +74,33 @@ class BaseOsudleGame(ABC):
         )
 
     async def do_next(self) -> None:
-        async with self.lock:
-            while not self.stop_event.is_set():
-                if self.current_task:
-                    await self.send_response(
-                        f"**{self.current_beatmapset.title}** by **{self.current_beatmapset.artist}** was the correct answer.",
-                    )
-                    self.current_task.cancel()
-                    try:
-                        await self.current_task
-                    except asyncio.CancelledError:
-                        pass
-                    self.current_task = None
+        if self.current_task:
+            self.current_task.cancel()
+            try:
+                await self.current_task
+            except asyncio.CancelledError:
+                pass
+            self.current_task = None
 
-                beatmapset = await self.get_beatmapset()
-                await self.send_message(beatmapset)
+            await self.send_response(
+                f"**{self.current_beatmapset.title}** by **{self.current_beatmapset.artist}** was the correct answer.",
+            )
 
-                try:
-                    self.current_task = asyncio.create_task(
-                        self.wait_for_guess(beatmapset),
-                    )
-                    await self.current_task
-                    self.current_task = None
-                except asyncio.TimeoutError:
-                    await self.send_response(
-                        f"**{beatmapset.title}** by **{beatmapset.artist}** was the correct answer.",
-                    )
-                    await self.stop_game()
-                    raise
+        beatmapset = await self.get_beatmapset()
+        await self.send_message(beatmapset)
+
+        try:
+            self.current_task = asyncio.create_task(
+                self.wait_for_guess(beatmapset),
+            )
+            await self.current_task
+            self.current_task = None
+        except asyncio.TimeoutError:
+            await self.send_response(
+                f"**{beatmapset.title}** by **{beatmapset.artist}** was the correct answer.",
+            )
+            await self.stop_game()
+            raise
 
     async def start_game(self, interaction: Interaction, mode: Gamemode) -> None:
         self.running = True
@@ -110,9 +109,6 @@ class BaseOsudleGame(ABC):
         self.mode = mode
 
         while not self.stop_event.is_set():
-            if self.stop_event.is_set():
-                break
-
             await self.do_next()
 
         await self.stop_game()
