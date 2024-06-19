@@ -79,6 +79,9 @@ def song_title_match(guess: str, answer: str) -> bool:
         "extended ver",
         "sped up ver",
         "sped up",
+        "russian ver",
+        "russian cover",
+        "japanese ver",
     ]
 
     alphanumeric = alphanumeric_rx.split(answer)[0]
