@@ -69,9 +69,26 @@ def fuzzy_string_match(str1: str, str2: str, permit_low_match: bool = False) -> 
 
 
 def song_title_match(guess: str, answer: str) -> bool:
+    banned_word_combos = [
+        "tv size",
+        "cut ver",
+        "full ver",
+        "short ver",
+        "op ver",
+        "ed ver",
+        "extended ver",
+        "sped up ver",
+        "sped up",
+    ]
+
     alphanumeric = alphanumeric_rx.split(answer)[0]
     minimum_words_required = 2 if len(answer.split(" ")) > 2 else 1
     guess_length = max(len(guess.split(" ")), minimum_words_required)
+
+    for combo in banned_word_combos:
+        if fuzzy_string_match(guess, combo):
+            return False
+
     partial_words_start = " ".join(answer.split(" ")[:guess_length])
     partial_words_end = " ".join(answer.split(" ")[-guess_length:])
     return (
