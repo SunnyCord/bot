@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from aiosu.models import Beatmapset
     from aiosu.models import Gamemode
     from discord import Interaction
+    from discord import Message
 
 
 class OsudleSkipButton(discord.ui.Button["BaseOsudleGame"]):
@@ -78,7 +79,7 @@ class BaseOsudleGame(ABC):
             )
         )
 
-    async def send_response(self, *args, **kwargs) -> None:
+    async def send_response(self, *args, **kwargs) -> Message | None:
         if self.interaction.response.is_done():
             return await self.interaction.followup.send(*args, **kwargs)
         try:
