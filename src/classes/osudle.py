@@ -153,7 +153,7 @@ class BaseOsudleGame(ABC):
             )
         except asyncio.TimeoutError:
             await self.send_response(
-                f"Nobody guessed the song. The correct answer was **{beatmapset.title}** by **{beatmapset.artist}**.",
+                f"Nobody guessed the beatmap. The correct answer was **{beatmapset.title}** by **{beatmapset.artist}**.",
             )
             await self.stop_game()
             raise
@@ -172,7 +172,7 @@ class BaseOsudleGame(ABC):
         self.skip_votes.add(interaction.user.id)
         if len(self.skip_votes) < self.skips_needed():
             await interaction.response.send_message(
-                f"{interaction.user.mention} voted to skip the current song. {len(self.skip_votes)}/{self.skips_needed()} votes needed.",
+                f"{interaction.user.mention} voted to skip the current beatmap. {len(self.skip_votes)}/{self.skips_needed()} votes needed.",
                 delete_after=5,
                 silent=True,
             )
