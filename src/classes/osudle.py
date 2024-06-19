@@ -28,6 +28,8 @@ class BaseOsudleGame(ABC):
         "current_task",
         "current_beatmapset",
         "timeout",
+        "lock",
+        "scores",
     )
 
     def __init__(self) -> None:
@@ -39,6 +41,18 @@ class BaseOsudleGame(ABC):
         self.current_task = None
         self.current_beatmapset = None
         self.timeout = 60
+        self.scores = {}
+
+    def get_formatted_scoreboard(self) -> str:
+        if not self.scores:
+            return "Nobody got any points. :("
+
+        return "\n".join(
+            f"### {i + 1}. <@{user}> - {score}"
+            for i, (user, score) in enumerate(
+                sorted(self.scores.items(), key=lambda x: x[1], reverse=True)[:3],
+            )
+        )
 
     def check_guess(self, message: str) -> bool:
         return (
@@ -69,6 +83,7 @@ class BaseOsudleGame(ABC):
             timeout=self.timeout,
         )
 
+        self.scores[message.author.id] = self.scores.get(message.author.id, 0) + 1
         await message.reply(
             f"Correct! {message.author.mention} guessed **{beatmapset.title}** by **{beatmapset.artist}**.",
         )
@@ -129,7 +144,9 @@ class BaseOsudleGame(ABC):
 
         self.stop_event.set()
         self.running = False
-        await self.send_response("Game stopped.")
+        await self.send_response(
+            f"Game has stopped.\nFinal scoreboard:\n{self.get_formatted_scoreboard()}",
+        )
 
     @abstractmethod
     async def send_message(self, beatmapset: Beatmapset) -> None: ...
