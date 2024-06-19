@@ -29,7 +29,7 @@ class OsudleSkipButton(discord.ui.Button["BaseOsudleGame"]):
         self.game = game
 
     async def callback(self, interaction: discord.Interaction):
-        await self.game.skip(interaction.user)
+        await self.game.skip(interaction)
 
 
 class BaseOsudleGame(ABC):
@@ -38,7 +38,7 @@ class BaseOsudleGame(ABC):
         "running",
         "stop_event",
         "mode",
-        "current_task",
+        "current_guess_task",
         "current_beatmapset",
         "timeout",
         "scores",
@@ -52,7 +52,7 @@ class BaseOsudleGame(ABC):
         self.running = False
         self.stop_event = asyncio.Event()
         self.mode = None
-        self.current_task = None
+        self.current_guess_task = None
         self.current_beatmapset = None
         self.timeout = 60
         self.scores = {}
@@ -133,7 +133,7 @@ class BaseOsudleGame(ABC):
         await self.edit_latest_message(view=None)
 
     async def do_next(self) -> None:
-        if self.current_task:
+        if self.current_guess_task:
             raise RuntimeError("Task already running.")
 
         await self.remove_view()
@@ -142,11 +142,11 @@ class BaseOsudleGame(ABC):
         await self.send_message(beatmapset)
 
         try:
-            self.current_task = asyncio.create_task(
+            self.current_guess_task = asyncio.create_task(
                 self.wait_for_guess(beatmapset),
             )
-            await self.current_task
-            self.current_task = None
+            await self.current_guess_task
+            self.current_guess_task = None
         except asyncio.CancelledError:
             await self.send_response(
                 f"**{beatmapset.title}** by **{beatmapset.artist}** was the correct answer.",
@@ -157,27 +157,30 @@ class BaseOsudleGame(ABC):
             )
             await self.stop_game()
             raise
+        finally:
+            self.skip_votes.clear()
 
-    async def skip(self, user: discord.User) -> None:
-        if not self.can_skip(user):
-            await self.send_response(
-                "Only players on the scoreboard can vote to skip.",
+    async def skip(self, interaction: discord.Interaction) -> None:
+        if not self.can_skip(interaction.user):
+            await interaction.response.send_message(
+                "You cannot vote to skip. You either already voted or are not on the scoreboard.",
+                delete_after=10,
                 ephemeral=True,
             )
             return
 
-        self.skip_votes.add(user.id)
+        self.skip_votes.add(interaction.user.id)
         if len(self.skip_votes) < self.skips_needed():
-            await self.send_response(
-                f"{user.mention} voted to skip the current song. {len(self.skip_votes)}/{self.skips_needed()} votes needed.",
+            await interaction.response.send_message(
+                f"{interaction.user.mention} voted to skip the current song. {len(self.skip_votes)}/{self.skips_needed()} votes needed.",
+                delete_after=5,
                 silent=True,
             )
             return
 
-        self.skip_votes.clear()
-        if self.current_task:
-            self.current_task.cancel()
-            self.current_task = None
+        if self.current_guess_task:
+            self.current_guess_task.cancel()
+            self.current_guess_task = None
 
     async def start_game(self, interaction: Interaction, mode: Gamemode) -> None:
         self.running = True
@@ -191,15 +194,15 @@ class BaseOsudleGame(ABC):
         await self.stop_game()
 
     async def stop_game(self) -> None:
-        if self.current_task:
-            self.current_task.cancel()
+        if self.current_guess_task:
+            self.current_guess_task.cancel()
             try:
-                await self.current_task
+                await self.current_guess_task
             except asyncio.CancelledError:
                 pass
             except asyncio.TimeoutError:
                 pass
-            self.current_task = None
+            self.current_guess_task = None
 
         await self.remove_view()
 
