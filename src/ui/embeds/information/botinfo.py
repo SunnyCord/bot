@@ -19,7 +19,7 @@ class BotInfoEmbed(ContextEmbed):
     def __init__(self, ctx: Context, *args: Any, **kwargs: Any) -> None:
         super().__init__(ctx, timestamp=ctx.message.created_at, *args, **kwargs)
         self.set_thumbnail(url=ctx.bot.user.avatar)
-        self.set_footer(text=ctx.bot.user.name)
+        self.set_footer(text=ctx.bot.version)
 
         self.add_field(
             name="Name (ID)",
