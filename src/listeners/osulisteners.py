@@ -103,14 +103,24 @@ class OsuListeners(
         ctx = await self.bot.get_context(message)
 
         client = await self.bot.client_storage.app_client
-        user = await client.get_user(user_id)
+
+        try:
+            user = await client.get_user(user_id)
+        except APIException:
+            return
 
         embed = OsuProfileCompactEmbed(ctx, user, user.playmode)
-
-        graph = await self.get_graph(user, int(user.playmode))
         embed.set_image(url="attachment://rank_graph.png")
+        args = {
+            "embed": embed,
+        }
+
+        with suppress(ValueError):
+            graph = await self.get_graph(user, int(user.playmode))
+            args["file"] = discord.File(graph, "rank_graph.png")
+
         with suppress(discord.Forbidden):
-            await ctx.send(embed=embed, file=discord.File(graph, "rank_graph.png"))
+            await ctx.send(**args)
 
 
 async def setup(bot: Sunny) -> None:
