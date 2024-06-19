@@ -70,7 +70,8 @@ def fuzzy_string_match(str1: str, str2: str, permit_low_match: bool = False) -> 
 
 def song_title_match(guess: str, answer: str) -> bool:
     alphanumeric = alphanumeric_rx.split(answer)[0]
-    guess_length = len(guess.split(" "))
+    minimum_words_required = 2 if len(answer.split(" ")) > 1 else 1
+    guess_length = max(len(guess.split(" ")), minimum_words_required)
     partial_words = " ".join(answer.split(" ")[:guess_length])
     return (
         fuzzy_string_match(guess, answer)
