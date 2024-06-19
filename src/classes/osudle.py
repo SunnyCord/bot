@@ -198,7 +198,7 @@ class BaseOsudleGame(ABC):
 class OsudleSongGame(BaseOsudleGame):
     """osu! Song Preview Game"""
 
-    async def get_message_content(self, beatmapset: Beatmapset) -> dict:
+    async def get_message_content(self, beatmapset: Beatmapset) -> dict[str, Any]:
         async with self.interaction.client.aiohttp_session.get(
             f"https:{beatmapset.preview_url}",
         ) as resp:
@@ -216,7 +216,7 @@ class OsudleSongGame(BaseOsudleGame):
 class OsudleBackgroundGame(BaseOsudleGame):
     """osu! Background Game"""
 
-    async def get_message_content(self, beatmapset: Beatmapset) -> None:
+    async def get_message_content(self, beatmapset: Beatmapset) -> dict[str, Any]:
         cover_url = beatmapset.covers.cover_2_x.replace(r"https:\/\/", "https://")
         async with self.interaction.client.aiohttp_session.get(cover_url) as resp:
             if resp.status != 200:
