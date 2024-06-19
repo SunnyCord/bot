@@ -752,7 +752,7 @@ class OsudleCog(MetadataGroupCog, name="osudle"):
 
         self.running_games[channel.id].interaction = interaction
         try:
-            await self.running_games[channel.id].do_next()
+            self.running_games[channel.id].skip()
         except asyncio.TimeoutError:
             del self.running_games[channel.id]
 
