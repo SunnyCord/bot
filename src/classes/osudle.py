@@ -118,6 +118,7 @@ class BaseOsudleGame(ABC):
         await message.reply(
             f"Correct! {message.author.mention} guessed **{beatmapset.title}** by **{beatmapset.artist}**.",
         )
+        await self.correct_guess_callback()
 
     async def edit_latest_message(self, *args, **kwargs) -> None:
         if self.latest_beatmap_message:
@@ -228,6 +229,9 @@ class BaseOsudleGame(ABC):
     @abstractmethod
     async def get_message_content(self, beatmapset: Beatmapset) -> dict[str, Any]: ...
 
+    @abstractmethod
+    async def correct_guess_callback(self) -> None: ...
+
 
 class OsudleSongGame(BaseOsudleGame):
     """osu! Song Preview Game"""
@@ -245,6 +249,9 @@ class OsudleSongGame(BaseOsudleGame):
             return {
                 "file": audio_file,
             }
+
+    async def correct_guess_callback(self) -> None:
+        await self.latest_beatmap_message.delete()
 
 
 class OsudleBackgroundGame(BaseOsudleGame):
