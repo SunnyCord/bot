@@ -81,8 +81,9 @@ def song_title_match(guess: str, answer: str) -> bool:
         "sped up",
     ]
 
-    alphanumeric = alphanumeric_rx.split(answer)[0]
-    minimum_words_required = 2 if len(alphanumeric.split(" ")) > 2 else 1
+    alphanumeric = " ".join(alphanumeric_rx.split(answer)).strip()
+    answer_length = min(len(alphanumeric.split(" ")), len(answer.split(" ")))
+    minimum_words_required = 2 if answer_length > 2 else 1
     guess_length = max(len(guess.split(" ")), minimum_words_required)
 
     for combo in banned_word_combos:
