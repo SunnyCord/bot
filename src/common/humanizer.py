@@ -82,6 +82,7 @@ def song_title_match(guess: str, answer: str) -> bool:
     ]
 
     alphanumeric = alphanumeric_rx.split(answer)[0]
+    print(alphanumeric)
     minimum_words_required = 2 if len(answer.split(" ")) > 2 else 1
     guess_length = max(len(alphanumeric.split(" ")), minimum_words_required)
 

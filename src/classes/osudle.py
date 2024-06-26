@@ -42,7 +42,6 @@ class BaseOsudleGame(ABC):
         "current_beatmapset",
         "timeout",
         "scores",
-        "current_view",
         "latest_beatmap_message",
         "skip_votes",
     )
@@ -56,7 +55,6 @@ class BaseOsudleGame(ABC):
         self.current_beatmapset = None
         self.timeout = 60
         self.scores = {}
-        self.current_view = None
         self.latest_beatmap_message = None
         self.skip_votes = set()
 
@@ -118,26 +116,15 @@ class BaseOsudleGame(ABC):
         await message.reply(
             f"Correct! {message.author.mention} guessed **{beatmapset.title}** by **{beatmapset.artist}**.",
         )
-        await self.correct_guess_callback()
 
     async def edit_latest_message(self, *args, **kwargs) -> None:
         if self.latest_beatmap_message:
             return await self.latest_beatmap_message.edit(*args, **kwargs)
         await self.interaction.edit_original_response(*args, **kwargs)
 
-    async def remove_view(self) -> None:
-        if not self.current_view:
-            return
-
-        self.current_view.stop()
-        self.current_view = None
-        await self.edit_latest_message(view=None)
-
     async def do_next(self) -> None:
         if self.current_guess_task:
             raise RuntimeError("Task already running.")
-
-        await self.remove_view()
 
         beatmapset = await self.get_beatmapset()
         await self.send_message(beatmapset)
@@ -147,14 +134,23 @@ class BaseOsudleGame(ABC):
                 self.wait_for_guess(beatmapset),
             )
             await self.current_guess_task
+            await self.edit_latest_message(
+                content=f"**{beatmapset.title}** by **{beatmapset.artist}** was the correct answer.",
+                attachments=[],
+                view=None,
+            )
             self.current_guess_task = None
         except asyncio.CancelledError:
-            await self.send_response(
-                f"**{beatmapset.title}** by **{beatmapset.artist}** was the correct answer.",
+            await self.edit_latest_message(
+                content=f"**{beatmapset.title}** by **{beatmapset.artist}** was the correct answer.",
+                attachments=[],
+                view=None,
             )
         except asyncio.TimeoutError:
-            await self.send_response(
-                f"Nobody guessed the beatmap. The correct answer was **{beatmapset.title}** by **{beatmapset.artist}**.",
+            await self.edit_latest_message(
+                content=f"Nobody guessed the beatmap. The correct answer was **{beatmapset.title}** by **{beatmapset.artist}**.",
+                attachments=[],
+                view=None,
             )
             await self.stop_game()
             raise
@@ -205,8 +201,6 @@ class BaseOsudleGame(ABC):
                 pass
             self.current_guess_task = None
 
-        await self.remove_view()
-
         if not self.running or self.stop_event.is_set():
             return
 
@@ -219,18 +213,15 @@ class BaseOsudleGame(ABC):
 
     async def send_message(self, beatmapset: Beatmapset) -> None:
         content = await self.get_message_content(beatmapset)
-        self.current_view = discord.ui.View()
-        self.current_view.add_item(OsudleSkipButton(self))
+        guess_view = discord.ui.View()
+        guess_view.add_item(OsudleSkipButton(self))
         self.latest_beatmap_message = await self.send_response(
             **content,
-            view=self.current_view,
+            view=guess_view,
         )
 
     @abstractmethod
     async def get_message_content(self, beatmapset: Beatmapset) -> dict[str, Any]: ...
-
-    @abstractmethod
-    async def correct_guess_callback(self) -> None: ...
 
 
 class OsudleSongGame(BaseOsudleGame):
@@ -249,9 +240,6 @@ class OsudleSongGame(BaseOsudleGame):
             return {
                 "file": audio_file,
             }
-
-    async def correct_guess_callback(self) -> None:
-        await self.latest_beatmap_message.delete()
 
 
 class OsudleBackgroundGame(BaseOsudleGame):
