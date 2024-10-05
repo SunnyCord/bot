@@ -872,6 +872,40 @@ class OsuCog(MetadataCog, name="osu!"):
         await embed.prepare()
         await ctx.send(embed=embed)
 
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    @commands.hybrid_command(
+        name="pinned",
+        aliases=["p"],
+        description="Shows pinned osu! scores for a user",
+    )
+    @app_commands.describe(
+        username="Discord/osu! username or mention",
+    )
+    async def osu_pinned_command(
+        self,
+        ctx: commands.Context,
+        username: str | None,
+        *,
+        flags: OsuScoreFlags,
+    ) -> None:
+        await ctx.defer()
+        mode = flags.mode
+        user_data = await OsuUserConverter().convert(ctx, username, mode)
+
+        client, user = user_data.client, user_data.user
+
+        safe_username = escape_markdown(user.username)
+
+        pinned = await client.get_user_pinned(user.id)
+        if not pinned:
+            await ctx.send(f"User **{safe_username}** has no pinned plays!")
+            return
+
+        await self.bot.beatmap_service.add(ctx.channel.id, pinned[0].beatmap)
+
+        title = f"Pinned osu! {mode:f} plays for {safe_username}"
+        await OsuScoresView.start(ctx, user, mode, pinned, title)
+
     async def osu_beatmap_scores_command(
         self,
         ctx: commands.Context,
@@ -901,7 +935,7 @@ class OsuCog(MetadataCog, name="osu!"):
         for score in scores:
             score.beatmap = beatmap
 
-        title = f"osu! {beatmap.mode:f} plays for {safe_username}"
+        title = f"osu! {beatmap.mode:f} plays for {safe_username} on {beatmap.beatmapset.artist} - {beatmap.beatmapset.title} [{beatmap.version}]"
         await OsuScoresView.start(
             ctx,
             user,
