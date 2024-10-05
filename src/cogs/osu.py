@@ -896,6 +896,8 @@ class OsuCog(MetadataCog, name="osu!"):
 
         safe_username = escape_markdown(user.username)
 
+        if mode is None:
+            mode = user.playmode
         pinned = await client.get_user_pinned(user.id)
         if not pinned:
             await ctx.send(f"User **{safe_username}** has no pinned plays!")
