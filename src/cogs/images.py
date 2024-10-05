@@ -74,7 +74,7 @@ class Image(MetadataGroupCog, name="image"):
     @app_commands.command(name="wink", description="Wink")
     async def wink_command(self, interaction: discord.Interaction) -> None:
         async with self.bot.aiohttp_session.get(
-            "https://some-random-api.com/animu/wink"
+            "https://some-random-api.com/animu/wink",
         ) as r:
             res = await r.json()
 
@@ -93,7 +93,7 @@ class Image(MetadataGroupCog, name="image"):
         user: discord.User | None,
     ) -> None:
         async with self.bot.aiohttp_session.get(
-            "https://some-random-api.com/animu/pat"
+            "https://some-random-api.com/animu/pat",
         ) as r:
             res = await r.json()
 
@@ -112,7 +112,7 @@ class Image(MetadataGroupCog, name="image"):
         user: discord.User | None,
     ) -> None:
         async with self.bot.aiohttp_session.get(
-            "https://some-random-api.com/animu/hug"
+            "https://some-random-api.com/animu/hug",
         ) as r:
             res = await r.json()
 
