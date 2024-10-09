@@ -113,11 +113,6 @@ class OsuRecordFlags(commands.FlagConverter):
         description="Discord/osu! username or mention. Optional, defaults to author",
         default=None,
     )
-    mode: aiosu.models.Gamemode | None = commands.Flag(
-        aliases=["m"],
-        description="The osu! mode to search for. Optional, defaults to the user's main mode",
-        default=None,
-    )
 
 
 class UserConverter(commands.Converter):
@@ -1329,11 +1324,7 @@ class OsuCog(MetadataCog, name="osu!"):
             )
             return
 
-        user_data = await OsuUserConverter().convert(
-            ctx,
-            flags.username,
-            flags.mode,
-        )
+        user_data = await OsuUserConverter().convert(ctx, flags.username)
 
         user = user_data.user
         client = user_data.client
@@ -1342,7 +1333,7 @@ class OsuCog(MetadataCog, name="osu!"):
                 raise aiosu.exceptions.InvalidClientRequestedError()
             client = user_data.author_client
 
-        mode = flags.mode or user.playmode
+        mode = user.playmode
 
         scores = await client.get_user_beatmap_scores(
             user.id,
