@@ -1139,7 +1139,7 @@ class OsuCog(MetadataCog, name="osu!"):
 
         safe_username = escape_markdown(user.username)
 
-        if pp < tops[-1].pp:
+        if tops and  pp < tops[-1].pp:
             await ctx.send(
                 f"{safe_username} would **not** gain any pp if they got a **{pp:.2f}pp** score.",
             )
