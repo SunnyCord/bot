@@ -929,6 +929,9 @@ class OsuCog(MetadataCog, name="osu!"):
             await ctx.send(f"User **{safe_username}** has no plays on the beatmap!")
             return
 
+        if beatmap.beatmapset is None:
+            beatmap.beatmapset = await client.get_beatmapset(beatmap.beatmapset_id)
+
         for score in scores:
             score.beatmap = beatmap
 
