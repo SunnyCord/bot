@@ -34,7 +34,7 @@ class OsuProfileCompactEmbed(ContextEmbed):
             peak_str = f"(peaked #{user.rank_highest.rank} {format_dt(user.rank_highest.updated_at)}\n"
 
         if user.rank_history:
-            peak_str += f"avg. ranks/day: {user.rank_history.average_gain:.2f} |"
+            peak_str += f"avg. ranks/day: {user.rank_history.average_gain:.2f} | "
 
         content = (
             f"{user.statistics.pp}pp (#{user.statistics.global_rank} | {user.country.flag_emoji}#{user.statistics.country_rank})\n"
