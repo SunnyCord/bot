@@ -1327,7 +1327,7 @@ class OsuCog(MetadataCog, name="osu!"):
             )
             return
 
-        user_data = await OsuUserConverter().convert(ctx, flags.username)
+        user_data = await OsuUserConverter().convert(ctx, flags.username, None)
 
         user = user_data.user
         client = user_data.client
