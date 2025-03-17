@@ -90,6 +90,9 @@ def _score_to_embed_strs(
     pp = score.pp or 0.0
     pp_fc = None
 
+    # TEMP: Disable pp calculation, remove on aiosu update
+    difficulty_attrs = None
+
     if difficulty_attrs:
         name += f" ({difficulty_attrs.star_rating:.2f}★)"
         max_combo = difficulty_attrs.max_combo
