@@ -20,6 +20,7 @@ pomice = "*"
 thefuzz = {extras = ["speedup"], version = "*"}
 pydantic = "*"
 pydantic-core = "*"
+async-timeout = "*"
 
 [dev-packages]
 black = ">=22.10.0"
