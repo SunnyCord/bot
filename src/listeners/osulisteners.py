@@ -35,10 +35,16 @@ class OsuListeners(
     def __init__(self, bot: Sunny) -> None:
         self.bot = bot
 
-    async def get_graph(self, user: User, mode_id: int):
+    async def get_graph(
+        self,
+        user: User,
+        mode_id: int,
+    ) -> BytesIO | None:
         try:
             graph = await self.bot.graph_service.get_one(user.id, mode_id)
         except ValueError:
+            if not user.rank_history:
+                return None
             graph = await self.bot.run_blocking(graphing.plot_rank_graph, user)
             await self.bot.graph_service.add(user.id, graph, mode_id)
         return graph
@@ -76,9 +82,7 @@ class OsuListeners(
         except APIException:
             return
 
-        async with self.bot.aiohttp_session.get(
-            f"https:{beatmapset.preview_url}",
-        ) as resp:
+        async with self.bot.aiohttp_session.get(beatmapset.preview_url) as resp:
             if resp.status != 200:
                 audio_file = None
             file_bytes = BytesIO(await resp.read())
@@ -117,7 +121,8 @@ class OsuListeners(
 
         with suppress(ValueError):
             graph = await self.get_graph(user, int(user.playmode))
-            args["file"] = discord.File(graph, "rank_graph.png")
+            if graph:
+                args["file"] = discord.File(graph, "rank_graph.png")
 
         with suppress(discord.Forbidden):
             await ctx.send(**args)

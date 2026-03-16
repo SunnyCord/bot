@@ -6,7 +6,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from typing import Literal
 
-import aiohttp
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -58,11 +57,10 @@ class Image(MetadataGroupCog, name="image"):
         interaction: discord.Interaction,
         animal: Animal,
     ) -> None:
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(
-                f"https://some-random-api.com/animal/{animal.name}",
-            ) as r:
-                res = await r.json()
+        async with self.bot.aiohttp_session.get(
+            f"https://some-random-api.com/animal/{animal.name}",
+        ) as r:
+            res = await r.json()
 
         embed = discord.Embed(
             title=animal.icon,
@@ -74,9 +72,10 @@ class Image(MetadataGroupCog, name="image"):
     @commands.cooldown(1, 5, commands.BucketType.user)
     @app_commands.command(name="wink", description="Wink")
     async def wink_command(self, interaction: discord.Interaction) -> None:
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get("https://some-random-api.com/animu/wink") as r:
-                res = await r.json()
+        async with self.bot.aiohttp_session.get(
+            "https://some-random-api.com/animu/wink",
+        ) as r:
+            res = await r.json()
 
         embed = discord.Embed(
             title=f"{interaction.user} winks 😉",
@@ -92,9 +91,10 @@ class Image(MetadataGroupCog, name="image"):
         interaction: discord.Interaction,
         user: discord.User | None,
     ) -> None:
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get("https://some-random-api.com/animu/pat") as r:
-                res = await r.json()
+        async with self.bot.aiohttp_session.get(
+            "https://some-random-api.com/animu/pat",
+        ) as r:
+            res = await r.json()
 
         embed = discord.Embed(
             title=f'{interaction.user} pats {f"themselves. 😔" if user is None else f"{user} <:lewd:545969728527663114>"}',
@@ -110,9 +110,10 @@ class Image(MetadataGroupCog, name="image"):
         interaction: discord.Interaction,
         user: discord.User | None,
     ) -> None:
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get("https://some-random-api.com/animu/hug") as r:
-                res = await r.json()
+        async with self.bot.aiohttp_session.get(
+            "https://some-random-api.com/animu/hug",
+        ) as r:
+            res = await r.json()
 
         embed = discord.Embed(
             title=f'{interaction.user} hugs {f"themselves. 😔" if user is None else f"{user} <:lewd:545969728527663114>"}',

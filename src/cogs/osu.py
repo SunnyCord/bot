@@ -3,7 +3,6 @@
 ###
 from __future__ import annotations
 
-import asyncio
 from contextlib import suppress
 from enum import Enum
 from typing import TYPE_CHECKING
@@ -111,11 +110,6 @@ class OsuRecordFlags(commands.FlagConverter):
     username: str | None = commands.Flag(
         aliases=["u"],
         description="Discord/osu! username or mention. Optional, defaults to author",
-        default=None,
-    )
-    mode: aiosu.models.Gamemode | None = commands.Flag(
-        aliases=["m"],
-        description="The osu! mode to search for. Optional, defaults to the user's main mode",
         default=None,
     )
 
@@ -698,7 +692,7 @@ class OsudleCog(MetadataGroupCog, name="osudle"):
 
         try:
             await game.start_game(interaction, mode)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             del self.running_games[channel.id]
 
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -753,7 +747,7 @@ class OsudleCog(MetadataGroupCog, name="osudle"):
         self.running_games[channel.id].interaction = interaction
         try:
             await self.running_games[channel.id].skip(interaction)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             del self.running_games[channel.id]
 
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -872,6 +866,42 @@ class OsuCog(MetadataCog, name="osu!"):
         await embed.prepare()
         await ctx.send(embed=embed)
 
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    @commands.hybrid_command(
+        name="pinned",
+        aliases=["p"],
+        description="Shows pinned osu! scores for a user",
+    )
+    @app_commands.describe(
+        username="Discord/osu! username or mention",
+    )
+    async def osu_pinned_command(
+        self,
+        ctx: commands.Context,
+        username: str | None,
+        *,
+        flags: OsuScoreFlags,
+    ) -> None:
+        await ctx.defer()
+        mode = flags.mode
+        user_data = await OsuUserConverter().convert(ctx, username, mode)
+
+        client, user = user_data.client, user_data.user
+
+        safe_username = escape_markdown(user.username)
+
+        if mode is None:
+            mode = user.playmode
+        pinned = await client.get_user_pinned(user.id)
+        if not pinned:
+            await ctx.send(f"User **{safe_username}** has no pinned plays!")
+            return
+
+        await self.bot.beatmap_service.add(ctx.channel.id, pinned[0].beatmap)
+
+        title = f"Pinned osu! {mode:f} plays for {safe_username}"
+        await OsuScoresView.start(ctx, user, mode, pinned, title)
+
     async def osu_beatmap_scores_command(
         self,
         ctx: commands.Context,
@@ -898,10 +928,13 @@ class OsuCog(MetadataCog, name="osu!"):
             await ctx.send(f"User **{safe_username}** has no plays on the beatmap!")
             return
 
+        if beatmap.beatmapset is None:
+            beatmap.beatmapset = await client.get_beatmapset(beatmap.beatmapset_id)
+
         for score in scores:
             score.beatmap = beatmap
 
-        title = f"osu! {beatmap.mode:f} plays for {safe_username}"
+        title = f"osu! {beatmap.mode:f} plays for {safe_username} on {beatmap.beatmapset.artist} - {beatmap.beatmapset.title} [{beatmap.version}]"
         await OsuScoresView.start(
             ctx,
             user,
@@ -1103,7 +1136,7 @@ class OsuCog(MetadataCog, name="osu!"):
 
         safe_username = escape_markdown(user.username)
 
-        if pp < tops[-1].pp:
+        if tops and pp < tops[-1].pp:
             await ctx.send(
                 f"{safe_username} would **not** gain any pp if they got a **{pp:.2f}pp** score.",
             )
@@ -1293,11 +1326,7 @@ class OsuCog(MetadataCog, name="osu!"):
             )
             return
 
-        user_data = await OsuUserConverter().convert(
-            ctx,
-            flags.username,
-            flags.mode,
-        )
+        user_data = await OsuUserConverter().convert(ctx, flags.username, None)
 
         user = user_data.user
         client = user_data.client
@@ -1306,7 +1335,7 @@ class OsuCog(MetadataCog, name="osu!"):
                 raise aiosu.exceptions.InvalidClientRequestedError()
             client = user_data.author_client
 
-        mode = flags.mode or user.playmode
+        mode = user.playmode
 
         scores = await client.get_user_beatmap_scores(
             user.id,

@@ -15,7 +15,8 @@ sample_rate = 1.0 if bot.config.environment == "development" else 0.2
 sentry_sdk.init(
     dsn=bot.config.sentry,
     environment=bot.config.environment,
-    traces_sample_rate=sample_rate,
+    traces_sample_rate=1.0,
+    profiles_sample_rate=sample_rate,
 )
 
 

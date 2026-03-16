@@ -43,7 +43,7 @@ class OsuBeatmapEmbed(ContextEmbed):
         description = cleandoc(
             f"""**Length**: {timedelta(seconds=beatmap.total_length)} **BPM:** {beatmap.bpm}\n**Download:** [map](https://osu.ppy.sh/d/{beatmapset.id})([🚫📹](https://osu.ppy.sh/d/{beatmapset.id}n)) [chimu.moe](https://api.chimu.moe/v1/download/{beatmapset.id})
                 **Discussion:** [mapset]({beatmapset.discussion_url}) [difficulty]({beatmap.discussion_url})
-                [**Browser Preview**](https://osu-preview.jmir.xyz/preview#{beatmap.id})
+                [**Browser Preview**](https://preview.tryz.id.vn/?b={beatmap.id})
             """,
         )
 

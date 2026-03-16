@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import asyncio
+import time
 from abc import ABC
 from abc import abstractmethod
 from io import BytesIO
@@ -13,6 +14,8 @@ import discord
 from discord import File
 
 from common import humanizer
+from ui.menus.osu import OsudleContinueView
+from ui.menus.osu import OsudleGuessView
 
 if TYPE_CHECKING:
     from typing import Any
@@ -23,13 +26,7 @@ if TYPE_CHECKING:
     from discord import Message
 
 
-class OsudleSkipButton(discord.ui.Button["BaseOsudleGame"]):
-    def __init__(self, game: BaseOsudleGame) -> None:
-        super().__init__(style=discord.ButtonStyle.danger, label="Skip")
-        self.game = game
-
-    async def callback(self, interaction: discord.Interaction):
-        await self.game.skip(interaction)
+CONTINUE_TIMEOUT_MINUTES = 10
 
 
 class BaseOsudleGame(ABC):
@@ -40,24 +37,23 @@ class BaseOsudleGame(ABC):
         "mode",
         "current_guess_task",
         "current_beatmapset",
-        "timeout",
+        "interaction_timeout",
         "scores",
-        "current_view",
-        "latest_beatmap_message",
+        "latest_beatmapset_message",
         "skip_votes",
     )
 
     def __init__(self) -> None:
         self.interaction = None
+        self.last_interaction_time = time.monotonic()
         self.running = False
         self.stop_event = asyncio.Event()
         self.mode = None
         self.current_guess_task = None
         self.current_beatmapset = None
-        self.timeout = 60
+        self.interaction_timeout = 60
         self.scores = {}
-        self.current_view = None
-        self.latest_beatmap_message = None
+        self.latest_beatmapset_message = None
         self.skip_votes = set()
 
     def get_formatted_scoreboard(self) -> str:
@@ -97,7 +93,8 @@ class BaseOsudleGame(ABC):
         if self.interaction.response.is_done():
             return await self.interaction.followup.send(*args, **kwargs)
         try:
-            return await self.interaction.response.send_message(*args, **kwargs)
+            await self.interaction.response.send_message(*args, **kwargs)
+            return await self.interaction.original_response()
         except discord.HTTPException:
             return await self.interaction.followup.send(*args, **kwargs)
 
@@ -111,7 +108,7 @@ class BaseOsudleGame(ABC):
         message = await self.interaction.client.wait_for(
             "message",
             check=self.check_guess,
-            timeout=self.timeout,
+            timeout=self.interaction_timeout,
         )
 
         self.scores[message.author.id] = self.scores.get(message.author.id, 0) + 1
@@ -119,46 +116,64 @@ class BaseOsudleGame(ABC):
             f"Correct! {message.author.mention} guessed **{beatmapset.title}** by **{beatmapset.artist}**.",
         )
 
+    async def wait_for_continue(self) -> None:
+        continue_view = OsudleContinueView(self)
+        message = await self.interaction.channel.send(
+            content="Due to Discord limitations of 15 minutes for interactions, you must confirm that you are still here.\nClick the button below to continue.",
+            view=continue_view,
+        )
+
+        timed_out = await continue_view.wait()
+        if timed_out:
+            await message.edit(
+                content="Stopping the game due to inactivity.",
+                view=None,
+            )
+            await self.stop_game()
+            raise TimeoutError
+
+        await message.edit(content="Continuing the game...", view=None)
+
     async def edit_latest_message(self, *args, **kwargs) -> None:
-        if self.latest_beatmap_message:
-            return await self.latest_beatmap_message.edit(*args, **kwargs)
+        if self.latest_beatmapset_message:
+            return await self.latest_beatmapset_message.edit(*args, **kwargs)
         await self.interaction.edit_original_response(*args, **kwargs)
-
-    async def remove_view(self) -> None:
-        if not self.current_view:
-            return
-
-        self.current_view.stop()
-        self.current_view = None
-        await self.edit_latest_message(view=None)
 
     async def do_next(self) -> None:
         if self.current_guess_task:
             raise RuntimeError("Task already running.")
 
-        await self.remove_view()
+        if (
+            time.monotonic() - self.last_interaction_time
+            > CONTINUE_TIMEOUT_MINUTES * 60
+        ):
+            await self.wait_for_continue()
 
         beatmapset = await self.get_beatmapset()
-        await self.send_message(beatmapset)
+        await self.send_beatmapset_message(beatmapset)
 
         try:
             self.current_guess_task = asyncio.create_task(
                 self.wait_for_guess(beatmapset),
             )
             await self.current_guess_task
+            await self.edit_latest_message(
+                content=f"**{beatmapset.title}** by **{beatmapset.artist}** was the correct answer.",
+            )
             self.current_guess_task = None
         except asyncio.CancelledError:
-            await self.send_response(
-                f"**{beatmapset.title}** by **{beatmapset.artist}** was the correct answer.",
+            await self.edit_latest_message(
+                content=f"**{beatmapset.title}** by **{beatmapset.artist}** was the correct answer.",
             )
-        except asyncio.TimeoutError:
-            await self.send_response(
-                f"Nobody guessed the beatmap. The correct answer was **{beatmapset.title}** by **{beatmapset.artist}**.",
+        except TimeoutError:
+            await self.edit_latest_message(
+                content=f"Nobody guessed the beatmap. The correct answer was **{beatmapset.title}** by **{beatmapset.artist}**.",
             )
             await self.stop_game()
             raise
         finally:
             self.skip_votes.clear()
+            await self.edit_latest_message(attachments=[], view=None)
 
     async def skip(self, interaction: discord.Interaction) -> None:
         if not self.can_skip(interaction.user):
@@ -200,11 +215,9 @@ class BaseOsudleGame(ABC):
                 await self.current_guess_task
             except asyncio.CancelledError:
                 pass
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 pass
             self.current_guess_task = None
-
-        await self.remove_view()
 
         if not self.running or self.stop_event.is_set():
             return
@@ -216,13 +229,11 @@ class BaseOsudleGame(ABC):
             f"Game has stopped.\nFinal scoreboard:\n{self.get_formatted_scoreboard()}",
         )
 
-    async def send_message(self, beatmapset: Beatmapset) -> None:
+    async def send_beatmapset_message(self, beatmapset: Beatmapset) -> None:
         content = await self.get_message_content(beatmapset)
-        self.current_view = discord.ui.View()
-        self.current_view.add_item(OsudleSkipButton(self))
-        self.latest_beatmap_message = await self.send_response(
+        self.latest_beatmapset_message = await self.send_response(
             **content,
-            view=self.current_view,
+            view=OsudleGuessView(self),
         )
 
     @abstractmethod
@@ -234,7 +245,7 @@ class OsudleSongGame(BaseOsudleGame):
 
     async def get_message_content(self, beatmapset: Beatmapset) -> dict[str, Any]:
         async with self.interaction.client.aiohttp_session.get(
-            f"https:{beatmapset.preview_url}",
+            beatmapset.preview_url,
         ) as resp:
             if resp.status != 200:
                 await self.send_response("Failed to fetch the audio file.")
