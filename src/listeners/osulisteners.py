@@ -82,9 +82,7 @@ class OsuListeners(
         except APIException:
             return
 
-        async with self.bot.aiohttp_session.get(
-            f"https:{beatmapset.preview_url}",
-        ) as resp:
+        async with self.bot.aiohttp_session.get(beatmapset.preview_url) as resp:
             if resp.status != 200:
                 audio_file = None
             file_bytes = BytesIO(await resp.read())

@@ -244,7 +244,7 @@ class OsudleSongGame(BaseOsudleGame):
 
     async def get_message_content(self, beatmapset: Beatmapset) -> dict[str, Any]:
         async with self.interaction.client.aiohttp_session.get(
-            f"https:{beatmapset.preview_url}",
+            beatmapset.preview_url,
         ) as resp:
             if resp.status != 200:
                 await self.send_response("Failed to fetch the audio file.")
