@@ -21,6 +21,7 @@ thefuzz = {extras = ["speedup"], version = "*"}
 pydantic = "*"
 pydantic-core = "*"
 async-timeout = "*"
+numpy = "*"
 
 [dev-packages]
 black = ">=22.10.0"
