@@ -8,6 +8,9 @@ FROM base AS python-deps
 # Install pipenv and compilation dependencies
 RUN pip install pipenv==2023.2.18
 RUN apt-get update && apt-get install -y --no-install-recommends gcc && rm -rf /var/lib/apt/lists/*
+# Bust cache when lockfile changes
+ARG LOCKFILE_HASH
+RUN echo $LOCKFILE_HASH
 # Install python dependencies in /.venv
 COPY Pipfile .
 COPY Pipfile.lock .
