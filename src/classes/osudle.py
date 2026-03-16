@@ -129,7 +129,7 @@ class BaseOsudleGame(ABC):
                 view=None,
             )
             await self.stop_game()
-            raise asyncio.TimeoutError
+            raise TimeoutError
 
         await message.edit(content="Continuing the game...", view=None)
 
@@ -164,7 +164,7 @@ class BaseOsudleGame(ABC):
             await self.edit_latest_message(
                 content=f"**{beatmapset.title}** by **{beatmapset.artist}** was the correct answer.",
             )
-        except asyncio.TimeoutError:
+        except TimeoutError:
             await self.edit_latest_message(
                 content=f"Nobody guessed the beatmap. The correct answer was **{beatmapset.title}** by **{beatmapset.artist}**.",
             )
@@ -214,7 +214,7 @@ class BaseOsudleGame(ABC):
                 await self.current_guess_task
             except asyncio.CancelledError:
                 pass
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 pass
             self.current_guess_task = None
 

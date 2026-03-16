@@ -3,7 +3,6 @@
 ###
 from __future__ import annotations
 
-import asyncio
 from contextlib import suppress
 from enum import Enum
 from typing import TYPE_CHECKING
@@ -693,7 +692,7 @@ class OsudleCog(MetadataGroupCog, name="osudle"):
 
         try:
             await game.start_game(interaction, mode)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             del self.running_games[channel.id]
 
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -748,7 +747,7 @@ class OsudleCog(MetadataGroupCog, name="osudle"):
         self.running_games[channel.id].interaction = interaction
         try:
             await self.running_games[channel.id].skip(interaction)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             del self.running_games[channel.id]
 
     @commands.cooldown(1, 5, commands.BucketType.user)
