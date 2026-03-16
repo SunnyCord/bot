@@ -93,7 +93,8 @@ class BaseOsudleGame(ABC):
         if self.interaction.response.is_done():
             return await self.interaction.followup.send(*args, **kwargs)
         try:
-            return await self.interaction.response.send_message(*args, **kwargs)
+            await self.interaction.response.send_message(*args, **kwargs)
+            return await self.interaction.original_response()
         except discord.HTTPException:
             return await self.interaction.followup.send(*args, **kwargs)
 
