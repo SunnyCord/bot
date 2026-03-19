@@ -51,10 +51,6 @@ jobs:
           cp Pipfile src/
           cp Pipfile.lock src/
 
-      - name: Generate lockfile hash
-        id: lockfile
-        run: echo "hash=${{ hashFiles('Pipfile.lock') }}" >> $GITHUB_OUTPUT
-
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
@@ -63,8 +59,6 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            LOCKFILE_HASH=${{ steps.lockfile.outputs.hash }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
