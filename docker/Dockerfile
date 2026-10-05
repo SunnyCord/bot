@@ -6,7 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONFAULTHANDLER=1
 FROM base AS python-deps
 # Install pipenv and compilation dependencies
-RUN pip install pipenv==2024.0.1
+RUN pip install pipenv==2026.8.0
 RUN apt-get update && apt-get install -y --no-install-recommends gcc && rm -rf /var/lib/apt/lists/*
 # Install python dependencies in /.venv
 COPY Pipfile .
