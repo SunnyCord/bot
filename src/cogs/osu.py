@@ -892,7 +892,7 @@ class OsuCog(MetadataCog, name="osu!"):
 
         if mode is None:
             mode = user.playmode
-        pinned = await client.get_user_pinned(user.id)
+        pinned = await client.get_user_pinned(user.id, mode=mode, new_format=True)
         if not pinned:
             await ctx.send(f"User **{safe_username}** has no pinned plays!")
             return
@@ -907,7 +907,7 @@ class OsuCog(MetadataCog, name="osu!"):
         ctx: commands.Context,
         username: str | None,
         mode: aiosu.models.Gamemode,
-        beatmap: aiosu.models.Beatmap,
+        beatmap: aiosu.models.BeatmapExtended | aiosu.models.LegacyBeatmap,
     ) -> None:
         user_data = await OsuUserConverter().convert(
             ctx,

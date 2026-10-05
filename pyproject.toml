@@ -1,4 +1,5 @@
 [tool.mypy]
+python_version = "3.12"
 plugins = ["pydantic.mypy"]
 mypy_path = "./"
 files = ["src"]
@@ -13,3 +14,6 @@ show_error_codes = true
 add_imports = ["from __future__ import annotations"]
 force_single_line = true
 profile = "black"
+
+[tool.black]
+target-version = ["py312"]

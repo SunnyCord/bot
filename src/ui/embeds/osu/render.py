@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from ui.embeds.generic import ContextEmbed
 
 if TYPE_CHECKING:
-    from discord import commands
+    from discord.ext import commands
 
 
 class OsuRenderEmbed(ContextEmbed):
@@ -18,4 +18,4 @@ class OsuRenderEmbed(ContextEmbed):
             title=title,
             description=description,
         )
-        self.set_thumbnail(url=ctx.bot.user.avatar)
+        self.set_thumbnail(url=ctx.bot.user.display_avatar.url)

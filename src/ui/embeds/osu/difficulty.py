@@ -12,22 +12,24 @@ from discord.utils import escape_markdown
 from ui.embeds.generic import ContextEmbed
 
 if TYPE_CHECKING:
-    from aiosu.models import Beatmap
     from aiosu.models import BeatmapDifficultyAttributes
+    from aiosu.models import BeatmapExtended
     from aiosu.models import Mods
-    from discord import commands
+    from discord.ext import commands
 
 
 class OsuDifficultyEmbed(ContextEmbed):
     def __init__(
         self,
         ctx: commands.Context,
-        beatmap: Beatmap,
+        beatmap: BeatmapExtended,
         difficulty_attributes: BeatmapDifficultyAttributes,
         mods: Mods,
-    ):
+    ) -> None:
         beatmapset = beatmap.beatmapset
-        mods_text = f" +{mods}" if int(mods) > 0 else ""
+        if beatmapset is None:
+            raise ValueError("Beatmap is missing beatmapset details.")
+        mods_text = f" +{mods}" if mods.to_acronyms() else ""
         super().__init__(
             ctx,
         )
@@ -41,7 +43,7 @@ class OsuDifficultyEmbed(ContextEmbed):
             url=beatmap.url,
         )
 
-        self.set_thumbnail(url=beatmap.beatmapset.covers.list_2_x)
+        self.set_thumbnail(url=beatmapset.covers.list_2_x)
 
         difficulty_attributes_dict = difficulty_attributes.model_dump(
             exclude_none=True,
@@ -65,8 +67,9 @@ class OsuDifficultyEmbed(ContextEmbed):
 
         self.add_field(name="Beatmap Attributes", value=beatmap_content)
 
-        difficulty_content = ""
-        for key, value in difficulty_attributes_dict.items():
-            difficulty_content += f"**{value:.2f}** {key.replace('_', ' ')}\n"
+        difficulty_content = "\n".join(
+            f"**{value:.2f}** {key.replace('_', ' ')}"
+            for key, value in difficulty_attributes_dict.items()
+        )
 
         self.add_field(name="Difficulty Attributes", value=difficulty_content)

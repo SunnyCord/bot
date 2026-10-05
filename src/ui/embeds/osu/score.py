@@ -3,13 +3,14 @@
 ###
 from __future__ import annotations
 
-from inspect import cleandoc
 from typing import TYPE_CHECKING
 
+from aiosu.models import BeatmapDifficultyAttributes
 from aiosu.models import BeatmapRankStatus
-from aiosu.models import LazerScore
-from aiosu.models import Mod
+from aiosu.models import Gamemode
+from aiosu.models import OsuPerformanceAttributes
 from aiosu.models import Score
+from aiosu.utils.accuracy import get_calculator as get_accuracy_calculator
 from aiosu.utils.performance import get_calculator
 from discord.utils import escape_markdown
 from discord.utils import format_dt
@@ -20,26 +21,21 @@ from ui.icons.score import ScoreRankIcon
 if TYPE_CHECKING:
     from typing import Any
 
-    import aiosu
-    from discord import commands
+    from aiosu.v2 import Client
+    from discord.ext.commands import Context
 
 
-def _check_leaderboarded(score: aiosu.models.Score) -> bool:
-    return score.beatmap.status in (
+async def get_score_beatmap_attributes(
+    score: Score,
+    client: Client,
+) -> BeatmapDifficultyAttributes | None:
+    if score.beatmap is None or score.beatmap.status not in (
         BeatmapRankStatus.APPROVED,
         BeatmapRankStatus.QUALIFIED,
         BeatmapRankStatus.LOVED,
         BeatmapRankStatus.RANKED,
-    )
-
-
-async def get_score_beatmap_attributes(
-    score: aiosu.models.Score,
-    client: aiosu.v2.Client,
-) -> aiosu.models.BeatmapDifficultyAttributes | None:
-    if not _check_leaderboarded(score):
+    ):
         return None
-
     return await client.get_beatmap_attributes(
         score.beatmap.id,
         mods=score.mods,
@@ -47,123 +43,122 @@ async def get_score_beatmap_attributes(
     )
 
 
-def _get_lazer_speed_modifier(mod):
-    speed_change = mod.settings.get("speed_change")
-    if speed_change:
-        return float(speed_change)
-    elif mod.acronym in ["DT", "NC"]:
-        return 1.5
-    elif mod.acronym in ["HT", "DC"]:
-        return 0.75
-    else:
-        return 1.0
+def _get_score_bpm(score: Score) -> str:
+    if score.beatmap is None or not score.beatmap.bpm:
+        return "?"
+    speed = 1.0
+    for mod in score.mods:
+        if mod.acronym == "DT" and "NC" in score.mods and not mod.settings:
+            continue
+        if mod.acronym in ("DT", "NC", "HT", "DC"):
+            default = 1.5 if mod.acronym in ("DT", "NC") else 0.75
+            speed *= float(mod.settings.get("speed_change", default))
+        elif mod.acronym in ("WU", "WD", "AS"):
+            speed *= float(mod.settings.get("initial_rate", 1.0))
+    return f"{score.beatmap.bpm * speed:.0f}"
 
 
-def _get_score_bpm(score: aiosu.models.Score) -> str:
-    speed_modifier = 1.0
+def _score_performance(
+    score: Score,
+    attributes: BeatmapDifficultyAttributes | None,
+) -> tuple[float, float | None]:
+    pp = score.pp or 0.0
+    if attributes is None or score.beatmap is None:
+        return pp, None
+    calculator = get_calculator(score.mode)(attributes)
+    try:
+        performance = calculator.calculate(score)
+    except ValueError:
+        return pp, None
+    pp = pp or performance.total
+    if score.mode != Gamemode.STANDARD:
+        return pp, None
+    if (
+        not isinstance(performance, OsuPerformanceAttributes)
+        or score.beatmap.count_objects is None
+    ):
+        return pp, None
+    if score.passed and performance.effective_miss_count == 0:
+        return pp, None
+    full_combo = score.model_copy(deep=True)
+    full_combo.max_combo = attributes.max_combo
+    full_combo.passed = True
+    full_combo.legacy_total_score = None
+    full_combo.statistics.great = max(
+        0,
+        score.beatmap.count_objects - score.statistics.ok - score.statistics.meh,
+    )
+    full_combo.statistics.miss = 0
+    full_combo.statistics.large_tick_miss = 0
+    full_combo.statistics.slider_tail_hit = score.beatmap.count_sliders
+    full_combo.accuracy = get_accuracy_calculator(score.mode).calculate(full_combo)
+    try:
+        return pp, calculator.calculate(full_combo).total
+    except ValueError:
+        return pp, None
 
-    if isinstance(score, LazerScore):
-        for mod in score.mods:
-            speed_modifier = _get_lazer_speed_modifier(mod)
-            if speed_modifier != 1.0:
-                break
-    else:
-        if score.mods & (Mod.DoubleTime | Mod.Nightcore):
-            speed_modifier = 1.5
-        elif score.mods & Mod.HalfTime:
-            speed_modifier = 0.75
 
-    return f"{score.beatmap.bpm * speed_modifier:.0f}" if score.beatmap.bpm else "?"
+def _score_hits(score: Score) -> str:
+    statistics = score.statistics
+    counts = [statistics.count_300, statistics.count_100]
+    if score.mode != Gamemode.TAIKO:
+        counts.append(statistics.count_50)
+    if score.mode == Gamemode.MANIA:
+        counts.insert(0, statistics.count_geki)
+        counts.append(statistics.count_katu)
+    elif score.mode == Gamemode.CTB:
+        counts.append(statistics.count_katu)
+    counts.append(statistics.count_miss)
+    return "/".join(f"**{count}**" for count in counts)
 
 
 def _score_to_embed_strs(
     score: Score,
     include_user: bool = False,
-    difficulty_attrs: aiosu.models.BeatmapDifficultyAttributes | None = None,
+    difficulty_attrs: BeatmapDifficultyAttributes | None = None,
 ) -> dict[str, str]:
-    beatmap, beatmapset = score.beatmap, score.beatmapset
-
+    beatmap = score.beatmap
+    beatmapset = score.beatmapset or (beatmap.beatmapset if beatmap else None)
+    if beatmap is None or beatmapset is None:
+        raise ValueError("Score is missing beatmap details.")
     name = f"{beatmapset.artist} - {beatmapset.title} [{beatmap.version}]"
-
-    statistics = score.statistics
-    max_combo = beatmap.max_combo
-    pp = score.pp or 0.0
-    pp_fc = None
-
-    # TEMP: Disable pp calculation, remove on aiosu update
-    difficulty_attrs = None
-
     if difficulty_attrs:
         name += f" ({difficulty_attrs.star_rating:.2f}★)"
-        max_combo = difficulty_attrs.max_combo
-        calculator_type = get_calculator(score.mode)
-        calculator = calculator_type(difficulty_attrs)
-
-        if not pp:
-            pp = calculator.calculate(score).total
-
-        if hasattr(calculator, "_calculate_effective_miss_count"):
-            is_fc = True
-            if score.passed:
-                is_fc = calculator._calculate_effective_miss_count(score) == 0
-            if not is_fc or not score.passed:
-                score_fc = score.model_copy()
-                score_fc.statistics = score.statistics.model_copy()
-                score_fc.max_combo = max_combo
-                adjusted_greats = (
-                    beatmap.count_objects
-                    - score.statistics.count_100
-                    - score.statistics.count_50
-                )
-                if isinstance(score, LazerScore):
-                    score_fc.statistics.great = adjusted_greats
-                    score_fc.statistics.miss = 0
-                else:
-                    score_fc.statistics.count_300 = adjusted_greats
-                    score_fc.statistics.count_miss = 0
-                pp_fc = calculator.calculate(score_fc).total
-
     if beatmapset.creator:
         name += f" <{beatmapset.creator}>"
-
-    weight = "" if not score.weight else f" (weight {score.weight.percentage/100:.2f})"
-    score_text = f"[score]({score.score_url}) | " if score.score_url else ""
-    user_text = f"[user]({score.user.url}) | " if include_user else ""
-    fc_text = "" if not pp_fc else f"(FC: **{pp_fc:.2f}pp**) "
-
-    fail_text = "" if score.passed else f" ({score.completion:.2f}%)"
-    bpm_text = _get_score_bpm(score)
-
-    mods_text = score.mods
-    mods_settings_text = ""
-    if isinstance(score, LazerScore):
-        mods_text = score.mods_str
-        mods_settings_text = "\n"
-        for mod in score.mods:
-            for key, value in mod.settings.items():
-                mods_settings_text += f"{key.replace('_', ' ')}: {value}\n"
-        mods_settings_text = mods_settings_text.rstrip()
-
-    value = cleandoc(
-        f"""**{pp:.2f}pp**{weight}, accuracy: **{score.accuracy*100:.2f}%**, combo: **{score.max_combo}x/{max_combo}x**
-            {fc_text}score: **{score.score}** [**{statistics.count_300}**/**{statistics.count_100}**/**{statistics.count_50}**/**{statistics.count_miss}**]
-            bpm: {bpm_text} | mods: {mods_text} | {ScoreRankIcon[score.rank]}{fail_text}{mods_settings_text}
-            {format_dt(score.created_at, style="R")}
-            {score_text}{user_text}[map]({beatmap.url})
-        """,
+    max_combo = difficulty_attrs.max_combo if difficulty_attrs else beatmap.max_combo
+    pp, pp_fc = _score_performance(score, difficulty_attrs)
+    weight = f" (weight {score.weight.percentage / 100:.2f})" if score.weight else ""
+    fc = f"(FC: **{pp_fc:.2f}pp**) " if pp_fc is not None else ""
+    fail = ""
+    if not score.passed and score.completion is not None:
+        fail = f" ({score.completion:.2f}%)"
+    links = []
+    if score.score_url:
+        links.append(f"[score]({score.score_url})")
+    if include_user and score.user:
+        links.append(f"[user]({score.user.url})")
+    links.append(f"[map]({beatmap.url})")
+    lines = [
+        f"**{pp:.2f}pp**{weight}, accuracy: **{score.accuracy * 100:.2f}%**, combo: **{score.max_combo}x/{max_combo or '?'}x**",
+        f"{fc}score: **{score.score}** [{_score_hits(score)}]",
+        f"bpm: {_get_score_bpm(score)} | mods: {score.mods} | {ScoreRankIcon[score.rank]}{fail}",
+    ]
+    lines.extend(
+        f"{mod.acronym} {key.replace('_', ' ')}: {value}"
+        for mod in score.mods
+        for key, value in mod.settings.items()
     )
-    return {
-        "name": escape_markdown(name),
-        "value": value,
-    }
+    lines.extend((format_dt(score.created_at, style="R"), " | ".join(links)))
+    return {"name": escape_markdown(name), "value": "\n".join(lines)}
 
 
 class OsuScoreSingleEmbed(ContextEmbed):
     def __init__(
         self,
-        ctx: commands.Context,
+        ctx: Context,
         score: Score,
-        title: str = None,
+        title: str | None = None,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -171,35 +166,35 @@ class OsuScoreSingleEmbed(ContextEmbed):
         self.ctx = ctx
         self.prepared = False
         self.score = score
-
-        safe_username = escape_markdown(score.user.username)
-
-        self.set_thumbnail(url=self.score.beatmapset.covers.list)
-        self.set_author(
-            name=title or safe_username,
-            icon_url=self.score.user.avatar_url,
+        beatmapset = score.beatmapset or (
+            score.beatmap.beatmapset if score.beatmap else None
         )
+        if beatmapset:
+            self.set_thumbnail(url=beatmapset.covers.list)
+        if score.user:
+            self.set_author(
+                name=title or escape_markdown(score.user.username),
+                icon_url=score.user.avatar_url,
+            )
+        elif title:
+            self.set_author(name=title)
 
     async def prepare(self) -> None:
         if self.prepared:
             return
-
         client = await self.ctx.bot.client_storage.app_client
-
-        difficulty_attrs = await get_score_beatmap_attributes(self.score, client)
-
+        attributes = await get_score_beatmap_attributes(self.score, client)
         self.add_field(
             inline=False,
-            **_score_to_embed_strs(self.score, True, difficulty_attrs),
+            **_score_to_embed_strs(self.score, True, attributes),
         )
-
         self.prepared = True
 
 
 class OsuScoreMultipleEmbed(ContextEmbed):
     def __init__(
         self,
-        ctx: commands.Context,
+        ctx: Context,
         scores: list[Score],
         same_beatmap: bool = False,
         *args: Any,
@@ -209,38 +204,26 @@ class OsuScoreMultipleEmbed(ContextEmbed):
         self.ctx = ctx
         self.prepared = False
         self.scores = scores
-        self.difficulty_attrs = []
         self.same_beatmap = same_beatmap
 
     async def prepare(self) -> None:
-        if self.prepared:
+        if self.prepared or not self.scores:
             return
-
         client = await self.ctx.bot.client_storage.app_client
-
         if self.same_beatmap:
-            score = self.scores[0]
-            if not score.beatmapset:
-                beatmapset = await client.get_beatmapset(score.beatmap.beatmapset_id)
-                for score in self.scores:
-                    score.beatmapset = beatmapset
-
-            self.set_thumbnail(url=score.beatmapset.covers.list)
-
-            self.difficulty_attrs = [
-                await get_score_beatmap_attributes(score, client),
-            ] * len(self.scores)
-
-        else:
+            first = self.scores[0]
+            if first.beatmap is None:
+                raise ValueError("Score is missing beatmap details.")
+            beatmapset = first.beatmapset or first.beatmap.beatmapset
+            if beatmapset is None:
+                beatmapset = await client.get_beatmapset(first.beatmap.beatmapset_id)
             for score in self.scores:
-                self.difficulty_attrs.append(
-                    await get_score_beatmap_attributes(score, client),
-                )
-
-        for idx, score in enumerate(self.scores):
-            data = _score_to_embed_strs(score, False, self.difficulty_attrs[idx])
+                score.beatmapset = beatmapset
+            self.set_thumbnail(url=beatmapset.covers.list)
+        for score in self.scores:
+            attributes = await get_score_beatmap_attributes(score, client)
+            data = _score_to_embed_strs(score, difficulty_attrs=attributes)
             if self.same_beatmap:
                 data["name"] = "_ _"
-
             self.add_field(inline=False, **data)
         self.prepared = True

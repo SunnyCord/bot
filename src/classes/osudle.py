@@ -20,8 +20,8 @@ from ui.menus.osu import OsudleGuessView
 if TYPE_CHECKING:
     from typing import Any
 
-    from aiosu.models import Beatmapset
     from aiosu.models import Gamemode
+    from aiosu.models import LegacyBeatmapset
     from discord import Interaction
     from discord import Message
 
@@ -98,13 +98,13 @@ class BaseOsudleGame(ABC):
         except discord.HTTPException:
             return await self.interaction.followup.send(*args, **kwargs)
 
-    async def get_beatmapset(self) -> Beatmapset:
+    async def get_beatmapset(self) -> LegacyBeatmapset:
         self.current_beatmapset = (
             await self.interaction.client.beatmapset_service.get_random(self.mode)
         )
         return self.current_beatmapset
 
-    async def wait_for_guess(self, beatmapset: Beatmapset) -> None:
+    async def wait_for_guess(self, beatmapset: LegacyBeatmapset) -> None:
         message = await self.interaction.client.wait_for(
             "message",
             check=self.check_guess,
@@ -229,7 +229,7 @@ class BaseOsudleGame(ABC):
             f"Game has stopped.\nFinal scoreboard:\n{self.get_formatted_scoreboard()}",
         )
 
-    async def send_beatmapset_message(self, beatmapset: Beatmapset) -> None:
+    async def send_beatmapset_message(self, beatmapset: LegacyBeatmapset) -> None:
         content = await self.get_message_content(beatmapset)
         self.latest_beatmapset_message = await self.send_response(
             **content,
@@ -237,13 +237,16 @@ class BaseOsudleGame(ABC):
         )
 
     @abstractmethod
-    async def get_message_content(self, beatmapset: Beatmapset) -> dict[str, Any]: ...
+    async def get_message_content(
+        self,
+        beatmapset: LegacyBeatmapset,
+    ) -> dict[str, Any]: ...
 
 
 class OsudleSongGame(BaseOsudleGame):
     """osu! Song Preview Game"""
 
-    async def get_message_content(self, beatmapset: Beatmapset) -> dict[str, Any]:
+    async def get_message_content(self, beatmapset: LegacyBeatmapset) -> dict[str, Any]:
         async with self.interaction.client.aiohttp_session.get(
             beatmapset.preview_url,
         ) as resp:
@@ -261,7 +264,7 @@ class OsudleSongGame(BaseOsudleGame):
 class OsudleBackgroundGame(BaseOsudleGame):
     """osu! Background Game"""
 
-    async def get_message_content(self, beatmapset: Beatmapset) -> dict[str, Any]:
+    async def get_message_content(self, beatmapset: LegacyBeatmapset) -> dict[str, Any]:
         cover_url = beatmapset.covers.cover_2_x.replace(r"https:\/\/", "https://")
         async with self.interaction.client.aiohttp_session.get(cover_url) as resp:
             if resp.status != 200:

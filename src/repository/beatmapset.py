@@ -3,9 +3,10 @@
 ###
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import Any
 
-from motor.motor_asyncio import AsyncIOMotorClient
+from motor.motor_asyncio import AsyncIOMotorDatabase
 
 
 class BeatmapsetRepository:
@@ -13,10 +14,10 @@ class BeatmapsetRepository:
 
     __slots__ = ("database",)
 
-    def __init__(self, database: AsyncIOMotorClient) -> None:
+    def __init__(self, database: AsyncIOMotorDatabase) -> None:
         self.database = database
 
-    async def get_one(self, beatmapset_id: int) -> dict[str, Any] | None:
+    async def get_one(self, beatmapset_id: int) -> Mapping[str, Any] | None:
         """Get beatmapset from database.
 
         Args:
@@ -26,10 +27,10 @@ class BeatmapsetRepository:
             Optional[dict[str, Any]]: Beatmapset data.
         """
         return await self.database.beatmapsets.find_one(
-            {"beatmapset_id": beatmapset_id},
+            {"id": beatmapset_id},
         )
 
-    async def get_many(self) -> list[dict[str, Any]]:
+    async def get_many(self) -> list[Mapping[str, Any]]:
         """Get all beatmapsets from database.
 
         Returns:
@@ -37,7 +38,7 @@ class BeatmapsetRepository:
         """
         return await self.database.beatmapsets.find().to_list(None)
 
-    async def get_random(self, gamemode: str) -> dict[str, Any]:
+    async def get_random(self, gamemode: str) -> list[Mapping[str, Any]]:
         """Get random beatmapset from database.
 
         Args:

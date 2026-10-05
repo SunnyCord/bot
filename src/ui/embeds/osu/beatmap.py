@@ -7,8 +7,10 @@ from datetime import timedelta
 from inspect import cleandoc
 from typing import TYPE_CHECKING
 
-from aiosu.models import Beatmap
-from aiosu.models import Beatmapset
+from aiosu.models import BeatmapExtended
+from aiosu.models import BeatmapsetExtended
+from aiosu.models import LegacyBeatmap
+from aiosu.models import LegacyBeatmapset
 from discord.utils import escape_markdown
 from discord.utils import format_dt
 
@@ -25,8 +27,8 @@ class OsuBeatmapEmbed(ContextEmbed):
     def __init__(
         self,
         ctx: Context,
-        beatmapset: Beatmapset,
-        beatmap: Beatmap,
+        beatmapset: BeatmapsetExtended | LegacyBeatmapset,
+        beatmap: BeatmapExtended | LegacyBeatmap,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -69,7 +71,7 @@ class OsuBeatmapEmbed(ContextEmbed):
         content = cleandoc(
             f"""**▸** {beatmap.difficulty_rating:.2f}⭐  **▸Max Combo:** x{beatmap.max_combo}\n**▸AR:** {beatmap.ar}  **▸OD:** {beatmap.accuracy}  **▸CS:** {beatmap.cs}  **▸HP:** {beatmap.drain}
                 {beatmap.status.name} | ❤️ {beatmapset.favourite_count} | ▶️ {beatmapset.play_count}
-                {footer_date_prefix}{format_dt(date, style="R")}
+                {footer_date_prefix + format_dt(date, style="R") if date else ""}
             """,
         )
 

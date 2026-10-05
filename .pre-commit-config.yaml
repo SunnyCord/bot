@@ -18,7 +18,7 @@ repos:
     rev: v3.21.2
     hooks:
       - id: pyupgrade
-        args: [--py311-plus, --keep-runtime-typing]
+        args: [--py312-plus, --keep-runtime-typing]
   - repo: https://github.com/pycqa/isort
     rev: 9.0.2
     hooks:
@@ -35,10 +35,11 @@ repos:
     rev: v2.6.0
     hooks:
       - id: pycln
+        language_version: python3.12
   - repo: https://github.com/aio-libs/sort-all
     rev: v1.3.0
     hooks:
       - id: sort-all
 
 default_language_version:
-  python: python3.10
+  python: python3.12

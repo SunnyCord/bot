@@ -18,4 +18,5 @@ class OsuLinkEmbed(InteractionEmbed):
             title="osu! Profile Link",
             description=f"Click [here]({link_url}) to link your osu! profile.",
         )
-        self.set_thumbnail(url=interaction.client.user.avatar)
+        if interaction.client.user:
+            self.set_thumbnail(url=interaction.client.user.display_avatar.url)

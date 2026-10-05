@@ -14,13 +14,14 @@ from ui.menus.generic import BaseView
 if TYPE_CHECKING:
     from typing import Any
 
-    from aiosu.models import Beatmapset
+    from aiosu.models import BeatmapsetExtended
+    from aiosu.models import LegacyBeatmapset
     from discord.ext.commands import Context
 
 
 def _split_beatmapset_to_pages(
     ctx: Context,
-    beatmapset: Beatmapset,
+    beatmapset: BeatmapsetExtended | LegacyBeatmapset,
 ) -> list[OsuBeatmapEmbed]:
     embeds: list[OsuBeatmapEmbed] = [
         OsuBeatmapEmbed(ctx, beatmapset, beatmap) for beatmap in beatmapset.beatmaps
@@ -41,7 +42,7 @@ class OsuBeatmapView(BaseView):
     def __init__(
         self,
         ctx: Context,
-        beatmapset: Beatmapset,
+        beatmapset: BeatmapsetExtended | LegacyBeatmapset,
         *args: Any,
         **kwargs: Any,
     ):

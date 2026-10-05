@@ -3,7 +3,6 @@
 ###
 from __future__ import annotations
 
-from inspect import cleandoc
 from typing import TYPE_CHECKING
 
 from aiosu.models import Gamemode
@@ -20,7 +19,7 @@ if TYPE_CHECKING:
     from typing import Any
 
 
-class OsuProfileCompactEmbed(ContextEmbed):
+class _OsuProfileEmbed(ContextEmbed):
     def __init__(
         self,
         ctx: commands.Context,
@@ -29,44 +28,17 @@ class OsuProfileCompactEmbed(ContextEmbed):
         *args: Any,
         **kwargs: Any,
     ) -> None:
-        peak_str = ""
-        if user.rank_highest:
-            peak_str = f"(peaked #{user.rank_highest.rank} {format_dt(user.rank_highest.updated_at)}\n"
-
-        if user.rank_history:
-            peak_str += f"avg. ranks/day: {user.rank_history.average_gain:.2f} | "
-
-        content = (
-            f"{user.statistics.pp}pp (#{user.statistics.global_rank} | {user.country.flag_emoji}#{user.statistics.country_rank})\n"
-            + peak_str
-            + cleandoc(
-                f"""
-                pp/hour: {user.statistics.pp_per_playtime:.2f}
-                accuracy: {user.statistics.hit_accuracy:.2f}%
-                level: {user.statistics.level.current} ({user.statistics.level.progress:.2f}%)
-                """,
-            )
-        )
-
-        safe_username = escape_markdown(user.username)
-        online_str = "🟢" if user.is_online else "🔴"
-
-        super().__init__(
-            ctx,
-            title=None,
-            description=content,
-            *args,
-            **kwargs,
-        )
+        super().__init__(ctx, *args, **kwargs)
+        online = "🟢" if user.is_online else "🔴"
         self.set_author(
-            name=f"osu! {mode.name_full} stats for {safe_username} {online_str}",
+            name=f"osu! {mode.name_full} stats for {escape_markdown(user.username)} {online}",
             url=user.url,
             icon_url=GamemodeIcon[mode.name].icon,
         )
         self.set_thumbnail(url=user.avatar_url)
 
 
-class OsuProfileExtendedEmbed(ContextEmbed):
+class OsuProfileCompactEmbed(_OsuProfileEmbed):
     def __init__(
         self,
         ctx: commands.Context,
@@ -75,77 +47,83 @@ class OsuProfileExtendedEmbed(ContextEmbed):
         *args: Any,
         **kwargs: Any,
     ) -> None:
-        peak_str = ""
+        super().__init__(ctx, user, mode, *args, **kwargs)
+        stats = user.statistics
+        if stats is None or stats.level is None:
+            self.description = "No statistics available."
+            return
+        country = user.country.flag_emoji if user.country else user.country_code
+        lines = [
+            f"{stats.pp}pp (#{stats.global_rank} | {country}#{stats.country_rank})",
+        ]
         if user.rank_highest:
-            peak_str = f"peak: **#{user.rank_highest.rank}** {format_dt(user.rank_highest.updated_at)}\n"
-
-        rank_content = (
-            f"rank: **#{user.statistics.global_rank}**\n"
-            + peak_str
-            + cleandoc(
-                f"""
-                country rank: **{user.country.flag_emoji}#{user.statistics.country_rank}**
-                pp: **{user.statistics.pp}**
-                acc: **{user.statistics.hit_accuracy:.2f}%**
-                level: **{user.statistics.level.current}** (**{user.statistics.level.progress:.2f}%**)
-                """,
-            )
-        )
-        self.add_field(name="", value=rank_content)
-
-        rank_gain_str = ""
+            peak = user.rank_highest
+            lines.append(f"peaked #{peak.rank} {format_dt(peak.updated_at)}")
         if user.rank_history:
-            rank_gain_str = (
-                f"\navg. rank gain: **{user.rank_history.average_gain:.2f}**\n"
-            )
-
-        average_content = cleandoc(
-            f"""
-            max combo: **{user.statistics.maximum_combo}**
-            pp/hour: **{user.statistics.pp_per_playtime:.2f}**{rank_gain_str}
-            joined: {format_dt(user.join_date)}
-            """,
+            lines.append(f"avg. ranks/day: {user.rank_history.average_gain:.2f}")
+        lines.extend(
+            (
+                f"pp/hour: {stats.pp_per_playtime:.2f}",
+                f"accuracy: {stats.hit_accuracy:.2f}%",
+                f"level: {stats.level.current} ({stats.level.progress:.2f}%)",
+            ),
         )
-        self.add_field(name="", value=average_content)
+        self.description = "\n".join(lines)
 
-        self.add_field(name="", value="", inline=False)
 
-        play_content = cleandoc(
-            f"""
-            playtime: **{humanizer.seconds_to_text(user.statistics.play_time)}**
-            playcount: **{humanizer.number(user.statistics.play_count)}**
-            total score: **{humanizer.number(user.statistics.total_score)}**
-            ranked score: **{humanizer.number(user.statistics.ranked_score)}**
-            total hits: **{humanizer.number(user.statistics.total_hits)}**
-            """,
+class OsuProfileExtendedEmbed(_OsuProfileEmbed):
+    def __init__(
+        self,
+        ctx: commands.Context,
+        user: User,
+        mode: Gamemode,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(ctx, user, mode, *args, **kwargs)
+        stats = user.statistics
+        if stats is None or stats.level is None:
+            self.description = "No statistics available."
+            return
+        country = user.country.flag_emoji if user.country else user.country_code
+        ranks = [f"rank: **#{stats.global_rank}**"]
+        if user.rank_highest:
+            peak = user.rank_highest
+            ranks.append(f"peak: **#{peak.rank}** {format_dt(peak.updated_at)}")
+        ranks.extend(
+            (
+                f"country rank: **{country}#{stats.country_rank}**",
+                f"pp: **{stats.pp}**",
+                f"acc: **{stats.hit_accuracy:.2f}%**",
+                f"level: **{stats.level.current}** (**{stats.level.progress:.2f}%**)",
+            ),
         )
-        self.add_field(name="", value=play_content)
-
-        playstyle_str = ""
+        averages = [
+            f"max combo: **{stats.maximum_combo}**",
+            f"pp/hour: **{stats.pp_per_playtime:.2f}**",
+            f"joined: {format_dt(user.join_date)}",
+        ]
+        if user.rank_history:
+            averages.append(f"avg. rank gain: **{user.rank_history.average_gain:.2f}**")
+        play = [
+            f"playtime: **{humanizer.seconds_to_text(stats.play_time or 0)}**",
+            f"playcount: **{humanizer.number(stats.play_count or 0)}**",
+            f"total score: **{humanizer.number(stats.total_score or 0)}**",
+            f"ranked score: **{humanizer.number(stats.ranked_score or 0)}**",
+            f"total hits: **{humanizer.number(stats.total_hits or 0)}**",
+        ]
+        profile = [
+            f"followers: **{user.follower_count}**",
+            f"has supported: **{user.has_supported}**",
+            f"support level: **{user.support_level}**",
+            f"total kudosu: **{humanizer.number(user.kudosu.total)}**",
+        ]
         if user.playstyle:
-            playstyle_str = f"playstyle: **{' '.join(user.playstyle)}**\n"
-        playstyle_content = cleandoc(
-            f"""
-            {playstyle_str}followers: **{user.follower_count}**
-            has supported: **{user.has_supported}**
-            support level: **{user.support_level}**
-            total kudosu: **{humanizer.number(user.kudosu.total)}**
-            """,
-        )
-        self.add_field(name="", value=playstyle_content)
-
-        safe_username = escape_markdown(user.username)
-        online_str = "🟢" if user.is_online else "🔴"
-
-        super().__init__(
-            ctx,
-            title=None,
-            *args,
-            **kwargs,
-        )
-        self.set_author(
-            name=f"osu! {mode.name_full} stats for {safe_username} {online_str}",
-            url=user.url,
-            icon_url=GamemodeIcon[mode.name].icon,
-        )
-        self.set_thumbnail(url=user.avatar_url)
+            profile.insert(0, f"playstyle: **{' '.join(user.playstyle)}**")
+        for name, lines in (
+            ("Ranks", ranks),
+            ("Averages", averages),
+            ("Play", play),
+            ("Profile", profile),
+        ):
+            self.add_field(name=name, value="\n".join(lines))
